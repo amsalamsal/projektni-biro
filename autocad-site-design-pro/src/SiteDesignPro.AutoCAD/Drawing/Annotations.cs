@@ -38,7 +38,8 @@ namespace SiteDesignPro.AutoCAD.Drawing
         /// <summary>Model-space text height in drawing units.</summary>
         public double TextHeight => settings.Labels.ModelTextHeightMeters * K;
 
-        private CultureInfo C => CultureInfo.InvariantCulture;
+        /// <summary>Numbers on drawings use the Bosnian decimal comma.</summary>
+        private static readonly NumberFormatInfo C = new NumberFormatInfo { NumberDecimalSeparator = ",", NumberGroupSeparator = "." };
 
         public static string LabelText(SiteElement e, ElementCatalog catalog)
         {
@@ -175,11 +176,23 @@ namespace SiteDesignPro.AutoCAD.Drawing
         public void SpotLevel(Point3d at, double? overrideLevel)
         {
             double h = TextHeight;
-            double level = overrideLevel ?? (at.Z / K);
+            double level = overrideLevel ?? (at.Z / K); // drawing Z frame (absolute or relative, see SDPDATUM)
+            Core.Elevation.ElevationDatum d = settings.Elevations;
+            string text;
+            try
+            {
+                double rel = d.RelativeFromDrawingZ(level);
+                text = Core.Elevation.ElevationDatum.FormatRelative(rel) + (d.IsDefined ? " (" + d.ToAbsolute(rel).ToString("0.00", C) + ")" : string.Empty);
+            }
+            catch (Core.Elevation.DatumNotDefinedException)
+            {
+                text = "Z = " + level.ToString("0.00", C); // no datum: the value is shown as drawn, without a sign
+            }
+
             var tri = new[] { new Point2d(at.X, at.Y), new Point2d(at.X - (h * 0.6), at.Y + h), new Point2d(at.X + (h * 0.6), at.Y + h) };
             Poly(tri, true, "anno_levels");
             Add(new Line(new Point3d(at.X - (h * 0.6), at.Y + h, 0), new Point3d(at.X + (h * 6), at.Y + h, 0)), "anno_levels");
-            Text(new Point3d(at.X + (h * 0.8), at.Y + (h * 1.25), 0), (level >= 0 ? "+" : string.Empty) + level.ToString("0.00", C), h, "anno_levels");
+            Text(new Point3d(at.X + (h * 0.8), at.Y + (h * 1.25), 0), text, h, "anno_levels");
         }
 
         /// <summary>Slope arrow from high to low point with gradient in percent (from Z values or given).</summary>
@@ -209,8 +222,8 @@ namespace SiteDesignPro.AutoCAD.Drawing
             double h = TextHeight;
             Add(new Line(at - new Vector3d(h, 0, 0), at + new Vector3d(h, 0, 0)), "anno_symbols");
             Add(new Line(at - new Vector3d(0, h, 0), at + new Vector3d(0, h, 0)), "anno_symbols");
-            Text(at + new Vector3d(h * 1.3, h * 0.3, 0), "E " + (at.X / K).ToString("0.000", C), h * 0.8, "anno_symbols");
-            Text(at + new Vector3d(h * 1.3, -h * 1.1, 0), "N " + (at.Y / K).ToString("0.000", C), h * 0.8, "anno_symbols");
+            Text(at + new Vector3d(h * 1.3, h * 0.3, 0), "Y = " + (at.X / K).ToString("0.000", C), h * 0.8, "anno_symbols");
+            Text(at + new Vector3d(h * 1.3, -h * 1.1, 0), "X = " + (at.Y / K).ToString("0.000", C), h * 0.8, "anno_symbols");
         }
 
         public void SectionMarker(Point3d a, Point3d b, string name)
@@ -290,7 +303,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
         {
             double h = TextHeight;
             double row = h * 3.2;
-            Text(at, "LEGEND", h * 1.3, "anno_schedules");
+            Text(at, "LEGENDA", h * 1.3, "anno_schedules");
             double y = at.Y - (row * 0.8);
             foreach (IGrouping<string, ManagedElement> g in elements.Where(e => e.Element != null && e.Type != null).GroupBy(e => e.Type!.Id).OrderBy(g => g.First().Type!.Category).ThenBy(g => g.Key))
             {
@@ -348,10 +361,10 @@ namespace SiteDesignPro.AutoCAD.Drawing
             double th = 3.5 * f, sh = 2.5 * f;
             string[] rows =
             {
-                "Project: " + settings.Name + (settings.Number.Length > 0 ? "  (" + settings.Number + ")" : string.Empty),
-                "Drawing: " + title,
-                "Client: " + settings.Client + "   Location: " + settings.Location,
-                "Scale 1:" + settings.Labels.ScaleDenominator.ToString("0", C) + "   Sheet " + sheetNumber + "   Rev. " + settings.Revision + "   " + DateTime.Now.ToString("yyyy-MM-dd", C) + (settings.Author.Length > 0 ? "   " + settings.Author : string.Empty),
+                "Projekat: " + settings.Name + (settings.Number.Length > 0 ? "  (" + settings.Number + ")" : string.Empty),
+                "Crtež: " + title,
+                "Investitor: " + settings.Client + "   Lokacija: " + settings.Location,
+                "Mjerilo 1:" + settings.Labels.ScaleDenominator.ToString("0", C) + "   List " + sheetNumber + "   Rev. " + settings.Revision + "   " + DateTime.Now.ToString("dd.MM.yyyy.", CultureInfo.InvariantCulture) + (settings.Author.Length > 0 ? "   " + settings.Author : string.Empty),
             };
             for (int i = 0; i < rows.Length; i++)
             {
@@ -462,7 +475,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
             svc.EraseAux(m.Element.Id, "coverage");
             ObjectId c = Add(new Circle(new Point3d(p.Position.X, p.Position.Y, 0), Vector3d.ZAxis, r * K), "anno_clearance");
             ElementStore.WriteAux((Entity)tr.GetObject(c, OpenMode.ForWrite), m.Element.Id, "coverage", tr);
-            ObjectId t = Text(new Point3d(p.Position.X, p.Position.Y - (r * K) - (TextHeight * 0.3), 0), "illustrative r=" + r.ToString("0.#", C) + " m", TextHeight * 0.7, "anno_clearance", 0, TextHorizontalMode.TextCenter, TextVerticalMode.TextTop);
+            ObjectId t = Text(new Point3d(p.Position.X, p.Position.Y - (r * K) - (TextHeight * 0.3), 0), "ilustrativno r = " + r.ToString("0.#", C) + " m", TextHeight * 0.7, "anno_clearance", 0, TextHorizontalMode.TextCenter, TextVerticalMode.TextTop);
             ElementStore.WriteAux((Entity)tr.GetObject(t, OpenMode.ForWrite), m.Element.Id, "coverage", tr);
             return true;
         }

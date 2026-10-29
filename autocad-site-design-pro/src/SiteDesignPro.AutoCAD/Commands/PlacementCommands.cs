@@ -11,6 +11,7 @@ using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Geometry;
 using SiteDesignPro.Core.Layout;
 using SiteDesignPro.Core.Model;
+using SiteDesignPro.Core.Text;
 using SiteDesignPro.Core.Validation;
 using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -31,7 +32,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         protected override SamplerStatus Sampler(JigPrompts prompts)
         {
-            var o = new JigPromptPointOptions("\nInsertion point [Enter to finish]: ")
+            var o = new JigPromptPointOptions("\nTačka umetanja [Enter za kraj]: ")
             {
                 UserInputControls = UserInputControls.Accept3dCoordinates | UserInputControls.NullResponseAccepted,
             };
@@ -67,10 +68,10 @@ namespace SiteDesignPro.AutoCAD.Commands
             ElementType? drawType = null;
             CommandContext.Run("SDPPLACE", ctx =>
             {
-                ElementType type = ctx.ChooseType("Element type", null);
+                ElementType type = ctx.ChooseType("Tip elementa", null);
                 if (type.Geometry != GeometryKind.Point)
                 {
-                    ctx.Write(type.Name + " is drawn as a " + ElementGeometry.KindCode(type.Geometry) + ".");
+                    ctx.Write(type.Name + " se crta kao " + (type.Geometry == GeometryKind.Path ? "trasa" : "površina") + " (SDPDRAW).");
                     drawType = type;
                     return;
                 }
@@ -90,7 +91,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                         break;
                     }
 
-                    rotation = ctx.Angle("Rotation <" + CommandContext.F(rotation * 180 / Math.PI, 1) + ">", jig.Position, rotation);
+                    rotation = ctx.Angle("Rotacija <" + CommandContext.F(rotation * 180 / Math.PI, 1) + "°>", jig.Position, rotation);
                     SiteElement element = ctx.NewElement(type, new PointGeometry(new Vec3(jig.Position.X, jig.Position.Y, jig.Position.Z), rotation), existing);
                     ctx.Svc.Create(element);
                     existing.Add(element);
@@ -98,7 +99,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     ctx.Tr.TransactionManager.QueueForGraphicsFlush();
                 }
 
-                ctx.Write(placed + " " + type.Name + " placed.");
+                ctx.Write("Postavljeno: " + placed + " × " + type.Name + ".");
             });
             if (drawType != null)
             {
@@ -111,7 +112,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void DrawCommand()
         {
             ElementType? type = null;
-            CommandContext.Run("SDPDRAW", ctx => type = ctx.ChooseType("Element type", null, GeometryKind.Path, GeometryKind.Polygon));
+            CommandContext.Run("SDPDRAW", ctx => type = ctx.ChooseType("Tip elementa", null, GeometryKind.Path, GeometryKind.Polygon));
             if (type != null)
             {
                 DrawInteractive(type);
@@ -129,21 +130,21 @@ namespace SiteDesignPro.AutoCAD.Commands
             CommandContext.Run("SDPDRAW", ctx =>
             {
                 method = type.Geometry == GeometryKind.Polygon
-                    ? ctx.Keyword("Boundary [Polyline/Rectangle/Pick/Select]", new[] { "Polyline", "Rectangle", "Pick", "Select" }, "Polyline")
-                    : ctx.Keyword("Alignment [Polyline/Select]", new[] { "Polyline", "Select" }, "Polyline");
+                    ? ctx.Keyword("Granica [Polilinija/Pravougaonik/Unutar/Odaberi]", new[] { "Polyline|Polilinija", "Rectangle|Pravougaonik", "Pick|Unutar", "Select|Odaberi" }, "Polyline")
+                    : ctx.Keyword("Trasa [Polilinija/Odaberi]", new[] { "Polyline|Polilinija", "Select|Odaberi" }, "Polyline");
                 if (method == "Select")
                 {
                     picked.AddRange(SelectCurves(ctx));
                 }
                 else if (method == "Pick")
                 {
-                    while (ctx.Point("Pick inside the area [Enter to finish]", null, true) is Point3d inside)
+                    while (ctx.Point("Kliknite unutar površine [Enter za kraj]", null, true) is Point3d inside)
                     {
                         DBObjectCollection found = ctx.Ed.TraceBoundary(inside, false);
                         Curve? outer = found.Cast<DBObject>().OfType<Curve>().OrderByDescending(c => c.GeometricExtents.MaxPoint.DistanceTo(c.GeometricExtents.MinPoint)).FirstOrDefault();
                         if (outer == null)
                         {
-                            ctx.Write("No closed boundary found around that point.");
+                            ctx.Write("Oko te tačke nije pronađena zatvorena granica.");
                             continue;
                         }
 
@@ -171,7 +172,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ObjectId last = Autodesk.AutoCAD.Internal.Utils.EntLast();
                 if (last.IsNull || last == before)
                 {
-                    ed.WriteMessage("\nNothing was drawn.");
+                    ed.WriteMessage("\nNišta nije nacrtano.");
                     return;
                 }
 
@@ -189,8 +190,8 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void ConvertCommand() => CommandContext.Run("SDPCONVERT", ctx =>
         {
             List<ObjectId> curves = SelectCurves(ctx);
-            ElementType type = ctx.ChooseType("Element type for the selected objects", null, GeometryKind.Path, GeometryKind.Polygon);
-            ctx.Write(ConvertCurves(ctx, type, curves) + " objects converted to " + type.Name + ".");
+            ElementType type = ctx.ChooseType("Tip elementa za odabrane objekte", null, GeometryKind.Path, GeometryKind.Polygon);
+            ctx.Write("Pretvoreno objekata u " + type.Name + ": " + ConvertCurves(ctx, type, curves) + ".");
         });
 
         private static List<ObjectId> SelectCurves(CommandContext ctx)
@@ -202,7 +203,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return implied.Value.GetObjectIds().ToList();
             }
 
-            PromptSelectionResult r = ctx.Ed.GetSelection(new PromptSelectionOptions { MessageForAdding = "\nSelect polylines, lines, arcs or circles: " }, filter);
+            PromptSelectionResult r = ctx.Ed.GetSelection(new PromptSelectionOptions { MessageForAdding = "\nOdaberite polilinije, linije, lukove ili krugove: " }, filter);
             if (r.Status != PromptStatus.OK)
             {
                 throw new CommandCancelled();
@@ -220,7 +221,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 var entity = (Entity)ctx.Tr.GetObject(id, OpenMode.ForWrite);
                 if (ElementStore.IsManaged(entity))
                 {
-                    ctx.Write("Object " + entity.Handle + " is already a Site Design Pro element; use SDPEDIT.");
+                    ctx.Write("Objekat " + entity.Handle + " je već element; koristite SDPEDIT.");
                     continue;
                 }
 
@@ -231,7 +232,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
                 catch (InvalidOperationException ex)
                 {
-                    ctx.Write("Skipped " + entity.Handle + ": " + ex.Message + (type.Geometry == GeometryKind.Polygon ? " Close the polyline (PEDIT Close) or use the Pick option." : string.Empty));
+                    ctx.Write("Preskočeno " + entity.Handle + ": " + ex.Message + (type.Geometry == GeometryKind.Polygon ? " Zatvorite poliliniju (PEDIT > Close) ili koristite opciju Unutar." : string.Empty));
                     continue;
                 }
 
@@ -239,7 +240,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ValidationReport check = new ProjectValidator(ctx.Catalog, ctx.Settings.Checks).Validate(new[] { Core.Exchange.PackageWriter.ToPackageFrame(element, ctx.Settings) });
                 foreach (ValidationIssue issue in check.Issues.Where(i => i.Severity == Severity.Error && i.Kind == IssueKind.GeometricError))
                 {
-                    ctx.Write("Warning for " + element.Label + ": " + issue.Message + " " + issue.Resolution);
+                    ctx.Write("Upozorenje za " + element.Label + ": " + issue.Message + " " + issue.Resolution);
                 }
 
                 entity.Layer = ctx.Svc.Layers.Ensure(type.LayerKey);
@@ -256,16 +257,16 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPEDIT", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void Edit() => CommandContext.Run("SDPEDIT", ctx =>
         {
-            List<ManagedElement> sel = ctx.SelectElements("Select elements to edit", false, m => m.Element != null && m.Type != null && !m.IsCopy);
+            List<ManagedElement> sel = ctx.SelectElements("Odaberite elemente za izmjenu", false, m => m.Element != null && m.Type != null && !m.IsCopy);
             if (sel.Count == 0)
             {
-                ctx.Write("No editable Site Design Pro elements selected.");
+                ctx.Write("Nije odabran nijedan element koji se može mijenjati.");
                 return;
             }
 
             if (sel.Select(m => m.Type!.Id).Distinct().Count() > 1)
             {
-                ctx.Write("Selected elements have different types; only parameters they share can be changed.");
+                ctx.Write("Odabrani elementi su različitih tipova; mijenjaju se samo zajednički parametri.");
             }
 
             ElementType type = sel[0].Type!;
@@ -273,15 +274,16 @@ namespace SiteDesignPro.AutoCAD.Commands
             while (true)
             {
                 SiteElement first = sel[0].Element!;
-                ctx.Write(type.Name + (sel.Count > 1 ? " (" + sel.Count + " elements)" : " " + first.Label) + ":");
+                ctx.Write(type.Name + (sel.Count > 1 ? " (" + Bs.Elements(sel.Count) + ")" : " " + first.Label) + ":");
+                int n = 0;
                 foreach (ParameterDefinition p in shared)
                 {
-                    IEnumerable<string> values = sel.Select(m => ElementCatalog.FormatValue(p, m.Element!.Parameters.Contains(p.Key) ? m.Element.Parameters[p.Key] : p.Default)).Distinct();
-                    ctx.Write("  " + p.Key.PadRight(24) + string.Join(" | ", values.Take(3)) + (values.Count() > 3 ? " | ..." : string.Empty) + "   (" + p.Label + ")");
+                    IEnumerable<string> values = sel.Select(m => ElementCatalog.FormatValue(p, m.Element!.Parameters.Contains(p.Key) ? m.Element.Parameters[p.Key] : p.Default, 3, ctx.Catalog)).Distinct();
+                    ctx.Write("  P" + (++n).ToString(CultureInfo.InvariantCulture).PadRight(4) + p.Label.PadRight(44) + string.Join(" | ", values.Take(3)) + (values.Count() > 3 ? " | ..." : string.Empty));
                 }
 
-                string[] keys = shared.Select(p => p.Key).Concat(new[] { "Label", "Property", "eXit" }).ToArray();
-                string key = ctx.Keyword("Parameter to change", keys, "eXit");
+                string[] keys = shared.Select((p, i) => p.Key + "|P" + (i + 1).ToString(CultureInfo.InvariantCulture)).Concat(new[] { "Label|Oznaka", "Property|Svojstvo", "eXit|Izlaz" }).ToArray();
+                string key = ctx.Keyword("Parametar za izmjenu [P1...P" + shared.Count + "/Oznaka/Svojstvo/Izlaz]", keys, "eXit");
                 if (key == "eXit")
                 {
                     break;
@@ -291,16 +293,16 @@ namespace SiteDesignPro.AutoCAD.Commands
                 {
                     if (sel.Count > 1)
                     {
-                        ctx.Write("Labels are unique; select a single element or use SDPNUMBER.");
+                        ctx.Write("Oznake su jedinstvene; odaberite jedan element ili koristite SDPNUMBER.");
                         continue;
                     }
 
-                    first.Label = ctx.Text("Label", first.Label ?? string.Empty, false);
+                    first.Label = ctx.Text("Oznaka", first.Label ?? string.Empty, false);
                 }
                 else if (key == "Property")
                 {
-                    string pk = ctx.Text("Property name (e.g. botanicalName, manufacturer, notes)", null, false);
-                    string pv = ctx.Text("Value (- to clear)", "-");
+                    string pk = ctx.Text("Naziv svojstva (npr. botanicalName, manufacturer, notes)", null, false);
+                    string pv = ctx.Text("Vrijednost (- za brisanje)", "-");
                     foreach (ManagedElement m in sel)
                     {
                         if (pv == "-")
@@ -330,7 +332,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     ValidationIssue? err = check.Issues.FirstOrDefault(i => i.Severity == Severity.Error && i.Code.StartsWith("SDP-P", StringComparison.Ordinal));
                     if (err != null)
                     {
-                        ctx.Write("Not applied to " + m.Element!.Label + ": " + err.Message);
+                        ctx.Write("Nije primijenjeno na " + m.Element!.Label + ": " + err.Message);
                         ManagedElement? fresh = ctx.Svc.Read((Entity)ctx.Tr.GetObject(m.ObjectId, OpenMode.ForRead));
                         m.Element = fresh?.Element;
                         continue;
@@ -352,9 +354,18 @@ namespace SiteDesignPro.AutoCAD.Commands
             switch (def.Type)
             {
                 case ParameterType.Bool:
-                    return ParamValue.Of(ctx.Keyword(def.Label + " [Yes/No]", new[] { "Yes", "No" }, current.AsBool() ? "Yes" : "No") == "Yes");
+                    return ParamValue.Of(ctx.Keyword(def.Label + " [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, current.AsBool() ? "Yes" : "No") == "Yes");
                 case ParameterType.Enum:
-                    return ParamValue.Of(ctx.Keyword(def.Label + " [" + string.Join("/", def.Options) + "]", def.Options.ToArray(), current.AsText()));
+                    {
+                        for (int i = 0; i < def.Options.Count; i++)
+                        {
+                            ctx.Write("  " + (i + 1).ToString(CultureInfo.InvariantCulture) + " = " + ctx.Catalog.OptionLabel(def.Options[i]));
+                        }
+
+                        int cur = Math.Max(0, def.Options.ToList().IndexOf(current.AsText()));
+                        int choice = ctx.Integer(def.Label + " (redni broj opcije)", cur + 1, 1);
+                        return ParamValue.Of(def.Options[Math.Min(choice, def.Options.Count) - 1]);
+                    }
                 case ParameterType.Integer:
                     return ParamValue.Of((double)ctx.Integer(def.Label, (int)current.AsNumber(def.Min ?? 1), (int)(def.Min ?? 0)));
                 case ParameterType.Length:
@@ -363,7 +374,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return ParamValue.Of(ctx.Number(def.Label + " (" + def.DisplayUnit + ")", current.IsNull ? (def.Min ?? 0) : current.AsNumber(), (def.Min ?? 0) < 0, (def.Min ?? 0) <= 0));
                 case ParameterType.Material:
                     {
-                        string v = ctx.Text(def.Label + " (material key, ? to list)", current.AsText(), false);
+                        string v = ctx.Text(def.Label + " (ključ materijala, ? za popis)", current.AsText(), false);
                         if (v == "?")
                         {
                             foreach (MaterialDefinition m in ctx.Catalog.Materials)
@@ -371,7 +382,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                                 ctx.Write("  " + m.Key.PadRight(20) + m.Name);
                             }
 
-                            v = ctx.Text(def.Label + " (material key)", current.AsText(), false);
+                            v = ctx.Text(def.Label + " (ključ materijala)", current.AsText(), false);
                         }
 
                         return ParamValue.Of(v);
@@ -379,7 +390,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 default:
                     {
-                        string v = ctx.Text(def.Label + " (- to clear)", current.IsNull ? "-" : current.AsText());
+                        string v = ctx.Text(def.Label + " (- za brisanje)", current.IsNull ? "-" : current.AsText());
                         return v == "-" ? ParamValue.Null : ParamValue.Of(v);
                     }
             }
@@ -389,14 +400,14 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPSETPARAM", CommandFlags.Modal)]
         public void SetParam() => CommandContext.Run("SDPSETPARAM", ctx =>
         {
-            string handles = ctx.Text("Element handles (comma separated)", null, false);
-            string key = ctx.Text("Parameter", null, false);
-            string raw = ctx.Text("Value", null, true);
+            string handles = ctx.Text("Handle elemenata (odvojeni zarezom)", null, false);
+            string key = ctx.Text("Parametar", null, false);
+            string raw = ctx.Text("Vrijednost", null, true);
             foreach (string h in handles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 if (!ctx.Db.TryGetObjectId(new Handle(Convert.ToInt64(h, 16)), out ObjectId id) || id.IsErased)
                 {
-                    ctx.Write("Element " + h + " not found.");
+                    ctx.Write("Element " + h + " nije pronađen.");
                     continue;
                 }
 
@@ -404,7 +415,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ParameterDefinition? def = m?.Type?.Parameter(key);
                 if (m?.Element == null || def == null)
                 {
-                    ctx.Write("Parameter '" + key + "' is not defined for element " + h + ".");
+                    ctx.Write("Parametar '" + key + "' nije definisan za element " + h + ".");
                     continue;
                 }
 
@@ -417,7 +428,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 if (err != null)
                 {
                     probe.Parameters[key] = old;
-                    ctx.Write("Not applied: " + err.Message);
+                    ctx.Write("Nije primijenjeno: " + err.Message);
                     continue;
                 }
 
@@ -436,7 +447,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             switch (def.Type)
             {
                 case ParameterType.Bool:
-                    return ParamValue.Of(raw.Equals("true", StringComparison.OrdinalIgnoreCase) || raw.Equals("yes", StringComparison.OrdinalIgnoreCase) || raw == "1");
+                    return ParamValue.Of(raw.Equals("true", StringComparison.OrdinalIgnoreCase) || raw.Equals("yes", StringComparison.OrdinalIgnoreCase) || raw.Equals("da", StringComparison.OrdinalIgnoreCase) || raw == "1");
                 case ParameterType.Length:
                 case ParameterType.Number:
                 case ParameterType.Integer:
@@ -450,13 +461,13 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPSELECT", CommandFlags.Modal | CommandFlags.Redraw)]
         public void Select() => CommandContext.Run("SDPSELECT", ctx =>
         {
-            string mode = ctx.Keyword("Select by [Type/Category/Label/Id/Material/All]", new[] { "Type", "Category", "Label", "Id", "Material", "All" }, "Type");
+            string mode = ctx.Keyword("Odabir po [Tipu/Kategoriji/Oznaci/Id/Materijalu/Sve]", new[] { "Type|Tipu", "Category|Kategoriji", "Label|Oznaci", "Id|Id", "Material|Materijalu", "All|Sve" }, "Type");
             Func<ManagedElement, bool> predicate;
             switch (mode)
             {
                 case "Type":
                     {
-                        ElementType t = ctx.ChooseType("Element type", null);
+                        ElementType t = ctx.ChooseType("Tip elementa", null);
                         predicate = m => m.Record.TypeId == t.Id;
                         break;
                     }
@@ -464,28 +475,28 @@ namespace SiteDesignPro.AutoCAD.Commands
                 case "Category":
                     {
                         string[] cats = ctx.Catalog.Categories.Select(c => c.Id).ToArray();
-                        string c = ctx.Keyword("Category [" + string.Join("/", cats) + "]", cats);
+                        string c = ctx.Keyword("Kategorija [" + string.Join("/", cats) + "]", cats);
                         predicate = m => m.Type?.Category == c;
                         break;
                     }
 
                 case "Label":
                     {
-                        string q = ctx.Text("Label or prefix (e.g. T- or T-012)", null, false);
+                        string q = ctx.Text("Oznaka ili prefiks (npr. T- ili T-012)", null, false);
                         predicate = m => (m.Record.Label ?? string.Empty).StartsWith(q, StringComparison.OrdinalIgnoreCase);
                         break;
                     }
 
                 case "Id":
                     {
-                        string q = ctx.Text("Element id (or its start)", null, false).ToLowerInvariant();
+                        string q = ctx.Text("Id elementa (ili njegov početak)", null, false).ToLowerInvariant();
                         predicate = m => m.Record.Id.StartsWith(q, StringComparison.Ordinal);
                         break;
                     }
 
                 case "Material":
                     {
-                        string q = ctx.Text("Material key", null, false);
+                        string q = ctx.Text("Ključ materijala", null, false);
                         predicate = m => m.Record.Parameters.Any(kv => kv.Value.Kind == ParamKind.Text && kv.Value.AsText() == q && m.Type?.Parameter(kv.Key)?.Type == ParameterType.Material);
                         break;
                     }
@@ -497,17 +508,17 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             ObjectId[] ids = ctx.Svc.ReadAll().Where(predicate).Select(m => m.ObjectId).ToArray();
             ctx.Ed.SetImpliedSelection(ids);
-            ctx.Write(ids.Length + " elements selected.");
+            ctx.Write("Odabrano: " + Bs.Elements(ids.Length) + ".");
         });
 
         /// <summary>Zooms to an element by handle (used by the validation palette).</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPZOOM", CommandFlags.Modal | CommandFlags.Redraw)]
         public void Zoom() => CommandContext.Run("SDPZOOM", ctx =>
         {
-            string h = ctx.Text("Element handle", null, false);
+            string h = ctx.Text("Handle elementa", null, false);
             if (!ctx.Db.TryGetObjectId(new Handle(Convert.ToInt64(h, 16)), out ObjectId id) || id.IsErased)
             {
-                ctx.Write("Element not found.");
+                ctx.Write("Element nije pronađen.");
                 return;
             }
 
@@ -526,18 +537,18 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         /// <summary>Repeats a point element along a curve (trees, lights, bollards, benches).</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPPATHARRAY", CommandFlags.Modal)]
-        public void PathArray() => CommandContext.Run("SDPPATHARRAY", ctx =>
+        public void PathArray() => CommandContext.RunMajor("SDPPATHARRAY", "Masovno postavljanje (SDPPATHARRAY)", ctx =>
         {
-            ObjectId cid = ctx.Entity("Select path (polyline, line or arc)", typeof(Curve));
+            ObjectId cid = ctx.Entity("Odaberite trasu (polilinija, linija ili luk)", typeof(Curve));
             (Ring ring, bool closed) = ElementService.ReadCurve((Entity)ctx.Tr.GetObject(cid, OpenMode.ForRead));
-            ElementType type = ctx.ChooseType("Element type to repeat", null, GeometryKind.Point);
-            double spacing = ctx.Number("Spacing (m)", 8.0);
-            SpacingMode mode = ctx.Keyword("Spacing mode [Fixed/Fit]", new[] { "Fixed", "Fit" }, "Fit") == "Fit" ? SpacingMode.Fit : SpacingMode.Fixed;
-            double start = ctx.Number("Start offset (m)", 0, false, true);
-            double end = ctx.Number("End offset (m)", 0, false, true);
-            double lateral = ctx.Number("Offset to the left of the path, negative = right (m)", 0, true, true);
-            string align = ctx.Keyword("Rotation [Align/Fixed]", new[] { "Align", "Fixed" }, "Align");
-            double extra = ctx.Number(align == "Align" ? "Additional rotation (deg)" : "Rotation (deg)", 0, true, true) * Math.PI / 180;
+            ElementType type = ctx.ChooseType("Tip elementa koji se ponavlja", null, GeometryKind.Point);
+            double spacing = ctx.Number("Razmak (m)", 8.0);
+            SpacingMode mode = ctx.Keyword("Način razmaka [Fiksni/Uklopi]", new[] { "Fixed|Fiksni", "Fit|Uklopi" }, "Fit") == "Fit" ? SpacingMode.Fit : SpacingMode.Fixed;
+            double start = ctx.Number("Odmak od početka (m)", 0, false, true);
+            double end = ctx.Number("Odmak od kraja (m)", 0, false, true);
+            double lateral = ctx.Number("Bočni odmak lijevo od trase, negativno = desno (m)", 0, true, true);
+            string align = ctx.Keyword("Rotacija [Poravnaj/Fiksna]", new[] { "Align|Poravnaj", "Fixed|Fiksna" }, "Align");
+            double extra = ctx.Number(align == "Align" ? "Dodatna rotacija (°)" : "Rotacija (°)", 0, true, true) * Math.PI / 180;
             double k = ctx.K;
             List<Placement> placements = PathPlacement.Distribute(ring, closed, spacing * k, start * k, end * k, mode, lateral * k, align == "Align" ? extra : 0);
             List<SiteElement> existing = ctx.ExistingElements();
@@ -548,23 +559,23 @@ namespace SiteDesignPro.AutoCAD.Commands
                 existing.Add(e);
             }
 
-            ctx.Write(placements.Count + " " + type.Name + " placed along the path.");
+            ctx.Write("Duž trase postavljeno: " + placements.Count + " × " + type.Name + ".");
         });
 
         /// <summary>Generates a row of parking bays along an aisle edge.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPPARKING", CommandFlags.Modal)]
-        public void Parking() => CommandContext.Run("SDPPARKING", ctx =>
+        public void Parking() => CommandContext.RunMajor("SDPPARKING", "Masovno postavljanje (SDPPARKING)", ctx =>
         {
-            ElementType type = ctx.ChooseType("Bay type", "road.parking_bay", GeometryKind.Point);
+            ElementType type = ctx.ChooseType("Tip parking mjesta", "road.parking_bay", GeometryKind.Point);
             if (type.Builder.Id != "parking_bay")
             {
-                type = ctx.ChooseType("Bay type (parking_bay builder)", null, GeometryKind.Point);
+                type = ctx.ChooseType("Tip parking mjesta (generator parking_bay)", null, GeometryKind.Point);
             }
 
-            Point3d a = ctx.Point("Start of the aisle edge")!.Value;
-            Point3d b = ctx.Point("End of the aisle edge", a)!.Value;
-            Point3d side = ctx.Point("Pick a point on the side where the bays go", b)!.Value;
-            double angle = ctx.Number("Bay angle to the aisle (deg)", 90);
+            Point3d a = ctx.Point("Početak ivice prolaza")!.Value;
+            Point3d b = ctx.Point("Kraj ivice prolaza", a)!.Value;
+            Point3d side = ctx.Point("Tačka na strani gdje su parking mjesta", b)!.Value;
+            double angle = ctx.Number("Ugao parking mjesta prema prolazu (°)", 90);
             double width = type.Parameter("width")!.Default.AsNumber();
             Vector3d dir = b - a;
             bool left = (dir.X * (side.Y - a.Y)) - (dir.Y * (side.X - a.X)) > 0;
@@ -579,26 +590,26 @@ namespace SiteDesignPro.AutoCAD.Commands
                 existing.Add(e);
             }
 
-            ctx.Write(row.Count + " bays created (" + CommandContext.F(width) + " m wide, " + CommandContext.F(angle, 1) + " deg).");
+            ctx.Write("Napravljeno parking mjesta: " + row.Count + " (širina " + CommandContext.F(width) + " m, ugao " + CommandContext.F(angle, 1) + "°).");
         });
 
         /// <summary>Fills a closed boundary with a planting grid of point elements.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPGRID", CommandFlags.Modal)]
-        public void Grid() => CommandContext.Run("SDPGRID", ctx =>
+        public void Grid() => CommandContext.RunMajor("SDPGRID", "Masovno postavljanje (SDPGRID)", ctx =>
         {
-            ObjectId cid = ctx.Entity("Select closed boundary", typeof(Curve));
+            ObjectId cid = ctx.Entity("Odaberite zatvorenu granicu", typeof(Curve));
             (Ring ring, bool closed) = ElementService.ReadCurve((Entity)ctx.Tr.GetObject(cid, OpenMode.ForRead));
             if (!closed)
             {
-                ctx.Write("The boundary must be closed.");
+                ctx.Write("Granica mora biti zatvorena.");
                 return;
             }
 
-            ElementType type = ctx.ChooseType("Element type", null, GeometryKind.Point);
-            double sx = ctx.Number("Spacing along rows (m)", 1.0);
-            double sy = ctx.Number("Row spacing (m)", sx);
-            bool stagger = ctx.Keyword("Staggered (triangular) [Yes/No]", new[] { "Yes", "No" }, "Yes") == "Yes";
-            double margin = ctx.Number("Distance from the boundary (m)", sx / 2, false, true);
+            ElementType type = ctx.ChooseType("Tip elementa", null, GeometryKind.Point);
+            double sx = ctx.Number("Razmak u redu (m)", 1.0);
+            double sy = ctx.Number("Razmak redova (m)", sx);
+            bool stagger = ctx.Keyword("Smaknuti raspored (trouglasti) [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "Yes") == "Yes";
+            double margin = ctx.Number("Udaljenost od granice (m)", sx / 2, false, true);
             double k = ctx.K;
             List<Vec2> outline = GeometryMath.Tessellate(ring, true, 0.05 * k).Select(v => v.XY).ToList();
             List<Vec2> pts = GridLayout.InPolygon(outline, sx * k, sy * k, (ring.Vertices[1].XY - ring.Vertices[0].XY).Angle, margin * k, stagger);
@@ -610,7 +621,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 existing.Add(e);
             }
 
-            ctx.Write(pts.Count + " " + type.Name + " placed.");
+            ctx.Write("Postavljeno: " + pts.Count + " × " + type.Name + ".");
         });
     }
 }

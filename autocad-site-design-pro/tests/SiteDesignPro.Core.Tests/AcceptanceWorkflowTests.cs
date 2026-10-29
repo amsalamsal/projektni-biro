@@ -152,3 +152,49 @@ namespace SiteDesignPro.Core.Tests
         }
     }
 }
+
+namespace SiteDesignPro.Core.Tests
+{
+    public class SiteChecksTests
+    {
+        private static (List<SiteDesignPro.Core.Model.SiteElement> Elements, SiteDesignPro.Core.Model.ProjectSettings Settings, SiteDesignPro.Core.Catalog.ElementCatalog Catalog) Sample()
+        {
+            SiteDesignPro.Core.Catalog.ElementCatalog cat = TestSupport.Catalog;
+            return (SampleResidentialComplex.CreateLocal(cat), SampleResidentialComplex.CreateSettings(), cat);
+        }
+
+        [Fact]
+        public void SampleProject_PassesSiteChecks()
+        {
+            var (els, s, cat) = Sample();
+            ValidationReport r = SiteChecks.Run(els, cat, s);
+            Assert.Empty(r.Issues);
+            Assert.True(els.Count(e => e.Properties.ContainsKey(ElevationAssignment.PropMode)) >= 4, "the sample assigns elevations object by object");
+        }
+
+        [Fact]
+        public void MovedObject_RoadAboveParterre_AndOutsideParcel_AreReported()
+        {
+            var (els, s, cat) = Sample();
+            SiteDesignPro.Core.Model.SiteElement building = els.First(e => e.TypeId == "building.footprint");
+            building.Geometry = building.Geometry.Transform(v => new Vec3(v.X, v.Y, v.Z + 0.5)); // moved up after assignment
+            SiteDesignPro.Core.Model.SiteElement road = els.First(e => e.TypeId == "surface.asphalt");
+            road.Properties[ElevationAssignment.PropRelative] = "0.2";
+            SiteDesignPro.Core.Model.SiteElement bench = els.First(e => e.TypeId == "furniture.bench");
+            bench.Geometry = new PointGeometry(new Vec3(130, 40, 0.15), 0);
+            ValidationReport r = SiteChecks.Run(els, cat, s);
+            Assert.Contains(r.Issues, i => i.Code == "SDP-E012" && i.ElementId == building.Id);
+            Assert.Contains(r.Issues, i => i.Code == "SDP-E010" && i.ElementId == road.Id);
+            Assert.Contains(r.Issues, i => i.Code == "SDP-C020" && i.ElementId == bench.Id);
+        }
+
+        [Fact]
+        public void AssignedElevation_WithoutDatum_IsReported()
+        {
+            var (els, s, cat) = Sample();
+            s.Elevations.BuildingZeroAbsolute = null;
+            ValidationReport r = SiteChecks.Run(els, cat, s);
+            Assert.Contains(r.Issues, i => i.Code == "SDP-E011");
+        }
+    }
+}

@@ -47,12 +47,13 @@ namespace SiteDesignPro.AutoCAD
                     Hook(doc);
                 }
 
-                AcadEnv.Message("Site Design Pro " + AcadEnv.Version + " loaded: SITE DESIGN PRO ribbon tab, palette SDPBROWSER, start with SDPNEW or SDPSAMPLE.");
+                AcadEnv.Message("Vanjsko uređenje PRO " + AcadEnv.Version + " je učitano: kartica VANJSKO UREĐENJE PRO na traci, paleta SDPBROWSER. Početak: SDPNEW ili SDPSAMPLE, pomoć: SDPPOMOC.");
+                SafetyCommands.ReportInterrupted();
             }
             catch (System.Exception ex)
             {
                 // Initialization must never take AutoCAD down; the failure is logged with details.
-                Log.Error("Site Design Pro failed to initialise", ex);
+                Log.Error("Vanjsko uređenje PRO se nije pokrenulo", ex);
             }
         }
 

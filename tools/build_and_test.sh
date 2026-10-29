@@ -27,7 +27,7 @@ PY
 git diff --quiet -- shared/samples || echo "NOTE: sample packages changed - review and commit them."
 
 step "Ruby tests (core, builders, change planning, SketchUp adapter against the API fake)"
-for f in sketchup-site-design-pro/tests/test_*.rb; do ruby -Isketchup-site-design-pro/tests "$f" | grep -v '\[INFO\]' ; done
+for f in sketchup-site-design-pro/tests/test_*.rb; do [ "$(basename "$f")" = test_helper.rb ] && continue; ruby -Isketchup-site-design-pro/tests "$f" | grep -v '\[INFO\]' ; done
 
 step "Ruby 2.7 syntax compatibility (SketchUp 2021-2023)"
 if ruby -e 'require "parser/ruby27"' 2>/dev/null; then

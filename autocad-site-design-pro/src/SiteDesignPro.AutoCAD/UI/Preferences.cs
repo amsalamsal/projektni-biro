@@ -35,7 +35,7 @@ namespace SiteDesignPro.AutoCAD.UI
             }
             catch (Exception ex) when (ex is IOException || ex is JsonException || ex is UnauthorizedAccessException)
             {
-                Log.Warn("Preferences could not be read and were reset: " + ex.Message);
+                Log.Warn("Korisničke postavke nisu pročitane i vraćene su na zadane: " + ex.Message);
             }
 
             return new Preferences();
@@ -49,7 +49,7 @@ namespace SiteDesignPro.AutoCAD.UI
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {
-                Log.Warn("Preferences could not be saved: " + ex.Message);
+                Log.Warn("Korisničke postavke nisu sačuvane: " + ex.Message);
             }
         }
 

@@ -112,7 +112,7 @@ namespace SiteDesignPro.AutoCAD.UI
             foreach (SourceRole role in SourceRoles.All)
             {
                 string name = SourceRoles.Name(role);
-                List<string> layers = grid.Rows.Cast<DataGridViewRow>().Where(r => (r.Cells["role"].Value as string) == name).Select(r => (string)r.Cells["layer"].Value).ToList();
+                List<string> layers = grid.Rows.Cast<DataGridViewRow>().Where(r => (r.Cells["role"].Value as string) == name).Select(r => r.Cells["layer"].Value as string ?? string.Empty).ToList();
                 if (layers.Count > 0)
                 {
                     m.Set(role, layers);
@@ -131,8 +131,8 @@ namespace SiteDesignPro.AutoCAD.UI
                     continue;
                 }
 
-                List<SourceRole> roles = mapping.RolesOf((string)row.Cells["layer"].Value);
-                row.Cells["role"].Value = roles.Count > 0 ? SourceRoles.Name(roles[0]) : (onlyEmpty ? NoRole : NoRole);
+                List<SourceRole> roles = mapping.RolesOf(row.Cells["layer"].Value as string ?? string.Empty);
+                row.Cells["role"].Value = roles.Count > 0 ? SourceRoles.Name(roles[0]) : NoRole;
             }
         }
 

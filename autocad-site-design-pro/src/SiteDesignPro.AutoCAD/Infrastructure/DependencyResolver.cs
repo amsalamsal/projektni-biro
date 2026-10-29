@@ -12,7 +12,9 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
     /// </summary>
     internal static class DependencyResolver
     {
+#if NETFRAMEWORK
         private static bool installed;
+#endif
 
         public static void Install()
         {
@@ -38,8 +40,6 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
                 string path = Path.Combine(dir, name + ".dll");
                 return File.Exists(path) ? Assembly.LoadFrom(path) : null;
             };
-#else
-            installed = true;
 #endif
         }
     }

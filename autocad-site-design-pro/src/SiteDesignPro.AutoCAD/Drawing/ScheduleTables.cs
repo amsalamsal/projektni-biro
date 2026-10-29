@@ -46,10 +46,10 @@ namespace SiteDesignPro.AutoCAD.Drawing
             {
                 int q = schedule.Columns.FindIndex(x => x.Key == "quantity");
                 int u = schedule.Columns.FindIndex(x => x.Key == "unit");
-                table.Cells[tr0 + i, 0].TextString = "Total";
+                table.Cells[tr0 + i, 0].TextString = "Ukupno";
                 if (q >= 0)
                 {
-                    table.Cells[tr0 + i, q].TextString = total.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+                    table.Cells[tr0 + i, q].TextString = total.Value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture).Replace('.', ',');
                 }
 
                 if (u >= 0)

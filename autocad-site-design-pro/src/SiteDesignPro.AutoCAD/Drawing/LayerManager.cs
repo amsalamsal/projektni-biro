@@ -81,6 +81,33 @@ namespace SiteDesignPro.AutoCAD.Drawing
             return ltr.ObjectId;
         }
 
+        /// <summary>Standard layers of version 0.1 (English names) present in the drawing, with their new names.</summary>
+        public List<(string Old, string New)> LegacyLayers()
+        {
+            var table = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            return catalog.Layers.Where(d => d.LegacyName.Length > 0 && d.LegacyName != d.Name && table.Has(d.LegacyName) && !table.Has(d.Name))
+                .Select(d => (d.LegacyName, d.Name)).ToList();
+        }
+
+        /// <summary>Renames the given 0.1 layers (only on the user's explicit request; objects stay on their layer).</summary>
+        public int RenameLegacy(IEnumerable<(string Old, string New)> pairs)
+        {
+            var table = (LayerTable)tr.GetObject(db.LayerTableId, OpenMode.ForRead);
+            int n = 0;
+            foreach ((string oldName, string newName) in pairs)
+            {
+                if (table.Has(oldName) && !table.Has(newName))
+                {
+                    var ltr = (LayerTableRecord)tr.GetObject(table[oldName], OpenMode.ForWrite);
+                    ltr.Name = newName;
+                    n++;
+                }
+            }
+
+            cache.Clear();
+            return n;
+        }
+
         /// <summary>Creates every catalog layer; with repair, resets properties to the standard. Returns (created, repaired).</summary>
         public (int Created, int Repaired) EnsureAll(bool repair)
         {
@@ -119,18 +146,18 @@ namespace SiteDesignPro.AutoCAD.Drawing
                 var ltr = (LayerTableRecord)tr.GetObject(table[def.Name], OpenMode.ForRead);
                 if (ltr.Color.ColorIndex != def.Color)
                 {
-                    issues.Add(def.Name + ": colour " + ltr.Color.ColorIndex + " (standard " + def.Color + ")");
+                    issues.Add(def.Name + ": boja " + ltr.Color.ColorIndex + " (standard " + def.Color + ")");
                 }
 
                 var lt = (LinetypeTableRecord)tr.GetObject(ltr.LinetypeObjectId, OpenMode.ForRead);
                 if (!string.Equals(lt.Name, def.Linetype, StringComparison.OrdinalIgnoreCase))
                 {
-                    issues.Add(def.Name + ": linetype " + lt.Name + " (standard " + def.Linetype + ")");
+                    issues.Add(def.Name + ": tip linije " + lt.Name + " (standard " + def.Linetype + ")");
                 }
 
                 if (ltr.IsPlottable != def.Plot)
                 {
-                    issues.Add(def.Name + ": plot " + ltr.IsPlottable + " (standard " + def.Plot + ")");
+                    issues.Add(def.Name + ": štampanje " + (ltr.IsPlottable ? "da" : "ne") + " (standard " + (def.Plot ? "da" : "ne") + ")");
                 }
             }
 
@@ -166,7 +193,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
                 }
             }
 
-            Log.Warn("Linetype '" + name + "' is not available; Continuous is used.");
+            Log.Warn("Tip linije '" + name + "' nije dostupan; koristi se Continuous.");
             return lt["Continuous"];
         }
 

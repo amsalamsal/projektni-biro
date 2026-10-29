@@ -203,7 +203,7 @@ namespace SiteDesignPro.AutoCAD.Data
                     {
                         if (!br.Normal.IsParallelTo(Vector3d.ZAxis))
                         {
-                            throw new InvalidOperationException("Symbol is not in the world XY plane (rotated out of plan).");
+                            throw new InvalidOperationException("Simbol nije u ravni XY (zarotiran izvan tlocrta).");
                         }
 
                         // direction of the block's X axis in WCS (correct for UCS insertions and mirrored blocks)
@@ -217,7 +217,7 @@ namespace SiteDesignPro.AutoCAD.Data
                         return new PointGeometry(new Vec3(pt.Position.X, pt.Position.Y, pt.Position.Z), 0);
                     }
 
-                    throw new InvalidOperationException("Point elements must be block references.");
+                    throw new InvalidOperationException("Tačkasti elementi moraju biti reference bloka.");
                 case GeometryKind.Path:
                     {
                         (Ring ring, bool closed) = ReadCurve(e);
@@ -229,7 +229,7 @@ namespace SiteDesignPro.AutoCAD.Data
                         (Ring ring, bool closed) = ReadCurve(e);
                         if (!closed)
                         {
-                            throw new InvalidOperationException("Area boundary is not closed.");
+                            throw new InvalidOperationException("Granica površine nije zatvorena.");
                         }
 
                         var holes = new List<Ring>();
@@ -249,7 +249,7 @@ namespace SiteDesignPro.AutoCAD.Data
                     }
 
                 default:
-                    throw new InvalidOperationException("Unsupported geometry kind.");
+                    throw new InvalidOperationException("Nepodržana vrsta geometrije.");
             }
         }
 
@@ -261,7 +261,7 @@ namespace SiteDesignPro.AutoCAD.Data
                     {
                         if (!pl.Normal.IsParallelTo(Vector3d.ZAxis))
                         {
-                            throw new InvalidOperationException("Polyline is not in the world XY plane.");
+                            throw new InvalidOperationException("Polilinija nije u ravni XY (WCS).");
                         }
 
                         var verts = new List<Vec3>();
@@ -307,7 +307,7 @@ namespace SiteDesignPro.AutoCAD.Data
                 case Circle c when c.Normal.IsParallelTo(Vector3d.ZAxis):
                     return (new Ring(new[] { new Vec3(c.Center.X - c.Radius, c.Center.Y, c.Center.Z), new Vec3(c.Center.X + c.Radius, c.Center.Y, c.Center.Z) }, new[] { 1.0, 1.0 }), true);
                 default:
-                    throw new InvalidOperationException("Unsupported curve type " + e.GetType().Name + "; use a polyline.");
+                    throw new InvalidOperationException("Nepodržana vrsta krive " + e.GetType().Name + "; koristite poliliniju.");
             }
         }
 
@@ -332,7 +332,7 @@ namespace SiteDesignPro.AutoCAD.Data
                     entity = CreateCurve(poly.Outer, true);
                     break;
                 default:
-                    throw new InvalidOperationException("Unsupported geometry.");
+                    throw new InvalidOperationException("Nepodržana geometrija.");
             }
 
             entity.SetDatabaseDefaults(db);
@@ -468,7 +468,7 @@ namespace SiteDesignPro.AutoCAD.Data
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception ex)
                 {
-                    Log.Warn("Edge offset failed: " + ex.Message);
+                    Log.Warn("Odmak ivice nije uspio: " + ex.Message);
                     return Array.Empty<Entity>();
                 }
 
@@ -519,7 +519,7 @@ namespace SiteDesignPro.AutoCAD.Data
             }
             catch (Autodesk.AutoCAD.Runtime.Exception)
             {
-                Log.Warn("Hatch pattern " + def.Pattern + " is not available; ANSI31 is used.");
+                Log.Warn("Šrafura " + def.Pattern + " nije dostupna; koristi se ANSI31.");
                 hatch.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
             }
 

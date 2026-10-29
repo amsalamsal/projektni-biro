@@ -67,6 +67,9 @@ namespace SiteDesignPro.Core.Model
 
         /// <summary>Also use the elevations assigned to objects (their boundary vertices) as terrain points.</summary>
         public bool UseAssignedElevations { get; set; }
+
+        /// <summary>Use unambiguous elevation labels as spot heights (converted through the datum).</summary>
+        public bool UseLabelsAsSpotHeights { get; set; }
     }
 
     /// <summary>Project-level settings stored with the drawing and written to the package manifest.</summary>

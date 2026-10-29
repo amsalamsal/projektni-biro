@@ -38,7 +38,7 @@ namespace SiteDesignPro.AutoCAD.UI
         {
             if (set == null)
             {
-                set = new PaletteSet("Site Design Pro", new Guid("4b8d6f8e-2f8a-4e43-9a51-3f0c6d1d7b21"))
+                set = new PaletteSet("Vanjsko uređenje PRO", new Guid("4b8d6f8e-2f8a-4e43-9a51-3f0c6d1d7b21"))
                 {
                     Style = PaletteSetStyles.ShowAutoHideButton | PaletteSetStyles.ShowCloseButton | PaletteSetStyles.ShowPropertiesMenu,
                     MinimumSize = new System.Drawing.Size(300, 400),
@@ -47,9 +47,9 @@ namespace SiteDesignPro.AutoCAD.UI
                 library = new LibraryView();
                 properties = new PropertiesView();
                 validation = new ValidationView();
-                set.AddVisual("Library", library);
-                set.AddVisual("Properties", properties);
-                set.AddVisual("Validation", validation);
+                set.AddVisual("Biblioteka", library);
+                set.AddVisual("Svojstva", properties);
+                set.AddVisual("Provjera", validation);
                 AcApp.DocumentManager.DocumentActivated += (s, e) => properties?.Refresh();
             }
 
@@ -182,9 +182,9 @@ namespace SiteDesignPro.AutoCAD.UI
             Background = SitePalette.Back;
             var top = new StackPanel();
             top.Children.Add(search);
-            category.Items.Add(new ComboBoxItem { Content = "All categories", Tag = string.Empty });
-            category.Items.Add(new ComboBoxItem { Content = "Favourites", Tag = "*fav" });
-            category.Items.Add(new ComboBoxItem { Content = "Recently used", Tag = "*recent" });
+            category.Items.Add(new ComboBoxItem { Content = "Sve kategorije", Tag = string.Empty });
+            category.Items.Add(new ComboBoxItem { Content = "Omiljeni", Tag = "*fav" });
+            category.Items.Add(new ComboBoxItem { Content = "Nedavno korišteni", Tag = "*recent" });
             foreach (CategoryDefinition c in AcadEnv.Catalog.Categories)
             {
                 category.Items.Add(new ComboBoxItem { Content = c.Name, Tag = c.Id });
@@ -194,7 +194,7 @@ namespace SiteDesignPro.AutoCAD.UI
             top.Children.Add(category);
             SetDock(top, Dock.Top);
             Children.Add(top);
-            var hint = SitePalette.Label("Double-click to place or draw. Right-click to add or remove a favourite.", 11, true);
+            var hint = SitePalette.Label("Dvostruki klik: postavi ili nacrtaj. Desni klik: dodaj ili ukloni iz omiljenih. Pretraga radi i s engleskim nazivima.", 11, true);
             hint.Margin = new Thickness(6, 2, 6, 6);
             hint.TextWrapping = TextWrapping.Wrap;
             SetDock(hint, Dock.Bottom);
@@ -308,7 +308,7 @@ namespace SiteDesignPro.AutoCAD.UI
         public PropertiesView()
         {
             Background = SitePalette.Back;
-            var apply = new Button { Content = "Apply changes", Margin = new Thickness(6), Padding = new Thickness(8, 3, 8, 3) };
+            var apply = new Button { Content = "Primijeni izmjene", Margin = new Thickness(6), Padding = new Thickness(8, 3, 8, 3) };
             apply.Click += (s, e) => Apply();
             SetDock(apply, Dock.Bottom);
             Children.Add(apply);
@@ -331,7 +331,7 @@ namespace SiteDesignPro.AutoCAD.UI
             PromptSelectionResult sel = doc.Editor.SelectImplied();
             if (sel.Status != PromptStatus.OK)
             {
-                body.Children.Add(SitePalette.Label("Select Site Design Pro elements to see their parameters.", 12, true));
+                body.Children.Add(SitePalette.Label("Odaberite elemente u crtežu da vidite njihove parametre.", 12, true));
                 return;
             }
 
@@ -350,14 +350,14 @@ namespace SiteDesignPro.AutoCAD.UI
             tr.Commit();
             if (managed.Count == 0)
             {
-                body.Children.Add(SitePalette.Label("The selection contains no Site Design Pro elements.", 12, true));
+                body.Children.Add(SitePalette.Label("Odabir ne sadrži elemente Vanjsko uređenje PRO.", 12, true));
                 return;
             }
 
             ElementType type = managed[0].Type!;
             managed = managed.Where(m => m.Type!.Id == type.Id).ToList();
             handles = string.Join(",", managed.Select(m => m.ObjectId.Handle.ToString()));
-            body.Children.Add(SitePalette.Label(managed.Count == 1 ? (managed[0].Element!.Label + " " + type.Name) : managed.Count + " x " + type.Name, 14));
+            body.Children.Add(SitePalette.Label(managed.Count == 1 ? (managed[0].Element!.Label + " " + type.Name) : managed.Count + " × " + type.Name, 14));
             body.Children.Add(SitePalette.Label(type.Id + (managed.Count == 1 ? " · " + managed[0].Element!.Id : string.Empty), 10, true));
             foreach (IGrouping<string, ParameterDefinition> g in type.Parameters.GroupBy(p => p.Group))
             {
@@ -366,7 +366,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 body.Children.Add(header);
                 foreach (ParameterDefinition p in g)
                 {
-                    List<string> values = managed.Select(m => (m.Element!.Parameters.Contains(p.Key) ? m.Element.Parameters[p.Key] : p.Default).AsText()).Distinct().ToList();
+                    List<string> values = managed.Select(m => Display(p, (m.Element!.Parameters.Contains(p.Key) ? m.Element.Parameters[p.Key] : p.Default).AsText())).Distinct().ToList();
                     string value = values.Count == 1 ? values[0] : string.Empty;
                     original[p.Key] = value;
                     var row = new Grid { Margin = new Thickness(0, 1, 0, 1) };
@@ -389,6 +389,9 @@ namespace SiteDesignPro.AutoCAD.UI
             }
         }
 
+        /// <summary>Numbers are shown with a decimal comma; SDPSETPARAM accepts both comma and point.</summary>
+        private static string Display(ParameterDefinition p, string raw) => p.IsNumeric ? raw.Replace('.', ',') : raw;
+
         private static FrameworkElement Editor(ParameterDefinition p, string value, bool mixed)
         {
             switch (p.Type)
@@ -400,10 +403,10 @@ namespace SiteDesignPro.AutoCAD.UI
                         var cb = new ComboBox();
                         foreach (string o in p.Options)
                         {
-                            cb.Items.Add(o);
+                            cb.Items.Add(new ComboBoxItem { Content = AcadEnv.Catalog.OptionLabel(o), Tag = o });
                         }
 
-                        cb.SelectedItem = mixed ? null : value;
+                        cb.SelectedItem = mixed ? null : cb.Items.Cast<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == value);
                         return cb;
                     }
 
@@ -420,7 +423,7 @@ namespace SiteDesignPro.AutoCAD.UI
                     }
 
                 default:
-                    return new TextBox { Text = mixed ? string.Empty : value, ToolTip = mixed ? "Values differ" : (p.Min.HasValue ? p.Min.Value.ToString(CultureInfo.InvariantCulture) + " to " + (p.Max?.ToString(CultureInfo.InvariantCulture) ?? "") : null) };
+                    return new TextBox { Text = mixed ? string.Empty : value, ToolTip = mixed ? "Vrijednosti se razlikuju" : (p.Min.HasValue ? "od " + Display(p, p.Min.Value.ToString(CultureInfo.InvariantCulture)) + " do " + (p.Max.HasValue ? Display(p, p.Max.Value.ToString(CultureInfo.InvariantCulture)) : "-") : null) };
             }
         }
 
@@ -461,7 +464,7 @@ namespace SiteDesignPro.AutoCAD.UI
     internal sealed class ValidationView : DockPanel
     {
         private readonly ListBox list = new ListBox { BorderThickness = new Thickness(0) };
-        private readonly TextBlock summary = SitePalette.Label("Run SDPVALIDATE to check the drawing.", 12, true);
+        private readonly TextBlock summary = SitePalette.Label("Pokrenite SDPVALIDATE ili SDPPROVJERADWG za provjeru crteža.", 12, true);
 
         public ValidationView()
         {
@@ -483,7 +486,7 @@ namespace SiteDesignPro.AutoCAD.UI
 
         public void Show(ValidationReport report, IReadOnlyDictionary<string, string> handles)
         {
-            summary.Text = string.Format(CultureInfo.InvariantCulture, "{0} elements: {1} errors, {2} warnings, {3} review items. {4}",
+            summary.Text = string.Format(CultureInfo.InvariantCulture, "{0} objekata: grešaka {1}, upozorenja {2}, za stručni pregled {3}. {4}",
                 report.ElementCount, report.ErrorCount, report.WarningCount, report.ReviewCount, ValidationReport.Disclaimer);
             list.Items.Clear();
             foreach (ValidationIssue i in report.Issues.OrderBy(i => i.Severity))
@@ -497,8 +500,8 @@ namespace SiteDesignPro.AutoCAD.UI
                 };
                 var panel = new StackPanel { Margin = new Thickness(2, 3, 2, 3) };
                 var head = new TextBlock { FontSize = 11, Foreground = SitePalette.Fore };
-                head.Inlines.Add(new System.Windows.Documents.Run(i.Severity.ToString().ToUpperInvariant() + "  ") { Foreground = new SolidColorBrush(c), FontWeight = FontWeights.SemiBold });
-                head.Inlines.Add(new System.Windows.Documents.Run(i.Code + "  " + (i.Label ?? i.ElementId ?? "drawing")));
+                head.Inlines.Add(new System.Windows.Documents.Run(ValidationReport.SeverityName(i.Severity).ToUpperInvariant() + "  ") { Foreground = new SolidColorBrush(c), FontWeight = FontWeights.SemiBold });
+                head.Inlines.Add(new System.Windows.Documents.Run(i.Code + "  " + (i.Label ?? i.ElementId ?? "crtež")));
                 panel.Children.Add(head);
                 TextBlock msg = SitePalette.Label(i.Message, 11);
                 msg.TextWrapping = TextWrapping.Wrap;
@@ -507,7 +510,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 res.TextWrapping = TextWrapping.Wrap;
                 panel.Children.Add(res);
                 string? handle = i.ElementId != null && handles.TryGetValue(i.ElementId, out string? h) ? h : null;
-                list.Items.Add(new ListBoxItem { Content = panel, Tag = handle, ToolTip = handle != null ? "Double-click to zoom to the element" : null });
+                list.Items.Add(new ListBoxItem { Content = panel, Tag = handle, ToolTip = handle != null ? "Dvostruki klik: zumiranje na objekat" : null });
             }
         }
     }
@@ -522,7 +525,7 @@ namespace SiteDesignPro.AutoCAD.UI
         public void BrowseCategory()
         {
             Editor ed = AcApp.DocumentManager.MdiActiveDocument.Editor;
-            PromptResult r = ed.GetString(new PromptStringOptions("\nCategory: ") { AllowSpaces = false });
+            PromptResult r = ed.GetString(new PromptStringOptions("\nKategorija: ") { AllowSpaces = false });
             if (r.Status == PromptStatus.OK)
             {
                 SitePalette.Show(r.StringResult);

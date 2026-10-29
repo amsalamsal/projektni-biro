@@ -48,13 +48,16 @@ namespace SiteDesignPro.AutoCAD.Data
     {
         public const string App = "SITEDESIGNPRO";
         public const string AuxApp = "SITEDESIGNPRO_AUX";
+
+        /// <summary>XData of elevation assignments on source objects that are not elements.</summary>
+        public const string ElevationApp = "SITEDESIGNPRO_KOTA";
         public const string RecordKey = "SDP_ELEMENT";
         private const int ChunkSize = 240;
 
         public static void EnsureRegApps(Database db, Transaction tr)
         {
             var table = (RegAppTable)tr.GetObject(db.RegAppTableId, OpenMode.ForRead);
-            foreach (string name in new[] { App, AuxApp })
+            foreach (string name in new[] { App, AuxApp, ElevationApp })
             {
                 if (!table.Has(name))
                 {
@@ -316,7 +319,7 @@ namespace SiteDesignPro.AutoCAD.Data
             Core.Units.LengthUnit? unit = Core.Units.UnitConversion.FromInsUnits((int)db.Insunits);
             return new ProjectSettings
             {
-                Name = System.IO.Path.GetFileNameWithoutExtension(db.Filename) is string n && n.Length > 0 ? n : "Untitled site project",
+                Name = System.IO.Path.GetFileNameWithoutExtension(db.Filename) is string n && n.Length > 0 ? n : "Projekat vanjskog uređenja",
                 DrawingUnit = Core.Units.UnitConversion.Code(unit ?? Core.Units.LengthUnit.Millimeter),
             };
         }

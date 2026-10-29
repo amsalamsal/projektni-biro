@@ -133,12 +133,24 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ prompts
 
+        /// <summary>
+        /// Keyword prompt. A keyword may be given as "Global|Lokalni": the Bosnian local name is shown and typed,
+        /// the global name is returned (so code can compare stable names). Without '|' both names are the same.
+        /// </summary>
         public string Keyword(string message, string[] keywords, string? defaultKeyword = null)
         {
             var o = new PromptKeywordOptions("\n" + message);
             foreach (string k in keywords)
             {
-                o.Keywords.Add(k);
+                int bar = k.IndexOf('|');
+                if (bar > 0)
+                {
+                    o.Keywords.Add(k.Substring(0, bar), k.Substring(bar + 1), k.Substring(bar + 1));
+                }
+                else
+                {
+                    o.Keywords.Add(k);
+                }
             }
 
             if (defaultKeyword != null)
