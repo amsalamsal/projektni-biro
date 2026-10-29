@@ -230,6 +230,9 @@ namespace SiteDesignPro.Core.Geometry
             return angle;
         }
 
+        /// <summary>Point-in-closed-ring test that honours arc segments (tessellated to 1 cm).</summary>
+        public static bool PointInRing(Vec2 p, Ring ring) => PointInPolygon(p, Tessellate(ring, true).Select(v => v.XY).ToList());
+
         public static bool PointInPolygon(Vec2 p, IReadOnlyList<Vec2> poly)
         {
             bool inside = false;
