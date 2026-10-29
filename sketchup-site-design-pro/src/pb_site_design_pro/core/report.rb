@@ -70,7 +70,7 @@ module ProjektniBiro
           'package' => @package_path,
           'startedAt' => @started_at.utc.strftime('%Y-%m-%dT%H:%M:%SZ'),
           'durationSeconds' => duration ? duration.round(3) : nil,
-          'stats' => @stats.dup,
+          'stats' => @stats.to_h { |k, v| [k.to_s, v] },
           'errors' => count(:error), 'warnings' => count(:warning), 'reviews' => count(:review),
           'issues' => @issues.map(&:to_h),
           'disclaimer' => DISCLAIMER
@@ -82,7 +82,7 @@ module ProjektniBiro
         lines << "Package: #{@package_path}" if @package_path
         lines << format('Duration: %.2f s', duration) if duration
         unless @stats.empty?
-          lines << @stats.sort.map { |k, v| "#{k}: #{v}" }.join(', ')
+          lines << @stats.sort_by { |k, _| k.to_s }.map { |k, v| "#{k}: #{v}" }.join(', ')
         end
         lines << "Errors: #{count(:error)}  Warnings: #{count(:warning)}  Reviews: #{count(:review)}"
         SEVERITIES.each do |sev|

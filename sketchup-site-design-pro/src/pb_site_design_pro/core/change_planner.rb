@@ -145,7 +145,7 @@ module ProjektniBiro
           'actions' => @actions.reject { |a| a.kind == :unchanged }.map do |a|
             el = a.element
             { 'kind' => a.kind.to_s, 'id' => el ? el.id : a.entry&.id, 'label' => el&.label,
-              'name' => el ? el.display_name : a.entry&.type_id, 'type' => el ? el.type_id : a.entry&.type_id, 'reason' => a.reason }
+              'name' => el ? el.base_name : a.entry&.type_id, 'type' => el ? el.type_id : a.entry&.type_id, 'reason' => a.reason }
           end
         }
       end

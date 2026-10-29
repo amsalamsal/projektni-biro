@@ -1,0 +1,2443 @@
+{
+  "types": [
+    {
+      "id": "building.footprint",
+      "name": "Building footprint (reference massing)",
+      "category": "buildings",
+      "subcategory": "Buildings",
+      "builder": "massing"
+    },
+    {
+      "id": "building.entrance",
+      "name": "Building entrance reference",
+      "category": "buildings",
+      "subcategory": "References",
+      "builder": "marker"
+    },
+    {
+      "id": "site.boundary",
+      "name": "Site boundary",
+      "category": "site",
+      "subcategory": "Boundaries",
+      "builder": "outline"
+    },
+    {
+      "id": "site.existing_feature",
+      "name": "Existing feature outline",
+      "category": "site",
+      "subcategory": "Existing conditions",
+      "builder": "outline"
+    },
+    {
+      "id": "surface.concrete_paving",
+      "name": "Concrete paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.natural_stone",
+      "name": "Natural stone paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.porcelain_tiles",
+      "name": "Outdoor porcelain / ceramic tiles",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.asphalt",
+      "name": "Asphalt surface",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.permeable_paving",
+      "name": "Permeable paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.grass_grid",
+      "name": "Grass grid / reinforced turf",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.gravel",
+      "name": "Gravel / decorative aggregate",
+      "category": "surfaces",
+      "subcategory": "Loose fill",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.rubber_safety",
+      "name": "Rubber safety surface",
+      "category": "surfaces",
+      "subcategory": "Safety surfaces",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.tactile_paving",
+      "name": "Tactile paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.sand",
+      "name": "Sand / loose-fill play surface",
+      "category": "surfaces",
+      "subcategory": "Loose fill",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.mulch",
+      "name": "Bark mulch",
+      "category": "surfaces",
+      "subcategory": "Loose fill",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.lawn",
+      "name": "Lawn",
+      "category": "surfaces",
+      "subcategory": "Soft landscape",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.timber_deck",
+      "name": "Timber decking / platform",
+      "category": "surfaces",
+      "subcategory": "Decks and terraces",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.raised_terrace",
+      "name": "Raised terrace floor (pedestal system)",
+      "category": "surfaces",
+      "subcategory": "Decks and terraces",
+      "builder": "slab"
+    },
+    {
+      "id": "surface.sports_court",
+      "name": "Sports court surface",
+      "category": "surfaces",
+      "subcategory": "Sports surfaces",
+      "builder": "slab"
+    },
+    {
+      "id": "edge.kerb",
+      "name": "Kerb",
+      "category": "surfaces",
+      "subcategory": "Edges and transitions",
+      "builder": "wall"
+    },
+    {
+      "id": "edge.flush_kerb",
+      "name": "Flush kerb / transition edge",
+      "category": "surfaces",
+      "subcategory": "Edges and transitions",
+      "builder": "wall"
+    },
+    {
+      "id": "edge.edging",
+      "name": "Edging / border strip",
+      "category": "surfaces",
+      "subcategory": "Edges and transitions",
+      "builder": "wall"
+    },
+    {
+      "id": "edge.retaining_edge",
+      "name": "Retaining edge",
+      "category": "surfaces",
+      "subcategory": "Edges and transitions",
+      "builder": "wall"
+    },
+    {
+      "id": "edge.surface_joint",
+      "name": "Movement / surface joint",
+      "category": "surfaces",
+      "subcategory": "Edges and transitions",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "level.steps",
+      "name": "Steps",
+      "category": "surfaces",
+      "subcategory": "Level changes",
+      "builder": "steps"
+    },
+    {
+      "id": "level.ramp",
+      "name": "Ramp",
+      "category": "surfaces",
+      "subcategory": "Level changes",
+      "builder": "ramp"
+    },
+    {
+      "id": "level.landing",
+      "name": "Landing",
+      "category": "surfaces",
+      "subcategory": "Level changes",
+      "builder": "slab"
+    },
+    {
+      "id": "road.access_road",
+      "name": "Internal access road (centreline)",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "road.driveway",
+      "name": "Driveway (centreline)",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "road.service_route",
+      "name": "Service route (centreline)",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "road.fire_access",
+      "name": "Fire-service access route (centreline)",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "road.turning_area",
+      "name": "Turning area",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "slab"
+    },
+    {
+      "id": "road.swept_path_placeholder",
+      "name": "Swept-path placeholder (not an analysis)",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "zone"
+    },
+    {
+      "id": "road.parking_bay",
+      "name": "Parking bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay"
+    },
+    {
+      "id": "road.parking_bay_accessible",
+      "name": "Accessible parking bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay"
+    },
+    {
+      "id": "road.parking_bay_ev",
+      "name": "EV charging parking bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay"
+    },
+    {
+      "id": "road.loading_bay",
+      "name": "Loading / unloading bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay"
+    },
+    {
+      "id": "road.pedestrian_crossing",
+      "name": "Pedestrian crossing (striped)",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "stripes"
+    },
+    {
+      "id": "road.hatched_area",
+      "name": "Hatched marking area",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "stripes"
+    },
+    {
+      "id": "road.marking_line",
+      "name": "Road marking line",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "road.arrow",
+      "name": "Traffic arrow",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "arrow_marking"
+    },
+    {
+      "id": "road.speed_hump",
+      "name": "Speed hump",
+      "category": "roads",
+      "subcategory": "Traffic calming",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "road.raised_crossing",
+      "name": "Raised crossing / table",
+      "category": "roads",
+      "subcategory": "Traffic calming",
+      "builder": "slab"
+    },
+    {
+      "id": "road.bollard",
+      "name": "Bollard",
+      "category": "roads",
+      "subcategory": "Barriers",
+      "builder": "bollard"
+    },
+    {
+      "id": "road.removable_bollard",
+      "name": "Removable bollard",
+      "category": "roads",
+      "subcategory": "Barriers",
+      "builder": "bollard"
+    },
+    {
+      "id": "road.vehicle_barrier",
+      "name": "Vehicle barrier (boom)",
+      "category": "roads",
+      "subcategory": "Barriers",
+      "builder": "gate"
+    },
+    {
+      "id": "road.wheel_stop",
+      "name": "Parking stop / wheel guide",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "road.traffic_sign",
+      "name": "Traffic sign",
+      "category": "roads",
+      "subcategory": "Signage",
+      "builder": "sign_post"
+    },
+    {
+      "id": "cycling.bike_path",
+      "name": "Dedicated bicycle path (centreline)",
+      "category": "cycling",
+      "subcategory": "Paths and lanes",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "cycling.shared_path",
+      "name": "Shared-use path (centreline)",
+      "category": "cycling",
+      "subcategory": "Paths and lanes",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "cycling.bike_lane",
+      "name": "Bicycle lane marking",
+      "category": "cycling",
+      "subcategory": "Paths and lanes",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "cycling.separation_line",
+      "name": "Bicycle / pedestrian separation line",
+      "category": "cycling",
+      "subcategory": "Paths and lanes",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "cycling.bike_box",
+      "name": "Bike box (advanced stop area)",
+      "category": "cycling",
+      "subcategory": "Paths and lanes",
+      "builder": "slab"
+    },
+    {
+      "id": "cycling.bike_stand",
+      "name": "Bicycle stand (hoop)",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "bike_stand"
+    },
+    {
+      "id": "cycling.bike_rack",
+      "name": "Bicycle rack (row of stands)",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "bike_stand"
+    },
+    {
+      "id": "cycling.bike_shelter",
+      "name": "Covered bicycle shelter",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "shelter"
+    },
+    {
+      "id": "cycling.bike_locker",
+      "name": "Bicycle locker",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "cycling.share_station",
+      "name": "Bicycle-sharing station",
+      "category": "cycling",
+      "subcategory": "Services",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "cycling.repair_station",
+      "name": "Bicycle repair station",
+      "category": "cycling",
+      "subcategory": "Services",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "cycling.pump",
+      "name": "Public bicycle pump",
+      "category": "cycling",
+      "subcategory": "Services",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "cycling.charging_point",
+      "name": "Bicycle charging point",
+      "category": "cycling",
+      "subcategory": "Services",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "cycling.route_marking",
+      "name": "Bicycle route marking",
+      "category": "cycling",
+      "subcategory": "Signage",
+      "builder": "arrow_marking"
+    },
+    {
+      "id": "cycling.direction_sign",
+      "name": "Bicycle directional sign",
+      "category": "cycling",
+      "subcategory": "Signage",
+      "builder": "sign_post"
+    },
+    {
+      "id": "water.swimming_pool",
+      "name": "Swimming pool",
+      "category": "water",
+      "subcategory": "Pools",
+      "builder": "pool"
+    },
+    {
+      "id": "water.infinity_pool",
+      "name": "Infinity pool",
+      "category": "water",
+      "subcategory": "Pools",
+      "builder": "pool"
+    },
+    {
+      "id": "water.decorative_pond",
+      "name": "Decorative pond",
+      "category": "water",
+      "subcategory": "Ponds and features",
+      "builder": "pool"
+    },
+    {
+      "id": "water.reflecting_pool",
+      "name": "Reflecting pool",
+      "category": "water",
+      "subcategory": "Ponds and features",
+      "builder": "pool"
+    },
+    {
+      "id": "water.fountain",
+      "name": "Fountain",
+      "category": "water",
+      "subcategory": "Ponds and features",
+      "builder": "fountain"
+    },
+    {
+      "id": "water.water_jet",
+      "name": "Water jet (ground nozzle)",
+      "category": "water",
+      "subcategory": "Ponds and features",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "water.cascade_wall",
+      "name": "Waterfall / cascade wall",
+      "category": "water",
+      "subcategory": "Ponds and features",
+      "builder": "wall"
+    },
+    {
+      "id": "water.equipment_zone",
+      "name": "Pool equipment zone",
+      "category": "water",
+      "subcategory": "Pools",
+      "builder": "zone"
+    },
+    {
+      "id": "water.drainage_channel",
+      "name": "Linear drainage channel",
+      "category": "water",
+      "subcategory": "Surface drainage",
+      "builder": "channel"
+    },
+    {
+      "id": "water.slot_drain",
+      "name": "Slot drain",
+      "category": "water",
+      "subcategory": "Surface drainage",
+      "builder": "channel"
+    },
+    {
+      "id": "water.overflow_channel",
+      "name": "Overflow channel",
+      "category": "water",
+      "subcategory": "Surface drainage",
+      "builder": "channel"
+    },
+    {
+      "id": "water.surface_inlet",
+      "name": "Surface inlet / gully grate",
+      "category": "water",
+      "subcategory": "Surface drainage",
+      "builder": "chamber"
+    },
+    {
+      "id": "water.inspection_chamber",
+      "name": "Drainage inspection chamber",
+      "category": "water",
+      "subcategory": "Underground drainage",
+      "builder": "chamber"
+    },
+    {
+      "id": "water.drain_pipe",
+      "name": "Drainage pipe",
+      "category": "water",
+      "subcategory": "Underground drainage",
+      "builder": "pipe"
+    },
+    {
+      "id": "water.rainwater_tank",
+      "name": "Underground rainwater tank",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "tank"
+    },
+    {
+      "id": "water.rainwater_collector",
+      "name": "Rainwater collection butt (above ground)",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "tank"
+    },
+    {
+      "id": "water.infiltration_crates",
+      "name": "Infiltration / attenuation crates",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "tank"
+    },
+    {
+      "id": "water.retention_basin",
+      "name": "Retention / detention basin",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "basin"
+    },
+    {
+      "id": "water.rain_garden",
+      "name": "Rain garden",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "basin"
+    },
+    {
+      "id": "water.bioswale",
+      "name": "Bioswale",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "basin"
+    },
+    {
+      "id": "water.irrigation_line",
+      "name": "Irrigation line",
+      "category": "water",
+      "subcategory": "Irrigation and supply",
+      "builder": "pipe"
+    },
+    {
+      "id": "water.supply_point",
+      "name": "Water supply point / tap",
+      "category": "water",
+      "subcategory": "Irrigation and supply",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "landscape.tree_deciduous",
+      "name": "Deciduous tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree"
+    },
+    {
+      "id": "landscape.tree_evergreen",
+      "name": "Evergreen tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree"
+    },
+    {
+      "id": "landscape.tree_fruit",
+      "name": "Fruit tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree"
+    },
+    {
+      "id": "landscape.tree_columnar",
+      "name": "Columnar tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree"
+    },
+    {
+      "id": "landscape.tree_existing",
+      "name": "Existing tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree"
+    },
+    {
+      "id": "landscape.orchard_tree",
+      "name": "Orchard tree (row planting)",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree"
+    },
+    {
+      "id": "landscape.shrub",
+      "name": "Shrub",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "shrub"
+    },
+    {
+      "id": "landscape.hedge",
+      "name": "Hedge",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "wall"
+    },
+    {
+      "id": "landscape.flower_bed",
+      "name": "Flower bed",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.rose_garden",
+      "name": "Rose garden",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.ornamental_grasses",
+      "name": "Ornamental grasses",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.perennials",
+      "name": "Perennial planting",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.ground_cover",
+      "name": "Ground cover",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.planting_bed",
+      "name": "Planting bed (soil only)",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.meadow",
+      "name": "Natural meadow",
+      "category": "landscape",
+      "subcategory": "Lawns and meadows",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.lawn_area",
+      "name": "Lawn area",
+      "category": "landscape",
+      "subcategory": "Lawns and meadows",
+      "builder": "planting_area"
+    },
+    {
+      "id": "landscape.climber",
+      "name": "Climbing plant",
+      "category": "landscape",
+      "subcategory": "Vertical greening",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "landscape.green_roof",
+      "name": "Green roof",
+      "category": "landscape",
+      "subcategory": "Vertical greening",
+      "builder": "slab"
+    },
+    {
+      "id": "landscape.green_wall",
+      "name": "Green wall",
+      "category": "landscape",
+      "subcategory": "Vertical greening",
+      "builder": "wall"
+    },
+    {
+      "id": "landscape.vertical_garden",
+      "name": "Vertical garden module",
+      "category": "landscape",
+      "subcategory": "Vertical greening",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "landscape.raised_planter",
+      "name": "Raised planter",
+      "category": "landscape",
+      "subcategory": "Planters",
+      "builder": "planter"
+    },
+    {
+      "id": "landscape.planting_container",
+      "name": "Large planting container",
+      "category": "landscape",
+      "subcategory": "Planters",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "landscape.tree_grate",
+      "name": "Tree pit grate",
+      "category": "landscape",
+      "subcategory": "Tree protection",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "landscape.tree_pit",
+      "name": "Tree pit (soil volume)",
+      "category": "landscape",
+      "subcategory": "Tree protection",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "landscape.root_protection_zone",
+      "name": "Root protection zone",
+      "category": "landscape",
+      "subcategory": "Tree protection",
+      "builder": "circle_zone"
+    },
+    {
+      "id": "landscape.tree_protection_barrier",
+      "name": "Tree protection barrier",
+      "category": "landscape",
+      "subcategory": "Tree protection",
+      "builder": "fence"
+    },
+    {
+      "id": "landscape.irrigation_point",
+      "name": "Irrigation point / valve box",
+      "category": "landscape",
+      "subcategory": "Irrigation",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "utility.waste_container_ug_3m3",
+      "name": "Underground waste container 3 m³",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container"
+    },
+    {
+      "id": "utility.waste_container_ug_5m3",
+      "name": "Underground waste container 5 m³",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container"
+    },
+    {
+      "id": "utility.waste_container_semi",
+      "name": "Semi-underground waste container",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container"
+    },
+    {
+      "id": "utility.waste_container_above",
+      "name": "Above-ground waste container",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "utility.recycling_island",
+      "name": "Recycling island",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "zone"
+    },
+    {
+      "id": "utility.cistern",
+      "name": "Underground cistern",
+      "category": "utilities",
+      "subcategory": "Tanks",
+      "builder": "tank"
+    },
+    {
+      "id": "utility.water_tank",
+      "name": "Water tank (above ground)",
+      "category": "utilities",
+      "subcategory": "Tanks",
+      "builder": "tank"
+    },
+    {
+      "id": "utility.septic_tank",
+      "name": "Septic tank",
+      "category": "utilities",
+      "subcategory": "Tanks",
+      "builder": "tank"
+    },
+    {
+      "id": "utility.trench",
+      "name": "Utility trench (envelope)",
+      "category": "utilities",
+      "subcategory": "Routes",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "utility.service_corridor",
+      "name": "Underground service corridor",
+      "category": "utilities",
+      "subcategory": "Routes",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "utility.cable_duct",
+      "name": "Cable duct",
+      "category": "utilities",
+      "subcategory": "Routes",
+      "builder": "pipe"
+    },
+    {
+      "id": "utility.water_pipe",
+      "name": "Water supply pipe",
+      "category": "utilities",
+      "subcategory": "Routes",
+      "builder": "pipe"
+    },
+    {
+      "id": "utility.service_connection",
+      "name": "Service connection",
+      "category": "utilities",
+      "subcategory": "Routes",
+      "builder": "pipe"
+    },
+    {
+      "id": "utility.electrical_chamber",
+      "name": "Electrical inspection chamber",
+      "category": "utilities",
+      "subcategory": "Chambers",
+      "builder": "chamber"
+    },
+    {
+      "id": "utility.telecom_chamber",
+      "name": "Telecommunications chamber",
+      "category": "utilities",
+      "subcategory": "Chambers",
+      "builder": "chamber"
+    },
+    {
+      "id": "utility.water_meter_chamber",
+      "name": "Water meter chamber",
+      "category": "utilities",
+      "subcategory": "Chambers",
+      "builder": "chamber"
+    },
+    {
+      "id": "utility.valve_chamber",
+      "name": "Valve chamber",
+      "category": "utilities",
+      "subcategory": "Chambers",
+      "builder": "chamber"
+    },
+    {
+      "id": "utility.manhole",
+      "name": "Manhole",
+      "category": "utilities",
+      "subcategory": "Chambers",
+      "builder": "chamber"
+    },
+    {
+      "id": "utility.pump_chamber",
+      "name": "Pump chamber",
+      "category": "utilities",
+      "subcategory": "Chambers",
+      "builder": "chamber"
+    },
+    {
+      "id": "utility.equipment_enclosure",
+      "name": "Equipment enclosure",
+      "category": "utilities",
+      "subcategory": "Equipment",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "lighting.street_light",
+      "name": "Street light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "lighting.pedestrian_light",
+      "name": "Pedestrian light (post-top)",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "lighting.solar_light",
+      "name": "Solar light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "lighting.smart_light",
+      "name": "Smart light (with sensor)",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "lighting.bollard_light",
+      "name": "Bollard light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "bollard"
+    },
+    {
+      "id": "lighting.path_light",
+      "name": "Pathway light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "bollard"
+    },
+    {
+      "id": "lighting.recessed_ground_light",
+      "name": "Recessed ground light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "lighting.underwater_light",
+      "name": "Underwater light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "lighting.step_light",
+      "name": "Step light",
+      "category": "lighting",
+      "subcategory": "Wall-mounted",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "lighting.wall_light",
+      "name": "Wall-mounted light",
+      "category": "lighting",
+      "subcategory": "Wall-mounted",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "lighting.facade_light",
+      "name": "Facade light",
+      "category": "lighting",
+      "subcategory": "Wall-mounted",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "lighting.garden_light",
+      "name": "Decorative garden light",
+      "category": "lighting",
+      "subcategory": "Decorative",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "lighting.led_strip",
+      "name": "LED strip",
+      "category": "lighting",
+      "subcategory": "Decorative",
+      "builder": "linear_slab"
+    },
+    {
+      "id": "lighting.pergola_light",
+      "name": "Pergola light",
+      "category": "lighting",
+      "subcategory": "Decorative",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "lighting.feature_light",
+      "name": "Architectural feature light (uplight)",
+      "category": "lighting",
+      "subcategory": "Decorative",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "lighting.control_cabinet",
+      "name": "Lighting control cabinet",
+      "category": "lighting",
+      "subcategory": "Control",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "lighting.circuit_route",
+      "name": "Lighting circuit route",
+      "category": "lighting",
+      "subcategory": "Control",
+      "builder": "pipe"
+    },
+    {
+      "id": "lighting.coverage_zone",
+      "name": "Illustrative lighting coverage (not photometric)",
+      "category": "lighting",
+      "subcategory": "Control",
+      "builder": "circle_zone"
+    },
+    {
+      "id": "wall.metal_fence",
+      "name": "Metal bar fence",
+      "category": "walls",
+      "subcategory": "Fences",
+      "builder": "fence"
+    },
+    {
+      "id": "wall.mesh_fence",
+      "name": "Welded-mesh fence",
+      "category": "walls",
+      "subcategory": "Fences",
+      "builder": "fence"
+    },
+    {
+      "id": "wall.glass_railing",
+      "name": "Glass railing",
+      "category": "walls",
+      "subcategory": "Railings",
+      "builder": "fence"
+    },
+    {
+      "id": "wall.timber_fence",
+      "name": "Timber fence",
+      "category": "walls",
+      "subcategory": "Fences",
+      "builder": "fence"
+    },
+    {
+      "id": "wall.decorative_fence",
+      "name": "Decorative fence",
+      "category": "walls",
+      "subcategory": "Fences",
+      "builder": "fence"
+    },
+    {
+      "id": "wall.safety_railing",
+      "name": "Safety railing",
+      "category": "walls",
+      "subcategory": "Railings",
+      "builder": "fence"
+    },
+    {
+      "id": "wall.gabion",
+      "name": "Gabion wall",
+      "category": "walls",
+      "subcategory": "Walls",
+      "builder": "wall"
+    },
+    {
+      "id": "wall.concrete",
+      "name": "Concrete wall",
+      "category": "walls",
+      "subcategory": "Walls",
+      "builder": "wall"
+    },
+    {
+      "id": "wall.stone",
+      "name": "Stone wall",
+      "category": "walls",
+      "subcategory": "Walls",
+      "builder": "wall"
+    },
+    {
+      "id": "wall.retaining",
+      "name": "Retaining wall",
+      "category": "walls",
+      "subcategory": "Retaining",
+      "builder": "wall"
+    },
+    {
+      "id": "wall.planter_wall",
+      "name": "Planter wall",
+      "category": "walls",
+      "subcategory": "Walls",
+      "builder": "wall"
+    },
+    {
+      "id": "wall.pedestrian_gate",
+      "name": "Pedestrian gate",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate"
+    },
+    {
+      "id": "wall.vehicle_gate",
+      "name": "Vehicle gate (double swing)",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate"
+    },
+    {
+      "id": "wall.sliding_gate",
+      "name": "Automatic sliding gate",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate"
+    },
+    {
+      "id": "wall.swing_gate",
+      "name": "Swing gate",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate"
+    },
+    {
+      "id": "wall.access_barrier",
+      "name": "Access-control barrier",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate"
+    },
+    {
+      "id": "structure.pergola",
+      "name": "Pergola",
+      "category": "structures",
+      "subcategory": "Pergolas",
+      "builder": "pergola"
+    },
+    {
+      "id": "structure.bioclimatic_pergola",
+      "name": "Bioclimatic pergola (adjustable louvers)",
+      "category": "structures",
+      "subcategory": "Pergolas",
+      "builder": "pergola"
+    },
+    {
+      "id": "structure.retractable_shade",
+      "name": "Pergola with retractable shade",
+      "category": "structures",
+      "subcategory": "Pergolas",
+      "builder": "pergola"
+    },
+    {
+      "id": "structure.tensile_membrane",
+      "name": "Tensile membrane canopy (simplified)",
+      "category": "structures",
+      "subcategory": "Canopies",
+      "builder": "sail"
+    },
+    {
+      "id": "structure.carport",
+      "name": "Carport",
+      "category": "structures",
+      "subcategory": "Canopies",
+      "builder": "pergola"
+    },
+    {
+      "id": "structure.solar_canopy",
+      "name": "Solar canopy",
+      "category": "structures",
+      "subcategory": "Canopies",
+      "builder": "pergola"
+    },
+    {
+      "id": "structure.bus_shelter",
+      "name": "Bus-style shelter",
+      "category": "structures",
+      "subcategory": "Shelters",
+      "builder": "shelter"
+    },
+    {
+      "id": "structure.gazebo",
+      "name": "Gazebo",
+      "category": "structures",
+      "subcategory": "Pavilions",
+      "builder": "shelter"
+    },
+    {
+      "id": "structure.pavilion",
+      "name": "Outdoor pavilion",
+      "category": "structures",
+      "subcategory": "Pavilions",
+      "builder": "shelter"
+    },
+    {
+      "id": "structure.terrace_roof",
+      "name": "Terrace roof (glass)",
+      "category": "structures",
+      "subcategory": "Canopies",
+      "builder": "pergola"
+    },
+    {
+      "id": "structure.entrance_canopy",
+      "name": "Lightweight entrance canopy",
+      "category": "structures",
+      "subcategory": "Canopies",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "structure.seating_shelter",
+      "name": "Outdoor seating shelter",
+      "category": "structures",
+      "subcategory": "Shelters",
+      "builder": "shelter"
+    },
+    {
+      "id": "furniture.bench",
+      "name": "Bench with backrest",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench"
+    },
+    {
+      "id": "furniture.bench_backless",
+      "name": "Backless bench",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench"
+    },
+    {
+      "id": "furniture.accessible_bench",
+      "name": "Accessible bench (armrests)",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench"
+    },
+    {
+      "id": "furniture.chair",
+      "name": "Outdoor chair",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench"
+    },
+    {
+      "id": "furniture.lounger",
+      "name": "Lounge seating",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench"
+    },
+    {
+      "id": "furniture.picnic_table",
+      "name": "Picnic table",
+      "category": "furniture",
+      "subcategory": "Tables",
+      "builder": "table"
+    },
+    {
+      "id": "furniture.dining_table",
+      "name": "Outdoor dining table",
+      "category": "furniture",
+      "subcategory": "Tables",
+      "builder": "table"
+    },
+    {
+      "id": "furniture.waste_bin",
+      "name": "Waste bin",
+      "category": "furniture",
+      "subcategory": "Bins",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "furniture.ashtray",
+      "name": "Ashtray / cigarette bin",
+      "category": "furniture",
+      "subcategory": "Bins",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "furniture.planter",
+      "name": "Planter (furniture)",
+      "category": "furniture",
+      "subcategory": "Planters",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "furniture.drinking_fountain",
+      "name": "Drinking fountain",
+      "category": "furniture",
+      "subcategory": "Amenities",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "furniture.outdoor_shower",
+      "name": "Outdoor shower",
+      "category": "furniture",
+      "subcategory": "Amenities",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "furniture.pet_waste_station",
+      "name": "Pet waste station",
+      "category": "furniture",
+      "subcategory": "Amenities",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "recreation.fitness_station",
+      "name": "Outdoor fitness equipment",
+      "category": "furniture",
+      "subcategory": "Fitness",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "recreation.playground_unit",
+      "name": "Children's play unit",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "recreation.slide",
+      "name": "Slide",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "recreation.swing",
+      "name": "Swing",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "swing"
+    },
+    {
+      "id": "recreation.climbing_structure",
+      "name": "Climbing structure",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "recreation.trampoline",
+      "name": "In-ground trampoline",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "recreation.zip_line",
+      "name": "Zip-line installation",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "cable_line"
+    },
+    {
+      "id": "recreation.table_tennis",
+      "name": "Outdoor table tennis",
+      "category": "furniture",
+      "subcategory": "Sports",
+      "builder": "table"
+    },
+    {
+      "id": "recreation.basketball_hoop",
+      "name": "Basketball hoop",
+      "category": "furniture",
+      "subcategory": "Sports",
+      "builder": "sign_post"
+    },
+    {
+      "id": "recreation.chess_table",
+      "name": "Outdoor chess table",
+      "category": "furniture",
+      "subcategory": "Sports",
+      "builder": "table"
+    },
+    {
+      "id": "recreation.platform",
+      "name": "Recreational platform",
+      "category": "furniture",
+      "subcategory": "Sports",
+      "builder": "slab"
+    },
+    {
+      "id": "recreation.safety_zone",
+      "name": "Playground safety envelope",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "zone"
+    },
+    {
+      "id": "sustainability.solar_array",
+      "name": "Ground-mounted solar array",
+      "category": "sustainability",
+      "subcategory": "Solar",
+      "builder": "solar_array"
+    },
+    {
+      "id": "sustainability.inverter",
+      "name": "Inverter",
+      "category": "sustainability",
+      "subcategory": "Solar",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.battery_cabinet",
+      "name": "Battery storage cabinet",
+      "category": "sustainability",
+      "subcategory": "Storage",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.ev_charger_pedestal",
+      "name": "EV charging station (pedestal)",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.ev_charger_wallbox",
+      "name": "EV charger (wallbox)",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.heat_pump",
+      "name": "Heat pump (outdoor unit)",
+      "category": "sustainability",
+      "subcategory": "Technical units",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.outdoor_unit",
+      "name": "Outdoor technical unit",
+      "category": "sustainability",
+      "subcategory": "Technical units",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.wind_turbine",
+      "name": "Vertical-axis wind turbine",
+      "category": "sustainability",
+      "subcategory": "Wind",
+      "builder": "vawt"
+    },
+    {
+      "id": "sustainability.rainwater_harvesting",
+      "name": "Rainwater harvesting tank",
+      "category": "sustainability",
+      "subcategory": "Water",
+      "builder": "tank"
+    },
+    {
+      "id": "sustainability.greywater_unit",
+      "name": "Greywater treatment unit",
+      "category": "sustainability",
+      "subcategory": "Water",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.compost_station",
+      "name": "Composting station",
+      "category": "sustainability",
+      "subcategory": "Waste",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.energy_cabinet",
+      "name": "Energy monitoring cabinet",
+      "category": "sustainability",
+      "subcategory": "Technical units",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "sustainability.suds_crate",
+      "name": "SuDS attenuation unit",
+      "category": "sustainability",
+      "subcategory": "Water",
+      "builder": "tank"
+    },
+    {
+      "id": "climate.misting_line",
+      "name": "Misting system line",
+      "category": "climate",
+      "subcategory": "Cooling",
+      "builder": "pipe"
+    },
+    {
+      "id": "climate.infrared_heater",
+      "name": "Infrared heater (mounted)",
+      "category": "climate",
+      "subcategory": "Heating",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "climate.patio_heater",
+      "name": "Patio heater (freestanding)",
+      "category": "climate",
+      "subcategory": "Heating",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "climate.heated_zone",
+      "name": "Heated terrace zone",
+      "category": "climate",
+      "subcategory": "Heating",
+      "builder": "zone"
+    },
+    {
+      "id": "climate.cooling_unit",
+      "name": "Outdoor cooling unit",
+      "category": "climate",
+      "subcategory": "Cooling",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "climate.evaporative_cooler",
+      "name": "Evaporative cooling installation",
+      "category": "climate",
+      "subcategory": "Cooling",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "climate.shade_sail",
+      "name": "Shade sail",
+      "category": "climate",
+      "subcategory": "Shading",
+      "builder": "sail"
+    },
+    {
+      "id": "climate.awning",
+      "name": "Retractable awning",
+      "category": "climate",
+      "subcategory": "Shading",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "climate.wind_screen",
+      "name": "Wind screen",
+      "category": "climate",
+      "subcategory": "Shading",
+      "builder": "fence"
+    },
+    {
+      "id": "climate.ventilation_unit",
+      "name": "Outdoor ventilation equipment",
+      "category": "climate",
+      "subcategory": "Ventilation",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "climate.comfort_zone",
+      "name": "Thermal comfort equipment zone",
+      "category": "climate",
+      "subcategory": "Zones",
+      "builder": "zone"
+    },
+    {
+      "id": "decorative.sculpture",
+      "name": "Sculpture (placeholder or custom asset)",
+      "category": "decorative",
+      "subcategory": "Art",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "decorative.public_art",
+      "name": "Public art installation",
+      "category": "decorative",
+      "subcategory": "Art",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "decorative.decorative_wall",
+      "name": "Decorative wall",
+      "category": "decorative",
+      "subcategory": "Walls and screens",
+      "builder": "wall"
+    },
+    {
+      "id": "decorative.mural",
+      "name": "Mural (mapped surface)",
+      "category": "decorative",
+      "subcategory": "Art",
+      "builder": "wall"
+    },
+    {
+      "id": "decorative.feature_planter",
+      "name": "Feature planter",
+      "category": "decorative",
+      "subcategory": "Planters",
+      "builder": "planter"
+    },
+    {
+      "id": "decorative.boulder",
+      "name": "Decorative stone / boulder",
+      "category": "decorative",
+      "subcategory": "Stones",
+      "builder": "boulder"
+    },
+    {
+      "id": "decorative.focal_point",
+      "name": "Landscape focal point",
+      "category": "decorative",
+      "subcategory": "Art",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "decorative.light_installation",
+      "name": "Decorative lighting installation",
+      "category": "decorative",
+      "subcategory": "Lighting art",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "decorative.entrance_monument",
+      "name": "Entrance monument",
+      "category": "decorative",
+      "subcategory": "Monuments",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "decorative.screen",
+      "name": "Decorative screen",
+      "category": "decorative",
+      "subcategory": "Walls and screens",
+      "builder": "fence"
+    },
+    {
+      "id": "decorative.signage_structure",
+      "name": "Signage structure",
+      "category": "decorative",
+      "subcategory": "Monuments",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.site_board",
+      "name": "Site information board",
+      "category": "information",
+      "subcategory": "Information",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.qr_panel",
+      "name": "QR-code information panel",
+      "category": "information",
+      "subcategory": "Information",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.directional_sign",
+      "name": "Directional sign",
+      "category": "information",
+      "subcategory": "Wayfinding",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.wayfinding_sign",
+      "name": "Wayfinding sign (monolith)",
+      "category": "information",
+      "subcategory": "Wayfinding",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.building_sign",
+      "name": "Building identification sign",
+      "category": "information",
+      "subcategory": "Wayfinding",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.accessibility_sign",
+      "name": "Accessibility signage",
+      "category": "information",
+      "subcategory": "Wayfinding",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.fire_info_point",
+      "name": "Fire-safety information point",
+      "category": "information",
+      "subcategory": "Safety",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.digital_kiosk",
+      "name": "Digital kiosk",
+      "category": "information",
+      "subcategory": "Information",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.cctv_camera",
+      "name": "CCTV camera (pole)",
+      "category": "information",
+      "subcategory": "Security",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "info.security_cabinet",
+      "name": "Security equipment cabinet",
+      "category": "information",
+      "subcategory": "Security",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.access_reader",
+      "name": "Access-control reader (post)",
+      "category": "information",
+      "subcategory": "Security",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.intercom",
+      "name": "Intercom (post)",
+      "category": "information",
+      "subcategory": "Communication",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.speaker",
+      "name": "Outdoor speaker / PA (pole)",
+      "category": "information",
+      "subcategory": "Communication",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "info.wifi_ap",
+      "name": "Wi-Fi access point (pole)",
+      "category": "information",
+      "subcategory": "Communication",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "info.emergency_call_point",
+      "name": "Emergency call point",
+      "category": "information",
+      "subcategory": "Safety",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "info.cable_route",
+      "name": "Communication cable route",
+      "category": "information",
+      "subcategory": "Communication",
+      "builder": "pipe"
+    }
+  ],
+  "categories": [
+    {
+      "id": "buildings",
+      "name": "Buildings & References",
+      "panel": "Site Analysis",
+      "modelGroup": "buildings"
+    },
+    {
+      "id": "site",
+      "name": "Site",
+      "panel": "Site Analysis",
+      "modelGroup": "annotations"
+    },
+    {
+      "id": "surfaces",
+      "name": "Surfaces",
+      "panel": "Surfaces",
+      "modelGroup": "surfaces"
+    },
+    {
+      "id": "roads",
+      "name": "Roads & Mobility",
+      "panel": "Roads & Mobility",
+      "modelGroup": "roads"
+    },
+    {
+      "id": "cycling",
+      "name": "Cycling Infrastructure",
+      "panel": "Cycling Infrastructure",
+      "modelGroup": "pedestrian_cycling"
+    },
+    {
+      "id": "water",
+      "name": "Water & Drainage",
+      "panel": "Water & Drainage",
+      "modelGroup": "water"
+    },
+    {
+      "id": "landscape",
+      "name": "Landscape",
+      "panel": "Landscape",
+      "modelGroup": "planting"
+    },
+    {
+      "id": "utilities",
+      "name": "Utilities",
+      "panel": "Utilities",
+      "modelGroup": "underground"
+    },
+    {
+      "id": "lighting",
+      "name": "Lighting",
+      "panel": "Lighting",
+      "modelGroup": "lighting"
+    },
+    {
+      "id": "walls",
+      "name": "Walls & Fences",
+      "panel": "Walls & Fences",
+      "modelGroup": "walls"
+    },
+    {
+      "id": "structures",
+      "name": "Structures",
+      "panel": "Structures",
+      "modelGroup": "canopies"
+    },
+    {
+      "id": "furniture",
+      "name": "Furniture & Recreation",
+      "panel": "Furniture & Recreation",
+      "modelGroup": "furniture"
+    },
+    {
+      "id": "sustainability",
+      "name": "Sustainability",
+      "panel": "Sustainability",
+      "modelGroup": "sustainability"
+    },
+    {
+      "id": "climate",
+      "name": "Climate Systems",
+      "panel": "Climate Systems",
+      "modelGroup": "climate"
+    },
+    {
+      "id": "decorative",
+      "name": "Decorative Elements",
+      "panel": "Decorative Elements",
+      "modelGroup": "decorative"
+    },
+    {
+      "id": "information",
+      "name": "Information Systems",
+      "panel": "Information Systems",
+      "modelGroup": "information"
+    }
+  ],
+  "materials": [
+    {
+      "key": "concrete_paver",
+      "name": "Concrete paving",
+      "color": [
+        178,
+        174,
+        166
+      ]
+    },
+    {
+      "key": "natural_stone",
+      "name": "Natural stone paving",
+      "color": [
+        196,
+        186,
+        168
+      ]
+    },
+    {
+      "key": "porcelain",
+      "name": "Porcelain tiles",
+      "color": [
+        208,
+        202,
+        192
+      ]
+    },
+    {
+      "key": "asphalt",
+      "name": "Asphalt",
+      "color": [
+        72,
+        72,
+        74
+      ]
+    },
+    {
+      "key": "asphalt_red",
+      "name": "Coloured asphalt (cycle)",
+      "color": [
+        150,
+        64,
+        52
+      ]
+    },
+    {
+      "key": "permeable_paver",
+      "name": "Permeable paving",
+      "color": [
+        160,
+        150,
+        136
+      ]
+    },
+    {
+      "key": "grass_grid",
+      "name": "Grass grid",
+      "color": [
+        118,
+        146,
+        92
+      ]
+    },
+    {
+      "key": "gravel",
+      "name": "Gravel / aggregate",
+      "color": [
+        188,
+        178,
+        158
+      ]
+    },
+    {
+      "key": "rubber",
+      "name": "Rubber safety surface",
+      "color": [
+        176,
+        72,
+        58
+      ]
+    },
+    {
+      "key": "tactile",
+      "name": "Tactile paving",
+      "color": [
+        222,
+        186,
+        54
+      ]
+    },
+    {
+      "key": "soil",
+      "name": "Planting soil",
+      "color": [
+        102,
+        80,
+        60
+      ]
+    },
+    {
+      "key": "mulch",
+      "name": "Bark mulch",
+      "color": [
+        122,
+        88,
+        62
+      ]
+    },
+    {
+      "key": "sand",
+      "name": "Play sand",
+      "color": [
+        226,
+        208,
+        166
+      ]
+    },
+    {
+      "key": "timber_deck",
+      "name": "Timber decking",
+      "color": [
+        160,
+        118,
+        80
+      ]
+    },
+    {
+      "key": "timber",
+      "name": "Timber",
+      "color": [
+        150,
+        108,
+        72
+      ]
+    },
+    {
+      "key": "grass",
+      "name": "Lawn",
+      "color": [
+        104,
+        152,
+        72
+      ]
+    },
+    {
+      "key": "meadow",
+      "name": "Meadow",
+      "color": [
+        146,
+        166,
+        92
+      ]
+    },
+    {
+      "key": "sedum",
+      "name": "Green roof (sedum)",
+      "color": [
+        128,
+        150,
+        84
+      ]
+    },
+    {
+      "key": "planting_mixed",
+      "name": "Planting (mixed)",
+      "color": [
+        86,
+        132,
+        70
+      ]
+    },
+    {
+      "key": "planting_flowers",
+      "name": "Planting (flowering)",
+      "color": [
+        176,
+        112,
+        150
+      ]
+    },
+    {
+      "key": "foliage",
+      "name": "Foliage (deciduous)",
+      "color": [
+        94,
+        140,
+        70
+      ],
+      "alpha": 0.92
+    },
+    {
+      "key": "foliage_evergreen",
+      "name": "Foliage (evergreen)",
+      "color": [
+        52,
+        96,
+        60
+      ],
+      "alpha": 0.95
+    },
+    {
+      "key": "foliage_fruit",
+      "name": "Foliage (fruit tree)",
+      "color": [
+        120,
+        150,
+        70
+      ],
+      "alpha": 0.92
+    },
+    {
+      "key": "bark",
+      "name": "Bark",
+      "color": [
+        96,
+        74,
+        56
+      ]
+    },
+    {
+      "key": "water",
+      "name": "Water",
+      "color": [
+        96,
+        160,
+        206
+      ],
+      "alpha": 0.55
+    },
+    {
+      "key": "pool_finish",
+      "name": "Pool finish",
+      "color": [
+        176,
+        214,
+        226
+      ]
+    },
+    {
+      "key": "pond_liner",
+      "name": "Pond liner",
+      "color": [
+        54,
+        58,
+        56
+      ]
+    },
+    {
+      "key": "concrete",
+      "name": "Concrete",
+      "color": [
+        170,
+        170,
+        166
+      ]
+    },
+    {
+      "key": "concrete_precast",
+      "name": "Precast concrete",
+      "color": [
+        150,
+        150,
+        146
+      ]
+    },
+    {
+      "key": "stone_wall",
+      "name": "Stone masonry",
+      "color": [
+        162,
+        150,
+        132
+      ]
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "color": [
+        160,
+        92,
+        70
+      ]
+    },
+    {
+      "key": "gabion",
+      "name": "Gabion",
+      "color": [
+        140,
+        132,
+        118
+      ]
+    },
+    {
+      "key": "steel_galv",
+      "name": "Galvanised steel",
+      "color": [
+        168,
+        172,
+        176
+      ]
+    },
+    {
+      "key": "steel_dark",
+      "name": "Powder-coated steel (dark)",
+      "color": [
+        58,
+        60,
+        64
+      ]
+    },
+    {
+      "key": "aluminium",
+      "name": "Aluminium",
+      "color": [
+        192,
+        196,
+        200
+      ]
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "color": [
+        190,
+        220,
+        230
+      ],
+      "alpha": 0.35
+    },
+    {
+      "key": "fabric",
+      "name": "Fabric membrane",
+      "color": [
+        236,
+        234,
+        226
+      ],
+      "alpha": 0.9
+    },
+    {
+      "key": "solar_pv",
+      "name": "Solar PV module",
+      "color": [
+        34,
+        46,
+        78
+      ]
+    },
+    {
+      "key": "plastic_dark",
+      "name": "Plastic (dark)",
+      "color": [
+        52,
+        54,
+        56
+      ]
+    },
+    {
+      "key": "plastic_green",
+      "name": "Plastic (green)",
+      "color": [
+        60,
+        110,
+        70
+      ]
+    },
+    {
+      "key": "hdpe",
+      "name": "HDPE",
+      "color": [
+        40,
+        40,
+        42
+      ]
+    },
+    {
+      "key": "grate_steel",
+      "name": "Steel grating",
+      "color": [
+        90,
+        92,
+        96
+      ]
+    },
+    {
+      "key": "cast_iron",
+      "name": "Cast iron cover",
+      "color": [
+        70,
+        70,
+        72
+      ]
+    },
+    {
+      "key": "line_paint_white",
+      "name": "Line paint (white)",
+      "color": [
+        240,
+        240,
+        236
+      ]
+    },
+    {
+      "key": "line_paint_yellow",
+      "name": "Line paint (yellow)",
+      "color": [
+        236,
+        196,
+        40
+      ]
+    },
+    {
+      "key": "line_paint_blue",
+      "name": "Line paint (blue)",
+      "color": [
+        40,
+        96,
+        180
+      ]
+    },
+    {
+      "key": "marking_green",
+      "name": "Cycle box (green)",
+      "color": [
+        70,
+        150,
+        90
+      ]
+    },
+    {
+      "key": "acrylic_court",
+      "name": "Sports court acrylic",
+      "color": [
+        64,
+        112,
+        150
+      ]
+    },
+    {
+      "key": "sign_plate",
+      "name": "Sign plate",
+      "color": [
+        232,
+        232,
+        228
+      ]
+    },
+    {
+      "key": "luminaire",
+      "name": "Luminaire",
+      "color": [
+        250,
+        244,
+        210
+      ]
+    },
+    {
+      "key": "building_massing",
+      "name": "Building massing",
+      "color": [
+        222,
+        220,
+        214
+      ]
+    },
+    {
+      "key": "zone_safety",
+      "name": "Safety zone",
+      "color": [
+        230,
+        80,
+        60
+      ],
+      "alpha": 0.18
+    },
+    {
+      "key": "zone_service",
+      "name": "Service / maintenance zone",
+      "color": [
+        80,
+        140,
+        230
+      ],
+      "alpha": 0.18
+    },
+    {
+      "key": "zone_excavation",
+      "name": "Excavation envelope",
+      "color": [
+        170,
+        120,
+        60
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_coverage",
+      "name": "Illustrative coverage",
+      "color": [
+        250,
+        220,
+        90
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_root",
+      "name": "Root protection zone",
+      "color": [
+        120,
+        170,
+        80
+      ],
+      "alpha": 0.18
+    },
+    {
+      "key": "zone_heat",
+      "name": "Heated / comfort zone",
+      "color": [
+        240,
+        140,
+        60
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_generic",
+      "name": "Zone",
+      "color": [
+        150,
+        150,
+        150
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "default",
+      "name": "Default",
+      "color": [
+        200,
+        200,
+        200
+      ]
+    }
+  ],
+  "settings": {
+    "lod": "standard",
+    "modifiedPolicy": "keep",
+    "deletedPolicy": "mark",
+    "createScenes": true,
+    "setNorth": true,
+    "componentMappings": {
+      "furniture.bench": "C:/Library/Bench Model A.skp"
+    },
+    "favorites": [
+      "landscape.tree_deciduous"
+    ]
+  },
+  "inModel": {
+    "furniture.bench": 4,
+    "landscape.tree_deciduous": 14
+  }
+}

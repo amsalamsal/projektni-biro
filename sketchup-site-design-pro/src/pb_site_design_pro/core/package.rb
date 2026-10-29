@@ -82,9 +82,12 @@ module ProjektniBiro
         v.nil? ? fallback : v.to_s
       end
 
+      def base_name
+        @name.to_s.empty? ? (@type_def ? @type_def.name : @type_id) : @name
+      end
+
       def display_name
-        base = @name.to_s.empty? ? (@type_def ? @type_def.name : @type_id) : @name
-        @label.to_s.empty? ? base : "#{@label} #{base}"
+        @label.to_s.empty? ? base_name : "#{@label} #{base_name}"
       end
 
       # Returns a copy with replaced parameters (used for SketchUp-side parameter edits).
@@ -317,6 +320,20 @@ module ProjektniBiro
           { kind: 'polygon', outer: outer, holes: (ge['holes'] || []).map { |h| ring(h) } }
         else
           raise PackageError, "unknown geometry kind '#{ge['kind']}'"
+        end
+      end
+
+      # Schema-format (string-keyed) geometry Hash, the inverse of parse_geometry.
+      def geometry_json(g)
+        ring = lambda do |r|
+          h = { 'vertices' => r[:vertices] }
+          h['bulges'] = r[:bulges] if r[:bulges]
+          h
+        end
+        case g[:kind]
+        when 'point' then { 'kind' => 'point', 'position' => g[:position], 'rotation' => g[:rotation] }
+        when 'path' then ring.call(g).merge('kind' => 'path', 'closed' => g[:closed])
+        else { 'kind' => 'polygon', 'outer' => ring.call(g[:outer]), 'holes' => g[:holes].map { |h| ring.call(h) } }
         end
       end
 

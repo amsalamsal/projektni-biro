@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Site Design Pro - Element properties</title>
+<link rel="stylesheet" href="sdp.css">
+</head>
+<body>
+<header>
+  <h1 id="title">Element</h1>
+  <div class="sub" id="subtitle"></div>
+</header>
+<main>
+  <div class="messages" id="messages"></div>
+  <div class="panel" id="status"></div>
+  <div class="tabs">
+    <button class="active" data-for="params">Parameters</button>
+    <button data-for="props">Properties</button>
+  </div>
+  <div data-tab="params" class="params panel" id="params"></div>
+  <div data-tab="props" class="hidden panel"><table id="props"></table></div>
+</main>
+<footer>
+  <span class="note">Edits are kept in SketchUp and can be sent to AutoCAD with "Export changes".</span>
+  <button id="selectType">Select same type</button>
+  <button id="revert">Revert edits</button>
+  <button id="apply" class="primary">Apply</button>
+</footer>
+<script src="sdp.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = sdp.$, esc = sdp.esc, data = null;
+
+  function input(p) {
+    var v = p.value === null || p.value === undefined ? '' : p.value;
+    var attrs = ' data-key="' + esc(p.key) + '" data-type="' + esc(p.type) + '"';
+    switch (p.type) {
+      case 'bool':
+        return '<input type="checkbox"' + attrs + (v === true ? ' checked' : '') + '>';
+      case 'enum':
+        return '<select' + attrs + '>' + (p.options || []).map(function (o) {
+          return '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>';
+        }).join('') + '</select>';
+      case 'material':
+        return '<select' + attrs + '>' + (data.materials || []).map(function (m) {
+          return '<option value="' + esc(m.key) + '"' + (m.key === v ? ' selected' : '') + '>' + esc(m.name) + '</option>';
+        }).join('') + '</select>';
+      case 'length': case 'number': case 'integer': case 'angle':
+        return '<input type="number" step="any"' + attrs + ' value="' + esc(v) + '"' +
+          (p.min !== undefined && p.min !== null ? ' min="' + p.min + '"' : '') + (p.max !== undefined && p.max !== null ? ' max="' + p.max + '"' : '') + '>';
+      default:
+        return '<input type="text"' + attrs + ' value="' + esc(v) + '">';
+    }
+  }
+
+  function unit(p) {
+    if (p.type === 'length') { return 'm'; }
+    if (p.type === 'angle') { return 'deg'; }
+    return p.unit || '';
+  }
+
+  sdp.render = function (d) {
+    data = d;
+    $('#title').textContent = (d.label ? d.label + ' - ' : '') + (d.name || d.typeName);
+    $('#subtitle').textContent = d.typeName + ' (' + d.type + ')  |  ' + d.id;
+    var badges = [];
+    if (d.locallyModified) { badges.push(sdp.badge('keep_local', 'Modified in SketchUp')); }
+    if (d.deletedInSource) { badges.push(sdp.badge('mark_deleted', 'Deleted in AutoCAD')); }
+    $('#status').innerHTML = (badges.join(' ') || sdp.badge('create', 'In sync with last import')) +
+      '<div class="muted" style="margin-top:6px">Category: ' + esc(d.category) + ' &nbsp; Revision: ' + esc(d.revision) + ' &nbsp; Imported: ' + esc(d.importedAt) + '</div>';
+    var groups = {};
+    (d.parameters || []).forEach(function (p) { (groups[p.group || 'General'] = groups[p.group || 'General'] || []).push(p); });
+    $('#params').innerHTML = Object.keys(groups).map(function (g) {
+      return '<h3>' + esc(g) + '</h3>' + groups[g].map(function (p) {
+        return '<div class="param' + (p.edited ? ' edited' : '') + '"><label>' + esc(p.label || p.key) + '</label>' + input(p) +
+          '<span class="unit">' + esc(unit(p)) + '</span></div>';
+      }).join('');
+    }).join('') || '<div class="empty">No parameters.</div>';
+    var props = d.properties || {};
+    $('#props').innerHTML = Object.keys(props).length ? Object.keys(props).map(function (k) {
+      return '<tr><th style="width:180px">' + esc(k) + '</th><td>' + esc(props[k]) + '</td></tr>';
+    }).join('') : '<tr><td class="empty">No descriptive properties. Edit them in AutoCAD.</td></tr>';
+    $('#messages').innerHTML = (d.messages || []).map(function (m) {
+      return '<div class="' + esc(m.severity) + '">' + esc(m.message) + '</div>';
+    }).join('');
+  };
+
+  function edits() {
+    var out = {};
+    sdp.$$('[data-key]').forEach(function (el) {
+      var key = el.getAttribute('data-key'), type = el.getAttribute('data-type');
+      var p = data.parameters.filter(function (x) { return x.key === key; })[0];
+      var v;
+      if (type === 'bool') { v = el.checked; }
+      else if (['length', 'number', 'integer', 'angle'].indexOf(type) >= 0) {
+        if (el.value === '') { return; }
+        v = Number(el.value);
+      } else { v = el.value; }
+      if (p && p.value !== v) { out[key] = v; }
+    });
+    return out;
+  }
+
+  sdp.tabs(document);
+  $('#apply').addEventListener('click', function () { sdp.call('apply', { edits: edits() }); });
+  $('#revert').addEventListener('click', function () { sdp.call('revert'); });
+  $('#selectType').addEventListener('click', function () { sdp.call('selectType'); });
+})();
+</script>
+</body>
+</html>

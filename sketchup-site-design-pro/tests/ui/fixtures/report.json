@@ -1,0 +1,29 @@
+{
+  "mode": "report",
+  "report": {
+    "title": "Site Design Pro import",
+    "package": "/projects/sample/residential-complex.sdpkg",
+    "startedAt": "2026-10-29T13:26:22Z",
+    "durationSeconds": 3.4,
+    "stats": {
+      "created": 139,
+      "faces": 4210,
+      "instances": 332,
+      "seconds": 3.4
+    },
+    "errors": 0,
+    "warnings": 0,
+    "reviews": 1,
+    "issues": [
+      {
+        "severity": "review",
+        "code": "SDP-R001",
+        "elementId": "8acf4b54-319b-4152-a585-1253aa9e18a3",
+        "label": "UW-001",
+        "message": "Source of dimensions not defined.",
+        "resolution": "Enter manufacturer data."
+      }
+    ],
+    "disclaimer": "Automated checks support design coordination only. They use values entered by the user and are not certified regulatory compliance checks."
+  }
+}

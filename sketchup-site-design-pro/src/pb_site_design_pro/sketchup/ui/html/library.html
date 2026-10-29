@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Site Design Pro - Library and settings</title>
+<link rel="stylesheet" href="sdp.css">
+</head>
+<body>
+<header>
+  <h1>Library and settings</h1>
+  <div class="sub">Element types, component mappings, materials and import preferences.</div>
+</header>
+<main>
+  <div class="tabs">
+    <button class="active" data-for="types">Element types</button>
+    <button data-for="materials">Materials</button>
+    <button data-for="settings">Settings</button>
+  </div>
+  <section data-tab="types">
+    <div class="row" style="margin-bottom:6px">
+      <input type="search" id="search" placeholder="Search types" style="flex:1">
+      <select id="category"><option value="">All categories</option></select>
+      <label><input type="checkbox" id="onlyModel"> In this model</label>
+      <label><input type="checkbox" id="onlyFav"> Favourites</label>
+    </div>
+    <div class="scroll"><table><thead><tr><th></th><th>Type</th><th>Builder</th><th>In model</th><th>3D representation</th><th></th></tr></thead><tbody id="types"></tbody></table></div>
+  </section>
+  <section data-tab="materials" class="hidden">
+    <div class="scroll"><table><thead><tr><th></th><th>Material</th><th>Key</th><th>Opacity</th></tr></thead><tbody id="materials"></tbody></table></div>
+  </section>
+  <section data-tab="settings" class="hidden">
+    <div class="panel">
+      <div class="row">
+        <label class="field">Default level of detail
+          <select id="lod"><option value="conceptual">Conceptual</option><option value="standard">Standard</option><option value="presentation">Presentation</option></select>
+        </label>
+        <label class="field">Objects edited in SketchUp
+          <select id="modifiedPolicy"><option value="keep">Keep SketchUp edits, report conflict</option><option value="overwrite">Overwrite with AutoCAD version</option></select>
+        </label>
+        <label class="field">Objects removed in AutoCAD
+          <select id="deletedPolicy"><option value="mark">Move to hidden tag</option><option value="delete">Delete</option><option value="keep">Keep</option></select>
+        </label>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label><input type="checkbox" id="createScenes"> Create review scenes after import</label>
+        <label><input type="checkbox" id="setNorth"> Set solar north from the package</label>
+      </div>
+      <div style="margin-top:12px"><button class="primary" id="saveSettings">Save settings</button></div>
+    </div>
+  </section>
+</main>
+<footer>
+  <span class="note" id="note"></span>
+  <button id="close">Close</button>
+</footer>
+<script src="sdp.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = sdp.$, esc = sdp.esc, data = null;
+
+  function favs() { return (data.settings.favorites || []); }
+
+  function renderTypes() {
+    var q = $('#search').value.toLowerCase(), cat = $('#category').value;
+    var maps = data.settings.componentMappings || {}, inModel = data.inModel || {}, f = favs();
+    var rows = data.types.filter(function (t) {
+      return (!cat || t.category === cat) && (!q || (t.name + ' ' + t.id + ' ' + t.subcategory).toLowerCase().indexOf(q) >= 0) &&
+        (!$('#onlyModel').checked || inModel[t.id]) && (!$('#onlyFav').checked || f.indexOf(t.id) >= 0);
+    });
+    $('#types').innerHTML = rows.map(function (t) {
+      var fav = f.indexOf(t.id) >= 0, map = maps[t.id];
+      return '<tr><td><button class="small" data-fav="' + esc(t.id) + '" title="Favourite">' + (fav ? '&#9733;' : '&#9734;') + '</button></td>' +
+        '<td>' + esc(t.name) + '<div class="mono">' + esc(t.id) + '</div></td><td class="mono">' + esc(t.builder) + '</td>' +
+        '<td>' + (inModel[t.id] || '') + '</td><td>' + (map ? esc(map.split(/[\\/]/).pop()) + '<div class="mono">custom component</div>' : '<span class="muted">parametric</span>') + '</td>' +
+        '<td style="white-space:nowrap"><button class="small" data-map="' + esc(t.id) + '">Assign component...</button>' +
+        (map ? ' <button class="small" data-clear="' + esc(t.id) + '">Clear</button>' : '') +
+        (inModel[t.id] ? ' <button class="small" data-select="' + esc(t.id) + '">Select</button>' : '') + '</td></tr>';
+    }).join('') || '<tr><td colspan="6" class="empty">No matching types.</td></tr>';
+    $('#note').textContent = rows.length + ' of ' + data.types.length + ' types';
+  }
+
+  sdp.render = function (d) {
+    data = d;
+    var cat = $('#category').value;
+    $('#category').innerHTML = '<option value="">All categories</option>' + d.categories.map(function (c) {
+      return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
+    }).join('');
+    $('#category').value = cat;
+    renderTypes();
+    $('#materials').innerHTML = d.materials.map(function (m) {
+      return '<tr><td><span class="swatch" style="background:rgb(' + m.color.join(',') + ');opacity:' + (m.alpha || 1) + '"></span></td><td>' +
+        esc(m.name) + '</td><td class="mono">' + esc(m.key) + '</td><td>' + Math.round((m.alpha || 1) * 100) + '%</td></tr>';
+    }).join('');
+    var s = d.settings;
+    ['lod', 'modifiedPolicy', 'deletedPolicy'].forEach(function (k) { $('#' + k).value = s[k]; });
+    $('#createScenes').checked = !!s.createScenes;
+    $('#setNorth').checked = !!s.setNorth;
+  };
+
+  sdp.tabs(document);
+  ['search', 'category', 'onlyModel', 'onlyFav'].forEach(function (id) {
+    $('#' + id).addEventListener(id === 'search' ? 'input' : 'change', renderTypes);
+  });
+  $('#types').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) { return; }
+    if (b.dataset.map) { sdp.call('mapComponent', { type: b.dataset.map }); }
+    if (b.dataset.clear) { sdp.call('clearComponent', { type: b.dataset.clear }); }
+    if (b.dataset.select) { sdp.call('selectType', { type: b.dataset.select }); }
+    if (b.dataset.fav) {
+      var f = favs().slice(), i = f.indexOf(b.dataset.fav);
+      if (i >= 0) { f.splice(i, 1); } else { f.push(b.dataset.fav); }
+      sdp.call('saveSettings', { favorites: f });
+    }
+  });
+  $('#saveSettings').addEventListener('click', function () {
+    sdp.call('saveSettings', { lod: $('#lod').value, modifiedPolicy: $('#modifiedPolicy').value, deletedPolicy: $('#deletedPolicy').value,
+      createScenes: $('#createScenes').checked, setNorth: $('#setNorth').checked });
+  });
+  $('#close').addEventListener('click', function () { sdp.call('close'); });
+})();
+</script>
+</body>
+</html>

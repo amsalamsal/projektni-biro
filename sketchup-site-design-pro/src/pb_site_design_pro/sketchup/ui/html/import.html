@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Site Design Pro - Import</title>
+<link rel="stylesheet" href="sdp.css">
+</head>
+<body>
+<header>
+  <h1 id="title">Site Design Pro</h1>
+  <div class="sub" id="subtitle">Loading package...</div>
+</header>
+<main>
+  <div class="cards" id="cards"></div>
+
+  <section id="preview" class="hidden">
+    <div class="panel">
+      <div class="row">
+        <label class="field">Level of detail
+          <select id="lod">
+            <option value="conceptual">Conceptual (lightweight)</option>
+            <option value="standard">Standard</option>
+            <option value="presentation">Presentation (detailed)</option>
+          </select>
+        </label>
+        <label class="field">Objects edited in SketchUp
+          <select id="modifiedPolicy">
+            <option value="keep">Keep SketchUp edits, report conflict</option>
+            <option value="overwrite">Overwrite with AutoCAD version</option>
+          </select>
+        </label>
+        <label class="field">Objects removed in AutoCAD
+          <select id="deletedPolicy">
+            <option value="mark">Move to hidden "Deleted in source" tag</option>
+            <option value="delete">Delete from the model</option>
+            <option value="keep">Keep unchanged</option>
+          </select>
+        </label>
+        <label class="field" style="min-width:auto"><span>&nbsp;</span>
+          <span><input type="checkbox" id="createScenes"> Create review scenes</span>
+        </label>
+      </div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="active" data-for="changes">Planned changes</button>
+      <button data-for="validation">Validation</button>
+      <button data-for="package">Package</button>
+    </div>
+    <div data-tab="changes">
+      <div class="row" style="margin-bottom:6px">
+        <input type="search" id="filter" placeholder="Filter by label, name or type" style="flex:1">
+        <select id="kindFilter"><option value="">All changes</option></select>
+      </div>
+      <div class="scroll"><table><thead><tr><th>Change</th><th>No.</th><th>Element</th><th>Type</th><th>Reason</th></tr></thead><tbody id="actions"></tbody></table></div>
+    </div>
+    <div data-tab="validation" class="hidden"><div class="scroll"><table><thead><tr><th>Severity</th><th>Code</th><th>Element</th><th>Message / resolution</th></tr></thead><tbody id="issues"></tbody></table></div></div>
+    <div data-tab="package" class="hidden"><div class="panel"><table id="pkgInfo"></table></div></div>
+  </section>
+
+  <section id="report" class="hidden">
+    <div class="panel" id="reportStats"></div>
+    <div class="scroll"><table><thead><tr><th>Severity</th><th>Code</th><th>Element</th><th>Message / resolution</th></tr></thead><tbody id="reportIssues"></tbody></table></div>
+    <div class="disclaimer" id="disclaimer"></div>
+  </section>
+</main>
+<footer>
+  <span class="note" id="note"></span>
+  <button id="save" class="hidden">Save report...</button>
+  <button id="close">Close</button>
+  <button id="apply" class="primary hidden">Import</button>
+</footer>
+<script src="sdp.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = sdp.$, esc = sdp.esc, state = null;
+  var LABELS = { create: 'New', update: 'Changed', restore: 'Restored', conflict: 'Conflict', mark_deleted: 'Deleted (marked)',
+    'delete': 'Deleted', keep_orphan: 'Deleted (kept)', keep_local: 'SketchUp edit kept', detach_duplicate: 'Copy detached',
+    skip: 'Not reconstructable', unchanged: 'Unchanged' };
+
+  function options() {
+    return { lod: $('#lod').value, modifiedPolicy: $('#modifiedPolicy').value, deletedPolicy: $('#deletedPolicy').value,
+      createScenes: $('#createScenes').checked };
+  }
+
+  function card(value, key, cls) {
+    return '<div class="card ' + (cls || '') + '"><div class="v">' + sdp.fmt(value, 0) + '</div><div class="k">' + esc(key) + '</div></div>';
+  }
+
+  function issueRows(issues) {
+    if (!issues.length) { return '<tr><td colspan="4" class="empty">No issues.</td></tr>'; }
+    return issues.map(function (i) {
+      return '<tr><td>' + sdp.badge(i.severity, i.severity) + '</td><td class="mono">' + esc(i.code) + '</td><td>' +
+        esc(i.label || '') + '<div class="mono">' + esc(i.elementId || '') + '</div></td><td>' + esc(i.message) +
+        (i.resolution ? '<div class="muted">' + esc(i.resolution) + '</div>' : '') + '</td></tr>';
+    }).join('');
+  }
+
+  function renderActions() {
+    var q = $('#filter').value.toLowerCase(), kind = $('#kindFilter').value;
+    var rows = state.plan.actions.filter(function (a) {
+      return (!kind || a.kind === kind) && (!q || [a.label, a.name, a.type].join(' ').toLowerCase().indexOf(q) >= 0);
+    });
+    $('#actions').innerHTML = rows.length ? rows.map(function (a) {
+      return '<tr><td>' + sdp.badge(a.kind, LABELS[a.kind] || a.kind) + '</td><td>' + esc(a.label || '') + '</td><td>' + esc(a.name || '') +
+        '<div class="mono">' + esc(a.id || '') + '</div></td><td class="mono">' + esc(a.type || '') + '</td><td class="muted">' + esc(a.reason || '') + '</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="empty">' + (state.plan.changes ? 'No matching changes.' : 'The model is up to date. Nothing to import.') + '</td></tr>';
+  }
+
+  function renderPreview(d) {
+    $('#preview').classList.remove('hidden');
+    $('#report').classList.add('hidden');
+    $('#apply').classList.remove('hidden');
+    $('#save').classList.add('hidden');
+    $('#title').textContent = 'Import: ' + (d.package.project.name || 'Site Design Pro package');
+    $('#subtitle').textContent = d.package.path;
+    var c = d.plan.counts;
+    $('#cards').innerHTML = card(d.package.elementCount, 'Elements') + card(c.create, 'New') + card(c.update + c.restore, 'Changed') +
+      card(c.conflict, 'Conflicts', c.conflict ? 'warning' : '') + card(c.mark_deleted + c['delete'] + c.keep_orphan, 'Removed in AutoCAD') +
+      card(d.validation.errors, 'Errors', d.validation.errors ? 'error' : '') + card(d.validation.warnings, 'Warnings', d.validation.warnings ? 'warning' : '') +
+      card(d.validation.reviews, 'Review items', d.validation.reviews ? 'review' : '');
+    ['lod', 'modifiedPolicy', 'deletedPolicy'].forEach(function (k) { $('#' + k).value = d.options[k]; });
+    $('#createScenes').checked = !!d.options.createScenes;
+    var kinds = Object.keys(c).filter(function (k) { return c[k] > 0 && k !== 'unchanged'; });
+    $('#kindFilter').innerHTML = '<option value="">All changes</option>' + kinds.map(function (k) {
+      return '<option value="' + k + '">' + esc(LABELS[k]) + ' (' + c[k] + ')</option>';
+    }).join('');
+    renderActions();
+    $('#issues').innerHTML = issueRows(d.validation.issues);
+    var p = d.package;
+    var info = [['Project', p.project.name + (p.project.number ? ' (' + p.project.number + ')' : '')], ['Package id', p.packageId],
+      ['Schema version', p.schemaVersion], ['Created (UTC)', p.created], ['Generator', (p.generator.application || '') + ' ' + (p.generator.version || '')],
+      ['Source units', p.units.sourceLengthUnit + ' (x' + p.units.sourceUnitsToMeters + ' to metres)'],
+      ['Project origin (m)', p.origin.map(function (v) { return sdp.fmt(v, 3); }).join(', ')], ['True north', sdp.fmt(p.trueNorth, 2) + ' deg'],
+      ['Coordinate system', p.crs || '-']].concat(p.groups.map(function (g) { return [g.group, g.count + ' elements']; }));
+    $('#pkgInfo').innerHTML = info.map(function (r) { return '<tr><th style="width:200px">' + esc(r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>'; }).join('');
+    $('#apply').disabled = !d.plan.changes;
+    $('#apply').textContent = d.plan.changes ? 'Import' : 'Up to date';
+    $('#note').textContent = d.plan.summary || '';
+  }
+
+  function renderReport(r) {
+    $('#preview').classList.add('hidden');
+    $('#report').classList.remove('hidden');
+    $('#apply').classList.add('hidden');
+    $('#save').classList.remove('hidden');
+    $('#title').textContent = r.title || 'Import report';
+    $('#subtitle').textContent = r['package'] || '';
+    var s = r.stats || {};
+    $('#cards').innerHTML = card(s.created || 0, 'Created') + card((s.updated || 0) + (s.restored || 0), 'Updated') +
+      card(s.conflicts || 0, 'Conflicts', s.conflicts ? 'warning' : '') + card((s.marked_deleted || 0) + (s.deleted || 0), 'Removed') +
+      card(s.unchanged || 0, 'Unchanged') + card(r.errors, 'Errors', r.errors ? 'error' : '') + card(r.warnings, 'Warnings', r.warnings ? 'warning' : '') +
+      card(r.reviews, 'Review items', r.reviews ? 'review' : '');
+    $('#reportStats').innerHTML = Object.keys(s).sort().map(function (k) { return '<span class="muted">' + esc(k) + ':</span> ' + esc(s[k]); }).join(' &nbsp; ');
+    $('#reportIssues').innerHTML = issueRows(r.issues || []);
+    $('#disclaimer').textContent = r.disclaimer || '';
+    $('#note').textContent = r.durationSeconds !== null && r.durationSeconds !== undefined ? 'Finished in ' + r.durationSeconds + ' s' : '';
+    state = { report: r };
+  }
+
+  sdp.render = function (d) {
+    if (d.mode === 'report') { renderReport(d.report); return; }
+    state = d;
+    renderPreview(d);
+  };
+
+  sdp.tabs(document);
+  $('#filter').addEventListener('input', renderActions);
+  $('#kindFilter').addEventListener('change', renderActions);
+  ['lod', 'modifiedPolicy', 'deletedPolicy'].forEach(function (k) {
+    $('#' + k).addEventListener('change', function () { sdp.call('replan', options()); });
+  });
+  $('#apply').addEventListener('click', function () {
+    $('#apply').disabled = true;
+    $('#note').textContent = 'Importing... SketchUp may be busy for large projects.';
+    setTimeout(function () { sdp.call('apply', options()); }, 30);
+  });
+  $('#close').addEventListener('click', function () { sdp.call('close'); });
+  $('#save').addEventListener('click', function () {
+    var r = state.report, lines = [r.title, r['package'] || ''];
+    Object.keys(r.stats || {}).sort().forEach(function (k) { lines.push(k + ': ' + r.stats[k]); });
+    (r.issues || []).forEach(function (i) { lines.push('[' + i.severity + '] ' + i.code + ' ' + (i.label || i.elementId || '') + ': ' + i.message + (i.resolution ? ' -> ' + i.resolution : '')); });
+    lines.push('', r.disclaimer || '');
+    sdp.call('saveReport', { filename: 'site-design-pro-import-report.txt', text: lines.join('\n') });
+  });
+})();
+</script>
+</body>
+</html>
