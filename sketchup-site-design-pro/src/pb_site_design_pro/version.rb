@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+module ProjektniBiro
+  module SiteDesignPro
+    VERSION = '0.1.0'
+    # Exchange schema major version this extension reads.
+    SUPPORTED_SCHEMA_MAJOR = 1
+    SCHEMA_VERSION = '1.0.0'
+  end
+end

@@ -1,0 +1,130 @@
+{
+  "createdUtc": "2026-10-29T13:11:11Z",
+  "elementCount": 139,
+  "errors": 0,
+  "warnings": 0,
+  "reviews": 12,
+  "disclaimer": "Automated checks support design coordination only. Clearance, safety, accessibility and capacity checks use values entered by the user; they are not certified regulatory compliance checks and do not replace professional review.",
+  "issues": [
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "3bde59e8-63db-43d2-8595-5a06d18a798e",
+      "relatedElementId": null,
+      "label": "UW-001",
+      "message": "'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "3bde59e8-63db-43d2-8595-5a06d18a798e",
+      "relatedElementId": null,
+      "label": "UW-001",
+      "message": "'Collection vehicle / lifting clearance' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "25bba43c-cc19-426d-87b9-b4f91bb790e1",
+      "relatedElementId": null,
+      "label": "UW-002",
+      "message": "'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "25bba43c-cc19-426d-87b9-b4f91bb790e1",
+      "relatedElementId": null,
+      "label": "UW-002",
+      "message": "'Collection vehicle / lifting clearance' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "4f99498f-f2b9-43f2-9ba3-b42e4cc45498",
+      "relatedElementId": null,
+      "label": "UW-003",
+      "message": "'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "4f99498f-f2b9-43f2-9ba3-b42e4cc45498",
+      "relatedElementId": null,
+      "label": "UW-003",
+      "message": "'Collection vehicle / lifting clearance' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "f6b1ee82-777f-4c46-9a0b-2ef0c63ad748",
+      "relatedElementId": null,
+      "label": "UW-004",
+      "message": "'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 3 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "f6b1ee82-777f-4c46-9a0b-2ef0c63ad748",
+      "relatedElementId": null,
+      "label": "UW-004",
+      "message": "'Collection vehicle / lifting clearance' has not been defined for Underground waste container 3 m³. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "208bc87e-b349-45c8-a258-19e837f23b48",
+      "relatedElementId": null,
+      "label": "PE-001",
+      "message": "'Safety clearance (from manufacturer / standard)' has not been defined for Swing. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "208bc87e-b349-45c8-a258-19e837f23b48",
+      "relatedElementId": null,
+      "label": "PE-001",
+      "message": "'Product reference / model' has not been defined for Swing. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "99313b5b-e07c-4d71-bf33-a9c06cd87afd",
+      "relatedElementId": null,
+      "label": "PE-002",
+      "message": "'Service / safety clearance' has not been defined for Children's play unit. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "99313b5b-e07c-4d71-bf33-a9c06cd87afd",
+      "relatedElementId": null,
+      "label": "PE-002",
+      "message": "'Product reference / model' has not been defined for Children's play unit. Default dimensions and clearances are indicative only.",
+      "resolution": "Enter the value from the manufacturer, botanical source or applicable standard and record the source."
+    }
+  ]
+}

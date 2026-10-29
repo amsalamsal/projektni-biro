@@ -1,0 +1,31 @@
+Site Design Pro validation report
+Created (UTC): 2026-10-29 13:11:11
+Elements: 139  Errors: 0  Warnings: 0  Reviews: 12
+
+REVIEW
+  SDP-R001  UW-001: 'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-001: 'Collection vehicle / lifting clearance' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-002: 'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-002: 'Collection vehicle / lifting clearance' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-003: 'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-003: 'Collection vehicle / lifting clearance' has not been defined for Underground waste container 5 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-004: 'Source of dimensions (manufacturer document)' has not been defined for Underground waste container 3 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  UW-004: 'Collection vehicle / lifting clearance' has not been defined for Underground waste container 3 m³. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  PE-001: 'Safety clearance (from manufacturer / standard)' has not been defined for Swing. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  PE-001: 'Product reference / model' has not been defined for Swing. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  PE-002: 'Service / safety clearance' has not been defined for Children's play unit. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+  SDP-R001  PE-002: 'Product reference / model' has not been defined for Children's play unit. Default dimensions and clearances are indicative only.
+      -> Enter the value from the manufacturer, botanical source or applicable standard and record the source.
+
+Automated checks support design coordination only. Clearance, safety, accessibility and capacity checks use values entered by the user; they are not certified regulatory compliance checks and do not replace professional review.

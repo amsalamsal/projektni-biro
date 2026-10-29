@@ -1,0 +1,6850 @@
+{
+  "format": "site-design-pro-package",
+  "schemaVersion": "1.0.0",
+  "packageId": "01ba9c61-4449-44a2-90ab-cc1873b828d3",
+  "createdUtc": "2026-01-01T00:00:00Z",
+  "generator": {
+    "application": "AutoCAD Site Design Pro",
+    "version": "0.1.0",
+    "host": "sdp command-line tool",
+    "sourceDocument": "SampleResidentialComplex (generated)"
+  },
+  "project": {
+    "id": "85ca0f75-91f8-487f-a951-d1a7f14e1796",
+    "name": "Sample Residential Complex",
+    "number": "SDP-SAMPLE-001",
+    "client": "Sample client",
+    "location": "Sample site",
+    "description": "Reference project for the AutoCAD to SketchUp workflow (two apartment buildings, parking and landscaped courtyard).",
+    "author": "Site Design Pro",
+    "revision": "A"
+  },
+  "units": {
+    "length": "m",
+    "angle": "rad",
+    "sourceLengthUnit": "mm",
+    "sourceUnitsToMeters": 0.001
+  },
+  "coordinateSystem": {
+    "origin": [
+      6550000,
+      4860000,
+      520
+    ],
+    "trueNorthDegrees": 0,
+    "crs": "EPSG:31276",
+    "heightDatum": "Sample datum"
+  },
+  "catalog": {
+    "id": "sdp-core",
+    "version": "1.0.0",
+    "materialsVersion": "1.0.0"
+  },
+  "typeDefinitions": [
+    {
+      "id": "building.entrance",
+      "name": "Building entrance reference",
+      "category": "buildings",
+      "subcategory": "References",
+      "builder": "marker",
+      "geometry": "point",
+      "modelGroup": "buildings",
+      "parameters": [
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "length",
+          "default": 1.2,
+          "min": 0.1,
+          "max": 10,
+          "group": "Dimensions"
+        },
+        {
+          "key": "reference",
+          "label": "Reference text",
+          "type": "text",
+          "group": "Information"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "line_paint_blue",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "building.footprint",
+      "name": "Building footprint (reference massing)",
+      "category": "buildings",
+      "subcategory": "Buildings",
+      "builder": "massing",
+      "geometry": "polygon",
+      "modelGroup": "buildings",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 12,
+          "min": 0.1,
+          "max": 600,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "baseOffset",
+          "label": "Base offset",
+          "type": "length",
+          "default": 0,
+          "min": -50,
+          "max": 50,
+          "group": "Elevation"
+        },
+        {
+          "key": "storeys",
+          "label": "Storeys",
+          "type": "integer",
+          "default": 4,
+          "min": 1,
+          "max": 200,
+          "group": "Information"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "building_massing",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "cycling.bike_rack",
+      "name": "Bicycle rack (row of stands)",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "bike_stand",
+      "geometry": "point",
+      "modelGroup": "pedestrian_cycling",
+      "parameters": [
+        {
+          "key": "count",
+          "label": "Number of stands",
+          "type": "integer",
+          "default": 5,
+          "min": 1,
+          "max": 200,
+          "required": true,
+          "group": "Configuration"
+        },
+        {
+          "key": "spacing",
+          "label": "Stand spacing",
+          "type": "length",
+          "default": 1,
+          "min": 0.3,
+          "max": 5,
+          "group": "Configuration"
+        },
+        {
+          "key": "width",
+          "label": "Hoop length",
+          "type": "length",
+          "default": 0.8,
+          "min": 0.2,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Hoop height",
+          "type": "length",
+          "default": 0.8,
+          "min": 0.2,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "tubeDiameter",
+          "label": "Tube diameter",
+          "type": "length",
+          "default": 0.05,
+          "min": 0.01,
+          "max": 0.3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "bikesPerStand",
+          "label": "Bicycles per stand",
+          "type": "integer",
+          "default": 2,
+          "min": 1,
+          "max": 4,
+          "group": "Capacity"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_galv",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "furniture.bench",
+      "name": "Bench with backrest",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench",
+      "geometry": "point",
+      "modelGroup": "furniture",
+      "parameters": [
+        {
+          "key": "length",
+          "label": "Length",
+          "type": "length",
+          "default": 1.8,
+          "min": 0.3,
+          "max": 20,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "depth",
+          "label": "Depth",
+          "type": "length",
+          "default": 0.6,
+          "min": 0.2,
+          "max": 3,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "seatHeight",
+          "label": "Seat height",
+          "type": "length",
+          "default": 0.45,
+          "min": 0.1,
+          "max": 1.2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "backrest",
+          "label": "Backrest",
+          "type": "bool",
+          "default": true,
+          "group": "Configuration"
+        },
+        {
+          "key": "backHeight",
+          "label": "Overall height with backrest",
+          "type": "length",
+          "default": 0.8,
+          "min": 0.2,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "armrests",
+          "label": "Armrests",
+          "type": "bool",
+          "default": false,
+          "group": "Configuration"
+        },
+        {
+          "key": "material",
+          "label": "Seat material",
+          "type": "material",
+          "default": "timber",
+          "group": "Appearance"
+        },
+        {
+          "key": "frameMaterial",
+          "label": "Frame material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "furniture.waste_bin",
+      "name": "Waste bin",
+      "category": "furniture",
+      "subcategory": "Bins",
+      "builder": "cylinder_equipment",
+      "geometry": "point",
+      "modelGroup": "furniture",
+      "parameters": [
+        {
+          "key": "diameter",
+          "label": "Diameter",
+          "type": "length",
+          "default": 0.45,
+          "min": 0.01,
+          "max": 50,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 0.9,
+          "min": 0.001,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "baseOffset",
+          "label": "Base offset",
+          "type": "length",
+          "default": 0,
+          "min": -30,
+          "max": 60,
+          "group": "Elevation"
+        },
+        {
+          "key": "serviceClearance",
+          "label": "Service / safety clearance",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 50,
+          "group": "Checks"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "W",
+          "default": null,
+          "min": 0,
+          "max": 100000,
+          "group": "Technical"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "landscape.flower_bed",
+      "name": "Flower bed",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area",
+      "geometry": "polygon",
+      "modelGroup": "planting",
+      "parameters": [
+        {
+          "key": "soilThickness",
+          "label": "Soil / topsoil depth",
+          "type": "length",
+          "default": 0.3,
+          "min": 0.01,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Soil top offset from boundary",
+          "type": "length",
+          "default": 0,
+          "min": -5,
+          "max": 5,
+          "group": "Elevation"
+        },
+        {
+          "key": "plantHeight",
+          "label": "Planting height (0 = soil only)",
+          "type": "length",
+          "default": 0.4,
+          "min": 0,
+          "max": 6,
+          "group": "Planting"
+        },
+        {
+          "key": "plantSpacing",
+          "label": "Plant spacing (for quantity estimate)",
+          "type": "length",
+          "default": null,
+          "min": 0.05,
+          "max": 10,
+          "group": "Planting"
+        },
+        {
+          "key": "plantCode",
+          "label": "Plant mix code",
+          "type": "text",
+          "group": "Planting"
+        },
+        {
+          "key": "soilMaterial",
+          "label": "Soil material",
+          "type": "material",
+          "default": "mulch",
+          "group": "Appearance"
+        },
+        {
+          "key": "plantMaterial",
+          "label": "Planting material",
+          "type": "material",
+          "default": "planting_flowers",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "landscape.hedge",
+      "name": "Hedge",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "wall",
+      "geometry": "path",
+      "modelGroup": "planting",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 1.5,
+          "min": 0.01,
+          "max": 30,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "thickness",
+          "label": "Thickness",
+          "type": "length",
+          "default": 0.8,
+          "min": 0.005,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "baseOffset",
+          "label": "Base offset from alignment elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "alignment",
+          "label": "Alignment",
+          "type": "enum",
+          "default": "center",
+          "options": [
+            "center",
+            "left",
+            "right"
+          ],
+          "group": "Dimensions"
+        },
+        {
+          "key": "footingWidth",
+          "label": "Footing width (0 = none)",
+          "type": "length",
+          "default": 0,
+          "min": 0,
+          "max": 20,
+          "group": "Foundation"
+        },
+        {
+          "key": "footingDepth",
+          "label": "Footing depth",
+          "type": "length",
+          "default": 0,
+          "min": 0,
+          "max": 10,
+          "group": "Foundation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "foliage_evergreen",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "landscape.shrub",
+      "name": "Shrub",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "shrub",
+      "geometry": "point",
+      "modelGroup": "planting",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 1.2,
+          "min": 0.05,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "diameter",
+          "label": "Spread",
+          "type": "length",
+          "default": 1.2,
+          "min": 0.05,
+          "max": 15,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "foliageMaterial",
+          "label": "Foliage material",
+          "type": "material",
+          "default": "foliage",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "landscape.tree_deciduous",
+      "name": "Deciduous tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "geometry": "point",
+      "modelGroup": "planting",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height (at planting)",
+          "type": "length",
+          "default": 8,
+          "min": 0.3,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "canopyDiameter",
+          "label": "Canopy diameter",
+          "type": "length",
+          "default": 5,
+          "min": 0.2,
+          "max": 50,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "trunkDiameter",
+          "label": "Trunk diameter",
+          "type": "length",
+          "default": 0.25,
+          "min": 0.01,
+          "max": 5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "clearTrunkHeight",
+          "label": "Clear trunk height",
+          "type": "length",
+          "default": 2.2,
+          "min": 0,
+          "max": 40,
+          "group": "Dimensions"
+        },
+        {
+          "key": "form",
+          "label": "Crown form",
+          "type": "enum",
+          "default": "round",
+          "options": [
+            "round",
+            "oval",
+            "conical",
+            "columnar"
+          ],
+          "group": "Appearance"
+        },
+        {
+          "key": "matureHeight",
+          "label": "Mature height",
+          "type": "length",
+          "default": null,
+          "min": 0.3,
+          "max": 120,
+          "group": "Growth"
+        },
+        {
+          "key": "matureCanopyDiameter",
+          "label": "Mature canopy diameter",
+          "type": "length",
+          "default": null,
+          "min": 0.2,
+          "max": 60,
+          "group": "Growth"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "enum",
+          "default": "proposed",
+          "options": [
+            "proposed",
+            "existing_retain",
+            "existing_remove"
+          ],
+          "group": "Information"
+        },
+        {
+          "key": "foliageMaterial",
+          "label": "Foliage material",
+          "type": "material",
+          "default": "foliage",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "landscape.tree_evergreen",
+      "name": "Evergreen tree",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "geometry": "point",
+      "modelGroup": "planting",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height (at planting)",
+          "type": "length",
+          "default": 8,
+          "min": 0.3,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "canopyDiameter",
+          "label": "Canopy diameter",
+          "type": "length",
+          "default": 4,
+          "min": 0.2,
+          "max": 50,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "trunkDiameter",
+          "label": "Trunk diameter",
+          "type": "length",
+          "default": 0.25,
+          "min": 0.01,
+          "max": 5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "clearTrunkHeight",
+          "label": "Clear trunk height",
+          "type": "length",
+          "default": 0.8,
+          "min": 0,
+          "max": 40,
+          "group": "Dimensions"
+        },
+        {
+          "key": "form",
+          "label": "Crown form",
+          "type": "enum",
+          "default": "conical",
+          "options": [
+            "round",
+            "oval",
+            "conical",
+            "columnar"
+          ],
+          "group": "Appearance"
+        },
+        {
+          "key": "matureHeight",
+          "label": "Mature height",
+          "type": "length",
+          "default": null,
+          "min": 0.3,
+          "max": 120,
+          "group": "Growth"
+        },
+        {
+          "key": "matureCanopyDiameter",
+          "label": "Mature canopy diameter",
+          "type": "length",
+          "default": null,
+          "min": 0.2,
+          "max": 60,
+          "group": "Growth"
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "enum",
+          "default": "proposed",
+          "options": [
+            "proposed",
+            "existing_retain",
+            "existing_remove"
+          ],
+          "group": "Information"
+        },
+        {
+          "key": "foliageMaterial",
+          "label": "Foliage material",
+          "type": "material",
+          "default": "foliage_evergreen",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "lighting.bollard_light",
+      "name": "Bollard light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "bollard",
+      "geometry": "point",
+      "modelGroup": "lighting",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 1,
+          "min": 0.05,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "diameter",
+          "label": "Diameter",
+          "type": "length",
+          "default": 0.2,
+          "min": 0.02,
+          "max": 2,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "lit",
+          "label": "Illuminated",
+          "type": "bool",
+          "default": true,
+          "group": "Equipment"
+        },
+        {
+          "key": "removable",
+          "label": "Removable",
+          "type": "bool",
+          "default": false,
+          "group": "Equipment"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "W",
+          "default": null,
+          "min": 0,
+          "max": 10000,
+          "group": "Technical"
+        },
+        {
+          "key": "fixtureCode",
+          "label": "Fixture code",
+          "type": "text",
+          "group": "Technical"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "lighting.pedestrian_light",
+      "name": "Pedestrian light (post-top)",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "geometry": "point",
+      "modelGroup": "lighting",
+      "parameters": [
+        {
+          "key": "poleHeight",
+          "label": "Pole / mounting height",
+          "type": "length",
+          "default": 4,
+          "min": 0.3,
+          "max": 40,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "poleDiameter",
+          "label": "Pole diameter",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.02,
+          "max": 1.5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "armLength",
+          "label": "Arm length (0 = post-top)",
+          "type": "length",
+          "default": 0,
+          "min": 0,
+          "max": 6,
+          "group": "Dimensions"
+        },
+        {
+          "key": "headLength",
+          "label": "Head length",
+          "type": "length",
+          "default": 0.4,
+          "min": 0.02,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "headWidth",
+          "label": "Head width",
+          "type": "length",
+          "default": 0.4,
+          "min": 0.02,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "headHeight",
+          "label": "Head height",
+          "type": "length",
+          "default": 0.3,
+          "min": 0.01,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "solarPanel",
+          "label": "Integrated solar panel",
+          "type": "bool",
+          "default": false,
+          "group": "Equipment"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "W",
+          "default": null,
+          "min": 0,
+          "max": 100000,
+          "group": "Technical"
+        },
+        {
+          "key": "fixtureCode",
+          "label": "Fixture / device code",
+          "type": "text",
+          "group": "Technical"
+        },
+        {
+          "key": "coverageRadius",
+          "label": "Illustrative coverage radius (not photometric)",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 200,
+          "group": "Checks"
+        },
+        {
+          "key": "poleMaterial",
+          "label": "Pole material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        },
+        {
+          "key": "headMaterial",
+          "label": "Head material",
+          "type": "material",
+          "default": "luminaire",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "lighting.street_light",
+      "name": "Street light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "geometry": "point",
+      "modelGroup": "lighting",
+      "parameters": [
+        {
+          "key": "poleHeight",
+          "label": "Pole / mounting height",
+          "type": "length",
+          "default": 8,
+          "min": 0.3,
+          "max": 40,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "poleDiameter",
+          "label": "Pole diameter",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.02,
+          "max": 1.5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "armLength",
+          "label": "Arm length (0 = post-top)",
+          "type": "length",
+          "default": 1,
+          "min": 0,
+          "max": 6,
+          "group": "Dimensions"
+        },
+        {
+          "key": "headLength",
+          "label": "Head length",
+          "type": "length",
+          "default": 0.7,
+          "min": 0.02,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "headWidth",
+          "label": "Head width",
+          "type": "length",
+          "default": 0.3,
+          "min": 0.02,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "headHeight",
+          "label": "Head height",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.01,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "solarPanel",
+          "label": "Integrated solar panel",
+          "type": "bool",
+          "default": false,
+          "group": "Equipment"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "W",
+          "default": null,
+          "min": 0,
+          "max": 100000,
+          "group": "Technical"
+        },
+        {
+          "key": "fixtureCode",
+          "label": "Fixture / device code",
+          "type": "text",
+          "group": "Technical"
+        },
+        {
+          "key": "coverageRadius",
+          "label": "Illustrative coverage radius (not photometric)",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 200,
+          "group": "Checks"
+        },
+        {
+          "key": "poleMaterial",
+          "label": "Pole material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        },
+        {
+          "key": "headMaterial",
+          "label": "Head material",
+          "type": "material",
+          "default": "luminaire",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "recreation.playground_unit",
+      "name": "Children's play unit",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "box_equipment",
+      "geometry": "point",
+      "modelGroup": "recreation",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Width (local X)",
+          "type": "length",
+          "default": 4,
+          "min": 0.01,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "depth",
+          "label": "Depth (local Y)",
+          "type": "length",
+          "default": 3,
+          "min": 0.01,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 3,
+          "min": 0.001,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "baseOffset",
+          "label": "Base offset / mounting height",
+          "type": "length",
+          "default": 0,
+          "min": -30,
+          "max": 60,
+          "group": "Elevation"
+        },
+        {
+          "key": "serviceClearance",
+          "label": "Service / safety clearance",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 50,
+          "group": "Checks"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "kW",
+          "default": null,
+          "min": 0,
+          "max": 100000,
+          "group": "Technical"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "timber",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "recreation.swing",
+      "name": "Swing",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "swing",
+      "geometry": "point",
+      "modelGroup": "recreation",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Beam length",
+          "type": "length",
+          "default": 3.4,
+          "min": 1,
+          "max": 15,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Beam height",
+          "type": "length",
+          "default": 2.4,
+          "min": 1,
+          "max": 6,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "frameSpread",
+          "label": "Leg spread at ground (local Y)",
+          "type": "length",
+          "default": 1.8,
+          "min": 0.3,
+          "max": 6,
+          "group": "Dimensions"
+        },
+        {
+          "key": "seats",
+          "label": "Seats",
+          "type": "integer",
+          "default": 2,
+          "min": 1,
+          "max": 6,
+          "group": "Configuration"
+        },
+        {
+          "key": "seatHeight",
+          "label": "Seat height",
+          "type": "length",
+          "default": 0.45,
+          "min": 0.2,
+          "max": 1.5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "frameDiameter",
+          "label": "Frame tube diameter",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.02,
+          "max": 0.5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "safetyClearance",
+          "label": "Safety clearance (from manufacturer / standard)",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 20,
+          "group": "Checks"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "road.access_road",
+      "name": "Internal access road (centreline)",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "linear_slab",
+      "geometry": "path",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Width",
+          "type": "length",
+          "default": 5.5,
+          "min": 0.005,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "thickness",
+          "label": "Thickness",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.001,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Top offset from centreline elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "asphalt",
+          "group": "Appearance"
+        },
+        {
+          "key": "requiredClearWidth",
+          "label": "Required clear width (project rule)",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 100,
+          "group": "Checks"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Surface code",
+          "type": "text",
+          "group": "Specification"
+        }
+      ]
+    },
+    {
+      "id": "road.arrow",
+      "name": "Traffic arrow",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "arrow_marking",
+      "geometry": "point",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "length",
+          "label": "Length",
+          "type": "length",
+          "default": 5,
+          "min": 0.3,
+          "max": 20,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "width",
+          "label": "Head width",
+          "type": "length",
+          "default": 1,
+          "min": 0.1,
+          "max": 5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "shaftWidth",
+          "label": "Shaft width",
+          "type": "length",
+          "default": 0.15,
+          "min": 0.02,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "thickness",
+          "label": "Marking thickness",
+          "type": "length",
+          "default": 0.003,
+          "min": 0.001,
+          "max": 0.1,
+          "group": "Dimensions"
+        },
+        {
+          "key": "material",
+          "label": "Marking material",
+          "type": "material",
+          "default": "line_paint_white",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "road.bollard",
+      "name": "Bollard",
+      "category": "roads",
+      "subcategory": "Barriers",
+      "builder": "bollard",
+      "geometry": "point",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 0.9,
+          "min": 0.05,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "diameter",
+          "label": "Diameter",
+          "type": "length",
+          "default": 0.2,
+          "min": 0.02,
+          "max": 2,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "lit",
+          "label": "Illuminated",
+          "type": "bool",
+          "default": false,
+          "group": "Equipment"
+        },
+        {
+          "key": "removable",
+          "label": "Removable",
+          "type": "bool",
+          "default": false,
+          "group": "Equipment"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "W",
+          "default": null,
+          "min": 0,
+          "max": 10000,
+          "group": "Technical"
+        },
+        {
+          "key": "fixtureCode",
+          "label": "Fixture code",
+          "type": "text",
+          "group": "Technical"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "road.parking_bay",
+      "name": "Parking bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "geometry": "point",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Bay width",
+          "type": "length",
+          "default": 2.5,
+          "min": 1,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "length",
+          "label": "Bay length",
+          "type": "length",
+          "default": 5,
+          "min": 2,
+          "max": 25,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "lineWidth",
+          "label": "Marking line width",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.02,
+          "max": 0.5,
+          "group": "Marking"
+        },
+        {
+          "key": "accessible",
+          "label": "Accessible bay",
+          "type": "bool",
+          "default": false,
+          "group": "Configuration"
+        },
+        {
+          "key": "ev",
+          "label": "EV charging bay",
+          "type": "bool",
+          "default": false,
+          "group": "Configuration"
+        },
+        {
+          "key": "bayNumber",
+          "label": "Bay number",
+          "type": "text",
+          "group": "Information"
+        },
+        {
+          "key": "markingMaterial",
+          "label": "Marking material",
+          "type": "material",
+          "default": "line_paint_white",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "road.parking_bay_accessible",
+      "name": "Accessible parking bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "geometry": "point",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Bay width",
+          "type": "length",
+          "default": 3.6,
+          "min": 1,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "length",
+          "label": "Bay length",
+          "type": "length",
+          "default": 5,
+          "min": 2,
+          "max": 25,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "lineWidth",
+          "label": "Marking line width",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.02,
+          "max": 0.5,
+          "group": "Marking"
+        },
+        {
+          "key": "accessible",
+          "label": "Accessible bay",
+          "type": "bool",
+          "default": true,
+          "group": "Configuration"
+        },
+        {
+          "key": "ev",
+          "label": "EV charging bay",
+          "type": "bool",
+          "default": false,
+          "group": "Configuration"
+        },
+        {
+          "key": "bayNumber",
+          "label": "Bay number",
+          "type": "text",
+          "group": "Information"
+        },
+        {
+          "key": "markingMaterial",
+          "label": "Marking material",
+          "type": "material",
+          "default": "line_paint_blue",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "road.parking_bay_ev",
+      "name": "EV charging parking bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "geometry": "point",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Bay width",
+          "type": "length",
+          "default": 2.5,
+          "min": 1,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "length",
+          "label": "Bay length",
+          "type": "length",
+          "default": 5,
+          "min": 2,
+          "max": 25,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "lineWidth",
+          "label": "Marking line width",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.02,
+          "max": 0.5,
+          "group": "Marking"
+        },
+        {
+          "key": "accessible",
+          "label": "Accessible bay",
+          "type": "bool",
+          "default": false,
+          "group": "Configuration"
+        },
+        {
+          "key": "ev",
+          "label": "EV charging bay",
+          "type": "bool",
+          "default": true,
+          "group": "Configuration"
+        },
+        {
+          "key": "bayNumber",
+          "label": "Bay number",
+          "type": "text",
+          "group": "Information"
+        },
+        {
+          "key": "markingMaterial",
+          "label": "Marking material",
+          "type": "material",
+          "default": "line_paint_white",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "road.pedestrian_crossing",
+      "name": "Pedestrian crossing (striped)",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "stripes",
+      "geometry": "polygon",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "stripeWidth",
+          "label": "Stripe width",
+          "type": "length",
+          "default": 0.5,
+          "min": 0.05,
+          "max": 5,
+          "required": true,
+          "group": "Marking"
+        },
+        {
+          "key": "gapWidth",
+          "label": "Gap width",
+          "type": "length",
+          "default": 0.5,
+          "min": 0.05,
+          "max": 5,
+          "required": true,
+          "group": "Marking"
+        },
+        {
+          "key": "thickness",
+          "label": "Marking thickness",
+          "type": "length",
+          "default": 0.003,
+          "min": 0.001,
+          "max": 0.2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "material",
+          "label": "Marking material",
+          "type": "material",
+          "default": "line_paint_white",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "site.boundary",
+      "name": "Site boundary",
+      "category": "site",
+      "subcategory": "Boundaries",
+      "builder": "outline",
+      "geometry": "polygon",
+      "modelGroup": "annotations",
+      "parameters": [
+        {
+          "key": "lineHeight",
+          "label": "Display height above boundary",
+          "type": "length",
+          "default": 0.02,
+          "min": 0,
+          "max": 10,
+          "group": "Elevation"
+        }
+      ]
+    },
+    {
+      "id": "structure.pergola",
+      "name": "Pergola",
+      "category": "structures",
+      "subcategory": "Pergolas",
+      "builder": "pergola",
+      "geometry": "polygon",
+      "modelGroup": "canopies",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Clear height (underside of beams)",
+          "type": "length",
+          "default": 2.6,
+          "min": 1.5,
+          "max": 15,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "columnSize",
+          "label": "Column size",
+          "type": "length",
+          "default": 0.15,
+          "min": 0.04,
+          "max": 1.5,
+          "group": "Structure"
+        },
+        {
+          "key": "columnSpacing",
+          "label": "Maximum column spacing",
+          "type": "length",
+          "default": 3.5,
+          "min": 0.5,
+          "max": 20,
+          "group": "Structure"
+        },
+        {
+          "key": "beamDepth",
+          "label": "Beam depth",
+          "type": "length",
+          "default": 0.25,
+          "min": 0.03,
+          "max": 2,
+          "group": "Structure"
+        },
+        {
+          "key": "beamWidth",
+          "label": "Beam width",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.02,
+          "max": 1,
+          "group": "Structure"
+        },
+        {
+          "key": "rafterSpacing",
+          "label": "Rafter / louver spacing",
+          "type": "length",
+          "default": 0.6,
+          "min": 0.05,
+          "max": 5,
+          "group": "Structure"
+        },
+        {
+          "key": "rafterDepth",
+          "label": "Rafter / louver depth",
+          "type": "length",
+          "default": 0.15,
+          "min": 0.01,
+          "max": 1,
+          "group": "Structure"
+        },
+        {
+          "key": "rafterWidth",
+          "label": "Rafter / louver width",
+          "type": "length",
+          "default": 0.05,
+          "min": 0.005,
+          "max": 0.5,
+          "group": "Structure"
+        },
+        {
+          "key": "louverAngle",
+          "label": "Louver angle (0 = vertical rafters)",
+          "type": "angle",
+          "default": 0,
+          "min": -90,
+          "max": 90,
+          "group": "Structure"
+        },
+        {
+          "key": "cover",
+          "label": "Cover",
+          "type": "enum",
+          "default": "none",
+          "options": [
+            "none",
+            "fabric",
+            "solid",
+            "glass",
+            "solar"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "roofSlope",
+          "label": "Cover slope",
+          "type": "angle",
+          "default": 0,
+          "min": 0,
+          "max": 45,
+          "group": "Configuration"
+        },
+        {
+          "key": "material",
+          "label": "Structure material",
+          "type": "material",
+          "default": "timber",
+          "group": "Appearance"
+        },
+        {
+          "key": "coverMaterial",
+          "label": "Cover material",
+          "type": "material",
+          "default": null,
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "surface.asphalt",
+      "name": "Asphalt surface",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab",
+      "geometry": "polygon",
+      "modelGroup": "surfaces",
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Thickness / build-up depth",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.001,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Top offset from boundary elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "asphalt",
+          "group": "Appearance"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Surface code",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "buildup",
+          "label": "Layer build-up (top to bottom)",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "jointPattern",
+          "label": "Paving / joint pattern",
+          "type": "enum",
+          "default": "none",
+          "options": [
+            "none",
+            "stretcher",
+            "stack",
+            "herringbone",
+            "basketweave",
+            "random"
+          ],
+          "group": "Specification"
+        }
+      ]
+    },
+    {
+      "id": "surface.concrete_paving",
+      "name": "Concrete paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab",
+      "geometry": "polygon",
+      "modelGroup": "surfaces",
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Thickness / build-up depth",
+          "type": "length",
+          "default": 0.08,
+          "min": 0.001,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Top offset from boundary elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "concrete_paver",
+          "group": "Appearance"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Surface code",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "buildup",
+          "label": "Layer build-up (top to bottom)",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "jointPattern",
+          "label": "Paving / joint pattern",
+          "type": "enum",
+          "default": "stretcher",
+          "options": [
+            "none",
+            "stretcher",
+            "stack",
+            "herringbone",
+            "basketweave",
+            "random"
+          ],
+          "group": "Specification"
+        }
+      ]
+    },
+    {
+      "id": "surface.lawn",
+      "name": "Lawn",
+      "category": "surfaces",
+      "subcategory": "Soft landscape",
+      "builder": "slab",
+      "geometry": "polygon",
+      "modelGroup": "surfaces",
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Thickness / build-up depth",
+          "type": "length",
+          "default": 0.15,
+          "min": 0.001,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Top offset from boundary elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "grass",
+          "group": "Appearance"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Surface code",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "buildup",
+          "label": "Layer build-up (top to bottom)",
+          "type": "text",
+          "default": "Turf on topsoil",
+          "group": "Specification"
+        },
+        {
+          "key": "jointPattern",
+          "label": "Paving / joint pattern",
+          "type": "enum",
+          "default": "none",
+          "options": [
+            "none",
+            "stretcher",
+            "stack",
+            "herringbone",
+            "basketweave",
+            "random"
+          ],
+          "group": "Specification"
+        }
+      ]
+    },
+    {
+      "id": "surface.natural_stone",
+      "name": "Natural stone paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab",
+      "geometry": "polygon",
+      "modelGroup": "surfaces",
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Thickness / build-up depth",
+          "type": "length",
+          "default": 0.06,
+          "min": 0.001,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Top offset from boundary elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "natural_stone",
+          "group": "Appearance"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Surface code",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "buildup",
+          "label": "Layer build-up (top to bottom)",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "jointPattern",
+          "label": "Paving / joint pattern",
+          "type": "enum",
+          "default": "random",
+          "options": [
+            "none",
+            "stretcher",
+            "stack",
+            "herringbone",
+            "basketweave",
+            "random"
+          ],
+          "group": "Specification"
+        }
+      ]
+    },
+    {
+      "id": "surface.rubber_safety",
+      "name": "Rubber safety surface",
+      "category": "surfaces",
+      "subcategory": "Safety surfaces",
+      "builder": "slab",
+      "geometry": "polygon",
+      "modelGroup": "surfaces",
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Thickness / build-up depth",
+          "type": "length",
+          "default": 0.04,
+          "min": 0.001,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "topOffset",
+          "label": "Top offset from boundary elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "rubber",
+          "group": "Appearance"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Surface code",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "buildup",
+          "label": "Layer build-up (top to bottom)",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "jointPattern",
+          "label": "Paving / joint pattern",
+          "type": "enum",
+          "default": "none",
+          "options": [
+            "none",
+            "stretcher",
+            "stack",
+            "herringbone",
+            "basketweave",
+            "random"
+          ],
+          "group": "Specification"
+        }
+      ]
+    },
+    {
+      "id": "sustainability.ev_charger_pedestal",
+      "name": "EV charging station (pedestal)",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment",
+      "geometry": "point",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Width (local X)",
+          "type": "length",
+          "default": 0.4,
+          "min": 0.01,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "depth",
+          "label": "Depth (local Y)",
+          "type": "length",
+          "default": 0.3,
+          "min": 0.01,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 1.5,
+          "min": 0.001,
+          "max": 100,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "baseOffset",
+          "label": "Base offset / mounting height",
+          "type": "length",
+          "default": 0,
+          "min": -30,
+          "max": 60,
+          "group": "Elevation"
+        },
+        {
+          "key": "serviceClearance",
+          "label": "Service / safety clearance",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 50,
+          "group": "Checks"
+        },
+        {
+          "key": "power",
+          "label": "Power",
+          "type": "number",
+          "unit": "kW",
+          "default": null,
+          "min": 0,
+          "max": 100000,
+          "group": "Technical"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "utility.waste_container_ug_3m3",
+      "name": "Underground waste container 3 m³",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container",
+      "geometry": "point",
+      "modelGroup": "underground",
+      "parameters": [
+        {
+          "key": "nominalVolume",
+          "label": "Nominal volume",
+          "type": "number",
+          "unit": "m3",
+          "default": 3,
+          "min": 0.1,
+          "max": 50,
+          "required": true,
+          "group": "Capacity"
+        },
+        {
+          "key": "installation",
+          "label": "Installation",
+          "type": "enum",
+          "default": "underground",
+          "options": [
+            "underground",
+            "semi_underground"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "wasteFraction",
+          "label": "Waste fraction",
+          "type": "enum",
+          "default": "mixed",
+          "options": [
+            "mixed",
+            "paper",
+            "plastic",
+            "glass",
+            "organic",
+            "metal",
+            "textile"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "bodyLength",
+          "label": "Body external length (local X)",
+          "type": "length",
+          "default": 1.7,
+          "min": 0.3,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "bodyWidth",
+          "label": "Body external width (local Y)",
+          "type": "length",
+          "default": 1.7,
+          "min": 0.3,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "bodyDepth",
+          "label": "Body depth below cover level",
+          "type": "length",
+          "default": 2,
+          "min": 0.2,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "aboveGroundHeight",
+          "label": "Above-ground height (column or upper body)",
+          "type": "length",
+          "default": 1,
+          "min": 0,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "columnDiameter",
+          "label": "Insertion column diameter",
+          "type": "length",
+          "default": 0.8,
+          "min": 0.1,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "coverLevelOffset",
+          "label": "Cover level offset from insertion elevation",
+          "type": "length",
+          "default": 0,
+          "min": -2,
+          "max": 2,
+          "group": "Elevation"
+        },
+        {
+          "key": "excavationMargin",
+          "label": "Excavation margin around body",
+          "type": "length",
+          "default": 0.5,
+          "min": 0,
+          "max": 5,
+          "group": "Construction"
+        },
+        {
+          "key": "showExcavation",
+          "label": "Show excavation envelope in 3D",
+          "type": "bool",
+          "default": false,
+          "group": "Construction"
+        },
+        {
+          "key": "liftingClearance",
+          "label": "Collection vehicle / lifting clearance",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 30,
+          "group": "Checks"
+        },
+        {
+          "key": "dimensionsSource",
+          "label": "Source of dimensions (manufacturer document)",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "material",
+          "label": "Body material",
+          "type": "material",
+          "default": "concrete_precast",
+          "group": "Appearance"
+        },
+        {
+          "key": "columnMaterial",
+          "label": "Column material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "utility.waste_container_ug_5m3",
+      "name": "Underground waste container 5 m³",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container",
+      "geometry": "point",
+      "modelGroup": "underground",
+      "parameters": [
+        {
+          "key": "nominalVolume",
+          "label": "Nominal volume",
+          "type": "number",
+          "unit": "m3",
+          "default": 5,
+          "min": 0.1,
+          "max": 50,
+          "required": true,
+          "group": "Capacity"
+        },
+        {
+          "key": "installation",
+          "label": "Installation",
+          "type": "enum",
+          "default": "underground",
+          "options": [
+            "underground",
+            "semi_underground"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "wasteFraction",
+          "label": "Waste fraction",
+          "type": "enum",
+          "default": "mixed",
+          "options": [
+            "mixed",
+            "paper",
+            "plastic",
+            "glass",
+            "organic",
+            "metal",
+            "textile"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "bodyLength",
+          "label": "Body external length (local X)",
+          "type": "length",
+          "default": 2,
+          "min": 0.3,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "bodyWidth",
+          "label": "Body external width (local Y)",
+          "type": "length",
+          "default": 2,
+          "min": 0.3,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "bodyDepth",
+          "label": "Body depth below cover level",
+          "type": "length",
+          "default": 2.4,
+          "min": 0.2,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "aboveGroundHeight",
+          "label": "Above-ground height (column or upper body)",
+          "type": "length",
+          "default": 1,
+          "min": 0,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "columnDiameter",
+          "label": "Insertion column diameter",
+          "type": "length",
+          "default": 0.8,
+          "min": 0.1,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "coverLevelOffset",
+          "label": "Cover level offset from insertion elevation",
+          "type": "length",
+          "default": 0,
+          "min": -2,
+          "max": 2,
+          "group": "Elevation"
+        },
+        {
+          "key": "excavationMargin",
+          "label": "Excavation margin around body",
+          "type": "length",
+          "default": 0.5,
+          "min": 0,
+          "max": 5,
+          "group": "Construction"
+        },
+        {
+          "key": "showExcavation",
+          "label": "Show excavation envelope in 3D",
+          "type": "bool",
+          "default": false,
+          "group": "Construction"
+        },
+        {
+          "key": "liftingClearance",
+          "label": "Collection vehicle / lifting clearance",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 30,
+          "group": "Checks"
+        },
+        {
+          "key": "dimensionsSource",
+          "label": "Source of dimensions (manufacturer document)",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "material",
+          "label": "Body material",
+          "type": "material",
+          "default": "concrete_precast",
+          "group": "Appearance"
+        },
+        {
+          "key": "columnMaterial",
+          "label": "Column material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "wall.mesh_fence",
+      "name": "Welded-mesh fence",
+      "category": "walls",
+      "subcategory": "Fences",
+      "builder": "fence",
+      "geometry": "path",
+      "modelGroup": "walls",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 2,
+          "min": 0.2,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "postSpacing",
+          "label": "Maximum post spacing",
+          "type": "length",
+          "default": 2.5,
+          "min": 0.3,
+          "max": 15,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "postSize",
+          "label": "Post size",
+          "type": "length",
+          "default": 0.06,
+          "min": 0.01,
+          "max": 1,
+          "group": "Dimensions"
+        },
+        {
+          "key": "panelThickness",
+          "label": "Panel thickness",
+          "type": "length",
+          "default": 0.04,
+          "min": 0.002,
+          "max": 0.5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "groundClearance",
+          "label": "Panel ground clearance",
+          "type": "length",
+          "default": 0.05,
+          "min": 0,
+          "max": 2,
+          "group": "Dimensions"
+        },
+        {
+          "key": "panelStyle",
+          "label": "Panel style",
+          "type": "enum",
+          "default": "mesh",
+          "options": [
+            "mesh",
+            "bars",
+            "solid",
+            "glass"
+          ],
+          "group": "Appearance"
+        },
+        {
+          "key": "postMaterial",
+          "label": "Post material",
+          "type": "material",
+          "default": "steel_galv",
+          "group": "Appearance"
+        },
+        {
+          "key": "panelMaterial",
+          "label": "Panel material",
+          "type": "material",
+          "default": "steel_galv",
+          "group": "Appearance"
+        },
+        {
+          "key": "foundationDepth",
+          "label": "Post foundation depth (0 = none)",
+          "type": "length",
+          "default": 0,
+          "min": 0,
+          "max": 3,
+          "group": "Foundation"
+        }
+      ]
+    },
+    {
+      "id": "wall.pedestrian_gate",
+      "name": "Pedestrian gate",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate",
+      "geometry": "point",
+      "modelGroup": "walls",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Clear opening width",
+          "type": "length",
+          "default": 1,
+          "min": 0.5,
+          "max": 20,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 1.8,
+          "min": 0.3,
+          "max": 6,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "gateType",
+          "label": "Gate type",
+          "type": "enum",
+          "default": "swing_single",
+          "options": [
+            "swing_single",
+            "swing_double",
+            "sliding",
+            "barrier"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "openingSide",
+          "label": "Opening side",
+          "type": "enum",
+          "default": "back",
+          "options": [
+            "front",
+            "back"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "postSize",
+          "label": "Post size",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.03,
+          "max": 1,
+          "group": "Dimensions"
+        },
+        {
+          "key": "leafThickness",
+          "label": "Leaf thickness",
+          "type": "length",
+          "default": 0.05,
+          "min": 0.01,
+          "max": 0.5,
+          "group": "Dimensions"
+        },
+        {
+          "key": "automatic",
+          "label": "Automatic operation",
+          "type": "bool",
+          "default": false,
+          "group": "Equipment"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "steel_dark",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "wall.planter_wall",
+      "name": "Planter wall",
+      "category": "walls",
+      "subcategory": "Walls",
+      "builder": "wall",
+      "geometry": "path",
+      "modelGroup": "walls",
+      "parameters": [
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 0.6,
+          "min": 0.01,
+          "max": 30,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "thickness",
+          "label": "Thickness",
+          "type": "length",
+          "default": 0.25,
+          "min": 0.005,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "baseOffset",
+          "label": "Base offset from alignment elevation",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "alignment",
+          "label": "Alignment",
+          "type": "enum",
+          "default": "center",
+          "options": [
+            "center",
+            "left",
+            "right"
+          ],
+          "group": "Dimensions"
+        },
+        {
+          "key": "footingWidth",
+          "label": "Footing width (0 = none)",
+          "type": "length",
+          "default": 0,
+          "min": 0,
+          "max": 20,
+          "group": "Foundation"
+        },
+        {
+          "key": "footingDepth",
+          "label": "Footing depth",
+          "type": "length",
+          "default": 0,
+          "min": 0,
+          "max": 10,
+          "group": "Foundation"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "brick",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "water.drain_pipe",
+      "name": "Drainage pipe",
+      "category": "water",
+      "subcategory": "Underground drainage",
+      "builder": "pipe",
+      "geometry": "path",
+      "modelGroup": "drainage",
+      "parameters": [
+        {
+          "key": "diameter",
+          "label": "Outside diameter",
+          "type": "length",
+          "default": 0.2,
+          "min": 0.005,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "axisOffset",
+          "label": "Axis offset from path elevation",
+          "type": "length",
+          "default": -1.2,
+          "min": -30,
+          "max": 30,
+          "group": "Elevation"
+        },
+        {
+          "key": "service",
+          "label": "Service",
+          "type": "text",
+          "default": "storm",
+          "group": "Specification"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "hdpe",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "water.drainage_channel",
+      "name": "Linear drainage channel",
+      "category": "water",
+      "subcategory": "Surface drainage",
+      "builder": "channel",
+      "geometry": "path",
+      "modelGroup": "drainage",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Overall width",
+          "type": "length",
+          "default": 0.15,
+          "min": 0.02,
+          "max": 3,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "depth",
+          "label": "Body depth",
+          "type": "length",
+          "default": 0.25,
+          "min": 0.02,
+          "max": 5,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "gradient",
+          "label": "Design gradient (information)",
+          "type": "number",
+          "unit": "%",
+          "default": 0.5,
+          "min": 0,
+          "max": 100,
+          "group": "Hydraulics"
+        },
+        {
+          "key": "flowDirection",
+          "label": "Flow direction",
+          "type": "enum",
+          "default": "forward",
+          "options": [
+            "forward",
+            "reverse"
+          ],
+          "group": "Hydraulics"
+        },
+        {
+          "key": "outletTo",
+          "label": "Outlet / connection (element ID or note)",
+          "type": "text",
+          "group": "Hydraulics"
+        },
+        {
+          "key": "grateMaterial",
+          "label": "Grate material",
+          "type": "material",
+          "default": "grate_steel",
+          "group": "Appearance"
+        },
+        {
+          "key": "bodyMaterial",
+          "label": "Body material",
+          "type": "material",
+          "default": "concrete_precast",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "water.inspection_chamber",
+      "name": "Drainage inspection chamber",
+      "category": "water",
+      "subcategory": "Underground drainage",
+      "builder": "chamber",
+      "geometry": "point",
+      "modelGroup": "drainage",
+      "parameters": [
+        {
+          "key": "shape",
+          "label": "Chamber shape",
+          "type": "enum",
+          "default": "round",
+          "options": [
+            "round",
+            "square"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "innerSize",
+          "label": "Internal diameter / size",
+          "type": "length",
+          "default": 1,
+          "min": 0.1,
+          "max": 10,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "wallThickness",
+          "label": "Wall thickness",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.01,
+          "max": 1,
+          "group": "Dimensions"
+        },
+        {
+          "key": "depth",
+          "label": "Depth (cover to invert)",
+          "type": "length",
+          "default": 1.5,
+          "min": 0.1,
+          "max": 20,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "coverShape",
+          "label": "Cover shape",
+          "type": "enum",
+          "default": "round",
+          "options": [
+            "round",
+            "square"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "coverSize",
+          "label": "Clear opening size",
+          "type": "length",
+          "default": 0.6,
+          "min": 0.1,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "coverLevelOffset",
+          "label": "Cover level offset",
+          "type": "length",
+          "default": 0,
+          "min": -2,
+          "max": 2,
+          "group": "Elevation"
+        },
+        {
+          "key": "loadClass",
+          "label": "Cover load class",
+          "type": "text",
+          "group": "Specification"
+        },
+        {
+          "key": "service",
+          "label": "Service",
+          "type": "text",
+          "default": "storm",
+          "group": "Specification"
+        },
+        {
+          "key": "material",
+          "label": "Body material",
+          "type": "material",
+          "default": "concrete_precast",
+          "group": "Appearance"
+        },
+        {
+          "key": "coverMaterial",
+          "label": "Cover material",
+          "type": "material",
+          "default": "cast_iron",
+          "group": "Appearance"
+        }
+      ]
+    },
+    {
+      "id": "water.rainwater_tank",
+      "name": "Underground rainwater tank",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "tank",
+      "geometry": "point",
+      "modelGroup": "underground",
+      "parameters": [
+        {
+          "key": "shape",
+          "label": "Shape",
+          "type": "enum",
+          "default": "horizontal_cylinder",
+          "options": [
+            "box",
+            "horizontal_cylinder",
+            "vertical_cylinder"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "length",
+          "label": "Length (local X)",
+          "type": "length",
+          "default": 3.5,
+          "min": 0.2,
+          "max": 50,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "width",
+          "label": "Width / diameter",
+          "type": "length",
+          "default": 1.8,
+          "min": 0.2,
+          "max": 30,
+          "required": true,
+          "group": "Dimensions"
+        },
+        {
+          "key": "height",
+          "label": "Height",
+          "type": "length",
+          "default": 1.8,
+          "min": 0.2,
+          "max": 30,
+          "group": "Dimensions"
+        },
+        {
+          "key": "installation",
+          "label": "Installation",
+          "type": "enum",
+          "default": "underground",
+          "options": [
+            "underground",
+            "above_ground"
+          ],
+          "group": "Configuration"
+        },
+        {
+          "key": "coverDepth",
+          "label": "Cover depth (ground to top of tank)",
+          "type": "length",
+          "default": 0.8,
+          "min": 0,
+          "max": 20,
+          "group": "Elevation"
+        },
+        {
+          "key": "accessShaft",
+          "label": "Access shaft",
+          "type": "bool",
+          "default": true,
+          "group": "Configuration"
+        },
+        {
+          "key": "shaftDiameter",
+          "label": "Access shaft diameter",
+          "type": "length",
+          "default": 0.6,
+          "min": 0.2,
+          "max": 3,
+          "group": "Dimensions"
+        },
+        {
+          "key": "nominalVolume",
+          "label": "Nominal volume",
+          "type": "number",
+          "unit": "m3",
+          "default": null,
+          "min": 0,
+          "max": 100000,
+          "group": "Capacity"
+        },
+        {
+          "key": "material",
+          "label": "Material",
+          "type": "material",
+          "default": "hdpe",
+          "group": "Appearance"
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "key": "acrylic_court",
+      "name": "Sports court acrylic",
+      "color": [
+        64,
+        112,
+        150
+      ]
+    },
+    {
+      "key": "aluminium",
+      "name": "Aluminium",
+      "color": [
+        192,
+        196,
+        200
+      ]
+    },
+    {
+      "key": "asphalt",
+      "name": "Asphalt",
+      "color": [
+        72,
+        72,
+        74
+      ]
+    },
+    {
+      "key": "asphalt_red",
+      "name": "Coloured asphalt (cycle)",
+      "color": [
+        150,
+        64,
+        52
+      ]
+    },
+    {
+      "key": "bark",
+      "name": "Bark",
+      "color": [
+        96,
+        74,
+        56
+      ]
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "color": [
+        160,
+        92,
+        70
+      ]
+    },
+    {
+      "key": "building_massing",
+      "name": "Building massing",
+      "color": [
+        222,
+        220,
+        214
+      ]
+    },
+    {
+      "key": "cast_iron",
+      "name": "Cast iron cover",
+      "color": [
+        70,
+        70,
+        72
+      ]
+    },
+    {
+      "key": "concrete",
+      "name": "Concrete",
+      "color": [
+        170,
+        170,
+        166
+      ]
+    },
+    {
+      "key": "concrete_paver",
+      "name": "Concrete paving",
+      "color": [
+        178,
+        174,
+        166
+      ]
+    },
+    {
+      "key": "concrete_precast",
+      "name": "Precast concrete",
+      "color": [
+        150,
+        150,
+        146
+      ]
+    },
+    {
+      "key": "default",
+      "name": "Default",
+      "color": [
+        200,
+        200,
+        200
+      ]
+    },
+    {
+      "key": "fabric",
+      "name": "Fabric membrane",
+      "color": [
+        236,
+        234,
+        226
+      ],
+      "alpha": 0.9
+    },
+    {
+      "key": "foliage",
+      "name": "Foliage (deciduous)",
+      "color": [
+        94,
+        140,
+        70
+      ],
+      "alpha": 0.92
+    },
+    {
+      "key": "foliage_evergreen",
+      "name": "Foliage (evergreen)",
+      "color": [
+        52,
+        96,
+        60
+      ],
+      "alpha": 0.95
+    },
+    {
+      "key": "foliage_fruit",
+      "name": "Foliage (fruit tree)",
+      "color": [
+        120,
+        150,
+        70
+      ],
+      "alpha": 0.92
+    },
+    {
+      "key": "gabion",
+      "name": "Gabion",
+      "color": [
+        140,
+        132,
+        118
+      ]
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "color": [
+        190,
+        220,
+        230
+      ],
+      "alpha": 0.35
+    },
+    {
+      "key": "grass",
+      "name": "Lawn",
+      "color": [
+        104,
+        152,
+        72
+      ]
+    },
+    {
+      "key": "grass_grid",
+      "name": "Grass grid",
+      "color": [
+        118,
+        146,
+        92
+      ]
+    },
+    {
+      "key": "grate_steel",
+      "name": "Steel grating",
+      "color": [
+        90,
+        92,
+        96
+      ]
+    },
+    {
+      "key": "gravel",
+      "name": "Gravel / aggregate",
+      "color": [
+        188,
+        178,
+        158
+      ]
+    },
+    {
+      "key": "hdpe",
+      "name": "HDPE",
+      "color": [
+        40,
+        40,
+        42
+      ]
+    },
+    {
+      "key": "line_paint_blue",
+      "name": "Line paint (blue)",
+      "color": [
+        40,
+        96,
+        180
+      ]
+    },
+    {
+      "key": "line_paint_white",
+      "name": "Line paint (white)",
+      "color": [
+        240,
+        240,
+        236
+      ]
+    },
+    {
+      "key": "line_paint_yellow",
+      "name": "Line paint (yellow)",
+      "color": [
+        236,
+        196,
+        40
+      ]
+    },
+    {
+      "key": "luminaire",
+      "name": "Luminaire",
+      "color": [
+        250,
+        244,
+        210
+      ]
+    },
+    {
+      "key": "marking_green",
+      "name": "Cycle box (green)",
+      "color": [
+        70,
+        150,
+        90
+      ]
+    },
+    {
+      "key": "meadow",
+      "name": "Meadow",
+      "color": [
+        146,
+        166,
+        92
+      ]
+    },
+    {
+      "key": "mulch",
+      "name": "Bark mulch",
+      "color": [
+        122,
+        88,
+        62
+      ]
+    },
+    {
+      "key": "natural_stone",
+      "name": "Natural stone paving",
+      "color": [
+        196,
+        186,
+        168
+      ]
+    },
+    {
+      "key": "permeable_paver",
+      "name": "Permeable paving",
+      "color": [
+        160,
+        150,
+        136
+      ]
+    },
+    {
+      "key": "planting_flowers",
+      "name": "Planting (flowering)",
+      "color": [
+        176,
+        112,
+        150
+      ]
+    },
+    {
+      "key": "planting_mixed",
+      "name": "Planting (mixed)",
+      "color": [
+        86,
+        132,
+        70
+      ]
+    },
+    {
+      "key": "plastic_dark",
+      "name": "Plastic (dark)",
+      "color": [
+        52,
+        54,
+        56
+      ]
+    },
+    {
+      "key": "plastic_green",
+      "name": "Plastic (green)",
+      "color": [
+        60,
+        110,
+        70
+      ]
+    },
+    {
+      "key": "pond_liner",
+      "name": "Pond liner",
+      "color": [
+        54,
+        58,
+        56
+      ]
+    },
+    {
+      "key": "pool_finish",
+      "name": "Pool finish",
+      "color": [
+        176,
+        214,
+        226
+      ]
+    },
+    {
+      "key": "porcelain",
+      "name": "Porcelain tiles",
+      "color": [
+        208,
+        202,
+        192
+      ]
+    },
+    {
+      "key": "rubber",
+      "name": "Rubber safety surface",
+      "color": [
+        176,
+        72,
+        58
+      ]
+    },
+    {
+      "key": "sand",
+      "name": "Play sand",
+      "color": [
+        226,
+        208,
+        166
+      ]
+    },
+    {
+      "key": "sedum",
+      "name": "Green roof (sedum)",
+      "color": [
+        128,
+        150,
+        84
+      ]
+    },
+    {
+      "key": "sign_plate",
+      "name": "Sign plate",
+      "color": [
+        232,
+        232,
+        228
+      ]
+    },
+    {
+      "key": "soil",
+      "name": "Planting soil",
+      "color": [
+        102,
+        80,
+        60
+      ]
+    },
+    {
+      "key": "solar_pv",
+      "name": "Solar PV module",
+      "color": [
+        34,
+        46,
+        78
+      ]
+    },
+    {
+      "key": "steel_dark",
+      "name": "Powder-coated steel (dark)",
+      "color": [
+        58,
+        60,
+        64
+      ]
+    },
+    {
+      "key": "steel_galv",
+      "name": "Galvanised steel",
+      "color": [
+        168,
+        172,
+        176
+      ]
+    },
+    {
+      "key": "stone_wall",
+      "name": "Stone masonry",
+      "color": [
+        162,
+        150,
+        132
+      ]
+    },
+    {
+      "key": "tactile",
+      "name": "Tactile paving",
+      "color": [
+        222,
+        186,
+        54
+      ]
+    },
+    {
+      "key": "timber",
+      "name": "Timber",
+      "color": [
+        150,
+        108,
+        72
+      ]
+    },
+    {
+      "key": "timber_deck",
+      "name": "Timber decking",
+      "color": [
+        160,
+        118,
+        80
+      ]
+    },
+    {
+      "key": "water",
+      "name": "Water",
+      "color": [
+        96,
+        160,
+        206
+      ],
+      "alpha": 0.55
+    },
+    {
+      "key": "zone_coverage",
+      "name": "Illustrative coverage",
+      "color": [
+        250,
+        220,
+        90
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_excavation",
+      "name": "Excavation envelope",
+      "color": [
+        170,
+        120,
+        60
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_generic",
+      "name": "Zone",
+      "color": [
+        150,
+        150,
+        150
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_heat",
+      "name": "Heated / comfort zone",
+      "color": [
+        240,
+        140,
+        60
+      ],
+      "alpha": 0.2
+    },
+    {
+      "key": "zone_root",
+      "name": "Root protection zone",
+      "color": [
+        120,
+        170,
+        80
+      ],
+      "alpha": 0.18
+    },
+    {
+      "key": "zone_safety",
+      "name": "Safety zone",
+      "color": [
+        230,
+        80,
+        60
+      ],
+      "alpha": 0.18
+    },
+    {
+      "key": "zone_service",
+      "name": "Service / maintenance zone",
+      "color": [
+        80,
+        140,
+        230
+      ],
+      "alpha": 0.18
+    }
+  ],
+  "elements": [
+    {
+      "id": "8acf4b54-319b-4152-a585-1253aa9e18a3",
+      "type": "site.boundary",
+      "category": "site",
+      "subcategory": "Boundaries",
+      "builder": "outline",
+      "name": "Site boundary",
+      "label": "SB-001",
+      "layer": "C-PROP-BNDY",
+      "modelGroup": "annotations",
+      "revision": 1,
+      "contentHash": "d510af3c48bb4adf38607cb61d962f9021366ee30a4d16e6e6e698e788125ec2",
+      "parameters": {
+        "lineHeight": 0.02
+      }
+    },
+    {
+      "id": "be689cb3-c63f-402c-a46b-c2691a070e4b",
+      "type": "building.footprint",
+      "category": "buildings",
+      "subcategory": "Buildings",
+      "builder": "massing",
+      "name": "Building A",
+      "label": "B-001",
+      "layer": "A-BLDG-REF",
+      "modelGroup": "buildings",
+      "revision": 1,
+      "contentHash": "4539a2dea7cea5c09abcc2129bd53bff06813019ee2f6e84fd1de3f0a50d7923",
+      "parameters": {
+        "baseOffset": 0,
+        "height": 18,
+        "material": "building_massing",
+        "storeys": 6
+      }
+    },
+    {
+      "id": "92208afb-f758-4616-8c62-4fcad43df959",
+      "type": "building.footprint",
+      "category": "buildings",
+      "subcategory": "Buildings",
+      "builder": "massing",
+      "name": "Building B",
+      "label": "B-002",
+      "layer": "A-BLDG-REF",
+      "modelGroup": "buildings",
+      "revision": 1,
+      "contentHash": "35f4fc87160b4c482729e92663629f2853477dc862451f705c4782e7e8dbc50d",
+      "parameters": {
+        "baseOffset": 0,
+        "height": 15,
+        "material": "building_massing",
+        "storeys": 5
+      }
+    },
+    {
+      "id": "f55cee3d-034b-45d7-ba26-96556c34220f",
+      "type": "building.entrance",
+      "category": "buildings",
+      "subcategory": "References",
+      "builder": "marker",
+      "name": "Building entrance reference",
+      "label": "EN-001",
+      "layer": "A-BLDG-REF",
+      "modelGroup": "buildings",
+      "revision": 1,
+      "contentHash": "ee828e55456c58ff9803b9b9b6e239ea3d0aeadce779b9a1dba2a9f1f8358f05",
+      "parameters": {
+        "material": "line_paint_blue",
+        "reference": "A",
+        "size": 1.2
+      }
+    },
+    {
+      "id": "fc05ab26-d4b9-469f-b015-8ef4af202a82",
+      "type": "building.entrance",
+      "category": "buildings",
+      "subcategory": "References",
+      "builder": "marker",
+      "name": "Building entrance reference",
+      "label": "EN-002",
+      "layer": "A-BLDG-REF",
+      "modelGroup": "buildings",
+      "revision": 1,
+      "contentHash": "ec078b3a176e861ada808d310d516150be8c0ac854b59cef79026884be3d1896",
+      "parameters": {
+        "material": "line_paint_blue",
+        "reference": "B",
+        "size": 1.2
+      }
+    },
+    {
+      "id": "1c5c971d-afb9-4c9f-92a5-18711738b842",
+      "type": "road.access_road",
+      "category": "roads",
+      "subcategory": "Roads",
+      "builder": "linear_slab",
+      "name": "Internal access road (centreline)",
+      "label": "R-001",
+      "layer": "C-ROAD",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "08f16cc5f5472ff07740c961574a3ed750838f93e62795c9d0cc01e33e9e5a17",
+      "parameters": {
+        "material": "asphalt",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.1,
+        "topOffset": 0,
+        "width": 6
+      }
+    },
+    {
+      "id": "86c4230a-9804-4c5c-bb04-e88e36c3db60",
+      "type": "surface.asphalt",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab",
+      "name": "Parking area",
+      "label": "P-005",
+      "layer": "C-ROAD",
+      "modelGroup": "surfaces",
+      "revision": 1,
+      "contentHash": "205f9ed8204b9692631e5942044f8a7d705bb755c123d0fc2b3cea28bba37727",
+      "parameters": {
+        "buildup": "",
+        "jointPattern": "none",
+        "material": "asphalt",
+        "surfaceCode": "",
+        "thickness": 0.1,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "8650dd1f-8843-4c05-8225-358ae750708a",
+      "type": "road.pedestrian_crossing",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "stripes",
+      "name": "Pedestrian crossing (striped)",
+      "label": "PC-001",
+      "layer": "C-ROAD-MARK",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "9894d01be2eef9caa779acf920965ff312aa04b4ae19e80a852a5883571b1a95",
+      "parameters": {
+        "gapWidth": 0.5,
+        "material": "line_paint_white",
+        "stripeWidth": 0.5,
+        "thickness": 0.003
+      }
+    },
+    {
+      "id": "ea588d5b-d74b-42d2-b093-6237f8659cf3",
+      "type": "road.arrow",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "arrow_marking",
+      "name": "Traffic arrow",
+      "label": "AR-002",
+      "layer": "C-ROAD-MARK",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "14365ea1a7bc864ba365e4a90018b2c06ee3f26a8a504432540b53a762d7c9d1",
+      "parameters": {
+        "length": 5,
+        "material": "line_paint_white",
+        "shaftWidth": 0.15,
+        "thickness": 0.003,
+        "width": 1
+      }
+    },
+    {
+      "id": "afa341fb-ef37-4a1a-85ec-86f2a25c1cd9",
+      "type": "road.arrow",
+      "category": "roads",
+      "subcategory": "Markings",
+      "builder": "arrow_marking",
+      "name": "Traffic arrow",
+      "label": "AR-001",
+      "layer": "C-ROAD-MARK",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "d8ed4e90b711e7d6a34ca6a39ac8673d7b81942569ab12edfc40570f9edc586b",
+      "parameters": {
+        "length": 5,
+        "material": "line_paint_white",
+        "shaftWidth": 0.15,
+        "thickness": 0.003,
+        "width": 1
+      }
+    },
+    {
+      "id": "12ce7487-6ba2-448f-a92c-a10ab343f3dd",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-032",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "81ca95d9644a72d05d2ddd85434da6ccd8f0941859cffb29d513e37a52ebadec",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "39453be7-0315-455a-978d-df6c6d73486e",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-033",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "f5e8bc3fefb5bf517854d43680cc293f1174e2385c243cc62ce58b2c7f625b0b",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "38699414-4619-4431-bfc3-888a89c000db",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-034",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "f40aac0cc7d46d43c421078119e720a36ee3b4ae08db03a69f7ea0d0d7ad18ba",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "ef796bfa-efbc-478d-bff7-5e153ab8552f",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-035",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "ece64e71aa9444e7b9c73367bf0827925d020dec4d3b6c640c62d020d9489e65",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "16a803f9-3e96-4bb6-8d6e-7cbd8bc7d83c",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-036",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "a7efcd5ac4489194ab6558f576c20308808f065aeeb9cd82f02612060beeb823",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "6c2126e7-945b-47e5-b7c3-47bc4acb3bdb",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-037",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "15f9f17a857e6437f43b41e8116eec6048807b9e03f622ddc60550084b9edc1f",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "6b73b99b-c00b-4a7a-bd02-6ef2dcb3b49f",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-038",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "55ca5aa8fe73ee3e95b061cbbdb229118d1694e46e734708de620a01ecdeebe8",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "959b5a2c-5df3-44f0-a651-febbd1adcfe4",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-039",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "dc6d14618d3a5e36eadfa28f3d8b8bb0db30aa65d073d76fb0a9e2d0a5d3df20",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "1470a9bc-4df0-4021-be99-9cc77d9e876d",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-040",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "570f33cdedd0a1387268b0d93584074419d382bb3a821bd86d8f351fe113ef22",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "f20669ca-92a3-40b6-b5c6-b4225d3e9a0c",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-041",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "4215fd149aabdf9d7355b709c138d083ea9a871709e08681ab8a121b232c2d8a",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "56ed6214-c220-475f-8e39-ee3acb710902",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-042",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "71cfd7b0a7aaa277f7e509dbb5fe3ae6833d0c15bf215cd5c4414bbe01122e80",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "3ca789f3-d7eb-4938-9164-09e6115bb1e8",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-043",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "b430a9500c7f560c237047e83d8e9a95de83f0cdc7c5c2335f93bf8da40ac70f",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "89908e30-2a04-4107-a351-510907e942ac",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-044",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "808968cc813e5f6379f825d0fc0b4e38617c30a4725c4d8e40bec45586f707bd",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "00d871de-ef6c-47d0-aa7d-5c398bf8e269",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-045",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "8ea7ca343a90c91458f40811aaca2caf890c9d8cb662ac84ce18237cea5cb958",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "a3b4ca21-b1e8-44ff-bee1-dddc3b6d7579",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-046",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "fb587ec1c018e44f1a23bc51bf59d56ca7328935a1629c8eab86fb6df74c7429",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "fabb81ec-9dfc-4578-8480-a2b1ca4b1083",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-047",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "cf25dc1d868e7434aaaa990f402d0a09267c5211d1e999ffb6f70795115886c9",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "cd70f269-8ffd-42ce-b724-be12fbb3c2e1",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-048",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "8280f6dbaed7a174a719a404cd171ca0586fbdc052d91aa5c526b259f29d60cc",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "370d957f-4077-4d0b-94db-71bcb12b7b6f",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-049",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "0baf58b4a4139f4ca66e1c5e2acad797c6e8b21535b31dbeb3750fcae6589eb5",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "097f5973-1f70-40a6-a900-23d4b2a17ecb",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-050",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "3acfdbd7f7bf98d5dab7ab016b79a14bd213e0ce41db56ec2217c0bc46565118",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "4b7d0e38-3d91-4e37-bc14-be3809054d3f",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-051",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "409c4263c73570e46869151b0d0de31cb603362f1d1a1fcd775e3cf8931918ca",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "ce8eb9dd-8b08-4a6e-ba71-090cb4db2ed2",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-052",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "62cee936faf18cb0306a7cdbc0dd4234a20379151a56635c41ac3be70003d754",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "f0a3f5ba-ed30-4168-ab5f-8202221f89d7",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-053",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "9485d3499f39c986a9b7424072ba9b3737d3f92d6a5dc54d769efe6191b0509d",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "b96cbaef-2943-42cc-8c14-a9c9de0a4f9a",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-054",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "3fc72c9c63a49113f4c9e779bf44cea2529eeeefb682575264190297fa0b9b90",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "854d603c-c1b3-4fee-a2ef-fc391a985af9",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-055",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "5c8f37fb8524d81d05b176a1e53711be883bb6eff53d881e51325d7faf3f907a",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "c41bc6e8-5b36-469f-84d4-796d0392b00e",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-056",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "1f4ed7faa4800aa49156ada35e37fd1ff545799390704a7f4502394cebb3b9a4",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "30587289-a069-4faa-ab52-c80251bf49bd",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-057",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "642f52337d03e419b8963076b8d40a5d4c45012cab1f2e26b443aeb66a4034be",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "622d6934-1157-4554-9fe9-5c2fa56c3532",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-058",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "8485b3e8cc189b361626a2d0fcec43e96abbb573b30fb4b93fadde1e2757fac1",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "64c311db-fc7a-4dad-9528-eab7ac238a1f",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-059",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "96f48ba806c5da4de4838fe6f0f561d92e013c019fa18d83f86f34009b87b946",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "af6f7a22-f65c-406a-bb1f-8113062aa021",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-060",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "efe083e02061abe694a52bd8453a52477fc648f3c3531d6d7f38b10744617c72",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "94864fd2-da75-4502-b543-c47963a62489",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-061",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "365dfc12e4885081a77be890a24c4738b3d43d1447d089c5e0d8b8c350314d9c",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "5fa1ff1f-2d9d-4f28-a251-ae1f1d4c59b6",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-062",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "83c3ea15d04fcb196e75d629aaba6f424a6ccaf47a73c2020064a3d1e9a89094",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "89da2d50-0e1f-4f9f-a2ed-740e857ce97e",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-063",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "48f862387dc6d7a85f84939d3305334ae821f78872b5c52adbdf4a3dd480c6cb",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "c16cde3a-13a5-48d4-af0b-6e5cb417b280",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-001",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "47d0edd6cf53428d055eede2fb9c028cd34b9e301e26291303da112cd05da8e8",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "037095da-8be0-4026-be0f-01753ac410a9",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-002",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "6c5b7e229f7bf4cb1dc7fc8a66609f985407dcee7c54d9492f0ad2ba8db258b7",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "f0bc426f-df43-4c1f-883c-bcc80cde1116",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-003",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "7bb06092f6782709aef6bae299418b21e8ebe22f7722c19921828793681d8809",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "664e9f46-0135-433d-96a0-31ca8bc05421",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-004",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "d83cfebdce1834c16387a97574cd58c98861852a35292c7a0fe65dc936cbb78b",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "50db1c96-4f58-4b40-949a-52e31305cca9",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-005",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "6b072f14eee66f12957b64ccd26b7d93d90f235489d12e24e63aa6253a10c1fd",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "a2e70c4b-fba6-427a-8bf4-58ad2aadf3c4",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-006",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "4ebfcaf7d908c07d024a87c70132b88f3f17ff82b82b1dbd7f3760954a03063b",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "46e5ff33-e641-4625-8244-8e7222ac6903",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-007",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "f2e83390f9e3abcc9498c239e6f7f936467ea9f97f9ffc3c07edd686d0a27d3d",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "d2f2f2be-dbc8-4c70-b481-ca1db39a60a7",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-008",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "fe95d114a91014e50800568053e1f0d31565561653d59c9f1bb360dd30ec0c94",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "31bf3c64-bd18-499a-8b06-3a61cfad6579",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-009",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "f849c16cbd3a9f15e37cc5293c5b1a43ee5a4d42dcbd059d398abbd7183c5674",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "f799b16c-f420-4272-899a-eef1a566e567",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-010",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "92d2246cfe553a76de327241aec9cae06a5325c293d2786ee6abdf266f797a98",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "0d9f4478-129c-4586-9582-c34fd1ff3642",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-011",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "8e52303add39a46850d04ac447a1c4d475c318fd8d49300133b2c3d06f4c4471",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "4c103e5e-4eb1-4045-9409-324486033d6c",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-012",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "60c786a7c81ccc1f2bcf4fee7f5afcd9d1c5481598ec85eb213a442dda56ffe8",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "0b0ec8b3-fadb-4333-a417-50d02b12dece",
+      "type": "road.parking_bay_ev",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "EV charging parking bay",
+      "label": "PB-013",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "a0332e67bb45e073e7f9e5f74b70ce65cddfe603cfb9f93d363c0b22818e23f1",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": true,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "37481874-40cb-4c62-b718-fcdd3a26e496",
+      "type": "road.parking_bay_ev",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "EV charging parking bay",
+      "label": "PB-014",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "80a9fb7dbb4403599c983e69360cf20d03e94e3ce8d26b9abea2c2c76c893815",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": true,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "ea59c656-882f-4e4a-9cad-1d72a8e74f4b",
+      "type": "road.parking_bay_ev",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "EV charging parking bay",
+      "label": "PB-015",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "912d88d01272ce1ef87b2125575fe48ae81a862cf8eb53b4336d7f2ab923595e",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": true,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "a1f253f1-1d99-417d-ada5-6d62b8b2d2dc",
+      "type": "road.parking_bay_ev",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "EV charging parking bay",
+      "label": "PB-016",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "ba7228231de7377759847542622475f5f73dae4bdc277260b6b9ffd096d5c8c7",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": true,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "c53949cf-15be-465f-bc55-3fcc59b723a7",
+      "type": "road.parking_bay_accessible",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Accessible parking bay",
+      "label": "PB-017",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "61ab7728ba32aeca537876ae3ea902320a508e832f6f9316ced72975e0aef969",
+      "parameters": {
+        "accessible": true,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_blue",
+        "width": 3.6
+      }
+    },
+    {
+      "id": "c8aaa43d-1d88-4a18-80f2-011648ef4c4c",
+      "type": "road.parking_bay_accessible",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Accessible parking bay",
+      "label": "PB-018",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "186d905ef5cc4b14dc89930f508dbe5d94c68f2d503f194296fa42c09c90c03b",
+      "parameters": {
+        "accessible": true,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_blue",
+        "width": 3.6
+      }
+    },
+    {
+      "id": "a1f0afba-b997-4b2a-bc90-e1d7a8688033",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-019",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "0b94a2dd768e95504e253a5f6bf9a72e99bb257873b766b20b1c155cc2fb67cd",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "4e3e2deb-b920-46f0-95c4-267ec13cca25",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-020",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "bc477f829577c1c5174c411415fdf8ce65b73338ad6fe8cc2f94defbed46c810",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "e5fd25f3-fbcb-4b56-8e34-49d845fbf2ef",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-021",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "230ccc519cab3ac5d29b873b6b46241ae608491be0e55601be8c66da5b4d60a8",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "a4a0383e-f9a6-4050-8de6-f9445b5b1af0",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-022",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "dc467c3cf90ac1561976e06e417d42fd11b6794e5eedc310add3da03bd97c4ba",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "fd18214f-de46-4bb8-bbf9-158cf3b799d8",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-023",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "42acdb4be77ec5e72fc70df962990e20d0e135b1eb033a56bc9827a9ac063079",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "baef1c6a-7af8-484b-baac-16c5891426c9",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-024",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "46445e027943f00b6e858c92403cd293a4337ca12fd641f9e3d9bb5fe5b95e90",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "5ccd0762-0226-4b63-b37f-f20873fa4eb9",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-025",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "4fb8dbd2da9c802eddd5d2f14e2cb375c68b3f8c0773b9c7e56f6135f4f6199e",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "769c9154-855f-4ed1-832d-7395de1cc905",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-026",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "d6966294924f140cdf6d9599c36cd3e3751140ce7ac07a944f811b6b0654966f",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "7fadf499-5c2d-4364-a2c1-b01e4c78dca7",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-027",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "0d4c6f461f169069635a7650d02dd18227bbdc1995b3217a332ebdd1d05bc333",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "0cc67498-7220-498d-88d6-879d14497f57",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-028",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "25af613fa64d33dc34eb736d77367554ed3749141da690eed6d5a6758195028b",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "f995e6ab-4046-43ac-89ad-951d5406b60a",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-029",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "b667625e8070e449bff9a46d4ee01e285b8c7ff22e10a32d3019d8fe3f9757c6",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "43c41c4f-1bc3-4ae3-921d-4934b2183a90",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-030",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "cb658e7b6d7427eb9ab94b545ff26bd952f75a00fee69b401d01f43e2772fe81",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "3aad6992-8258-46ef-829b-45367212b736",
+      "type": "road.parking_bay",
+      "category": "roads",
+      "subcategory": "Parking",
+      "builder": "parking_bay",
+      "name": "Parking bay",
+      "label": "PB-031",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "e06543f8a3364a4509b00052d590df20ed320e422150ad681520a793fdeffdbf",
+      "parameters": {
+        "accessible": false,
+        "bayNumber": "",
+        "ev": false,
+        "length": 5,
+        "lineWidth": 0.12,
+        "markingMaterial": "line_paint_white",
+        "width": 2.5
+      }
+    },
+    {
+      "id": "ee703cde-e51c-423e-99bb-7d09eb4ef8b2",
+      "type": "sustainability.ev_charger_pedestal",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment",
+      "name": "EV charging station (pedestal)",
+      "label": "EV-001",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "910a5b226450784573be498e3a5b19554515116111121039df5d86866721bee5",
+      "parameters": {
+        "baseOffset": 0,
+        "depth": 0.3,
+        "height": 1.5,
+        "material": "steel_dark",
+        "power": null,
+        "serviceClearance": null,
+        "width": 0.4
+      },
+      "properties": {
+        "notes": "Charger model to be confirmed"
+      }
+    },
+    {
+      "id": "131393f9-3a08-4f94-b236-4595e58e96ae",
+      "type": "sustainability.ev_charger_pedestal",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment",
+      "name": "EV charging station (pedestal)",
+      "label": "EV-002",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "6dc9d358446882f2ed9c6973cc394627dc40e7edfbddc60b32d1d1664049cc6f",
+      "parameters": {
+        "baseOffset": 0,
+        "depth": 0.3,
+        "height": 1.5,
+        "material": "steel_dark",
+        "power": null,
+        "serviceClearance": null,
+        "width": 0.4
+      },
+      "properties": {
+        "notes": "Charger model to be confirmed"
+      }
+    },
+    {
+      "id": "94329130-285a-42c2-8146-8ed12e581bfc",
+      "type": "sustainability.ev_charger_pedestal",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment",
+      "name": "EV charging station (pedestal)",
+      "label": "EV-003",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "a7f67fd1e8857023234efe18e84dc7b9e206814390d53d9f151505c9046c0845",
+      "parameters": {
+        "baseOffset": 0,
+        "depth": 0.3,
+        "height": 1.5,
+        "material": "steel_dark",
+        "power": null,
+        "serviceClearance": null,
+        "width": 0.4
+      },
+      "properties": {
+        "notes": "Charger model to be confirmed"
+      }
+    },
+    {
+      "id": "57269129-89a7-47da-99db-12ba5a10adc1",
+      "type": "sustainability.ev_charger_pedestal",
+      "category": "sustainability",
+      "subcategory": "EV charging",
+      "builder": "box_equipment",
+      "name": "EV charging station (pedestal)",
+      "label": "EV-004",
+      "layer": "C-ROAD-PRKG",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "90c13b5057070de1134930dc63d914c83fac73fc18d3179db572d9089af9dc8b",
+      "parameters": {
+        "baseOffset": 0,
+        "depth": 0.3,
+        "height": 1.5,
+        "material": "steel_dark",
+        "power": null,
+        "serviceClearance": null,
+        "width": 0.4
+      },
+      "properties": {
+        "notes": "Charger model to be confirmed"
+      }
+    },
+    {
+      "id": "456507c9-2adb-410d-a794-a30a0a4c5f6c",
+      "type": "surface.concrete_paving",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab",
+      "name": "Front paving",
+      "label": "P-004",
+      "layer": "L-SURF",
+      "modelGroup": "surfaces",
+      "revision": 1,
+      "contentHash": "8bda92ab30d9ba66a83bc8c02ea08ce9bdc6cf01d659488649801a71da9cbfc1",
+      "parameters": {
+        "buildup": "",
+        "jointPattern": "stretcher",
+        "material": "concrete_paver",
+        "surfaceCode": "P1",
+        "thickness": 0.08,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "f142391e-6043-439d-a671-e0c5e8df1217",
+      "type": "surface.natural_stone",
+      "category": "surfaces",
+      "subcategory": "Paving",
+      "builder": "slab",
+      "name": "Courtyard",
+      "label": "P-003",
+      "layer": "L-SURF",
+      "modelGroup": "surfaces",
+      "revision": 1,
+      "contentHash": "9a94c0701db870b0494a589f7fb3bab5070c0edf000217623cb91cb1fb3f51f8",
+      "parameters": {
+        "buildup": "",
+        "jointPattern": "random",
+        "material": "natural_stone",
+        "surfaceCode": "P2",
+        "thickness": 0.06,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "a362f67d-69db-48f0-845d-89a520eda259",
+      "type": "road.bollard",
+      "category": "roads",
+      "subcategory": "Barriers",
+      "builder": "bollard",
+      "name": "Bollard",
+      "label": "BO-001",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "39aac8417a4e2684411e377a134a8246e9082daea9c0be755c50040ec6669bd8",
+      "parameters": {
+        "diameter": 0.2,
+        "fixtureCode": "",
+        "height": 0.9,
+        "lit": false,
+        "material": "steel_dark",
+        "power": null,
+        "removable": false
+      }
+    },
+    {
+      "id": "104b8cf4-f888-4795-a3b7-9c122dc2b112",
+      "type": "road.bollard",
+      "category": "roads",
+      "subcategory": "Barriers",
+      "builder": "bollard",
+      "name": "Bollard",
+      "label": "BO-002",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "ba25eab1310cdc480999f447c6e1bcd1ddf99a1e6cb8140c259fbba0e2636bb3",
+      "parameters": {
+        "diameter": 0.2,
+        "fixtureCode": "",
+        "height": 0.9,
+        "lit": false,
+        "material": "steel_dark",
+        "power": null,
+        "removable": false
+      }
+    },
+    {
+      "id": "3c6c0b0a-4bbe-4ca5-8bce-d85a17f395ad",
+      "type": "surface.lawn",
+      "category": "surfaces",
+      "subcategory": "Soft landscape",
+      "builder": "slab",
+      "name": "North lawn",
+      "label": "P-001",
+      "layer": "L-PLNT",
+      "modelGroup": "surfaces",
+      "revision": 1,
+      "contentHash": "c074997948d7bbbc9d2833dce5be214206a0ffb2179a9796abfd0e974f528eab",
+      "parameters": {
+        "buildup": "Turf on topsoil",
+        "jointPattern": "none",
+        "material": "grass",
+        "surfaceCode": "",
+        "thickness": 0.15,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "b14c7b56-d535-49a0-95eb-b4daa1052494",
+      "type": "surface.rubber_safety",
+      "category": "surfaces",
+      "subcategory": "Safety surfaces",
+      "builder": "slab",
+      "name": "Playground surface",
+      "label": "P-002",
+      "layer": "L-SITE-RECR",
+      "modelGroup": "surfaces",
+      "revision": 1,
+      "contentHash": "4db3d92971f21c37ebfbbcca39371d567220487eab9b9afbeaacdb9b662b01a3",
+      "parameters": {
+        "buildup": "",
+        "jointPattern": "none",
+        "material": "rubber",
+        "surfaceCode": "",
+        "thickness": 0.04,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "0f06c09c-3410-482c-b0cc-b91ba43152cb",
+      "type": "landscape.flower_bed",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area",
+      "name": "Flower bed",
+      "label": "PL-001",
+      "layer": "L-PLNT",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "efafdaf1e736e9ed5a776210ac4911f165e47368b38d1d3f0cfea7475df466d9",
+      "parameters": {
+        "plantCode": "",
+        "plantHeight": 0.4,
+        "plantMaterial": "planting_flowers",
+        "plantSpacing": null,
+        "soilMaterial": "mulch",
+        "soilThickness": 0.3,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "0da2112e-a9a9-45c9-aca5-1f01f59ca95e",
+      "type": "landscape.flower_bed",
+      "category": "landscape",
+      "subcategory": "Planting beds",
+      "builder": "planting_area",
+      "name": "Flower bed",
+      "label": "PL-002",
+      "layer": "L-PLNT",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "daca2526ba05e99ad8fe20134f061605438809c99309437e368c739e41bf1c6b",
+      "parameters": {
+        "plantCode": "",
+        "plantHeight": 0.4,
+        "plantMaterial": "planting_flowers",
+        "plantSpacing": null,
+        "soilMaterial": "mulch",
+        "soilThickness": 0.3,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "70ed2dea-d2d0-43cc-a90e-3a974666facb",
+      "type": "wall.planter_wall",
+      "category": "walls",
+      "subcategory": "Walls",
+      "builder": "wall",
+      "name": "Planter wall",
+      "label": "WL-001",
+      "layer": "L-WALL",
+      "modelGroup": "walls",
+      "revision": 1,
+      "contentHash": "c568ee711057a825d17392c55fd80a0b22f5842e6847f836609cc2eb74a5b429",
+      "parameters": {
+        "alignment": "center",
+        "baseOffset": 0,
+        "footingDepth": 0,
+        "footingWidth": 0,
+        "height": 0.6,
+        "material": "brick",
+        "thickness": 0.25
+      }
+    },
+    {
+      "id": "d4ef0874-aa61-47bb-a139-f49bb8deef82",
+      "type": "landscape.hedge",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "wall",
+      "name": "Hedge",
+      "label": "H-001",
+      "layer": "L-PLNT",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "9acd167f1511bf86a99f268a92b696732bb4401a23b2fe773dc21b5fc4c7ac01",
+      "parameters": {
+        "alignment": "center",
+        "baseOffset": 0,
+        "footingDepth": 0,
+        "footingWidth": 0,
+        "height": 1.6,
+        "material": "foliage_evergreen",
+        "thickness": 0.8
+      }
+    },
+    {
+      "id": "26a825a0-9df8-436b-877a-00a8225b3175",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-004",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "980f2cbf91f94056199c2483141085aa5a8ba7495b9150c38fda5a15b338212e",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "a2678360-b750-4c07-be8d-1048f93ca63e",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-005",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "835c646a944e29b5a86da1dd6175b2891a01a0e09074315b246e25b894d90a85",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "765a1f90-ebfe-4ab8-851e-7722577f9e57",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-006",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "f5c768ca2ad2b2c94d36e8e4f182b4cd16e9ace6c263ab3bb55b265f06ece428",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "c735c553-d080-40ce-8432-0657c1c7377b",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-007",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "effe479e0de94912d018a5b65333b2b3aa054a44b9e992461a2d51d8b393e286",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "894a5427-fd27-45e9-9c5c-069755e56c81",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-008",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "828d1466ddd8eff1d351a0a17642b87d4e5889d7bc6f5b50556f503b06b49ede",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "5e8ed2fb-ec11-427a-b1b5-7d45cff89b62",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-009",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "94a65b6ed8eb01e79e76b49812f8a2caed0d1238a84392c666a5aacb7a8941c1",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "af75f535-30be-461c-9b16-f5dd9a752b9c",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-010",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "3351b209127e4a0ba852b595c176f65ca912c4618c2ce4f2c0bfe4b8d666ad51",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "3e701f38-3d4c-495f-92d6-55b6a050e5ed",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-011",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "2e1b36708380b7b419b6c6c0c95c8747e8bc78815d2df158d4f35bfb2ba1f085",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "baae78c4-7663-4ce4-ba77-da8b6724c199",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-012",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "6f2cc6dbc91414bccccf737d1a5919f734ba74bef2945de574ee75ea72019214",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "33da158d-7e2d-411f-aabc-25f4789f8632",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-013",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "a0e758b68b5c6d09d9d1177c3e5b3d042580ca9d6103ad617ba99e3b8290008c",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "f486a301-1560-4cdc-8504-ee8218e3449e",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-014",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "47b12e68615c51eb762bec14d98a4a34cbd2c20be21097f44e43fd6745df64cf",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "92124185-1fa5-406a-bf2a-a76aa16210d6",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-015",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "402b3045440199d2336535ab712b96b108e067c0c441331bcc0158ef915ea23b",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "911510ac-2b9b-4dfe-84fe-7f80f0e6e703",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-016",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "1439d56012b7843fb076f053baa37098dee3dbfc4d97e3a3de28e95c814af115",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "f55c6300-9fc4-49d4-b74e-8c1d60d53825",
+      "type": "landscape.tree_deciduous",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Deciduous tree",
+      "label": "T-017",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "fee425c02105cf6519bba75ace23ab76859493950cfe663fe83c78f1d8421a87",
+      "parameters": {
+        "canopyDiameter": 5,
+        "clearTrunkHeight": 2.2,
+        "foliageMaterial": "foliage",
+        "form": "round",
+        "height": 7,
+        "matureCanopyDiameter": 9,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Tilia cordata",
+        "commonName": "Small-leaved lime",
+        "dataSource": "Sample project - replace with nursery data",
+        "plantingSize": "18-20 cm girth"
+      }
+    },
+    {
+      "id": "4bff25b3-6ee3-4db5-a96b-d8b4873d7544",
+      "type": "landscape.tree_evergreen",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Evergreen tree",
+      "label": "T-001",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "a8eb6d6df6d4adc60ed8e530916f72f6f38f12c37b62410dc955b943cbc0cf5a",
+      "parameters": {
+        "canopyDiameter": 4,
+        "clearTrunkHeight": 0.8,
+        "foliageMaterial": "foliage_evergreen",
+        "form": "conical",
+        "height": 9,
+        "matureCanopyDiameter": null,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Pinus nigra",
+        "commonName": "Black pine",
+        "dataSource": "Sample project - replace with nursery data"
+      }
+    },
+    {
+      "id": "104f23e4-5a19-4a1a-94c4-782e28f08730",
+      "type": "landscape.tree_evergreen",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Evergreen tree",
+      "label": "T-002",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "da545c8b10447ee52d896879e6f178688b224cef61c8a6f0d11e263da906f7b5",
+      "parameters": {
+        "canopyDiameter": 4,
+        "clearTrunkHeight": 0.8,
+        "foliageMaterial": "foliage_evergreen",
+        "form": "conical",
+        "height": 9,
+        "matureCanopyDiameter": null,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Pinus nigra",
+        "commonName": "Black pine",
+        "dataSource": "Sample project - replace with nursery data"
+      }
+    },
+    {
+      "id": "bdb1d2bf-95cf-4094-9c12-ee326b4ab70c",
+      "type": "landscape.tree_evergreen",
+      "category": "landscape",
+      "subcategory": "Trees",
+      "builder": "tree",
+      "name": "Evergreen tree",
+      "label": "T-003",
+      "layer": "L-PLNT-TREE",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "5199fa5e8c18cb195136791baadb0f266b95ae68f993a543581e4aab4bf18120",
+      "parameters": {
+        "canopyDiameter": 4,
+        "clearTrunkHeight": 0.8,
+        "foliageMaterial": "foliage_evergreen",
+        "form": "conical",
+        "height": 9,
+        "matureCanopyDiameter": null,
+        "matureHeight": null,
+        "status": "proposed",
+        "trunkDiameter": 0.25
+      },
+      "properties": {
+        "botanicalName": "Pinus nigra",
+        "commonName": "Black pine",
+        "dataSource": "Sample project - replace with nursery data"
+      }
+    },
+    {
+      "id": "95e37783-030c-48a3-a273-e0a38ef1cdc5",
+      "type": "landscape.shrub",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "shrub",
+      "name": "Shrub",
+      "label": "S-002",
+      "layer": "L-PLNT",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "aed23cd510646ef7b5630d93b3d865b43ba6e971bfdb0425951ba9ac08b3f1c7",
+      "parameters": {
+        "diameter": 1.8,
+        "foliageMaterial": "foliage",
+        "height": 1.5
+      }
+    },
+    {
+      "id": "b15e4ead-1f60-459c-941b-b095c1f35d7a",
+      "type": "landscape.shrub",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "shrub",
+      "name": "Shrub",
+      "label": "S-001",
+      "layer": "L-PLNT",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "c2b9293807f7192c1163c0bf5968f6e6a1f70755a99fe3a1f139c630d1208f69",
+      "parameters": {
+        "diameter": 1.8,
+        "foliageMaterial": "foliage",
+        "height": 1.5
+      }
+    },
+    {
+      "id": "051a419c-3755-4509-8519-5ac13c0c2270",
+      "type": "landscape.shrub",
+      "category": "landscape",
+      "subcategory": "Shrubs and hedges",
+      "builder": "shrub",
+      "name": "Shrub",
+      "label": "S-003",
+      "layer": "L-PLNT",
+      "modelGroup": "planting",
+      "revision": 1,
+      "contentHash": "b04626fe4a3913f5ea860f1eca353953c2bfbabe6f10b64694bd95ac1769ed1b",
+      "parameters": {
+        "diameter": 1.8,
+        "foliageMaterial": "foliage",
+        "height": 1.5
+      }
+    },
+    {
+      "id": "23c54af6-503a-4117-bb05-93a3179a07de",
+      "type": "lighting.street_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Street light",
+      "label": "L-008",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "165bd990df13606486223ef228059b4d0681162c3439d2438db5132803b5a737",
+      "parameters": {
+        "armLength": 1,
+        "coverageRadius": null,
+        "fixtureCode": "SL-1",
+        "headHeight": 0.12,
+        "headLength": 0.7,
+        "headMaterial": "luminaire",
+        "headWidth": 0.3,
+        "poleDiameter": 0.12,
+        "poleHeight": 8,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "adacac6a-574e-409c-adec-e37ef3e43245",
+      "type": "lighting.street_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Street light",
+      "label": "L-009",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "5b79472128f7089c30f94eebe44af20be6b4603e4c52e20ca881224f29465726",
+      "parameters": {
+        "armLength": 1,
+        "coverageRadius": null,
+        "fixtureCode": "SL-1",
+        "headHeight": 0.12,
+        "headLength": 0.7,
+        "headMaterial": "luminaire",
+        "headWidth": 0.3,
+        "poleDiameter": 0.12,
+        "poleHeight": 8,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "8d41350d-7371-4285-85c8-06b6ab2f2a5e",
+      "type": "lighting.street_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Street light",
+      "label": "L-010",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "e18b4cae1d7bcc1289514f673eeeb67f9ecbaf9e44f8e036cce1a7bf9753f65a",
+      "parameters": {
+        "armLength": 1,
+        "coverageRadius": null,
+        "fixtureCode": "SL-1",
+        "headHeight": 0.12,
+        "headLength": 0.7,
+        "headMaterial": "luminaire",
+        "headWidth": 0.3,
+        "poleDiameter": 0.12,
+        "poleHeight": 8,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "7f3b05d5-3c9d-4517-a2ac-9f94ccf9c1cc",
+      "type": "lighting.street_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Street light",
+      "label": "L-011",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "4ddf72bfc64c5021b0b0fe2b03d94b12a9a9ba94e35cd1f8630503093597547b",
+      "parameters": {
+        "armLength": 1,
+        "coverageRadius": null,
+        "fixtureCode": "SL-1",
+        "headHeight": 0.12,
+        "headLength": 0.7,
+        "headMaterial": "luminaire",
+        "headWidth": 0.3,
+        "poleDiameter": 0.12,
+        "poleHeight": 8,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "eb6e019a-d2f8-4a83-92c5-fc5ec36de389",
+      "type": "lighting.street_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Street light",
+      "label": "L-012",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "88c2c5703863ecad375144e2a5c5726ced44902bdf788c456e920a47dae7f0ab",
+      "parameters": {
+        "armLength": 1,
+        "coverageRadius": null,
+        "fixtureCode": "SL-1",
+        "headHeight": 0.12,
+        "headLength": 0.7,
+        "headMaterial": "luminaire",
+        "headWidth": 0.3,
+        "poleDiameter": 0.12,
+        "poleHeight": 8,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "4ca153af-7698-4c11-8cc3-a3255a1e7a64",
+      "type": "lighting.pedestrian_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Pedestrian light (post-top)",
+      "label": "L-003",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "3533bd7f845f8dfe13e5c6d64459e0c31ca5a5f15e4ea8f4848e020abbf68cb9",
+      "parameters": {
+        "armLength": 0,
+        "coverageRadius": null,
+        "fixtureCode": "PL-1",
+        "headHeight": 0.3,
+        "headLength": 0.4,
+        "headMaterial": "luminaire",
+        "headWidth": 0.4,
+        "poleDiameter": 0.1,
+        "poleHeight": 4,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "e7edc13d-b0c0-47c2-aa84-fdaa0288e60d",
+      "type": "lighting.pedestrian_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Pedestrian light (post-top)",
+      "label": "L-004",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "200e4638cacffed3e1121f75229375c2b53a82675b3f9bb0b80d46378ecebf13",
+      "parameters": {
+        "armLength": 0,
+        "coverageRadius": null,
+        "fixtureCode": "PL-1",
+        "headHeight": 0.3,
+        "headLength": 0.4,
+        "headMaterial": "luminaire",
+        "headWidth": 0.4,
+        "poleDiameter": 0.1,
+        "poleHeight": 4,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "6cadb695-614e-4b5f-8ca2-e6d682e28201",
+      "type": "lighting.pedestrian_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Pedestrian light (post-top)",
+      "label": "L-005",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "d7aae29b3844dc48c15705c24050d86ea9fc82cb28f0c179019ab7261d007914",
+      "parameters": {
+        "armLength": 0,
+        "coverageRadius": null,
+        "fixtureCode": "PL-1",
+        "headHeight": 0.3,
+        "headLength": 0.4,
+        "headMaterial": "luminaire",
+        "headWidth": 0.4,
+        "poleDiameter": 0.1,
+        "poleHeight": 4,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "7478aa60-2db3-4556-9fef-43208222e616",
+      "type": "lighting.pedestrian_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Pedestrian light (post-top)",
+      "label": "L-006",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "3fab2305e6a9cad84cfb6ff57965a09533fe14b2a0a52f5fcede721b78c1eafe",
+      "parameters": {
+        "armLength": 0,
+        "coverageRadius": null,
+        "fixtureCode": "PL-1",
+        "headHeight": 0.3,
+        "headLength": 0.4,
+        "headMaterial": "luminaire",
+        "headWidth": 0.4,
+        "poleDiameter": 0.1,
+        "poleHeight": 4,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "e58250be-7a1a-4da7-b2b0-2e3f1847b6b8",
+      "type": "lighting.pedestrian_light",
+      "category": "lighting",
+      "subcategory": "Poles",
+      "builder": "pole_mounted",
+      "name": "Pedestrian light (post-top)",
+      "label": "L-007",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "be36e7329a5fb45f2ac4c9756e26621fd7388ec00bd357a4c9a6201289d398b0",
+      "parameters": {
+        "armLength": 0,
+        "coverageRadius": null,
+        "fixtureCode": "PL-1",
+        "headHeight": 0.3,
+        "headLength": 0.4,
+        "headMaterial": "luminaire",
+        "headWidth": 0.4,
+        "poleDiameter": 0.1,
+        "poleHeight": 4,
+        "poleMaterial": "steel_dark",
+        "power": null,
+        "solarPanel": false
+      }
+    },
+    {
+      "id": "d0e2f150-7835-42ab-98d3-87c44603135f",
+      "type": "lighting.bollard_light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "bollard",
+      "name": "Bollard light",
+      "label": "L-001",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "7ef44a92af96d5a64c0c490d6aba53cfc476982520a2379fb63ca9dc1c395bb3",
+      "parameters": {
+        "diameter": 0.2,
+        "fixtureCode": "BL-1",
+        "height": 1,
+        "lit": true,
+        "material": "steel_dark",
+        "power": null,
+        "removable": false
+      }
+    },
+    {
+      "id": "4425f20a-119d-4071-9a83-7dbcd4ec4432",
+      "type": "lighting.bollard_light",
+      "category": "lighting",
+      "subcategory": "Low-level",
+      "builder": "bollard",
+      "name": "Bollard light",
+      "label": "L-002",
+      "layer": "E-LITE-SITE",
+      "modelGroup": "lighting",
+      "revision": 1,
+      "contentHash": "b0b5725b9b1ba5ebfed0a1bc7ea473fb8b91f3dfad7fcea883cb757a845c0232",
+      "parameters": {
+        "diameter": 0.2,
+        "fixtureCode": "BL-1",
+        "height": 1,
+        "lit": true,
+        "material": "steel_dark",
+        "power": null,
+        "removable": false
+      }
+    },
+    {
+      "id": "7e7013f4-0d07-4406-af8c-7d98e061a486",
+      "type": "furniture.bench",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench",
+      "name": "Bench with backrest",
+      "label": "FB-003",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "furniture",
+      "revision": 1,
+      "contentHash": "877eccae305e1a217a7486be94e750fed7b6180cefe6f9a3241d564a5c70f318",
+      "parameters": {
+        "armrests": false,
+        "backHeight": 0.8,
+        "backrest": true,
+        "depth": 0.6,
+        "frameMaterial": "steel_dark",
+        "length": 1.8,
+        "material": "timber",
+        "seatHeight": 0.45
+      }
+    },
+    {
+      "id": "87e1d316-8330-4d9a-82dc-58fb8b8c2900",
+      "type": "furniture.bench",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench",
+      "name": "Bench with backrest",
+      "label": "FB-004",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "furniture",
+      "revision": 1,
+      "contentHash": "eb88fb74f06152dc4b35e53bf49fd30fe1ce99d3b5a0bf8aa44149f3691242d5",
+      "parameters": {
+        "armrests": false,
+        "backHeight": 0.8,
+        "backrest": true,
+        "depth": 0.6,
+        "frameMaterial": "steel_dark",
+        "length": 1.8,
+        "material": "timber",
+        "seatHeight": 0.45
+      }
+    },
+    {
+      "id": "04319255-b2d6-4684-a243-d910919ffca4",
+      "type": "furniture.bench",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench",
+      "name": "Bench with backrest",
+      "label": "FB-001",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "furniture",
+      "revision": 1,
+      "contentHash": "f923b737935ae6d2ad0ab204f3e2d4ad985041f06be361d80d9354cda0f06966",
+      "parameters": {
+        "armrests": false,
+        "backHeight": 0.8,
+        "backrest": true,
+        "depth": 0.6,
+        "frameMaterial": "steel_dark",
+        "length": 1.8,
+        "material": "timber",
+        "seatHeight": 0.45
+      }
+    },
+    {
+      "id": "e1cc5117-d7ff-4b7d-bf86-b340e02e4c7a",
+      "type": "furniture.bench",
+      "category": "furniture",
+      "subcategory": "Seating",
+      "builder": "bench",
+      "name": "Bench with backrest",
+      "label": "FB-002",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "furniture",
+      "revision": 1,
+      "contentHash": "79edee3407ba02f3f046384569bf74e2eb75227e86e8703d5402df654462ed43",
+      "parameters": {
+        "armrests": false,
+        "backHeight": 0.8,
+        "backrest": true,
+        "depth": 0.6,
+        "frameMaterial": "steel_dark",
+        "length": 1.8,
+        "material": "timber",
+        "seatHeight": 0.45
+      }
+    },
+    {
+      "id": "ad88e40d-7d3c-409d-9d33-de1260cc6139",
+      "type": "furniture.waste_bin",
+      "category": "furniture",
+      "subcategory": "Bins",
+      "builder": "cylinder_equipment",
+      "name": "Waste bin",
+      "label": "WB-001",
+      "layer": "L-SITE-FURN",
+      "modelGroup": "furniture",
+      "revision": 1,
+      "contentHash": "9a571cbbb65754f786afd88b64b62c885f5165fb7b0dc9f2c73d9ab1d1c7195c",
+      "parameters": {
+        "baseOffset": 0,
+        "diameter": 0.45,
+        "height": 0.9,
+        "material": "steel_dark",
+        "power": null,
+        "serviceClearance": null
+      }
+    },
+    {
+      "id": "04964e18-1c7e-417d-9fea-5c4c93622e46",
+      "type": "cycling.bike_rack",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "bike_stand",
+      "name": "Bicycle rack (row of stands)",
+      "label": "BS-001",
+      "layer": "C-BIKE",
+      "modelGroup": "pedestrian_cycling",
+      "revision": 1,
+      "contentHash": "4a2b42b7992fa2f169f5502724d6178faa5a5da79c1820e2197e8466b954f939",
+      "parameters": {
+        "bikesPerStand": 2,
+        "count": 5,
+        "height": 0.8,
+        "material": "steel_galv",
+        "spacing": 1,
+        "tubeDiameter": 0.05,
+        "width": 0.8
+      }
+    },
+    {
+      "id": "1de40879-59f4-4890-9c58-e71569226f39",
+      "type": "cycling.bike_rack",
+      "category": "cycling",
+      "subcategory": "Parking",
+      "builder": "bike_stand",
+      "name": "Bicycle rack (row of stands)",
+      "label": "BS-002",
+      "layer": "C-BIKE",
+      "modelGroup": "pedestrian_cycling",
+      "revision": 1,
+      "contentHash": "e3effa2785412bb76751ab5dfe74b7fd870f9eb895fb5c9f39d92ab4ac9df0d0",
+      "parameters": {
+        "bikesPerStand": 2,
+        "count": 5,
+        "height": 0.8,
+        "material": "steel_galv",
+        "spacing": 1,
+        "tubeDiameter": 0.05,
+        "width": 0.8
+      }
+    },
+    {
+      "id": "3bde59e8-63db-43d2-8595-5a06d18a798e",
+      "type": "utility.waste_container_ug_5m3",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container",
+      "name": "Underground waste container 5 m³",
+      "label": "UW-001",
+      "layer": "C-UTIL-WAST",
+      "modelGroup": "underground",
+      "revision": 1,
+      "contentHash": "a0ce155bdd37efd1b7489f5625d4774d70a872d94a2b7fa017cf957c0c883873",
+      "parameters": {
+        "aboveGroundHeight": 1,
+        "bodyDepth": 2.4,
+        "bodyLength": 2,
+        "bodyWidth": 2,
+        "columnDiameter": 0.8,
+        "columnMaterial": "steel_dark",
+        "coverLevelOffset": 0,
+        "dimensionsSource": "",
+        "excavationMargin": 0.5,
+        "installation": "underground",
+        "liftingClearance": null,
+        "material": "concrete_precast",
+        "nominalVolume": 5,
+        "showExcavation": false,
+        "wasteFraction": "mixed"
+      }
+    },
+    {
+      "id": "25bba43c-cc19-426d-87b9-b4f91bb790e1",
+      "type": "utility.waste_container_ug_5m3",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container",
+      "name": "Underground waste container 5 m³",
+      "label": "UW-002",
+      "layer": "C-UTIL-WAST",
+      "modelGroup": "underground",
+      "revision": 1,
+      "contentHash": "f49bb2719324614125641fdd1277bfe4e03e073094a8f718943cd7e359b20d73",
+      "parameters": {
+        "aboveGroundHeight": 1,
+        "bodyDepth": 2.4,
+        "bodyLength": 2,
+        "bodyWidth": 2,
+        "columnDiameter": 0.8,
+        "columnMaterial": "steel_dark",
+        "coverLevelOffset": 0,
+        "dimensionsSource": "",
+        "excavationMargin": 0.5,
+        "installation": "underground",
+        "liftingClearance": null,
+        "material": "concrete_precast",
+        "nominalVolume": 5,
+        "showExcavation": false,
+        "wasteFraction": "paper"
+      }
+    },
+    {
+      "id": "4f99498f-f2b9-43f2-9ba3-b42e4cc45498",
+      "type": "utility.waste_container_ug_5m3",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container",
+      "name": "Underground waste container 5 m³",
+      "label": "UW-003",
+      "layer": "C-UTIL-WAST",
+      "modelGroup": "underground",
+      "revision": 1,
+      "contentHash": "ff20d49da7a53f429265404dd206d1f434610cc6a553dc475448a54efe6f99b6",
+      "parameters": {
+        "aboveGroundHeight": 1,
+        "bodyDepth": 2.4,
+        "bodyLength": 2,
+        "bodyWidth": 2,
+        "columnDiameter": 0.8,
+        "columnMaterial": "steel_dark",
+        "coverLevelOffset": 0,
+        "dimensionsSource": "",
+        "excavationMargin": 0.5,
+        "installation": "underground",
+        "liftingClearance": null,
+        "material": "concrete_precast",
+        "nominalVolume": 5,
+        "showExcavation": false,
+        "wasteFraction": "plastic"
+      }
+    },
+    {
+      "id": "f6b1ee82-777f-4c46-9a0b-2ef0c63ad748",
+      "type": "utility.waste_container_ug_3m3",
+      "category": "utilities",
+      "subcategory": "Waste",
+      "builder": "underground_container",
+      "name": "Underground waste container 3 m³",
+      "label": "UW-004",
+      "layer": "C-UTIL-WAST",
+      "modelGroup": "underground",
+      "revision": 1,
+      "contentHash": "846e3ab0d1716ca87985078849445ece975be613181fb148e5a707730bb5cb80",
+      "parameters": {
+        "aboveGroundHeight": 1,
+        "bodyDepth": 2,
+        "bodyLength": 1.7,
+        "bodyWidth": 1.7,
+        "columnDiameter": 0.8,
+        "columnMaterial": "steel_dark",
+        "coverLevelOffset": 0,
+        "dimensionsSource": "",
+        "excavationMargin": 0.5,
+        "installation": "underground",
+        "liftingClearance": null,
+        "material": "concrete_precast",
+        "nominalVolume": 3,
+        "showExcavation": false,
+        "wasteFraction": "glass"
+      }
+    },
+    {
+      "id": "0282d1a2-566e-45d0-8b5c-b6bb0403e9d3",
+      "type": "water.drainage_channel",
+      "category": "water",
+      "subcategory": "Surface drainage",
+      "builder": "channel",
+      "name": "Linear drainage channel",
+      "label": "D-001",
+      "layer": "C-STRM",
+      "modelGroup": "drainage",
+      "revision": 1,
+      "contentHash": "0eed10e76bc486885fec7e9db6163bfbd6641bc6e513dfd41aab59c560948534",
+      "parameters": {
+        "bodyMaterial": "concrete_precast",
+        "depth": 0.25,
+        "flowDirection": "forward",
+        "gradient": 0.5,
+        "grateMaterial": "grate_steel",
+        "outletTo": "IC at east end",
+        "width": 0.15
+      }
+    },
+    {
+      "id": "e010a5c1-4939-4a8f-96a4-f603a305a59e",
+      "type": "water.inspection_chamber",
+      "category": "water",
+      "subcategory": "Underground drainage",
+      "builder": "chamber",
+      "name": "Drainage inspection chamber",
+      "label": "IC-001",
+      "layer": "C-STRM",
+      "modelGroup": "drainage",
+      "revision": 1,
+      "contentHash": "46b3c2da60b08d9f13909b7b2f1f680f361b0aae2fd12ecc8ef0f06b3554fab9",
+      "parameters": {
+        "coverLevelOffset": 0,
+        "coverMaterial": "cast_iron",
+        "coverShape": "round",
+        "coverSize": 0.6,
+        "depth": 1.6,
+        "innerSize": 1,
+        "loadClass": "",
+        "material": "concrete_precast",
+        "service": "storm",
+        "shape": "round",
+        "wallThickness": 0.12
+      }
+    },
+    {
+      "id": "b7eb8ace-22b6-49a2-9bd0-abed277a396f",
+      "type": "water.drain_pipe",
+      "category": "water",
+      "subcategory": "Underground drainage",
+      "builder": "pipe",
+      "name": "Drainage pipe",
+      "label": "DP-001",
+      "layer": "C-STRM",
+      "modelGroup": "drainage",
+      "revision": 1,
+      "contentHash": "73e255dbec41de20bbfc6070dca095fd1b76ba3fee240e7b691cc4866c05c566",
+      "parameters": {
+        "axisOffset": -1.4,
+        "diameter": 0.2,
+        "material": "hdpe",
+        "service": "storm"
+      }
+    },
+    {
+      "id": "2977953d-3630-4a5e-87d9-8bc31a84acc6",
+      "type": "water.rainwater_tank",
+      "category": "water",
+      "subcategory": "Rainwater",
+      "builder": "tank",
+      "name": "Underground rainwater tank",
+      "label": "RT-001",
+      "layer": "C-STRM",
+      "modelGroup": "underground",
+      "revision": 1,
+      "contentHash": "d1c51bc09c8a0413e14b1388c0e1e11933ce88617f0ad25636bb6d6118b94fbf",
+      "parameters": {
+        "accessShaft": true,
+        "coverDepth": 0.8,
+        "height": 1.8,
+        "installation": "underground",
+        "length": 3.5,
+        "material": "hdpe",
+        "nominalVolume": null,
+        "shaftDiameter": 0.6,
+        "shape": "horizontal_cylinder",
+        "width": 1.8
+      }
+    },
+    {
+      "id": "98775afe-6f40-4e89-8abc-9c6117f56cb8",
+      "type": "wall.mesh_fence",
+      "category": "walls",
+      "subcategory": "Fences",
+      "builder": "fence",
+      "name": "Welded-mesh fence",
+      "label": "F-001",
+      "layer": "L-FENC",
+      "modelGroup": "walls",
+      "revision": 1,
+      "contentHash": "d17c669ece849191323a5c920b3bd00766dcf795628ff2e5ac64790b128ac65e",
+      "parameters": {
+        "foundationDepth": 0,
+        "groundClearance": 0.05,
+        "height": 2,
+        "panelMaterial": "steel_galv",
+        "panelStyle": "mesh",
+        "panelThickness": 0.04,
+        "postMaterial": "steel_galv",
+        "postSize": 0.06,
+        "postSpacing": 2.5
+      }
+    },
+    {
+      "id": "394f7c42-aff9-4a68-a63b-34b1acad9b54",
+      "type": "wall.pedestrian_gate",
+      "category": "walls",
+      "subcategory": "Gates",
+      "builder": "gate",
+      "name": "Pedestrian gate",
+      "label": "GT-001",
+      "layer": "L-FENC",
+      "modelGroup": "walls",
+      "revision": 1,
+      "contentHash": "d530276e89b5ac3e590e45171bfa3e8fd4dd7826dd16c1a177ceabe142e56f66",
+      "parameters": {
+        "automatic": false,
+        "gateType": "swing_single",
+        "height": 1.8,
+        "leafThickness": 0.05,
+        "material": "steel_dark",
+        "openingSide": "back",
+        "postSize": 0.1,
+        "width": 1
+      }
+    },
+    {
+      "id": "b37ad3e6-8169-4285-acd1-6125e97e3421",
+      "type": "structure.pergola",
+      "category": "structures",
+      "subcategory": "Pergolas",
+      "builder": "pergola",
+      "name": "Pergola",
+      "label": "PG-001",
+      "layer": "L-STRC",
+      "modelGroup": "canopies",
+      "revision": 1,
+      "contentHash": "85c9314bf07a2129a87067c18609062768ec869fcab958e2ab0751bf921cea92",
+      "parameters": {
+        "beamDepth": 0.25,
+        "beamWidth": 0.1,
+        "columnSize": 0.15,
+        "columnSpacing": 3.5,
+        "cover": "none",
+        "coverMaterial": null,
+        "height": 2.7,
+        "louverAngle": 0,
+        "material": "timber",
+        "rafterDepth": 0.15,
+        "rafterSpacing": 0.6,
+        "rafterWidth": 0.05,
+        "roofSlope": 0
+      }
+    },
+    {
+      "id": "208bc87e-b349-45c8-a258-19e837f23b48",
+      "type": "recreation.swing",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "swing",
+      "name": "Swing",
+      "label": "PE-001",
+      "layer": "L-SITE-RECR",
+      "modelGroup": "recreation",
+      "revision": 1,
+      "contentHash": "700304a71f5cb759a862d94cc48430a6f9a5168fde79107547d22f1cf41e803e",
+      "parameters": {
+        "frameDiameter": 0.1,
+        "frameSpread": 1.8,
+        "height": 2.4,
+        "material": "steel_dark",
+        "safetyClearance": null,
+        "seatHeight": 0.45,
+        "seats": 2,
+        "width": 3.4
+      }
+    },
+    {
+      "id": "99313b5b-e07c-4d71-bf33-a9c06cd87afd",
+      "type": "recreation.playground_unit",
+      "category": "furniture",
+      "subcategory": "Playgrounds",
+      "builder": "box_equipment",
+      "name": "Children's play unit",
+      "label": "PE-002",
+      "layer": "L-SITE-RECR",
+      "modelGroup": "recreation",
+      "revision": 1,
+      "contentHash": "e0c70554d2a1562922fd6691f6d513807782446c40929db4ae5e32568a2dfc76",
+      "parameters": {
+        "baseOffset": 0,
+        "depth": 3,
+        "height": 3,
+        "material": "timber",
+        "power": null,
+        "serviceClearance": null,
+        "width": 3.5
+      }
+    }
+  ],
+  "validation": {
+    "errors": 0,
+    "warnings": 0,
+    "reviews": 12,
+    "reportPath": "preview/validation-report.json"
+  }
+}
