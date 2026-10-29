@@ -1,0 +1,648 @@
+{
+  "$comment": "Parametric builder definitions. A builder is a reusable generator implemented once in each host: AutoCAD draws its 2D representation (block symbol for point builders, polyline/hatch for path and polygon builders) and SketchUp reconstructs its 3D geometry. Element types (element-types.json) reference a builder and override defaults. All lengths are metres, angles are degrees. Parameter 'type' is one of: length, number, integer, angle, bool, enum, text, material.",
+  "version": "1.0.0",
+  "builders": {
+    "slab": {
+      "geometry": "polygon",
+      "description": "Surface slab bounded by a closed boundary, top at boundary elevation + topOffset, extruded downward by thickness.",
+      "quantity": { "measure": "area", "unit": "m2", "secondary": "volume" },
+      "hatch": { "pattern": "AR-CONC", "scale": 0.05 },
+      "parameters": [
+        { "key": "thickness", "label": "Thickness / build-up depth", "type": "length", "default": 0.08, "min": 0.001, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "topOffset", "label": "Top offset from boundary elevation", "type": "length", "default": 0, "min": -20, "max": 20, "group": "Elevation" },
+        { "key": "material", "label": "Material", "type": "material", "default": "concrete_paver", "group": "Appearance" },
+        { "key": "surfaceCode", "label": "Surface code", "type": "text", "default": "", "group": "Specification" },
+        { "key": "buildup", "label": "Layer build-up (top to bottom)", "type": "text", "default": "", "group": "Specification" },
+        { "key": "jointPattern", "label": "Paving / joint pattern", "type": "enum", "default": "none", "options": ["none", "stretcher", "stack", "herringbone", "basketweave", "random"], "group": "Specification" }
+      ]
+    },
+    "massing": {
+      "geometry": "polygon",
+      "description": "Building or reference massing extruded from a footprint.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": { "pattern": "ANSI31", "scale": 0.5 },
+      "parameters": [
+        { "key": "height", "label": "Height", "type": "length", "default": 12, "min": 0.1, "max": 600, "required": true, "group": "Dimensions" },
+        { "key": "baseOffset", "label": "Base offset", "type": "length", "default": 0, "min": -50, "max": 50, "group": "Elevation" },
+        { "key": "storeys", "label": "Storeys", "type": "integer", "default": 4, "min": 1, "max": 200, "group": "Information" },
+        { "key": "material", "label": "Material", "type": "material", "default": "building_massing", "group": "Appearance" }
+      ]
+    },
+    "linear_slab": {
+      "geometry": "path",
+      "description": "Strip of constant width along a centreline (roads, paths, markings, trenches).",
+      "quantity": { "measure": "length", "unit": "m", "secondary": "area" },
+      "polylineWidthParam": "width",
+      "parameters": [
+        { "key": "width", "label": "Width", "type": "length", "default": 3.0, "min": 0.005, "max": 100, "required": true, "group": "Dimensions" },
+        { "key": "thickness", "label": "Thickness", "type": "length", "default": 0.1, "min": 0.001, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "topOffset", "label": "Top offset from centreline elevation", "type": "length", "default": 0, "min": -20, "max": 20, "group": "Elevation" },
+        { "key": "material", "label": "Material", "type": "material", "default": "asphalt", "group": "Appearance" },
+        { "key": "requiredClearWidth", "label": "Required clear width (project rule)", "type": "length", "default": null, "min": 0, "max": 100, "group": "Checks" },
+        { "key": "surfaceCode", "label": "Surface code", "type": "text", "default": "", "group": "Specification" }
+      ]
+    },
+    "wall": {
+      "geometry": "path",
+      "description": "Wall, kerb, hedge or edging following an alignment, with optional strip footing.",
+      "quantity": { "measure": "length", "unit": "m" },
+      "polylineWidthParam": "thickness",
+      "parameters": [
+        { "key": "height", "label": "Height", "type": "length", "default": 1.0, "min": 0.01, "max": 30, "required": true, "group": "Dimensions" },
+        { "key": "thickness", "label": "Thickness", "type": "length", "default": 0.2, "min": 0.005, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "baseOffset", "label": "Base offset from alignment elevation", "type": "length", "default": 0, "min": -20, "max": 20, "group": "Elevation" },
+        { "key": "alignment", "label": "Alignment", "type": "enum", "default": "center", "options": ["center", "left", "right"], "group": "Dimensions" },
+        { "key": "footingWidth", "label": "Footing width (0 = none)", "type": "length", "default": 0, "min": 0, "max": 20, "group": "Foundation" },
+        { "key": "footingDepth", "label": "Footing depth", "type": "length", "default": 0, "min": 0, "max": 10, "group": "Foundation" },
+        { "key": "material", "label": "Material", "type": "material", "default": "concrete", "group": "Appearance" }
+      ]
+    },
+    "fence": {
+      "geometry": "path",
+      "description": "Posts at regular spacing along an alignment (straight and curved), with panels between posts.",
+      "quantity": { "measure": "length", "unit": "m" },
+      "linetype": "FENCELINE1",
+      "parameters": [
+        { "key": "height", "label": "Height", "type": "length", "default": 1.8, "min": 0.2, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "postSpacing", "label": "Maximum post spacing", "type": "length", "default": 2.5, "min": 0.3, "max": 15, "required": true, "group": "Dimensions" },
+        { "key": "postSize", "label": "Post size", "type": "length", "default": 0.06, "min": 0.01, "max": 1, "group": "Dimensions" },
+        { "key": "panelThickness", "label": "Panel thickness", "type": "length", "default": 0.04, "min": 0.002, "max": 0.5, "group": "Dimensions" },
+        { "key": "groundClearance", "label": "Panel ground clearance", "type": "length", "default": 0.05, "min": 0, "max": 2, "group": "Dimensions" },
+        { "key": "panelStyle", "label": "Panel style", "type": "enum", "default": "mesh", "options": ["mesh", "bars", "solid", "glass"], "group": "Appearance" },
+        { "key": "postMaterial", "label": "Post material", "type": "material", "default": "steel_galv", "group": "Appearance" },
+        { "key": "panelMaterial", "label": "Panel material", "type": "material", "default": "steel_galv", "group": "Appearance" },
+        { "key": "foundationDepth", "label": "Post foundation depth (0 = none)", "type": "length", "default": 0, "min": 0, "max": 3, "group": "Foundation" }
+      ]
+    },
+    "channel": {
+      "geometry": "path",
+      "description": "Linear drainage channel; path vertices define the grate (top) level.",
+      "quantity": { "measure": "length", "unit": "m" },
+      "polylineWidthParam": "width",
+      "parameters": [
+        { "key": "width", "label": "Overall width", "type": "length", "default": 0.15, "min": 0.02, "max": 3, "required": true, "group": "Dimensions" },
+        { "key": "depth", "label": "Body depth", "type": "length", "default": 0.25, "min": 0.02, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "gradient", "label": "Design gradient (information)", "type": "number", "unit": "%", "default": 0.5, "min": 0, "max": 100, "group": "Hydraulics" },
+        { "key": "flowDirection", "label": "Flow direction", "type": "enum", "default": "forward", "options": ["forward", "reverse"], "group": "Hydraulics" },
+        { "key": "outletTo", "label": "Outlet / connection (element ID or note)", "type": "text", "default": "", "group": "Hydraulics" },
+        { "key": "grateMaterial", "label": "Grate material", "type": "material", "default": "grate_steel", "group": "Appearance" },
+        { "key": "bodyMaterial", "label": "Body material", "type": "material", "default": "concrete_precast", "group": "Appearance" }
+      ]
+    },
+    "pipe": {
+      "geometry": "path",
+      "description": "Pipe, duct, cable or route along a path; axis offset vertically from the path (negative = buried).",
+      "quantity": { "measure": "length", "unit": "m" },
+      "linetype": "HIDDEN",
+      "parameters": [
+        { "key": "diameter", "label": "Outside diameter", "type": "length", "default": 0.2, "min": 0.005, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "axisOffset", "label": "Axis offset from path elevation", "type": "length", "default": -1.0, "min": -30, "max": 30, "group": "Elevation" },
+        { "key": "service", "label": "Service", "type": "text", "default": "", "group": "Specification" },
+        { "key": "material", "label": "Material", "type": "material", "default": "hdpe", "group": "Appearance" }
+      ]
+    },
+    "tree": {
+      "geometry": "point",
+      "description": "Tree with trunk and canopy. Botanical data must be supplied by the user; defaults are generic placeholders.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "tree",
+      "parameters": [
+        { "key": "height", "label": "Height (at planting)", "type": "length", "default": 8, "min": 0.3, "max": 100, "required": true, "group": "Dimensions" },
+        { "key": "canopyDiameter", "label": "Canopy diameter", "type": "length", "default": 5, "min": 0.2, "max": 50, "required": true, "group": "Dimensions" },
+        { "key": "trunkDiameter", "label": "Trunk diameter", "type": "length", "default": 0.25, "min": 0.01, "max": 5, "group": "Dimensions" },
+        { "key": "clearTrunkHeight", "label": "Clear trunk height", "type": "length", "default": 2.2, "min": 0, "max": 40, "group": "Dimensions" },
+        { "key": "form", "label": "Crown form", "type": "enum", "default": "round", "options": ["round", "oval", "conical", "columnar"], "group": "Appearance" },
+        { "key": "matureHeight", "label": "Mature height", "type": "length", "default": null, "min": 0.3, "max": 120, "group": "Growth" },
+        { "key": "matureCanopyDiameter", "label": "Mature canopy diameter", "type": "length", "default": null, "min": 0.2, "max": 60, "group": "Growth" },
+        { "key": "status", "label": "Status", "type": "enum", "default": "proposed", "options": ["proposed", "existing_retain", "existing_remove"], "group": "Information" },
+        { "key": "foliageMaterial", "label": "Foliage material", "type": "material", "default": "foliage", "group": "Appearance" }
+      ]
+    },
+    "shrub": {
+      "geometry": "point",
+      "description": "Individual shrub or large perennial.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "shrub",
+      "parameters": [
+        { "key": "height", "label": "Height", "type": "length", "default": 1.2, "min": 0.05, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "diameter", "label": "Spread", "type": "length", "default": 1.2, "min": 0.05, "max": 15, "required": true, "group": "Dimensions" },
+        { "key": "foliageMaterial", "label": "Foliage material", "type": "material", "default": "foliage", "group": "Appearance" }
+      ]
+    },
+    "pole_mounted": {
+      "geometry": "point",
+      "description": "Pole with an arm and a head unit (luminaire, camera, speaker, antenna). The arm points along local +X.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "pole",
+      "parameters": [
+        { "key": "poleHeight", "label": "Pole / mounting height", "type": "length", "default": 6, "min": 0.3, "max": 40, "required": true, "group": "Dimensions" },
+        { "key": "poleDiameter", "label": "Pole diameter", "type": "length", "default": 0.12, "min": 0.02, "max": 1.5, "group": "Dimensions" },
+        { "key": "armLength", "label": "Arm length (0 = post-top)", "type": "length", "default": 0.6, "min": 0, "max": 6, "group": "Dimensions" },
+        { "key": "headLength", "label": "Head length", "type": "length", "default": 0.6, "min": 0.02, "max": 3, "group": "Dimensions" },
+        { "key": "headWidth", "label": "Head width", "type": "length", "default": 0.25, "min": 0.02, "max": 2, "group": "Dimensions" },
+        { "key": "headHeight", "label": "Head height", "type": "length", "default": 0.12, "min": 0.01, "max": 2, "group": "Dimensions" },
+        { "key": "solarPanel", "label": "Integrated solar panel", "type": "bool", "default": false, "group": "Equipment" },
+        { "key": "power", "label": "Power", "type": "number", "unit": "W", "default": null, "min": 0, "max": 100000, "group": "Technical" },
+        { "key": "fixtureCode", "label": "Fixture / device code", "type": "text", "default": "", "group": "Technical" },
+        { "key": "coverageRadius", "label": "Illustrative coverage radius (not photometric)", "type": "length", "default": null, "min": 0, "max": 200, "group": "Checks" },
+        { "key": "poleMaterial", "label": "Pole material", "type": "material", "default": "steel_dark", "group": "Appearance" },
+        { "key": "headMaterial", "label": "Head material", "type": "material", "default": "luminaire", "group": "Appearance" }
+      ]
+    },
+    "bollard": {
+      "geometry": "point",
+      "description": "Bollard, bollard light or post.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "bollard",
+      "parameters": [
+        { "key": "height", "label": "Height", "type": "length", "default": 0.9, "min": 0.05, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "diameter", "label": "Diameter", "type": "length", "default": 0.2, "min": 0.02, "max": 2, "required": true, "group": "Dimensions" },
+        { "key": "lit", "label": "Illuminated", "type": "bool", "default": false, "group": "Equipment" },
+        { "key": "removable", "label": "Removable", "type": "bool", "default": false, "group": "Equipment" },
+        { "key": "power", "label": "Power", "type": "number", "unit": "W", "default": null, "min": 0, "max": 10000, "group": "Technical" },
+        { "key": "fixtureCode", "label": "Fixture code", "type": "text", "default": "", "group": "Technical" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "bench": {
+      "geometry": "point",
+      "description": "Bench, chair or lounger. Length along local X; the seat front faces local -Y.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "bench",
+      "parameters": [
+        { "key": "length", "label": "Length", "type": "length", "default": 1.8, "min": 0.3, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "depth", "label": "Depth", "type": "length", "default": 0.6, "min": 0.2, "max": 3, "required": true, "group": "Dimensions" },
+        { "key": "seatHeight", "label": "Seat height", "type": "length", "default": 0.45, "min": 0.1, "max": 1.2, "group": "Dimensions" },
+        { "key": "backrest", "label": "Backrest", "type": "bool", "default": true, "group": "Configuration" },
+        { "key": "backHeight", "label": "Overall height with backrest", "type": "length", "default": 0.8, "min": 0.2, "max": 2, "group": "Dimensions" },
+        { "key": "armrests", "label": "Armrests", "type": "bool", "default": false, "group": "Configuration" },
+        { "key": "material", "label": "Seat material", "type": "material", "default": "timber", "group": "Appearance" },
+        { "key": "frameMaterial", "label": "Frame material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "table": {
+      "geometry": "point",
+      "description": "Table with optional attached benches on both long sides. Length along local X.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "table",
+      "parameters": [
+        { "key": "length", "label": "Length", "type": "length", "default": 2.0, "min": 0.3, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "width", "label": "Width", "type": "length", "default": 0.8, "min": 0.3, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 0.75, "min": 0.3, "max": 1.5, "group": "Dimensions" },
+        { "key": "benches", "label": "Attached benches", "type": "bool", "default": true, "group": "Configuration" },
+        { "key": "benchWidth", "label": "Bench width", "type": "length", "default": 0.3, "min": 0.1, "max": 1, "group": "Dimensions" },
+        { "key": "material", "label": "Material", "type": "material", "default": "timber", "group": "Appearance" },
+        { "key": "frameMaterial", "label": "Frame material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "bike_stand": {
+      "geometry": "point",
+      "description": "Row of bicycle hoops. Each hoop is parallel to local X; hoops repeat along local +Y at the given spacing.",
+      "quantity": { "measure": "count", "unit": "pcs", "countParam": "count" },
+      "symbol": "bike_stand",
+      "parameters": [
+        { "key": "count", "label": "Number of stands", "type": "integer", "default": 1, "min": 1, "max": 200, "required": true, "group": "Configuration" },
+        { "key": "spacing", "label": "Stand spacing", "type": "length", "default": 1.0, "min": 0.3, "max": 5, "group": "Configuration" },
+        { "key": "width", "label": "Hoop length", "type": "length", "default": 0.8, "min": 0.2, "max": 3, "group": "Dimensions" },
+        { "key": "height", "label": "Hoop height", "type": "length", "default": 0.8, "min": 0.2, "max": 2, "group": "Dimensions" },
+        { "key": "tubeDiameter", "label": "Tube diameter", "type": "length", "default": 0.05, "min": 0.01, "max": 0.3, "group": "Dimensions" },
+        { "key": "bikesPerStand", "label": "Bicycles per stand", "type": "integer", "default": 2, "min": 1, "max": 4, "group": "Capacity" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_galv", "group": "Appearance" }
+      ]
+    },
+    "box_equipment": {
+      "geometry": "point",
+      "description": "Generic rectangular equipment or furniture body, centred on the insertion point. Use baseOffset for wall-mounted (positive) or buried (negative) items.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "box",
+      "parameters": [
+        { "key": "width", "label": "Width (local X)", "type": "length", "default": 1.0, "min": 0.01, "max": 100, "required": true, "group": "Dimensions" },
+        { "key": "depth", "label": "Depth (local Y)", "type": "length", "default": 0.6, "min": 0.01, "max": 100, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 1.2, "min": 0.001, "max": 100, "required": true, "group": "Dimensions" },
+        { "key": "baseOffset", "label": "Base offset / mounting height", "type": "length", "default": 0, "min": -30, "max": 60, "group": "Elevation" },
+        { "key": "serviceClearance", "label": "Service / safety clearance", "type": "length", "default": null, "min": 0, "max": 50, "group": "Checks" },
+        { "key": "power", "label": "Power", "type": "number", "unit": "kW", "default": null, "min": 0, "max": 100000, "group": "Technical" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "cylinder_equipment": {
+      "geometry": "point",
+      "description": "Generic cylindrical body (bins, posts, pots, tanks, small lights).",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "cylinder",
+      "parameters": [
+        { "key": "diameter", "label": "Diameter", "type": "length", "default": 0.6, "min": 0.01, "max": 50, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 1.0, "min": 0.001, "max": 100, "required": true, "group": "Dimensions" },
+        { "key": "baseOffset", "label": "Base offset", "type": "length", "default": 0, "min": -30, "max": 60, "group": "Elevation" },
+        { "key": "serviceClearance", "label": "Service / safety clearance", "type": "length", "default": null, "min": 0, "max": 50, "group": "Checks" },
+        { "key": "power", "label": "Power", "type": "number", "unit": "W", "default": null, "min": 0, "max": 100000, "group": "Technical" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "underground_container": {
+      "geometry": "point",
+      "description": "Underground or semi-underground waste container: buried body, top platform at cover level, insertion column above ground. Default dimensions are indicative only and must be replaced by manufacturer data.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "container_ug",
+      "parameters": [
+        { "key": "nominalVolume", "label": "Nominal volume", "type": "number", "unit": "m3", "default": 5, "min": 0.1, "max": 50, "required": true, "group": "Capacity" },
+        { "key": "installation", "label": "Installation", "type": "enum", "default": "underground", "options": ["underground", "semi_underground"], "group": "Configuration" },
+        { "key": "wasteFraction", "label": "Waste fraction", "type": "enum", "default": "mixed", "options": ["mixed", "paper", "plastic", "glass", "organic", "metal", "textile"], "group": "Configuration" },
+        { "key": "bodyLength", "label": "Body external length (local X)", "type": "length", "default": 2.0, "min": 0.3, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "bodyWidth", "label": "Body external width (local Y)", "type": "length", "default": 2.0, "min": 0.3, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "bodyDepth", "label": "Body depth below cover level", "type": "length", "default": 2.4, "min": 0.2, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "aboveGroundHeight", "label": "Above-ground height (column or upper body)", "type": "length", "default": 1.0, "min": 0, "max": 3, "group": "Dimensions" },
+        { "key": "columnDiameter", "label": "Insertion column diameter", "type": "length", "default": 0.8, "min": 0.1, "max": 3, "group": "Dimensions" },
+        { "key": "coverLevelOffset", "label": "Cover level offset from insertion elevation", "type": "length", "default": 0, "min": -2, "max": 2, "group": "Elevation" },
+        { "key": "excavationMargin", "label": "Excavation margin around body", "type": "length", "default": 0.5, "min": 0, "max": 5, "group": "Construction" },
+        { "key": "showExcavation", "label": "Show excavation envelope in 3D", "type": "bool", "default": false, "group": "Construction" },
+        { "key": "liftingClearance", "label": "Collection vehicle / lifting clearance", "type": "length", "default": null, "min": 0, "max": 30, "group": "Checks" },
+        { "key": "dimensionsSource", "label": "Source of dimensions (manufacturer document)", "type": "text", "default": "", "group": "Specification" },
+        { "key": "material", "label": "Body material", "type": "material", "default": "concrete_precast", "group": "Appearance" },
+        { "key": "columnMaterial", "label": "Column material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "chamber": {
+      "geometry": "point",
+      "description": "Inspection chamber, manhole, valve or meter chamber. Insertion elevation = finished ground; cover level offset applies.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "chamber",
+      "parameters": [
+        { "key": "shape", "label": "Chamber shape", "type": "enum", "default": "round", "options": ["round", "square"], "group": "Configuration" },
+        { "key": "innerSize", "label": "Internal diameter / size", "type": "length", "default": 1.0, "min": 0.1, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "wallThickness", "label": "Wall thickness", "type": "length", "default": 0.12, "min": 0.01, "max": 1, "group": "Dimensions" },
+        { "key": "depth", "label": "Depth (cover to invert)", "type": "length", "default": 1.5, "min": 0.1, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "coverShape", "label": "Cover shape", "type": "enum", "default": "round", "options": ["round", "square"], "group": "Configuration" },
+        { "key": "coverSize", "label": "Clear opening size", "type": "length", "default": 0.6, "min": 0.1, "max": 3, "group": "Dimensions" },
+        { "key": "coverLevelOffset", "label": "Cover level offset", "type": "length", "default": 0, "min": -2, "max": 2, "group": "Elevation" },
+        { "key": "loadClass", "label": "Cover load class", "type": "text", "default": "", "group": "Specification" },
+        { "key": "service", "label": "Service", "type": "text", "default": "", "group": "Specification" },
+        { "key": "material", "label": "Body material", "type": "material", "default": "concrete_precast", "group": "Appearance" },
+        { "key": "coverMaterial", "label": "Cover material", "type": "material", "default": "cast_iron", "group": "Appearance" }
+      ]
+    },
+    "tank": {
+      "geometry": "point",
+      "description": "Tank or cistern (box, horizontal or vertical cylinder), underground with cover depth or above ground.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "tank",
+      "parameters": [
+        { "key": "shape", "label": "Shape", "type": "enum", "default": "box", "options": ["box", "horizontal_cylinder", "vertical_cylinder"], "group": "Configuration" },
+        { "key": "length", "label": "Length (local X)", "type": "length", "default": 3.0, "min": 0.2, "max": 50, "required": true, "group": "Dimensions" },
+        { "key": "width", "label": "Width / diameter", "type": "length", "default": 1.5, "min": 0.2, "max": 30, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 1.5, "min": 0.2, "max": 30, "group": "Dimensions" },
+        { "key": "installation", "label": "Installation", "type": "enum", "default": "underground", "options": ["underground", "above_ground"], "group": "Configuration" },
+        { "key": "coverDepth", "label": "Cover depth (ground to top of tank)", "type": "length", "default": 0.8, "min": 0, "max": 20, "group": "Elevation" },
+        { "key": "accessShaft", "label": "Access shaft", "type": "bool", "default": true, "group": "Configuration" },
+        { "key": "shaftDiameter", "label": "Access shaft diameter", "type": "length", "default": 0.6, "min": 0.2, "max": 3, "group": "Dimensions" },
+        { "key": "nominalVolume", "label": "Nominal volume", "type": "number", "unit": "m3", "default": null, "min": 0, "max": 100000, "group": "Capacity" },
+        { "key": "material", "label": "Material", "type": "material", "default": "hdpe", "group": "Appearance" }
+      ]
+    },
+    "pergola": {
+      "geometry": "polygon",
+      "description": "Pergola, carport or canopy on the oriented bounding rectangle of the footprint (first edge defines orientation): columns, perimeter beams, rafters or louvers and an optional cover.",
+      "quantity": { "measure": "count", "unit": "pcs", "secondary": "area" },
+      "hatch": null,
+      "parameters": [
+        { "key": "height", "label": "Clear height (underside of beams)", "type": "length", "default": 2.6, "min": 1.5, "max": 15, "required": true, "group": "Dimensions" },
+        { "key": "columnSize", "label": "Column size", "type": "length", "default": 0.15, "min": 0.04, "max": 1.5, "group": "Structure" },
+        { "key": "columnSpacing", "label": "Maximum column spacing", "type": "length", "default": 3.5, "min": 0.5, "max": 20, "group": "Structure" },
+        { "key": "beamDepth", "label": "Beam depth", "type": "length", "default": 0.25, "min": 0.03, "max": 2, "group": "Structure" },
+        { "key": "beamWidth", "label": "Beam width", "type": "length", "default": 0.1, "min": 0.02, "max": 1, "group": "Structure" },
+        { "key": "rafterSpacing", "label": "Rafter / louver spacing", "type": "length", "default": 0.6, "min": 0.05, "max": 5, "group": "Structure" },
+        { "key": "rafterDepth", "label": "Rafter / louver depth", "type": "length", "default": 0.15, "min": 0.01, "max": 1, "group": "Structure" },
+        { "key": "rafterWidth", "label": "Rafter / louver width", "type": "length", "default": 0.05, "min": 0.005, "max": 0.5, "group": "Structure" },
+        { "key": "louverAngle", "label": "Louver angle (0 = vertical rafters)", "type": "angle", "default": 0, "min": -90, "max": 90, "group": "Structure" },
+        { "key": "cover", "label": "Cover", "type": "enum", "default": "none", "options": ["none", "fabric", "solid", "glass", "solar"], "group": "Configuration" },
+        { "key": "roofSlope", "label": "Cover slope", "type": "angle", "default": 0, "min": 0, "max": 45, "group": "Configuration" },
+        { "key": "material", "label": "Structure material", "type": "material", "default": "timber", "group": "Appearance" },
+        { "key": "coverMaterial", "label": "Cover material", "type": "material", "default": null, "group": "Appearance" }
+      ]
+    },
+    "shelter": {
+      "geometry": "point",
+      "description": "Shelter, gazebo or pavilion centred on the insertion point; open side faces local -Y.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "shelter",
+      "parameters": [
+        { "key": "width", "label": "Width (local X)", "type": "length", "default": 3.0, "min": 0.5, "max": 50, "required": true, "group": "Dimensions" },
+        { "key": "depth", "label": "Depth (local Y)", "type": "length", "default": 1.5, "min": 0.5, "max": 50, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Eaves height", "type": "length", "default": 2.5, "min": 1.5, "max": 15, "required": true, "group": "Dimensions" },
+        { "key": "roofType", "label": "Roof type", "type": "enum", "default": "mono", "options": ["flat", "mono", "pyramid"], "group": "Configuration" },
+        { "key": "roofSlope", "label": "Roof slope", "type": "angle", "default": 5, "min": 0, "max": 60, "group": "Configuration" },
+        { "key": "roofThickness", "label": "Roof thickness", "type": "length", "default": 0.12, "min": 0.01, "max": 1, "group": "Dimensions" },
+        { "key": "postSize", "label": "Post size", "type": "length", "default": 0.1, "min": 0.03, "max": 1, "group": "Structure" },
+        { "key": "backWall", "label": "Back wall", "type": "bool", "default": true, "group": "Configuration" },
+        { "key": "sideWalls", "label": "Side walls", "type": "bool", "default": false, "group": "Configuration" },
+        { "key": "frameMaterial", "label": "Frame material", "type": "material", "default": "steel_dark", "group": "Appearance" },
+        { "key": "wallMaterial", "label": "Wall material", "type": "material", "default": "glass", "group": "Appearance" },
+        { "key": "roofMaterial", "label": "Roof material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "parking_bay": {
+      "geometry": "point",
+      "description": "Parking or loading bay. Insertion point = centre of the access (aisle) edge; the bay extends along local +Y.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "parking_bay",
+      "parameters": [
+        { "key": "width", "label": "Bay width", "type": "length", "default": 2.5, "min": 1.0, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "length", "label": "Bay length", "type": "length", "default": 5.0, "min": 2.0, "max": 25, "required": true, "group": "Dimensions" },
+        { "key": "lineWidth", "label": "Marking line width", "type": "length", "default": 0.12, "min": 0.02, "max": 0.5, "group": "Marking" },
+        { "key": "accessible", "label": "Accessible bay", "type": "bool", "default": false, "group": "Configuration" },
+        { "key": "ev", "label": "EV charging bay", "type": "bool", "default": false, "group": "Configuration" },
+        { "key": "bayNumber", "label": "Bay number", "type": "text", "default": "", "group": "Information" },
+        { "key": "markingMaterial", "label": "Marking material", "type": "material", "default": "line_paint_white", "group": "Appearance" }
+      ]
+    },
+    "stripes": {
+      "geometry": "polygon",
+      "description": "Striped marking area (pedestrian crossings, hatched areas). Stripes run parallel to the first boundary edge and repeat across the area, clipped to the boundary's oriented bounding rectangle.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": { "pattern": "ANSI31", "scale": 1.0 },
+      "parameters": [
+        { "key": "stripeWidth", "label": "Stripe width", "type": "length", "default": 0.5, "min": 0.05, "max": 5, "required": true, "group": "Marking" },
+        { "key": "gapWidth", "label": "Gap width", "type": "length", "default": 0.5, "min": 0.05, "max": 5, "required": true, "group": "Marking" },
+        { "key": "thickness", "label": "Marking thickness", "type": "length", "default": 0.003, "min": 0.001, "max": 0.2, "group": "Dimensions" },
+        { "key": "material", "label": "Marking material", "type": "material", "default": "line_paint_white", "group": "Appearance" }
+      ]
+    },
+    "arrow_marking": {
+      "geometry": "point",
+      "description": "Painted direction arrow pointing along local +X, starting at the insertion point.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "arrow",
+      "parameters": [
+        { "key": "length", "label": "Length", "type": "length", "default": 5.0, "min": 0.3, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "width", "label": "Head width", "type": "length", "default": 1.0, "min": 0.1, "max": 5, "group": "Dimensions" },
+        { "key": "shaftWidth", "label": "Shaft width", "type": "length", "default": 0.15, "min": 0.02, "max": 2, "group": "Dimensions" },
+        { "key": "thickness", "label": "Marking thickness", "type": "length", "default": 0.003, "min": 0.001, "max": 0.1, "group": "Dimensions" },
+        { "key": "material", "label": "Marking material", "type": "material", "default": "line_paint_white", "group": "Appearance" }
+      ]
+    },
+    "sign_post": {
+      "geometry": "point",
+      "description": "Sign, information board or panel on one or two posts. The face is readable from local -Y.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "sign",
+      "parameters": [
+        { "key": "postCount", "label": "Number of posts", "type": "integer", "default": 1, "min": 0, "max": 2, "group": "Configuration" },
+        { "key": "postHeight", "label": "Post height", "type": "length", "default": 2.6, "min": 0.3, "max": 15, "group": "Dimensions" },
+        { "key": "postDiameter", "label": "Post diameter", "type": "length", "default": 0.076, "min": 0.02, "max": 0.6, "group": "Dimensions" },
+        { "key": "plateWidth", "label": "Panel width", "type": "length", "default": 0.6, "min": 0.05, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "plateHeight", "label": "Panel height", "type": "length", "default": 0.6, "min": 0.05, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "plateBottom", "label": "Panel bottom height", "type": "length", "default": 2.0, "min": 0, "max": 15, "group": "Dimensions" },
+        { "key": "plateShape", "label": "Panel shape", "type": "enum", "default": "rectangle", "options": ["rectangle", "circle", "triangle"], "group": "Appearance" },
+        { "key": "plateThickness", "label": "Panel thickness", "type": "length", "default": 0.02, "min": 0.002, "max": 1, "group": "Dimensions" },
+        { "key": "viewingDirection", "label": "Viewing direction note", "type": "text", "default": "", "group": "Information" },
+        { "key": "postMaterial", "label": "Post material", "type": "material", "default": "steel_galv", "group": "Appearance" },
+        { "key": "plateMaterial", "label": "Panel material", "type": "material", "default": "sign_plate", "group": "Appearance" }
+      ]
+    },
+    "gate": {
+      "geometry": "point",
+      "description": "Gate or barrier. Insertion point = centre of the opening; the opening runs along local X; swing leaves open toward the chosen side.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "gate",
+      "parameters": [
+        { "key": "width", "label": "Clear opening width", "type": "length", "default": 1.0, "min": 0.5, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 1.8, "min": 0.3, "max": 6, "required": true, "group": "Dimensions" },
+        { "key": "gateType", "label": "Gate type", "type": "enum", "default": "swing_single", "options": ["swing_single", "swing_double", "sliding", "barrier"], "group": "Configuration" },
+        { "key": "openingSide", "label": "Opening side", "type": "enum", "default": "back", "options": ["front", "back"], "group": "Configuration" },
+        { "key": "postSize", "label": "Post size", "type": "length", "default": 0.1, "min": 0.03, "max": 1, "group": "Dimensions" },
+        { "key": "leafThickness", "label": "Leaf thickness", "type": "length", "default": 0.05, "min": 0.01, "max": 0.5, "group": "Dimensions" },
+        { "key": "automatic", "label": "Automatic operation", "type": "bool", "default": false, "group": "Equipment" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "pool": {
+      "geometry": "polygon",
+      "description": "Basin with walls, floor and water surface. The boundary is the inner (water-side) edge at coping level.",
+      "quantity": { "measure": "area", "unit": "m2", "secondary": "volume" },
+      "hatch": { "pattern": "DOTS", "scale": 0.5 },
+      "parameters": [
+        { "key": "depth", "label": "Depth (coping to floor)", "type": "length", "default": 1.5, "min": 0.05, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "waterLevelOffset", "label": "Water level below coping", "type": "length", "default": 0.1, "min": 0, "max": 5, "group": "Dimensions" },
+        { "key": "wallThickness", "label": "Wall thickness", "type": "length", "default": 0.25, "min": 0.01, "max": 2, "group": "Dimensions" },
+        { "key": "floorThickness", "label": "Floor thickness", "type": "length", "default": 0.25, "min": 0.01, "max": 2, "group": "Dimensions" },
+        { "key": "finishMaterial", "label": "Finish material", "type": "material", "default": "pool_finish", "group": "Appearance" },
+        { "key": "waterMaterial", "label": "Water material", "type": "material", "default": "water", "group": "Appearance" }
+      ]
+    },
+    "planter": {
+      "geometry": "polygon",
+      "description": "Raised planter: perimeter wall following the outer boundary, soil fill and optional planting mass.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": { "pattern": "EARTH", "scale": 0.05 },
+      "parameters": [
+        { "key": "height", "label": "Wall height", "type": "length", "default": 0.6, "min": 0.05, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "wallThickness", "label": "Wall thickness", "type": "length", "default": 0.1, "min": 0.01, "max": 1, "group": "Dimensions" },
+        { "key": "soilDepthBelowTop", "label": "Soil level below wall top", "type": "length", "default": 0.05, "min": 0, "max": 2, "group": "Dimensions" },
+        { "key": "plantHeight", "label": "Planting height (0 = none)", "type": "length", "default": 0.5, "min": 0, "max": 5, "group": "Planting" },
+        { "key": "material", "label": "Wall material", "type": "material", "default": "concrete", "group": "Appearance" },
+        { "key": "soilMaterial", "label": "Soil material", "type": "material", "default": "soil", "group": "Appearance" },
+        { "key": "plantMaterial", "label": "Planting material", "type": "material", "default": "planting_mixed", "group": "Appearance" }
+      ]
+    },
+    "planting_area": {
+      "geometry": "polygon",
+      "description": "Planting bed, lawn or meadow: soil layer plus a simplified planting mass. Plant quantity can be estimated from spacing.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": { "pattern": "GRASS", "scale": 0.05 },
+      "parameters": [
+        { "key": "soilThickness", "label": "Soil / topsoil depth", "type": "length", "default": 0.3, "min": 0.01, "max": 3, "group": "Dimensions" },
+        { "key": "topOffset", "label": "Soil top offset from boundary", "type": "length", "default": 0, "min": -5, "max": 5, "group": "Elevation" },
+        { "key": "plantHeight", "label": "Planting height (0 = soil only)", "type": "length", "default": 0.6, "min": 0, "max": 6, "group": "Planting" },
+        { "key": "plantSpacing", "label": "Plant spacing (for quantity estimate)", "type": "length", "default": null, "min": 0.05, "max": 10, "group": "Planting" },
+        { "key": "plantCode", "label": "Plant mix code", "type": "text", "default": "", "group": "Planting" },
+        { "key": "soilMaterial", "label": "Soil material", "type": "material", "default": "mulch", "group": "Appearance" },
+        { "key": "plantMaterial", "label": "Planting material", "type": "material", "default": "planting_mixed", "group": "Appearance" }
+      ]
+    },
+    "basin": {
+      "geometry": "polygon",
+      "description": "Depression with sloped sides (retention/detention basin, rain garden, bioswale). The boundary is the top edge.",
+      "quantity": { "measure": "area", "unit": "m2", "secondary": "volume" },
+      "hatch": { "pattern": "SWAMP", "scale": 0.05 },
+      "parameters": [
+        { "key": "depth", "label": "Depth", "type": "length", "default": 0.5, "min": 0.02, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "sideSlope", "label": "Side slope (1 vertical : n horizontal)", "type": "number", "default": 3, "min": 0, "max": 20, "group": "Dimensions" },
+        { "key": "waterDepth", "label": "Design water depth (0 = dry)", "type": "length", "default": 0, "min": 0, "max": 10, "group": "Hydraulics" },
+        { "key": "floorMaterial", "label": "Floor / side material", "type": "material", "default": "grass", "group": "Appearance" },
+        { "key": "waterMaterial", "label": "Water material", "type": "material", "default": "water", "group": "Appearance" }
+      ]
+    },
+    "zone": {
+      "geometry": "polygon",
+      "description": "Translucent zone volume (equipment zone, maintenance area, comfort zone, recycling island footprint).",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": { "pattern": "NET", "scale": 0.5 },
+      "parameters": [
+        { "key": "height", "label": "Height", "type": "length", "default": 2.0, "min": 0.001, "max": 50, "group": "Dimensions" },
+        { "key": "baseOffset", "label": "Base offset", "type": "length", "default": 0, "min": -30, "max": 30, "group": "Elevation" },
+        { "key": "zoneType", "label": "Zone type", "type": "text", "default": "", "group": "Information" },
+        { "key": "material", "label": "Material", "type": "material", "default": "zone_generic", "group": "Appearance" }
+      ]
+    },
+    "circle_zone": {
+      "geometry": "point",
+      "description": "Circular zone (root protection, safety envelope, illustrative coverage).",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "circle_zone",
+      "parameters": [
+        { "key": "radius", "label": "Radius", "type": "length", "default": 2.0, "min": 0.05, "max": 200, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 0.05, "min": 0.001, "max": 50, "group": "Dimensions" },
+        { "key": "baseOffset", "label": "Base offset", "type": "length", "default": 0, "min": -30, "max": 30, "group": "Elevation" },
+        { "key": "zoneType", "label": "Zone type", "type": "text", "default": "", "group": "Information" },
+        { "key": "material", "label": "Material", "type": "material", "default": "zone_generic", "group": "Appearance" }
+      ]
+    },
+    "steps": {
+      "geometry": "polygon",
+      "description": "Flight of steps on the oriented bounding rectangle of the boundary. The flight ascends away from the first boundary edge.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": null,
+      "parameters": [
+        { "key": "totalRise", "label": "Total rise", "type": "length", "default": 0.6, "min": 0.05, "max": 10, "required": true, "group": "Dimensions" },
+        { "key": "riserHeight", "label": "Target riser height", "type": "length", "default": 0.15, "min": 0.05, "max": 0.4, "required": true, "group": "Dimensions" },
+        { "key": "material", "label": "Material", "type": "material", "default": "concrete", "group": "Appearance" }
+      ]
+    },
+    "ramp": {
+      "geometry": "polygon",
+      "description": "Ramp on the oriented bounding rectangle of the boundary, rising away from the first boundary edge.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": { "pattern": "ANSI37", "scale": 0.5 },
+      "parameters": [
+        { "key": "rise", "label": "Rise", "type": "length", "default": 0.3, "min": 0.01, "max": 5, "required": true, "group": "Dimensions" },
+        { "key": "thickness", "label": "Slab thickness", "type": "length", "default": 0.2, "min": 0.02, "max": 2, "group": "Dimensions" },
+        { "key": "maxSlope", "label": "Maximum slope (project rule)", "type": "number", "unit": "%", "default": null, "min": 0, "max": 100, "group": "Checks" },
+        { "key": "material", "label": "Material", "type": "material", "default": "concrete", "group": "Appearance" }
+      ]
+    },
+    "swing": {
+      "geometry": "point",
+      "description": "Swing frame with seats. Beam along local X.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "swing",
+      "parameters": [
+        { "key": "width", "label": "Beam length", "type": "length", "default": 3.4, "min": 1, "max": 15, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Beam height", "type": "length", "default": 2.4, "min": 1, "max": 6, "required": true, "group": "Dimensions" },
+        { "key": "frameSpread", "label": "Leg spread at ground (local Y)", "type": "length", "default": 1.8, "min": 0.3, "max": 6, "group": "Dimensions" },
+        { "key": "seats", "label": "Seats", "type": "integer", "default": 2, "min": 1, "max": 6, "group": "Configuration" },
+        { "key": "seatHeight", "label": "Seat height", "type": "length", "default": 0.45, "min": 0.2, "max": 1.5, "group": "Dimensions" },
+        { "key": "frameDiameter", "label": "Frame tube diameter", "type": "length", "default": 0.1, "min": 0.02, "max": 0.5, "group": "Dimensions" },
+        { "key": "safetyClearance", "label": "Safety clearance (from manufacturer / standard)", "type": "length", "default": null, "min": 0, "max": 20, "group": "Checks" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_dark", "group": "Appearance" }
+      ]
+    },
+    "cable_line": {
+      "geometry": "path",
+      "description": "Cable between posts at the first and last path vertex (zip line).",
+      "quantity": { "measure": "length", "unit": "m" },
+      "linetype": "DASHED",
+      "parameters": [
+        { "key": "startHeight", "label": "Start post height", "type": "length", "default": 3.0, "min": 0.5, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "endHeight", "label": "End post height", "type": "length", "default": 2.0, "min": 0.5, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "postDiameter", "label": "Post diameter", "type": "length", "default": 0.2, "min": 0.03, "max": 1, "group": "Dimensions" },
+        { "key": "cableDiameter", "label": "Cable diameter", "type": "length", "default": 0.02, "min": 0.003, "max": 0.2, "group": "Dimensions" },
+        { "key": "safetyClearance", "label": "Safety clearance", "type": "length", "default": null, "min": 0, "max": 20, "group": "Checks" },
+        { "key": "material", "label": "Material", "type": "material", "default": "steel_galv", "group": "Appearance" }
+      ]
+    },
+    "solar_array": {
+      "geometry": "point",
+      "description": "Ground-mounted PV array. Modules repeat along local +X; rows repeat along local +Y; modules face local -Y and tilt upward toward +Y.",
+      "quantity": { "measure": "count", "unit": "pcs", "countExpression": "rows*modulesPerRow" },
+      "symbol": "solar_array",
+      "parameters": [
+        { "key": "rows", "label": "Rows", "type": "integer", "default": 2, "min": 1, "max": 200, "required": true, "group": "Layout" },
+        { "key": "modulesPerRow", "label": "Modules per row", "type": "integer", "default": 10, "min": 1, "max": 500, "required": true, "group": "Layout" },
+        { "key": "moduleWidth", "label": "Module width (along row)", "type": "length", "default": 1.13, "min": 0.2, "max": 5, "group": "Module" },
+        { "key": "moduleLength", "label": "Module length (up slope)", "type": "length", "default": 1.72, "min": 0.2, "max": 5, "group": "Module" },
+        { "key": "tilt", "label": "Tilt", "type": "angle", "default": 25, "min": 0, "max": 90, "group": "Layout" },
+        { "key": "rowSpacing", "label": "Row pitch", "type": "length", "default": 3.5, "min": 0.5, "max": 50, "group": "Layout" },
+        { "key": "lowEdgeHeight", "label": "Low edge height", "type": "length", "default": 0.5, "min": 0, "max": 10, "group": "Layout" },
+        { "key": "modulePower", "label": "Module power (user data)", "type": "number", "unit": "W", "default": null, "min": 0, "max": 5000, "group": "Technical" },
+        { "key": "material", "label": "Module material", "type": "material", "default": "solar_pv", "group": "Appearance" },
+        { "key": "frameMaterial", "label": "Frame material", "type": "material", "default": "aluminium", "group": "Appearance" }
+      ]
+    },
+    "vawt": {
+      "geometry": "point",
+      "description": "Vertical-axis wind turbine: mast and cylindrical rotor envelope.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "vawt",
+      "parameters": [
+        { "key": "mastHeight", "label": "Mast height (to rotor base)", "type": "length", "default": 6, "min": 0.5, "max": 60, "required": true, "group": "Dimensions" },
+        { "key": "mastDiameter", "label": "Mast diameter", "type": "length", "default": 0.15, "min": 0.02, "max": 2, "group": "Dimensions" },
+        { "key": "rotorDiameter", "label": "Rotor diameter", "type": "length", "default": 1.5, "min": 0.2, "max": 30, "required": true, "group": "Dimensions" },
+        { "key": "rotorHeight", "label": "Rotor height", "type": "length", "default": 2.5, "min": 0.2, "max": 40, "required": true, "group": "Dimensions" },
+        { "key": "ratedPower", "label": "Rated power (user data)", "type": "number", "unit": "kW", "default": null, "min": 0, "max": 10000, "group": "Technical" },
+        { "key": "material", "label": "Mast material", "type": "material", "default": "steel_galv", "group": "Appearance" },
+        { "key": "rotorMaterial", "label": "Rotor material", "type": "material", "default": "aluminium", "group": "Appearance" }
+      ]
+    },
+    "sail": {
+      "geometry": "polygon",
+      "description": "Shade sail through 3 or 4 corner points with alternating high and low fixing heights and masts at the corners.",
+      "quantity": { "measure": "area", "unit": "m2" },
+      "hatch": null,
+      "parameters": [
+        { "key": "highHeight", "label": "High corner height", "type": "length", "default": 3.5, "min": 1, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "lowHeight", "label": "Low corner height", "type": "length", "default": 2.6, "min": 1, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "mastDiameter", "label": "Mast diameter (0 = no masts)", "type": "length", "default": 0.12, "min": 0, "max": 1, "group": "Dimensions" },
+        { "key": "material", "label": "Fabric material", "type": "material", "default": "fabric", "group": "Appearance" },
+        { "key": "mastMaterial", "label": "Mast material", "type": "material", "default": "steel_galv", "group": "Appearance" }
+      ]
+    },
+    "outline": {
+      "geometry": "polygon",
+      "description": "Reference outline (site boundary, existing feature). Exported as edges without faces.",
+      "quantity": { "measure": "area", "unit": "m2", "secondary": "perimeter" },
+      "hatch": null,
+      "parameters": [
+        { "key": "lineHeight", "label": "Display height above boundary", "type": "length", "default": 0.02, "min": 0, "max": 10, "group": "Elevation" }
+      ]
+    },
+    "marker": {
+      "geometry": "point",
+      "description": "Reference marker (building entrance, access point) pointing along local +X.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "marker",
+      "parameters": [
+        { "key": "size", "label": "Size", "type": "length", "default": 1.0, "min": 0.1, "max": 10, "group": "Dimensions" },
+        { "key": "reference", "label": "Reference text", "type": "text", "default": "", "group": "Information" },
+        { "key": "material", "label": "Material", "type": "material", "default": "line_paint_blue", "group": "Appearance" }
+      ]
+    },
+    "fountain": {
+      "geometry": "point",
+      "description": "Round fountain basin with a water jet.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "fountain",
+      "parameters": [
+        { "key": "basinDiameter", "label": "Basin outer diameter", "type": "length", "default": 3.0, "min": 0.3, "max": 50, "required": true, "group": "Dimensions" },
+        { "key": "basinHeight", "label": "Rim height", "type": "length", "default": 0.45, "min": 0, "max": 3, "group": "Dimensions" },
+        { "key": "rimWidth", "label": "Rim width", "type": "length", "default": 0.25, "min": 0.02, "max": 2, "group": "Dimensions" },
+        { "key": "jetHeight", "label": "Jet height (0 = none)", "type": "length", "default": 2.0, "min": 0, "max": 50, "group": "Dimensions" },
+        { "key": "jetDiameter", "label": "Jet diameter", "type": "length", "default": 0.08, "min": 0.01, "max": 2, "group": "Dimensions" },
+        { "key": "basinMaterial", "label": "Basin material", "type": "material", "default": "stone_wall", "group": "Appearance" },
+        { "key": "waterMaterial", "label": "Water material", "type": "material", "default": "water", "group": "Appearance" }
+      ]
+    },
+    "boulder": {
+      "geometry": "point",
+      "description": "Decorative stone or boulder approximated by a faceted ellipsoid, partly embedded.",
+      "quantity": { "measure": "count", "unit": "pcs" },
+      "symbol": "boulder",
+      "parameters": [
+        { "key": "length", "label": "Length (local X)", "type": "length", "default": 1.2, "min": 0.05, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "width", "label": "Width (local Y)", "type": "length", "default": 0.9, "min": 0.05, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "height", "label": "Height", "type": "length", "default": 0.7, "min": 0.05, "max": 20, "required": true, "group": "Dimensions" },
+        { "key": "embedment", "label": "Embedment depth", "type": "length", "default": 0.15, "min": 0, "max": 10, "group": "Elevation" },
+        { "key": "material", "label": "Material", "type": "material", "default": "stone_wall", "group": "Appearance" }
+      ]
+    }
+  }
+}

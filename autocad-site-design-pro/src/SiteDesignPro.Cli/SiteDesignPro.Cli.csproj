@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Headless command-line tool: generate the sample project package, validate packages, print schedules. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>sdp</AssemblyName>
+    <RootNamespace>SiteDesignPro.Cli</RootNamespace>
+    <RollForward>Major</RollForward>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SiteDesignPro.Core\SiteDesignPro.Core.csproj" />
+  </ItemGroup>
+</Project>

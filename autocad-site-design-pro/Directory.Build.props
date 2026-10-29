@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
+    <Version>0.1.0</Version>
+    <Company>Projektni biro</Company>
+    <Product>Site Design Pro</Product>
+    <Copyright>Copyright (c) 2026 Projektni biro</Copyright>
+    <Deterministic>true</Deterministic>
+    <SharedDir>$(MSBuildThisFileDirectory)..\shared\</SharedDir>
+  </PropertyGroup>
+</Project>

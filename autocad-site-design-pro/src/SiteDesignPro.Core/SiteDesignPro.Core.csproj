@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Host-independent domain library: element model, catalog, units, geometry, exchange package,
+       validation, schedules, layout and 2D symbol generation. No AutoCAD dependency, fully unit-tested. -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SiteDesignPro.Core</RootNamespace>
+    <AssemblyName>SiteDesignPro.Core</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The shared catalog is the single source of truth; it is embedded so the library works stand-alone. -->
+    <EmbeddedResource Include="$(SharedDir)catalog\*.json" LogicalName="SiteDesignPro.Catalog.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="$(SharedDir)schema\*.json" LogicalName="SiteDesignPro.Schema.%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>
