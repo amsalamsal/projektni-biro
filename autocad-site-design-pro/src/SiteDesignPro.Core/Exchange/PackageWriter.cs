@@ -278,6 +278,11 @@ namespace SiteDesignPro.Core.Exchange
             };
             if (options.Validation != null)
             {
+                if (options.CreatedUtc.HasValue)
+                {
+                    options.Validation.CreatedUtc = options.CreatedUtc.Value.ToUniversalTime(); // reproducible packages
+                }
+
                 files.Add((PackageFormat.ValidationReportFile, Encoding.UTF8.GetBytes(options.Validation.ToJson().ToJsonString(Indented))));
                 files.Add(("preview/validation-report.txt", Encoding.UTF8.GetBytes(options.Validation.ToText())));
             }

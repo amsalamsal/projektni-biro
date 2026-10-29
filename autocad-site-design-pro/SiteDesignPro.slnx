@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SiteDesignPro.AutoCAD/SiteDesignPro.AutoCAD.csproj" />
+    <Project Path="src/SiteDesignPro.Cli/SiteDesignPro.Cli.csproj" />
+    <Project Path="src/SiteDesignPro.Core/SiteDesignPro.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SiteDesignPro.Core.Tests/SiteDesignPro.Core.Tests.csproj" />
+  </Folder>
+</Solution>

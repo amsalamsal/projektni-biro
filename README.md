@@ -7,4 +7,11 @@ AutoCAD + SketchUp extension suite for landscape architecture and site design.
 * `shared/` — exchange schema, element catalog (types, builders, layers, materials), sample packages.
 * `docs/` — architecture, build, installation, user guide, limitations.
 
-See `docs/ARCHITECTURE.md` for the design and `docs/BUILD.md` for build and test instructions.
+Documentation: [Architecture](docs/ARCHITECTURE.md) · [Build](docs/BUILD.md) · [Install](docs/INSTALL.md) ·
+[User guide](docs/USER_GUIDE.md) · [Object library](docs/OBJECT_LIBRARY.md) · [Test report](docs/TEST_REPORT.md) ·
+[Known limitations](docs/KNOWN_LIMITATIONS.md) · [Changelog](CHANGELOG.md)
+
+> Status: both extensions build and pass their automated tests, but neither has been run inside AutoCAD or SketchUp
+> yet (see Known limitations).
+
+Quick start: `tools/build_and_test.sh` builds, tests and writes the installable packages to `dist/`.

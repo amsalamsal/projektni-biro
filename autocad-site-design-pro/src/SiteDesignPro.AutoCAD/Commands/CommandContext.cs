@@ -1,0 +1,340 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using SiteDesignPro.AutoCAD.Data;
+using SiteDesignPro.AutoCAD.Infrastructure;
+using SiteDesignPro.Core.Catalog;
+using SiteDesignPro.Core.Geometry;
+using SiteDesignPro.Core.Labels;
+using SiteDesignPro.Core.Model;
+using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
+
+namespace SiteDesignPro.AutoCAD.Commands
+{
+    /// <summary>Thrown to end a command quietly after the user cancels.</summary>
+    internal sealed class CommandCancelled : Exception
+    {
+    }
+
+    /// <summary>
+    /// Per-command services: document, editor, one transaction, catalog, project settings and the element service.
+    /// All drawing modifications of a command happen in this transaction (one UNDO step); exceptions abort it.
+    /// </summary>
+    internal sealed class CommandContext : IDisposable
+    {
+        private bool committed;
+
+        private CommandContext(Document doc)
+        {
+            Doc = doc;
+            Db = doc.Database;
+            Ed = doc.Editor;
+            Catalog = AcadEnv.Catalog;
+            Tr = Db.TransactionManager.StartTransaction();
+            Settings = ProjectStore.ReadOrDefault(Db, Tr);
+            Svc = new ElementService(Db, Tr, Catalog, Settings);
+        }
+
+        public Document Doc { get; }
+
+        public Database Db { get; }
+
+        public Editor Ed { get; }
+
+        public Transaction Tr { get; }
+
+        public ElementCatalog Catalog { get; }
+
+        public ProjectSettings Settings { get; }
+
+        public ElementService Svc { get; }
+
+        public double K => Settings.Scale.DrawingUnitsPerMeter;
+
+        /// <summary>Runs a command body with error handling, logging and transaction management.</summary>
+        public static void Run(string name, Action<CommandContext> body)
+        {
+            Document? doc = AcApp.DocumentManager.MdiActiveDocument;
+            if (doc == null)
+            {
+                return;
+            }
+
+            try
+            {
+                using var ctx = new CommandContext(doc);
+                body(ctx);
+                ctx.Commit();
+            }
+            catch (CommandCancelled)
+            {
+                doc.Editor.WriteMessage("\n*Cancel*");
+            }
+            catch (Autodesk.AutoCAD.Runtime.Exception ex)
+            {
+                Log.Error(name + " failed (AutoCAD " + ex.ErrorStatus + ")", ex);
+            }
+            catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is FormatException || ex is System.IO.IOException || ex is KeyNotFoundException || ex is UnauthorizedAccessException)
+            {
+                Log.Error(name + " failed", ex);
+            }
+        }
+
+        public void Commit()
+        {
+            if (!committed)
+            {
+                Tr.Commit();
+                committed = true;
+            }
+        }
+
+        public void SaveSettings()
+        {
+            ProjectStore.Write(Db, Tr, Settings);
+        }
+
+        public void Dispose()
+        {
+            Tr.Dispose();
+        }
+
+        public void Write(string text) => Ed.WriteMessage("\n" + text);
+
+        // ------------------------------------------------------------------ prompts
+
+        public string Keyword(string message, string[] keywords, string? defaultKeyword = null)
+        {
+            var o = new PromptKeywordOptions("\n" + message);
+            foreach (string k in keywords)
+            {
+                o.Keywords.Add(k);
+            }
+
+            if (defaultKeyword != null)
+            {
+                o.Keywords.Default = defaultKeyword;
+            }
+
+            o.AllowNone = defaultKeyword != null;
+            PromptResult r = Ed.GetKeywords(o);
+            if (r.Status == PromptStatus.None && defaultKeyword != null)
+            {
+                return defaultKeyword;
+            }
+
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.StringResult;
+        }
+
+        public string Text(string message, string? defaultValue = null, bool allowSpaces = true)
+        {
+            var o = new PromptStringOptions("\n" + message + (defaultValue != null ? " <" + defaultValue + ">" : string.Empty) + ": ") { AllowSpaces = allowSpaces };
+            PromptResult r = Ed.GetString(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.StringResult.Length == 0 && defaultValue != null ? defaultValue : r.StringResult;
+        }
+
+        public double Number(string message, double defaultValue, bool allowNegative = false, bool allowZero = false)
+        {
+            var o = new PromptDoubleOptions("\n" + message) { DefaultValue = defaultValue, UseDefaultValue = true, AllowNegative = allowNegative, AllowZero = allowZero };
+            PromptDoubleResult r = Ed.GetDouble(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.Value;
+        }
+
+        public int Integer(string message, int defaultValue, int min = 1)
+        {
+            var o = new PromptIntegerOptions("\n" + message) { DefaultValue = defaultValue, UseDefaultValue = true, LowerLimit = min, AllowNegative = min < 0, AllowZero = min <= 0 };
+            PromptIntegerResult r = Ed.GetInteger(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.Value;
+        }
+
+        public Point3d? Point(string message, Point3d? basePoint = null, bool allowNone = false)
+        {
+            var o = new PromptPointOptions("\n" + message) { AllowNone = allowNone };
+            if (basePoint.HasValue)
+            {
+                o.BasePoint = basePoint.Value.TransformBy(Ed.CurrentUserCoordinateSystem.Inverse());
+                o.UseBasePoint = true;
+            }
+
+            PromptPointResult r = Ed.GetPoint(o);
+            if (r.Status == PromptStatus.None && allowNone)
+            {
+                return null;
+            }
+
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.Value.TransformBy(Ed.CurrentUserCoordinateSystem);
+        }
+
+        public double Angle(string message, Point3d basePoint, double defaultRadians)
+        {
+            var o = new PromptAngleOptions("\n" + message) { BasePoint = basePoint.TransformBy(Ed.CurrentUserCoordinateSystem.Inverse()), UseBasePoint = true, DefaultValue = defaultRadians, UseDefaultValue = true, AllowNone = true };
+            PromptDoubleResult r = Ed.GetAngle(o);
+            if (r.Status == PromptStatus.None)
+            {
+                return defaultRadians;
+            }
+
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            // GetAngle returns the angle in the current UCS; convert to WCS about the UCS Z axis
+            Matrix3d ucs = Ed.CurrentUserCoordinateSystem;
+            Vector3d x = Vector3d.XAxis.TransformBy(ucs);
+            return GeometryMath.NormalizeAngle(r.Value + Math.Atan2(x.Y, x.X));
+        }
+
+        public ObjectId Entity(string message, params Type[] allowed)
+        {
+            var o = new PromptEntityOptions("\n" + message);
+            if (allowed.Length > 0)
+            {
+                o.SetRejectMessage("\nObject type not supported.");
+                foreach (Type t in allowed)
+                {
+                    o.AddAllowedClass(t, false);
+                }
+            }
+
+            PromptEntityResult r = Ed.GetEntity(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.ObjectId;
+        }
+
+        /// <summary>Selects managed elements (implied selection first); "All" selects every managed element.</summary>
+        public List<ManagedElement> SelectElements(string message, bool allowAll = true, Func<ManagedElement, bool>? filter = null)
+        {
+            var sf = new SelectionFilter(new[] { new TypedValue((int)DxfCode.ExtendedDataRegAppName, ElementStore.App) });
+            PromptSelectionResult implied = Ed.SelectImplied();
+            ObjectId[] ids;
+            if (implied.Status == PromptStatus.OK && implied.Value.Count > 0)
+            {
+                ids = implied.Value.GetObjectIds();
+                Ed.SetImpliedSelection(Array.Empty<ObjectId>());
+            }
+            else
+            {
+                var o = new PromptSelectionOptions { MessageForAdding = "\n" + message + (allowAll ? " (or Enter for all)" : string.Empty) };
+                PromptSelectionResult r = Ed.GetSelection(o, sf);
+                if (r.Status == PromptStatus.Error && allowAll)
+                {
+                    PromptSelectionResult all = Ed.SelectAll(sf);
+                    ids = all.Status == PromptStatus.OK ? all.Value.GetObjectIds() : Array.Empty<ObjectId>();
+                }
+                else if (r.Status != PromptStatus.OK)
+                {
+                    throw new CommandCancelled();
+                }
+                else
+                {
+                    ids = r.Value.GetObjectIds();
+                }
+            }
+
+            var result = new List<ManagedElement>();
+            foreach (ObjectId id in ids)
+            {
+                if (Tr.GetObject(id, OpenMode.ForRead) is Entity e && ElementStore.IsManaged(e))
+                {
+                    ManagedElement? m = Svc.Read(e);
+                    if (m != null && (filter == null || filter(m)))
+                    {
+                        result.Add(m);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>Asks for an element type by id or name fragment, optionally restricted to geometry kinds.</summary>
+        public ElementType ChooseType(string message, string? argument, params GeometryKind[] kinds)
+        {
+            string query = argument ?? Text(message + " (type id or part of the name, ? to list)", null, true);
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                IEnumerable<ElementType> pool = Catalog.Types.Where(t => kinds.Length == 0 || kinds.Contains(t.Geometry));
+                ElementType? exact = pool.FirstOrDefault(t => string.Equals(t.Id, query, StringComparison.OrdinalIgnoreCase));
+                if (exact != null)
+                {
+                    return exact;
+                }
+
+                List<ElementType> matches = query == "?" ? pool.ToList() : pool.Where(t => t.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || t.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                if (matches.Count == 1)
+                {
+                    return matches[0];
+                }
+
+                if (matches.Count == 0)
+                {
+                    Write("No element type matches '" + query + "'.");
+                }
+                else
+                {
+                    foreach (ElementType t in matches.Take(40))
+                    {
+                        Write("  " + t.Id.PadRight(40) + t.Name);
+                    }
+
+                    if (matches.Count > 40)
+                    {
+                        Write("  ... " + (matches.Count - 40) + " more; refine the search or use the Site Design Pro palette.");
+                    }
+                }
+
+                query = Text(message + " (type id)", null, true);
+            }
+
+            throw new CommandCancelled();
+        }
+
+        /// <summary>New element with type defaults, next label and the given drawing-frame geometry.</summary>
+        public SiteElement NewElement(ElementType type, ElementGeometry geometry, IEnumerable<SiteElement> existing)
+        {
+            var e = new SiteElement(SiteElement.NewId(), type.Id, geometry) { Name = type.Name, Parameters = type.CreateDefaultParameters() };
+            e.Label = new LabelNumbering(Settings.Labels, Catalog).Next(type, existing);
+            return e;
+        }
+
+        /// <summary>All elements currently in the drawing (drawing frame), for numbering.</summary>
+        public List<SiteElement> ExistingElements() => Svc.ReadAll().Where(m => m.Element != null && !m.IsCopy).Select(m => m.Element!).ToList();
+
+        public static string F(double v, int decimals = 3) => v.ToString("0." + new string('#', decimals), CultureInfo.InvariantCulture);
+    }
+}

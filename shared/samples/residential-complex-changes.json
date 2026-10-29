@@ -1,0 +1,53 @@
+{
+  "format": "site-design-pro-changes",
+  "schemaVersion": "1.0.0",
+  "createdUtc": "2026-01-01T00:00:00Z",
+  "generator": {
+    "application": "SketchUp Site Design Pro",
+    "version": "0.1.0"
+  },
+  "projectId": "85ca0f75-91f8-487f-a951-d1a7f14e1796",
+  "sourcePackageId": "01ba9c61-4449-44a2-90ab-cc1873b828d3",
+  "units": {
+    "length": "m",
+    "angle": "rad"
+  },
+  "coordinateSystem": {
+    "origin": [
+      6550000.0,
+      4860000.0,
+      520.0
+    ]
+  },
+  "changes": [
+    {
+      "id": "d0e2f150-7835-42ab-98d3-87c44603135f",
+      "type": "lighting.bollard_light",
+      "baseContentHash": "7ef44a92af96d5a64c0c490d6aba53cfc476982520a2379fb63ca9dc1c395bb3",
+      "label": "L-001",
+      "position": [
+        60.0,
+        49.5,
+        0.15
+      ],
+      "rotation": 0.0
+    },
+    {
+      "id": "e1cc5117-d7ff-4b7d-bf86-b340e02e4c7a",
+      "type": "furniture.bench",
+      "baseContentHash": "79edee3407ba02f3f046384569bf74e2eb75227e86e8703d5402df654462ed43",
+      "label": "FB-002",
+      "rotation": 1.570796327
+    },
+    {
+      "id": "04319255-b2d6-4684-a243-d910919ffca4",
+      "type": "furniture.bench",
+      "baseContentHash": "f923b737935ae6d2ad0ab204f3e2d4ad985041f06be361d80d9354cda0f06966",
+      "label": "FB-001",
+      "parameters": {
+        "length": 2.2,
+        "armrests": true
+      }
+    }
+  ]
+}

@@ -65,7 +65,7 @@ module ProjektniBiro
 
       def write(level, message)
         line = "#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} [#{level.upcase}] #{message}"
-        puts "Site Design Pro: #{line}" if level != :debug
+        puts "Site Design Pro: #{line}" if level != :debug && !ENV['SDP_QUIET']
         File.open(path, 'a') { |f| f.puts(line) }
       rescue SystemCallError, IOError => e
         puts "Site Design Pro: could not write log (#{e.message}): #{line}"

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Autodesk Autoloader manifest. Copy SiteDesignPro.bundle to
+     %APPDATA%\Autodesk\ApplicationPlugins (current user) or %PROGRAMDATA%\Autodesk\ApplicationPlugins (all users). -->
+<ApplicationPackage SchemaVersion="1.0"
+                    AppVersion="0.1.0"
+                    ProductCode="{6F1B2C4E-3A5D-4E7F-9B21-0C8D5A6E7F10}"
+                    UpgradeCode="{9A7C3E21-5B4D-4C6E-8F12-3D4E5F607182}"
+                    Name="Site Design Pro"
+                    Description="Landscape and site design tools with SketchUp exchange"
+                    Author="Projektni biro"
+                    AutodeskProduct="AutoCAD"
+                    ProductType="Application"
+                    SupportedLocales="Enu"
+                    HelpFile="./Contents/Docs/README.html">
+  <CompanyDetails Name="Projektni biro" />
+  <Components Description="AutoCAD 2025 and 2026 (.NET 8, API R25)">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R25.0" SeriesMax="R25.1" />
+    <ComponentEntry AppName="SiteDesignPro" Version="0.1.0"
+                    ModuleName="./Contents/Win64/R25/SiteDesignPro.AutoCAD.dll"
+                    AppDescription="Site Design Pro for AutoCAD 2025-2026"
+                    LoadOnAutoCADStartup="True" />
+  </Components>
+  <Components Description="AutoCAD 2027 (.NET 10, API R26)">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R26.0" SeriesMax="R26.0" />
+    <ComponentEntry AppName="SiteDesignPro" Version="0.1.0"
+                    ModuleName="./Contents/Win64/R26/SiteDesignPro.AutoCAD.dll"
+                    AppDescription="Site Design Pro for AutoCAD 2027"
+                    LoadOnAutoCADStartup="True" />
+  </Components>
+</ApplicationPackage>
