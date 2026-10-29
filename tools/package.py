@@ -164,6 +164,45 @@ def autocad_bundle() -> pathlib.Path:
     return bundle
 
 
+README_INSTALL = """Vanjsko uredjenje PRO za AutoCAD 2020-2027 - instalacija
+=========================================================
+
+1. Zatvorite AutoCAD.
+2. Raspakujte CIJELI ovaj zip u neki folder (npr. Desktop). Ne pokrecite iz samog zip-a.
+3. Dvostruki klik na INSTALIRAJ.bat
+   - skripta pronalazi instalirane verzije AutoCAD-a (2020-2027, i Civil 3D/Map 3D na istoj osnovi),
+   - kopira SiteDesignPro.bundle u %APPDATA%\\Autodesk\\ApplicationPlugins,
+   - uklanja Windows blokadu preuzetih datoteka i stare verzije dodatka,
+   - dodaje folder u pouzdane putanje AutoCAD-a (TRUSTEDPATHS).
+4. Pokrenite AutoCAD: pojavljuje se kartica VANJSKO UREDJENJE PRO. Provjera: SDPABOUT, pa SDPSAMPLE.
+
+Ostalo:
+- INSTALIRAJ_ZA_SVE_KORISNIKE.bat - instalacija u %PROGRAMDATA% (trazi administratorska prava).
+- DEINSTALIRAJ.bat - uklanja dodatak (crtezi zadrzavaju geometriju i podatke).
+- Ako Windows SmartScreen upozori: "More info" -> "Run anyway".
+- Ako AutoCAD pri prvom pokretanju pita za sigurnost (SECURELOAD): odaberite "Always load".
+- Dnevnik instalacije: %TEMP%\\VanjskoUredjenjePRO-instalacija.log
+
+Dodatak jos nije testiran u stvarnom AutoCAD-u. Ako nesto ne radi, posaljite verziju AutoCAD-a,
+tekst greske iz komandne linije i dnevnike (%LOCALAPPDATA%\\SiteDesignPro\\logs).
+"""
+
+
+def autocad_installer(bundle: pathlib.Path) -> pathlib.Path:
+    """Zip for end users: the bundle plus the Windows installer scripts (detects the installed AutoCAD versions)."""
+    target = DIST / "VanjskoUredjenjePRO-AutoCAD-instalacija.zip"
+    win = ROOT / "tools" / "windows"
+    with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as z:
+        for name in ("INSTALIRAJ.bat", "INSTALIRAJ_ZA_SVE_KORISNIKE.bat", "DEINSTALIRAJ.bat", "instaliraj.ps1"):
+            data = (win / name).read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")  # CRLF for cmd.exe
+            z.writestr(name, data)
+        z.writestr("PROCITAJ.txt", README_INSTALL.replace("\n", "\r\n"))
+        for f in sorted(bundle.rglob("*")):
+            if f.is_file():
+                z.write(f, "SiteDesignPro.bundle/" + f.relative_to(bundle).as_posix())
+    return target
+
+
 def sketchup_rbz() -> pathlib.Path:
     staging = DIST / "rbz-staging"
     if staging.exists():
@@ -191,7 +230,9 @@ def samples() -> None:
 
 if __name__ == "__main__":
     DIST.mkdir(exist_ok=True)
-    print("AutoCAD bundle:", autocad_bundle())
+    bundle = autocad_bundle()
+    print("AutoCAD bundle:", bundle)
+    print("AutoCAD setup: ", autocad_installer(bundle))
     print("SketchUp rbz:  ", sketchup_rbz())
     samples()
     print("Samples:        ", DIST / "samples")

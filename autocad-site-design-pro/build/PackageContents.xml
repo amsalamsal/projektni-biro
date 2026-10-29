@@ -11,7 +11,7 @@
                     AutodeskProduct="AutoCAD"
                     ProductType="Application"
                     SupportedLocales="Enu"
-                    HelpFile="./Contents/Docs/README.html">
+                    HelpFile="./Contents/Docs/index.html">
   <CompanyDetails Name="Projektni biro" />
   <Components Description="AutoCAD 2020 (.NET Framework 4.7, API R23.1)">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R23.1" SeriesMax="R23.1" />

@@ -5,7 +5,27 @@
 > SketchUp Extension Managera. Ako nešto ne radi, pošaljite ispis iz komandne linije AutoCAD-a ili Ruby konzole i
 > dnevnike navedene ispod.
 
-## AutoCAD 2020 – 2027 (Windows)
+## AutoCAD – automatska instalacija (preporučeno)
+
+**Gotov paket:**
+1. Uzmite `dist/VanjskoUredjenjePRO-AutoCAD-instalacija.zip`, zatvorite AutoCAD i raspakujte **cijeli** zip.
+2. Dvostruki klik na `INSTALIRAJ.bat`. Skripta:
+   * u registru pronalazi instalirane verzije AutoCAD-a 2020–2027 (uključujući Civil 3D i Map 3D na istoj osnovi)
+     i ispisuje koje su podržane;
+   * uklanja stare kopije dodatka (da se ne učita dvaput);
+   * kopira `SiteDesignPro.bundle` u `%APPDATA%\Autodesk\ApplicationPlugins` i skida Windows blokadu s datoteka;
+   * dodaje folder u pouzdane putanje (`TRUSTEDPATHS`) svakog profila pronađenih AutoCAD-a.
+3. `INSTALIRAJ_ZA_SVE_KORISNIKE.bat` instalira u `%ProgramData%` (UAC upit). `DEINSTALIRAJ.bat` uklanja dodatak.
+
+**Kompajliranje iz izvornog koda:** u korijenu repozitorija pokrenite `IZGRADI_I_INSTALIRAJ.bat`.
+* Potreban je .NET SDK 8, a za AutoCAD 2027 i .NET SDK 10.
+* Kompajliraju se samo verzije za pronađene AutoCAD-e. Ako nijedan nije pronađen, kompajliraju se sve.
+* Sklopljeni paket se zatim instalira kao gore.
+
+Dnevnik instalacije je `%TEMP%\VanjskoUredjenjePRO-instalacija.log`. Skripte nisu pokrenute na Windowsu tokom
+razvoja: provjerena je samo sintaksa i logika koja ne zavisi od registra (PowerShell 7 na Linuxu).
+
+## AutoCAD 2020 – 2027 (Windows) – ručna instalacija
 
 Paket `SiteDesignPro.bundle` sadrži četiri verzije dodatka. Autoloader bira odgovarajuću prema verziji AutoCAD-a:
 
