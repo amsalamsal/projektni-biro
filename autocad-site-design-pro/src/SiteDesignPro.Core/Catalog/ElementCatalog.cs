@@ -57,7 +57,26 @@ namespace SiteDesignPro.Core.Catalog
 
         public ElementType? FindType(string id) => types.TryGetValue(id, out ElementType? t) ? t : null;
 
-        public ElementType RequireType(string id) => FindType(id) ?? throw new KeyNotFoundException("Unknown element type '" + id + "'.");
+        private readonly Dictionary<string, string> optionLabels = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        /// <summary>Display label (Bosnian) of an enum option value; the value itself when no label exists.</summary>
+        public string OptionLabel(string value) => optionLabels.TryGetValue(value, out string? l) ? l : value;
+
+        /// <summary>Option value for a display label or value typed by the user (case-insensitive), or null.</summary>
+        public string? OptionFromLabel(ParameterDefinition p, string text)
+        {
+            foreach (string o in p.Options)
+            {
+                if (string.Equals(o, text, StringComparison.OrdinalIgnoreCase) || string.Equals(OptionLabel(o), text, StringComparison.OrdinalIgnoreCase))
+                {
+                    return o;
+                }
+            }
+
+            return null;
+        }
+
+        public ElementType RequireType(string id) => FindType(id) ?? throw new KeyNotFoundException("Nepoznat tip elementa '" + id + "'.");
 
         public BuilderDefinition? FindBuilder(string id) => builders.TryGetValue(id, out BuilderDefinition? b) ? b : null;
 
@@ -80,7 +99,7 @@ namespace SiteDesignPro.Core.Catalog
                 using Stream? s = asm.GetManifestResourceStream("SiteDesignPro.Catalog." + name);
                 if (s == null)
                 {
-                    throw new FileNotFoundException("Embedded catalog resource not found: " + name);
+                    throw new FileNotFoundException("Ugrađeni katalog nije pronađen: " + name);
                 }
 
                 using var r = new StreamReader(s);
@@ -113,7 +132,7 @@ namespace SiteDesignPro.Core.Catalog
                     }
                     catch (Exception ex) when (ex is JsonException || ex is FormatException || ex is KeyNotFoundException)
                     {
-                        cat.loadMessages.Add("User catalog '" + Path.GetFileName(file) + "' was skipped: " + ex.Message);
+                        cat.loadMessages.Add("Korisnički katalog '" + Path.GetFileName(file) + "' je preskočen: " + ex.Message);
                     }
                 }
             }
@@ -129,6 +148,14 @@ namespace SiteDesignPro.Core.Catalog
                 foreach (JsonProperty b in doc.RootElement.GetProperty("builders").EnumerateObject())
                 {
                     cat.builders[b.Name] = ParseBuilder(b.Name, b.Value);
+                }
+
+                if (doc.RootElement.TryGetProperty("optionLabels", out JsonElement ol) && ol.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (JsonProperty o in ol.EnumerateObject())
+                    {
+                        cat.optionLabels[o.Name] = o.Value.GetString() ?? o.Name;
+                    }
                 }
             }
 
@@ -147,6 +174,7 @@ namespace SiteDesignPro.Core.Catalog
                     Id = Str(g, "id"),
                     Name = Str(g, "name"),
                     Tag = Str(g, "tag"),
+                    LegacyTag = Str(g, "legacyTag"),
                     Order = g.TryGetProperty("order", out JsonElement o) ? o.GetInt32() : 0,
                 }).ToList();
                 cat.Schedules = root.GetProperty("schedules").EnumerateArray().Select(s => new ScheduleDefinition
@@ -253,12 +281,12 @@ namespace SiteDesignPro.Core.Catalog
             string id = Str(t, "id");
             if (string.IsNullOrWhiteSpace(id))
             {
-                throw new FormatException("Element type without id.");
+                throw new FormatException("Tip elementa nema id.");
             }
 
             string builderId = Str(t, "builder");
             BuilderDefinition builder = FindBuilder(builderId)
-                ?? throw new FormatException("Element type '" + id + "' references unknown builder '" + builderId + "'.");
+                ?? throw new FormatException("Tip elementa '" + id + "' koristi nepoznat generator '" + builderId + "'.");
             string category = Str(t, "category");
             CategoryDefinition? cat = FindCategory(category);
 
@@ -269,7 +297,7 @@ namespace SiteDesignPro.Core.Catalog
                 {
                     if (!builder.Parameters.Any(x => x.Key == p.Name))
                     {
-                        throw new FormatException("Element type '" + id + "' sets unknown parameter '" + p.Name + "'.");
+                        throw new FormatException("Tip elementa '" + id + "' postavlja nepoznat parametar '" + p.Name + "'.");
                     }
 
                     defaults[p.Name] = ParamValue.FromJson(p.Value);
@@ -302,6 +330,7 @@ namespace SiteDesignPro.Core.Catalog
             {
                 Id = id,
                 Name = Str(t, "name", id),
+                NameEn = Str(t, "nameEn"),
                 Category = category,
                 Subcategory = Str(t, "subcategory"),
                 Builder = builder,
@@ -349,7 +378,7 @@ namespace SiteDesignPro.Core.Catalog
             string typeCode = Str(p, "type", "text");
             if (!Enum.TryParse(typeCode, true, out ParameterType type))
             {
-                throw new FormatException("Unknown parameter type '" + typeCode + "'.");
+                throw new FormatException("Nepoznata vrsta parametra '" + typeCode + "'.");
             }
 
             return new ParameterDefinition
@@ -395,9 +424,11 @@ namespace SiteDesignPro.Core.Catalog
                 Transparency = baseDef.Transparency,
                 Plot = baseDef.Plot,
                 Description = baseDef.Description,
+                LegacyName = baseDef.LegacyName,
             };
             def.Key = Str(l, "key", def.Key);
             def.Name = Str(l, "name", def.Name);
+            def.LegacyName = Str(l, "legacyName", def.LegacyName);
             if (l.TryGetProperty("color", out JsonElement c))
             {
                 def.Color = c.GetInt16();
@@ -422,7 +453,7 @@ namespace SiteDesignPro.Core.Catalog
             def.Description = Str(l, "description", def.Description);
             if (string.IsNullOrWhiteSpace(def.Key) || string.IsNullOrWhiteSpace(def.Name))
             {
-                throw new FormatException("Layer definitions need 'key' and 'name'.");
+                throw new FormatException("Definicija sloja mora imati 'key' i 'name'.");
             }
 
             return def;
@@ -462,18 +493,29 @@ namespace SiteDesignPro.Core.Catalog
         }
 
         /// <summary>Formats a parameter value for display with its unit.</summary>
-        public static string FormatValue(ParameterDefinition def, ParamValue value, int precision = 3)
+        /// <summary>Display text of a parameter value (Bosnian: decimal comma, Da/Ne, option labels).</summary>
+        public static string FormatValue(ParameterDefinition def, ParamValue value, int precision = 3, ElementCatalog? catalog = null)
         {
             if (value.IsNull)
             {
-                return "(not set)";
+                return "(nije uneseno)";
             }
 
             if (def.IsNumeric && value.Kind == ParamKind.Number)
             {
                 string fmt = def.Type == ParameterType.Integer ? "0" : "0." + new string('#', Math.Max(0, precision));
                 string unit = def.DisplayUnit;
-                return value.AsNumber().ToString(fmt, CultureInfo.InvariantCulture) + (unit.Length > 0 ? " " + unit : string.Empty);
+                return value.AsNumber().ToString(fmt, CultureInfo.InvariantCulture).Replace('.', ',') + (unit.Length > 0 ? " " + unit : string.Empty);
+            }
+
+            if (def.Type == ParameterType.Bool && value.Kind == ParamKind.Bool)
+            {
+                return value.AsBool() ? "Da" : "Ne";
+            }
+
+            if (def.Type == ParameterType.Enum && catalog != null)
+            {
+                return catalog.OptionLabel(value.AsText());
             }
 
             return value.AsText();

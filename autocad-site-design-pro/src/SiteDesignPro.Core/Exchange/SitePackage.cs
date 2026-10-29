@@ -8,15 +8,16 @@ namespace SiteDesignPro.Core.Exchange
     public static class PackageFormat
     {
         public const string FormatId = "site-design-pro-package";
-        public const string SchemaVersion = "1.0.0";
+        public const string SchemaVersion = "1.1.0"; // 1.1: elevation datum, georeference, terrain.json
         public const int SupportedMajor = 1;
         public const string ManifestFile = "manifest.json";
         public const string GeometryFile = "geometry.json";
+        public const string TerrainFile = "terrain.json";
         public const string AssetsFolder = "assets";
         public const string PreviewFolder = "preview";
         public const string ValidationReportFile = "preview/validation-report.json";
         public const string PackageExtension = ".sdpkg";
-        public const string ApplicationName = "AutoCAD Site Design Pro";
+        public const string ApplicationName = "Vanjsko uređenje PRO (AutoCAD)";
     }
 
     /// <summary>Element as read from a package: the element plus metadata stored with it.</summary>
@@ -83,6 +84,19 @@ namespace SiteDesignPro.Core.Exchange
         public double[] Origin { get; set; } = new double[3];
 
         public double TrueNorthDegrees { get; set; }
+
+        /// <summary>Absolute elevation (m above the vertical datum) of package z = 0; null when unknown.</summary>
+        public double? PackageZeroAbsolute { get; set; }
+
+        /// <summary>Absolute elevation of building zero ±0,00; null when the project datum was not defined.</summary>
+        public double? BuildingZeroAbsolute { get; set; }
+
+        public string VerticalDatum { get; set; } = string.Empty;
+
+        public string Crs { get; set; } = string.Empty;
+
+        /// <summary>Terrain surfaces declared in the manifest (id, name, triangle count).</summary>
+        public List<(string Id, string Name, int Triangles)> TerrainSurfaces { get; } = new List<(string, string, int)>();
 
         public string CatalogId { get; set; } = string.Empty;
 

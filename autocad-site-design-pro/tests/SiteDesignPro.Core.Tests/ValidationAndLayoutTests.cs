@@ -64,7 +64,7 @@ namespace SiteDesignPro.Core.Tests
                 p["trunkDiameter"] = ParamValue.Of("thick");
             });
             ValidationReport r = Run(e);
-            Assert.Contains(r.Issues, i => i.Code == "SDP-P004" && i.Resolution.Contains("millimetres", StringComparison.Ordinal));
+            Assert.Contains(r.Issues, i => i.Code == "SDP-P004" && i.Resolution.Contains("milimetrima", StringComparison.Ordinal));
             Assert.Contains(r.Issues, i => i.Code == "SDP-P006");
             Assert.Contains(r.Issues, i => i.Code == "SDP-P001");
             Assert.Contains(r.Issues, i => i.Code == "SDP-P007" && i.Severity == Severity.Warning);
@@ -94,7 +94,7 @@ namespace SiteDesignPro.Core.Tests
             List<ValidationIssue> collisions = r.Issues.Where(i => i.Code == "SDP-C001").ToList();
             Assert.Equal(2, collisions.Count);
             Assert.Contains(collisions, i => (i.ElementId == b1.Id || i.RelatedElementId == b1.Id) && (i.ElementId == b2.Id || i.RelatedElementId == b2.Id));
-            Assert.Contains(collisions, i => i.Message.Contains("underground", StringComparison.Ordinal));
+            Assert.Contains(collisions, i => i.Message.Contains("podzemno", StringComparison.Ordinal));
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace SiteDesignPro.Core.Tests
         {
             ValidationReport r = Run(Element("furniture.bench", Pt(0, 0, 150)), Element("furniture.bench", Pt(10, 0, 1500)));
             ValidationIssue issue = Assert.Single(r.Issues, i => i.Code == "SDP-G012");
-            Assert.Contains("units", issue.Resolution, StringComparison.Ordinal);
+            Assert.Contains("jedinice", issue.Resolution, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -151,7 +151,7 @@ namespace SiteDesignPro.Core.Tests
             SiteElement l2 = Element("furniture.bench", Pt(100, 100), null, "RA-001");
             ValidationReport r = Run(fire, r1, l2);
             Assert.Contains(r.Issues, i => i.Code == "SDP-C010");
-            Assert.Contains(r.Issues, i => i.Code == "SDP-C011" && i.Message.Contains("10.0%", StringComparison.Ordinal));
+            Assert.Contains(r.Issues, i => i.Code == "SDP-C011" && i.Message.Contains("10,0 %", StringComparison.Ordinal));
             Assert.Contains(r.Issues, i => i.Code == "SDP-D010");
         }
 

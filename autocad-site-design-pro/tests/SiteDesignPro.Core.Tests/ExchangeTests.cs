@@ -65,7 +65,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(9.5, pkg.Elements[0].Element.Parameters.Number("height"));
             Assert.Equal("Acer campestre", pkg.Elements[0].Element.Properties["botanicalName"]);
             Assert.Equal("T-001", pkg.Elements[0].Element.Label);
-            Assert.Equal("L-PLNT-TREE", pkg.Elements[0].Layer);
+            Assert.Equal("VU-ZELENILO-DRVECE", pkg.Elements[0].Layer);
             Assert.Equal("planting", pkg.Elements[0].ModelGroup);
 
             var fence = (PathGeometry)pkg.Elements[1].Element.Geometry;
@@ -118,7 +118,7 @@ namespace SiteDesignPro.Core.Tests
             man["schemaVersion"] = "2.0.0";
             PackageReadResult r = PackageReader.ReadFromStrings(man.ToJsonString(), g);
             Assert.Null(r.Package);
-            Assert.Contains(r.Report.Issues, i => i.Code == "SDP-F001" && i.Message.Contains("Unsupported schema version", StringComparison.Ordinal));
+            Assert.Contains(r.Report.Issues, i => i.Code == "SDP-F001" && i.Message.Contains("Nepodržana verzija sheme", StringComparison.Ordinal));
 
             man = JsonNode.Parse(m)!.AsObject();
             man["schemaVersion"] = "1.7.0";

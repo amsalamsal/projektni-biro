@@ -4,97 +4,313 @@
   "title": "Site Design Pro package manifest",
   "description": "Project metadata, settings, element identifiers, parameters and references of a Site Design Pro exchange package (schema 1.x). Geometry is stored separately in geometry.json and linked by element id.",
   "type": "object",
-  "required": ["format", "schemaVersion", "packageId", "createdUtc", "generator", "project", "units", "coordinateSystem", "catalog", "typeDefinitions", "elements"],
+  "required": [
+    "format",
+    "schemaVersion",
+    "packageId",
+    "createdUtc",
+    "generator",
+    "project",
+    "units",
+    "coordinateSystem",
+    "catalog",
+    "typeDefinitions",
+    "elements"
+  ],
   "additionalProperties": false,
   "properties": {
-    "format": { "const": "site-design-pro-package" },
-    "schemaVersion": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
-    "packageId": { "$ref": "#/$defs/uuid" },
-    "createdUtc": { "type": "string", "format": "date-time" },
+    "format": {
+      "const": "site-design-pro-package"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+    },
+    "packageId": {
+      "$ref": "#/$defs/uuid"
+    },
+    "createdUtc": {
+      "type": "string",
+      "format": "date-time"
+    },
     "generator": {
       "type": "object",
-      "required": ["application", "version"],
+      "required": [
+        "application",
+        "version"
+      ],
       "additionalProperties": false,
       "properties": {
-        "application": { "type": "string", "minLength": 1 },
-        "version": { "type": "string", "minLength": 1 },
-        "host": { "type": "string" },
-        "sourceDocument": { "type": "string" }
+        "application": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "host": {
+          "type": "string"
+        },
+        "sourceDocument": {
+          "type": "string"
+        }
       }
     },
     "project": {
       "type": "object",
-      "required": ["id", "name"],
+      "required": [
+        "id",
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "name": { "type": "string", "minLength": 1 },
-        "number": { "type": "string" },
-        "client": { "type": "string" },
-        "location": { "type": "string" },
-        "description": { "type": "string" },
-        "author": { "type": "string" },
-        "revision": { "type": "string" }
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "number": {
+          "type": "string"
+        },
+        "client": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        }
       }
     },
     "units": {
       "type": "object",
-      "required": ["length", "angle", "sourceLengthUnit", "sourceUnitsToMeters"],
+      "required": [
+        "length",
+        "angle",
+        "sourceLengthUnit",
+        "sourceUnitsToMeters"
+      ],
       "additionalProperties": false,
       "properties": {
-        "length": { "const": "m", "description": "All lengths in the package are metres." },
-        "angle": { "const": "rad", "description": "Geometry rotations are radians, counter-clockwise about +Z from +X. Angle-type parameters are degrees." },
-        "sourceLengthUnit": { "enum": ["mm", "cm", "m", "in", "ft"] },
-        "sourceUnitsToMeters": { "type": "number", "exclusiveMinimum": 0 }
+        "length": {
+          "const": "m",
+          "description": "All lengths in the package are metres."
+        },
+        "angle": {
+          "const": "rad",
+          "description": "Geometry rotations are radians, counter-clockwise about +Z from +X. Angle-type parameters are degrees."
+        },
+        "sourceLengthUnit": {
+          "enum": [
+            "mm",
+            "cm",
+            "m",
+            "in",
+            "ft"
+          ]
+        },
+        "sourceUnitsToMeters": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "coordinateSystem": {
       "type": "object",
-      "required": ["origin", "trueNorthDegrees"],
+      "required": [
+        "origin",
+        "trueNorthDegrees"
+      ],
       "additionalProperties": false,
       "properties": {
-        "origin": { "$ref": "#/$defs/vec3", "description": "Source WCS point (metres) that maps to package (0,0,0). Absolute = local + origin." },
-        "trueNorthDegrees": { "type": "number", "minimum": -360, "maximum": 360, "description": "Clockwise angle from the package +Y axis to true north, degrees." },
-        "crs": { "type": "string", "description": "Optional coordinate reference system identifier, e.g. EPSG code." },
-        "heightDatum": { "type": "string" },
-        "description": { "type": "string" }
+        "origin": {
+          "$ref": "#/$defs/vec3",
+          "description": "Source WCS point (metres) that maps to package (0,0,0). Absolute = local + origin."
+        },
+        "trueNorthDegrees": {
+          "type": "number",
+          "minimum": -360,
+          "maximum": 360,
+          "description": "Clockwise angle from the package +Y axis to true north, degrees."
+        },
+        "crs": {
+          "type": "string",
+          "description": "Optional coordinate reference system identifier, e.g. EPSG code."
+        },
+        "heightDatum": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "elevation": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Vertical reference. Null means not defined by the user (never a default).",
+          "properties": {
+            "buildingZeroAbsolute": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Absolute elevation of building zero ±0,00 (m above the vertical datum)."
+            },
+            "parterreRelative": {
+              "type": "number",
+              "description": "Main parterre relative to building zero (m)."
+            },
+            "roadOffsetBelowParterre": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Default road level below the parterre (m, positive = lower)."
+            },
+            "verticalDatum": {
+              "type": "string"
+            },
+            "drawingZ": {
+              "enum": [
+                "absolute",
+                "relative"
+              ]
+            },
+            "packageZeroAbsolute": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Absolute elevation of package z = 0."
+            }
+          }
+        },
+        "georeference": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "tx",
+            "ty",
+            "rotationDegrees",
+            "scale"
+          ],
+          "description": "Transform from drawing coordinates (m) to project coordinates: E = tx + s(cos r x - sin r y), N = ty + s(sin r x + cos r y).",
+          "properties": {
+            "kind": {
+              "enum": [
+                "Identity",
+                "TranslationWithGivenRotation",
+                "Rigid",
+                "Similarity"
+              ]
+            },
+            "tx": {
+              "type": "number"
+            },
+            "ty": {
+              "type": "number"
+            },
+            "rotationDegrees": {
+              "type": "number"
+            },
+            "scale": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "controlPoints": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "rmsError": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
       }
     },
     "catalog": {
       "type": "object",
-      "required": ["id", "version"],
+      "required": [
+        "id",
+        "version"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string" },
-        "version": { "type": "string" },
-        "materialsVersion": { "type": "string" }
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "materialsVersion": {
+          "type": "string"
+        }
       }
     },
     "typeDefinitions": {
       "type": "array",
       "description": "Resolved definitions of every element type used in the package, so the package is self-contained even when the receiving side lacks a custom user catalog.",
-      "items": { "$ref": "#/$defs/typeDefinition" }
+      "items": {
+        "$ref": "#/$defs/typeDefinition"
+      }
     },
     "materials": {
       "type": "array",
-      "items": { "$ref": "#/$defs/material" }
+      "items": {
+        "$ref": "#/$defs/material"
+      }
     },
     "elements": {
       "type": "array",
-      "items": { "$ref": "#/$defs/element" }
+      "items": {
+        "$ref": "#/$defs/element"
+      }
     },
     "assets": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "path", "kind"],
+        "required": [
+          "id",
+          "path",
+          "kind"
+        ],
         "additionalProperties": false,
         "properties": {
-          "id": { "type": "string", "minLength": 1 },
-          "path": { "type": "string", "pattern": "^assets/[^\\\\:*?\"<>|]+$" },
-          "kind": { "enum": ["texture", "component", "thumbnail", "document"] },
-          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-          "description": { "type": "string" }
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^assets/[^\\\\:*?\"<>|]+$"
+          },
+          "kind": {
+            "enum": [
+              "texture",
+              "component",
+              "thumbnail",
+              "document"
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "description": {
+            "type": "string"
+          }
         }
       }
     },
@@ -102,81 +318,304 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "errors": { "type": "integer", "minimum": 0 },
-        "warnings": { "type": "integer", "minimum": 0 },
-        "reviews": { "type": "integer", "minimum": 0 },
-        "reportPath": { "type": "string" }
+        "errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warnings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reviews": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reportPath": {
+          "type": "string"
+        }
+      }
+    },
+    "terrain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "surfaces"
+      ],
+      "properties": {
+        "path": {
+          "const": "terrain.json"
+        },
+        "surfaces": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "name",
+              "triangles"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string"
+              },
+              "triangles": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
       }
     }
   },
   "$defs": {
-    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
-    "vec3": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
-    "scalar": { "type": ["number", "string", "boolean", "null"] },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "vec3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "scalar": {
+      "type": [
+        "number",
+        "string",
+        "boolean",
+        "null"
+      ]
+    },
     "element": {
       "type": "object",
-      "required": ["id", "type", "category", "builder", "name", "revision", "contentHash", "parameters"],
+      "required": [
+        "id",
+        "type",
+        "category",
+        "builder",
+        "name",
+        "revision",
+        "contentHash",
+        "parameters"
+      ],
       "additionalProperties": false,
       "properties": {
-        "id": { "$ref": "#/$defs/uuid" },
-        "type": { "type": "string", "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)+$" },
-        "category": { "type": "string", "minLength": 1 },
-        "subcategory": { "type": "string" },
-        "builder": { "type": "string", "minLength": 1 },
-        "name": { "type": "string" },
-        "label": { "type": "string" },
-        "layer": { "type": "string" },
-        "modelGroup": { "type": "string" },
-        "revision": { "type": "integer", "minimum": 1 },
-        "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
-        "parameters": { "type": "object", "additionalProperties": { "$ref": "#/$defs/scalar" } },
-        "properties": { "type": "object", "additionalProperties": { "type": "string" } },
-        "custom": { "type": "object", "additionalProperties": { "$ref": "#/$defs/scalar" } },
-        "sourceHandle": { "type": "string" },
-        "assetId": { "type": "string" },
-        "status": { "enum": ["active", "warning", "error"] }
+        "id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "type": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)+$"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subcategory": {
+          "type": "string"
+        },
+        "builder": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "layer": {
+          "type": "string"
+        },
+        "modelGroup": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/scalar"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "custom": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/scalar"
+          }
+        },
+        "sourceHandle": {
+          "type": "string"
+        },
+        "assetId": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "warning",
+            "error"
+          ]
+        }
       }
     },
     "parameterDefinition": {
       "type": "object",
-      "required": ["key", "type"],
+      "required": [
+        "key",
+        "type"
+      ],
       "properties": {
-        "key": { "type": "string" },
-        "label": { "type": "string" },
-        "type": { "enum": ["length", "number", "integer", "angle", "bool", "enum", "text", "material"] },
-        "unit": { "type": "string" },
-        "default": { "$ref": "#/$defs/scalar" },
-        "min": { "type": "number" },
-        "max": { "type": "number" },
-        "options": { "type": "array", "items": { "type": "string" } },
-        "required": { "type": "boolean" },
-        "group": { "type": "string" }
+        "key": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "length",
+            "number",
+            "integer",
+            "angle",
+            "bool",
+            "enum",
+            "text",
+            "material"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "default": {
+          "$ref": "#/$defs/scalar"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "group": {
+          "type": "string"
+        }
       }
     },
     "typeDefinition": {
       "type": "object",
-      "required": ["id", "name", "category", "builder", "geometry", "parameters"],
+      "required": [
+        "id",
+        "name",
+        "category",
+        "builder",
+        "geometry",
+        "parameters"
+      ],
       "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string" },
-        "category": { "type": "string" },
-        "subcategory": { "type": "string" },
-        "builder": { "type": "string" },
-        "geometry": { "enum": ["point", "path", "polygon"] },
-        "modelGroup": { "type": "string" },
-        "parameters": { "type": "array", "items": { "$ref": "#/$defs/parameterDefinition" } }
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "subcategory": {
+          "type": "string"
+        },
+        "builder": {
+          "type": "string"
+        },
+        "geometry": {
+          "enum": [
+            "point",
+            "path",
+            "polygon"
+          ]
+        },
+        "modelGroup": {
+          "type": "string"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/parameterDefinition"
+          }
+        }
       }
     },
     "material": {
       "type": "object",
-      "required": ["key", "name", "color"],
+      "required": [
+        "key",
+        "name",
+        "color"
+      ],
       "properties": {
-        "key": { "type": "string" },
-        "name": { "type": "string" },
-        "color": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 255 }, "minItems": 3, "maxItems": 3 },
-        "alpha": { "type": "number", "minimum": 0, "maximum": 1 },
-        "texture": { "type": "string" },
-        "textureSize": { "type": "array", "items": { "type": "number", "exclusiveMinimum": 0 }, "minItems": 2, "maxItems": 2 }
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "alpha": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "texture": {
+          "type": "string"
+        },
+        "textureSize": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
       }
     }
   }

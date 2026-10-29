@@ -88,7 +88,11 @@ namespace SiteDesignPro.Core.Quantities
             };
         }
 
-        internal static string Format(double v, int decimals) => v.ToString("0." + new string('#', decimals), CultureInfo.InvariantCulture);
+        /// <summary>Display number with a decimal comma (Bosnian); trailing zeros are dropped.</summary>
+        internal static string Format(double v, int decimals) => v.ToString("0." + new string('#', decimals), CultureInfo.InvariantCulture).Replace('.', ',');
+
+        /// <summary>Display form of a quantity unit code: pcs → kom, m2 → m², m3 → m³.</summary>
+        public static string UnitLabel(string unit) => unit == "pcs" ? "kom" : unit == "m2" ? "m²" : unit == "m3" ? "m³" : unit;
 
         private static string Escape(string s, char sep)
         {
@@ -123,7 +127,7 @@ namespace SiteDesignPro.Core.Quantities
             var table = new ScheduleTable { Id = def.Id, Title = def.Title };
             foreach (string key in def.Columns)
             {
-                table.Columns.Add(new ScheduleColumn { Key = key, Title = ColumnTitle(key), Numeric = key == "quantity" || key == "secondary" });
+                table.Columns.Add(new ScheduleColumn { Key = key, Title = ColumnTitle(key, catalog), Numeric = key == "quantity" || key == "secondary" });
             }
 
             var members = elements
@@ -173,10 +177,10 @@ namespace SiteDesignPro.Core.Quantities
                             row.Cells.Add(ScheduleTable.Format(quantity, unit == "pcs" ? 0 : decimals));
                             break;
                         case "unit":
-                            row.Cells.Add(unit);
+                            row.Cells.Add(ScheduleTable.UnitLabel(unit));
                             break;
                         case "secondary":
-                            row.Cells.Add(hasSecondary ? (approx ? "~" : string.Empty) + ScheduleTable.Format(secondary, decimals) + " " + secondaryUnit : string.Empty);
+                            row.Cells.Add(hasSecondary ? (approx ? "~" : string.Empty) + ScheduleTable.Format(secondary, decimals) + " " + ScheduleTable.UnitLabel(secondaryUnit) : string.Empty);
                             break;
                         case "notes":
                             row.Cells.Add(string.Join("; ", g.Select(x => x.E.Property("notes")).Where(n => n.Length > 0).Distinct(StringComparer.Ordinal)));
@@ -231,26 +235,58 @@ namespace SiteDesignPro.Core.Quantities
                     return catalog.FindMaterial(v.AsText())?.Name ?? v.AsText();
                 }
 
-                return ElementCatalog.FormatValue(def, v, 3);
+                return ElementCatalog.FormatValue(def, v, 3, catalog);
             }
 
             return string.Empty;
         }
 
-        private static string ColumnTitle(string key)
+        private static readonly Dictionary<string, string> PropertyTitles = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["botanicalName"] = "Botanički naziv",
+            ["commonName"] = "Narodni naziv",
+            ["plantCode"] = "Šifra biljke",
+            ["plantingSize"] = "Veličina sadnice",
+            ["surfaceRequirement"] = "Zahtjev za podlogu",
+            ["dataSource"] = "Izvor podataka",
+        };
+
+        private static string ColumnTitle(string key, ElementCatalog catalog)
         {
             switch (key)
             {
-                case "label": return "No.";
-                case "type": return "Type";
-                case "category": return "Category";
-                case "quantity": return "Quantity";
-                case "unit": return "Unit";
-                case "secondary": return "Secondary quantity";
-                case "notes": return "Notes";
+                case "label": return "Br.";
+                case "type": return "Tip";
+                case "category": return "Kategorija";
+                case "quantity": return "Količina";
+                case "unit": return "Jed. mj.";
+                case "secondary": return "Dodatna količina";
+                case "notes": return "Napomene";
             }
 
             string k = key.Contains(':', StringComparison.Ordinal) ? key.Substring(key.IndexOf(':', StringComparison.Ordinal) + 1) : key;
+            if (key.StartsWith("param:", StringComparison.Ordinal))
+            {
+                ParameterDefinition? def = catalog.Builders.SelectMany(b => b.Parameters).FirstOrDefault(p => p.Key == k);
+                if (def != null)
+                {
+                    int cut = def.Label.IndexOf(" (", StringComparison.Ordinal);
+                    return cut > 0 ? def.Label.Substring(0, cut) : def.Label;
+                }
+            }
+            else if (key.StartsWith("prop:", StringComparison.Ordinal))
+            {
+                PropertyDefinition? prop = catalog.CommonProperties.FirstOrDefault(p => p.Key == k);
+                if (prop != null)
+                {
+                    return prop.Label;
+                }
+
+                if (PropertyTitles.TryGetValue(k, out string? t))
+                {
+                    return t;
+                }
+            }
             var sb = new StringBuilder();
             foreach (char c in k)
             {

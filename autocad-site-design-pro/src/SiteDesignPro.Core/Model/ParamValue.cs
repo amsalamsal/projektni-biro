@@ -108,7 +108,7 @@ namespace SiteDesignPro.Core.Model
             JsonValueKind.False => Of(false),
             JsonValueKind.Null => Null,
             JsonValueKind.Undefined => Null,
-            _ => throw new FormatException("Parameter values must be scalars (number, string, boolean or null)."),
+            _ => throw new FormatException("Vrijednosti parametara moraju biti broj, tekst, logička vrijednost ili prazno."),
         };
 
         public bool Equals(ParamValue other)

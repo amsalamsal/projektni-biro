@@ -40,8 +40,8 @@ namespace SiteDesignPro.Core.Exchange
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is InvalidDataException || ex is JsonException || ex is FormatException)
             {
                 result.Package = null;
-                result.Report.Add(Severity.Error, IssueKind.Format, "SDP-F001", null, "The package could not be read: " + ex.Message,
-                    "Check that the file is a Site Design Pro package (.sdpkg or a folder with manifest.json and geometry.json) and re-export it.");
+                result.Report.Add(Severity.Error, IssueKind.Format, "SDP-F001", null, "Paket nije moguće pročitati: " + ex.Message,
+                    "Provjerite da je datoteka paket programa Vanjsko uređenje PRO (.sdpkg ili folder s manifest.json i geometry.json) i ponovo ga izvezite.");
             }
 
             return result;
@@ -57,7 +57,7 @@ namespace SiteDesignPro.Core.Exchange
             catch (Exception ex) when (ex is JsonException || ex is FormatException)
             {
                 result.Package = null;
-                result.Report.Add(Severity.Error, IssueKind.Format, "SDP-F001", null, "The package could not be parsed: " + ex.Message, "Re-export the package.");
+                result.Report.Add(Severity.Error, IssueKind.Format, "SDP-F001", null, "Sadržaj paketa nije ispravan: " + ex.Message, "Ponovo izvezite paket.");
             }
 
             return result;
@@ -109,7 +109,7 @@ namespace SiteDesignPro.Core.Exchange
         {
             if (bytes > MaxDocumentBytes)
             {
-                throw new InvalidDataException("Package document exceeds the maximum supported size.");
+                throw new InvalidDataException("Dokument paketa prelazi najveću podržanu veličinu.");
             }
         }
 
@@ -129,19 +129,19 @@ namespace SiteDesignPro.Core.Exchange
             string version = Str(m, "schemaVersion");
             if (!TryMajor(version, out int major) || major != PackageFormat.SupportedMajor)
             {
-                throw new FormatException("Unsupported schema version '" + version + "'. This version reads schema " + PackageFormat.SupportedMajor + ".x.");
+                throw new FormatException("Nepodržana verzija sheme '" + version + "'. Ova verzija čita shemu " + PackageFormat.SupportedMajor + ".x.");
             }
 
             if (Version.TryParse(version, out Version? read) && read > Version.Parse(PackageFormat.SchemaVersion))
             {
                 report.Add(Severity.Warning, IssueKind.Format, "SDP-F002", null,
-                    "Package schema " + version + " is newer than this reader (" + PackageFormat.SchemaVersion + "). Unknown fields are ignored.",
-                    "Update Site Design Pro to the latest version to use all package features.");
+                    "Shema paketa " + version + " je novija od ove verzije programa (" + PackageFormat.SchemaVersion + "). Nepoznata polja se zanemaruju.",
+                    "Ažurirajte Vanjsko uređenje PRO na najnoviju verziju.");
             }
 
             if (Str(g, "lengthUnit") != "m" || Str(m.GetProperty("units"), "length") != "m")
             {
-                throw new FormatException("Package length unit must be metres.");
+                throw new FormatException("Jedinica dužine paketa mora biti metar.");
             }
 
             JsonElement units = m.GetProperty("units");
@@ -164,6 +164,33 @@ namespace SiteDesignPro.Core.Exchange
                 CatalogId = Str(m.GetProperty("catalog"), "id"),
                 CatalogVersion = Str(m.GetProperty("catalog"), "version"),
             };
+            if (cs.TryGetProperty("crs", out JsonElement crsEl) && crsEl.ValueKind == JsonValueKind.String)
+            {
+                pkg.Crs = crsEl.GetString() ?? string.Empty;
+            }
+
+            if (cs.TryGetProperty("elevation", out JsonElement elev) && elev.ValueKind == JsonValueKind.Object)
+            {
+                pkg.BuildingZeroAbsolute = NullableNumber(elev, "buildingZeroAbsolute");
+                pkg.PackageZeroAbsolute = NullableNumber(elev, "packageZeroAbsolute");
+                pkg.VerticalDatum = elev.TryGetProperty("verticalDatum", out JsonElement vd) && vd.ValueKind == JsonValueKind.String ? vd.GetString() ?? string.Empty : string.Empty;
+            }
+
+            if (m.TryGetProperty("terrain", out JsonElement terrain) && terrain.ValueKind == JsonValueKind.Object)
+            {
+                string tPath = Str(terrain, "path");
+                if (tPath != PackageFormat.TerrainFile || !assetExists(tPath))
+                {
+                    result.Report.Add(Severity.Error, IssueKind.Format, "SDP-F030", null,
+                        "Paket navodi teren (" + tPath + "), ali datoteka nedostaje.", "Ponovo izvezite paket.");
+                }
+
+                foreach (JsonElement sf in terrain.GetProperty("surfaces").EnumerateArray())
+                {
+                    pkg.TerrainSurfaces.Add((Str(sf, "id"), Str(sf, "name"), sf.GetProperty("triangles").GetInt32()));
+                }
+            }
+
             if (!SiteElement.IsValidId(pkg.PackageId))
             {
                 throw new FormatException("packageId is not a valid UUID.");
@@ -183,7 +210,7 @@ namespace SiteDesignPro.Core.Exchange
                 string id = Str(ge, "id");
                 if (geometries.ContainsKey(id))
                 {
-                    report.Add(Severity.Error, IssueKind.Format, "SDP-F010", id, "Duplicate geometry record.", "Re-export the package; each element must have exactly one geometry record.");
+                    report.Add(Severity.Error, IssueKind.Format, "SDP-F010", id, "Dupli zapis geometrije.", "Ponovo izvezite paket; svaki element mora imati tačno jedan zapis geometrije.");
                     continue;
                 }
 
@@ -196,19 +223,19 @@ namespace SiteDesignPro.Core.Exchange
                 string id = Str(e, "id");
                 if (!SiteElement.IsValidId(id))
                 {
-                    report.Add(Severity.Error, IssueKind.DataError, "SDP-D001", string.IsNullOrEmpty(id) ? null : id, "Element has a missing or malformed id.", "Run SDPAUDIT in AutoCAD to assign identifiers, then re-export.");
+                    report.Add(Severity.Error, IssueKind.DataError, "SDP-D001", string.IsNullOrEmpty(id) ? null : id, "Element nema ispravan identifikator.", "Pokrenite SDPAUDIT u AutoCAD-u da se dodijele identifikatori, zatim ponovo izvezite.");
                     continue;
                 }
 
                 if (!seen.Add(id))
                 {
-                    report.Add(Severity.Error, IssueKind.DataError, "SDP-D002", id, "Duplicate element id in package.", "Run SDPAUDIT in AutoCAD to repair duplicated identifiers (usually caused by copying objects), then re-export.");
+                    report.Add(Severity.Error, IssueKind.DataError, "SDP-D002", id, "Dupli identifikator elementa u paketu.", "Pokrenite SDPAUDIT u AutoCAD-u da se poprave dupli identifikatori (obično nastaju kopiranjem objekata), zatim ponovo izvezite.");
                     continue;
                 }
 
                 if (!geometries.TryGetValue(id, out JsonElement geoJson))
                 {
-                    report.Add(Severity.Error, IssueKind.Format, "SDP-F011", id, "Element has no geometry record.", "Re-export the package.");
+                    report.Add(Severity.Error, IssueKind.Format, "SDP-F011", id, "Element nema zapis geometrije.", "Ponovo izvezite paket.");
                     continue;
                 }
 
@@ -220,13 +247,13 @@ namespace SiteDesignPro.Core.Exchange
                 }
                 catch (Exception ex) when (ex is FormatException || ex is KeyNotFoundException || ex is InvalidOperationException)
                 {
-                    report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G010", id, "Invalid geometry: " + ex.Message, "Fix the source object in AutoCAD and re-export.");
+                    report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G010", id, "Neispravna geometrija: " + ex.Message, "Ispravite izvorni objekat u AutoCAD-u i ponovo izvezite.");
                     continue;
                 }
 
                 if (typeGeometry.TryGetValue(typeId, out string? expected) && expected != ElementGeometry.KindCode(geometry.Kind))
                 {
-                    report.Add(Severity.Error, IssueKind.Format, "SDP-F012", id, "Geometry kind '" + ElementGeometry.KindCode(geometry.Kind) + "' does not match type definition '" + expected + "'.", "Re-export the package.");
+                    report.Add(Severity.Error, IssueKind.Format, "SDP-F012", id, "Vrsta geometrije '" + ElementGeometry.KindCode(geometry.Kind) + "' ne odgovara definiciji tipa '" + expected + "'.", "Ponovo izvezite paket.");
                     continue;
                 }
 
@@ -266,7 +293,7 @@ namespace SiteDesignPro.Core.Exchange
 
             foreach (string orphan in geometries.Keys.Where(k => !seen.Contains(k)))
             {
-                report.Add(Severity.Warning, IssueKind.Format, "SDP-F014", orphan, "Geometry record without a manifest element is ignored.", "Re-export the package.");
+                report.Add(Severity.Warning, IssueKind.Format, "SDP-F014", orphan, "Zapis geometrije bez elementa u manifestu se zanemaruje.", "Ponovo izvezite paket.");
             }
 
             if (m.TryGetProperty("assets", out JsonElement assets))
@@ -282,11 +309,11 @@ namespace SiteDesignPro.Core.Exchange
                     pkg.Assets.Add(asset);
                     if (asset.Path.Contains("..", StringComparison.Ordinal) || !asset.Path.StartsWith(PackageFormat.AssetsFolder + "/", StringComparison.Ordinal))
                     {
-                        report.Add(Severity.Error, IssueKind.Format, "SDP-F020", null, "Asset '" + asset.Id + "' has an unsafe path '" + asset.Path + "'.", "Asset paths must stay inside the assets/ folder.");
+                        report.Add(Severity.Error, IssueKind.Format, "SDP-F020", null, "Datoteka modela '" + asset.Id + "' ima nesigurnu putanju '" + asset.Path + "'.", "Putanje datoteka moraju ostati unutar foldera assets/.");
                     }
                     else if (!assetExists(asset.Path))
                     {
-                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-F021", null, "Asset '" + asset.Id + "' is missing: " + asset.Path, "Re-export the package with its assets, or remove the asset reference. Elements fall back to their parametric geometry.");
+                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-F021", null, "Datoteka modela '" + asset.Id + "' nedostaje: " + asset.Path, "Ponovo izvezite paket s modelima ili uklonite referencu. Elementi se prikazuju parametarskom geometrijom.");
                     }
                 }
             }
@@ -294,12 +321,15 @@ namespace SiteDesignPro.Core.Exchange
             var assetIds = new HashSet<string>(pkg.Assets.Select(a => a.Id), StringComparer.Ordinal);
             foreach (PackageElement pe in pkg.Elements.Where(x => x.Element.AssetId != null && !assetIds.Contains(x.Element.AssetId!)))
             {
-                report.Add(Severity.Warning, IssueKind.DataError, "SDP-F022", pe.Element.Id, "Referenced asset '" + pe.Element.AssetId + "' is not declared.", "Re-export the package with the asset, or clear the element's asset reference.");
+                report.Add(Severity.Warning, IssueKind.DataError, "SDP-F022", pe.Element.Id, "Navedeni model '" + pe.Element.AssetId + "' nije deklarisan u paketu.", "Ponovo izvezite paket s modelom ili uklonite referencu na model u elementu.");
             }
 
             report.ElementCount = pkg.Elements.Count;
             result.Package = pkg;
         }
+
+        private static double? NullableNumber(JsonElement o, string name) =>
+            o.TryGetProperty(name, out JsonElement v) && v.ValueKind == JsonValueKind.Number ? v.GetDouble() : (double?)null;
 
         private static bool TryMajor(string version, out int major)
         {
@@ -312,7 +342,7 @@ namespace SiteDesignPro.Core.Exchange
         {
             if (!e.TryGetProperty(name, out JsonElement v))
             {
-                throw new FormatException("Required field '" + name + "' is missing.");
+                throw new FormatException("Nedostaje obavezno polje '" + name + "'.");
             }
 
             return v.ValueKind == JsonValueKind.String ? v.GetString() ?? string.Empty : v.ToString();

@@ -35,7 +35,7 @@ namespace SiteDesignPro.Core.Geometry
             "point" => GeometryKind.Point,
             "path" => GeometryKind.Path,
             "polygon" => GeometryKind.Polygon,
-            _ => throw new FormatException("Unknown geometry kind '" + code + "'."),
+            _ => throw new FormatException("Nepoznata vrsta geometrije '" + code + "'."),
         };
     }
 

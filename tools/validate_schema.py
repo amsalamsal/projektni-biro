@@ -21,20 +21,28 @@ SCHEMAS = {
     "manifest.json": json.loads((ROOT / "shared/schema/manifest.schema.json").read_text(encoding="utf-8")),
     "geometry.json": json.loads((ROOT / "shared/schema/geometry.schema.json").read_text(encoding="utf-8")),
 }
+OPTIONAL = {
+    "terrain.json": json.loads((ROOT / "shared/schema/terrain.schema.json").read_text(encoding="utf-8")),
+}
 
 
 def load(path: pathlib.Path):
+    names = list(SCHEMAS) + list(OPTIONAL)
     if path.is_file() and path.suffix.lower() == ".sdpkg":
         with zipfile.ZipFile(path) as z:
-            return {name: json.loads(z.read(name).decode("utf-8")) for name in SCHEMAS}
-    return {name: json.loads((path / name).read_text(encoding="utf-8")) for name in SCHEMAS}
+            present = set(z.namelist())
+            return {name: json.loads(z.read(name).decode("utf-8")) for name in names if name in present}
+    return {name: json.loads((path / name).read_text(encoding="utf-8")) for name in names if (path / name).exists()}
 
 
 def main(paths):
     ok = True
     for p in paths:
         docs = load(pathlib.Path(p))
-        for name, schema in SCHEMAS.items():
+        if "terrain" in docs["manifest.json"] and "terrain.json" not in docs:
+            ok = False
+            print(f"INVALID {p} :: manifest declares terrain.json but the file is missing")
+        for name, schema in list(SCHEMAS.items()) + [(n, s) for n, s in OPTIONAL.items() if n in docs]:
             validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
             errors = sorted(validator.iter_errors(docs[name]), key=lambda e: list(e.path))
             if errors:
@@ -44,6 +52,11 @@ def main(paths):
                     print("   ", "/".join(map(str, e.path)), "-", e.message[:200])
             else:
                 print(f"valid   {p} :: {name}")
+        for surface in docs.get("terrain.json", {}).get("surfaces", []):
+            n = len(surface["vertices"])
+            if any(i >= n for t in surface["triangles"] for i in t):
+                ok = False
+                print(f"INVALID {p} :: terrain {surface['id']} has a triangle index outside its vertex list")
         ids = [e["id"] for e in docs["manifest.json"]["elements"]]
         gids = [g["id"] for g in docs["geometry.json"]["elements"]]
         if sorted(ids) != sorted(gids):

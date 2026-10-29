@@ -592,7 +592,7 @@ namespace SiteDesignPro.Core.Symbols
                     items.Add(new SymCircle(Vec2.Zero, N("radius", 2)));
                     break;
                 default:
-                    throw new NotSupportedException("No plan symbol is defined for builder '" + builder + "'.");
+                    throw new NotSupportedException("Za generator '" + builder + "' nije definisan simbol u tlocrtu.");
             }
 
             return new SymbolDrawing(symbol, items);

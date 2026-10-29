@@ -29,7 +29,7 @@ namespace SiteDesignPro.Core.Layout
         {
             if (!(spacing > 0))
             {
-                throw new ArgumentOutOfRangeException(nameof(spacing), "Spacing must be positive.");
+                throw new ArgumentOutOfRangeException(nameof(spacing), "Razmak mora biti pozitivan.");
             }
 
             double length = GeometryMath.Length(ring, closed);
@@ -72,7 +72,7 @@ namespace SiteDesignPro.Core.Layout
 
             if (count > maxCount)
             {
-                throw new InvalidOperationException("Placement would create " + count + " items (limit " + maxCount + "). Check spacing and units.");
+                throw new InvalidOperationException("Raspored bi napravio " + count + " elemenata (ograničenje " + maxCount + "). Provjerite razmak i jedinice.");
             }
 
             for (int i = 0; i < count; i++)
@@ -108,7 +108,7 @@ namespace SiteDesignPro.Core.Layout
 
             if (angleDegrees < 30 || angleDegrees > 90)
             {
-                throw new ArgumentOutOfRangeException(nameof(angleDegrees), "Bay angle must be between 30 and 90 degrees.");
+                throw new ArgumentOutOfRangeException(nameof(angleDegrees), "Ugao parking mjesta mora biti između 30 i 90 stepeni.");
             }
 
             Vec2 dir = end.XY - start.XY;
@@ -143,7 +143,7 @@ namespace SiteDesignPro.Core.Layout
         {
             if (!(spacingX > 0) || !(spacingY > 0))
             {
-                throw new ArgumentOutOfRangeException(nameof(spacingX), "Grid spacing must be positive.");
+                throw new ArgumentOutOfRangeException(nameof(spacingX), "Razmak mreže mora biti pozitivan.");
             }
 
             var result = new List<Vec2>();
@@ -158,7 +158,7 @@ namespace SiteDesignPro.Core.Layout
             long estimate = (long)((b.Width / spacingX) + 2) * (long)((b.Height / spacingY) + 2);
             if (estimate > maxCount * 4L)
             {
-                throw new InvalidOperationException("Grid would contain too many points; check spacing and units.");
+                throw new InvalidOperationException("Mreža bi imala previše tačaka; provjerite razmak i jedinice.");
             }
 
             int row = 0;
@@ -173,7 +173,7 @@ namespace SiteDesignPro.Core.Layout
                         result.Add(origin + q.Rotate(angle));
                         if (result.Count > maxCount)
                         {
-                            throw new InvalidOperationException("Grid exceeds " + maxCount + " points.");
+                            throw new InvalidOperationException("Mreža prelazi " + maxCount + " tačaka.");
                         }
                     }
                 }

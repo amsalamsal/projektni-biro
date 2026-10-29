@@ -1,22 +1,22 @@
 {
   "format": "site-design-pro-package",
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "packageId": "01ba9c61-4449-44a2-90ab-cc1873b828d3",
   "createdUtc": "2026-01-01T00:00:00Z",
   "generator": {
-    "application": "AutoCAD Site Design Pro",
+    "application": "Vanjsko uređenje PRO (AutoCAD)",
     "version": "0.1.0",
     "host": "sdp command-line tool",
     "sourceDocument": "SampleResidentialComplex (generated)"
   },
   "project": {
     "id": "85ca0f75-91f8-487f-a951-d1a7f14e1796",
-    "name": "Sample Residential Complex",
+    "name": "Primjer: stambeni kompleks",
     "number": "SDP-SAMPLE-001",
-    "client": "Sample client",
-    "location": "Sample site",
-    "description": "Reference project for the AutoCAD to SketchUp workflow (two apartment buildings, parking and landscaped courtyard).",
-    "author": "Site Design Pro",
+    "client": "Primjer investitora",
+    "location": "Primjer lokacije",
+    "description": "Referentni projekat za tok rada AutoCAD → SketchUp (dva stambena objekta, parking i uređeno dvorište).",
+    "author": "Vanjsko uređenje PRO",
     "revision": "A"
   },
   "units": {
@@ -32,8 +32,16 @@
       520
     ],
     "trueNorthDegrees": 0,
-    "crs": "EPSG:31276",
-    "heightDatum": "Sample datum"
+    "crs": "EPSG:3908",
+    "heightDatum": "Primjer – nije stvarni visinski datum",
+    "elevation": {
+      "buildingZeroAbsolute": 520.15,
+      "parterreRelative": 0,
+      "roadOffsetBelowParterre": 0.15,
+      "verticalDatum": "Primjer – nije stvarni visinski datum",
+      "drawingZ": "absolute",
+      "packageZeroAbsolute": 520
+    }
   },
   "catalog": {
     "id": "sdp-core",
@@ -3605,17 +3613,23 @@
       "category": "buildings",
       "subcategory": "Buildings",
       "builder": "massing",
-      "name": "Building A",
+      "name": "Objekat A",
       "label": "B-001",
       "layer": "A-BLDG-REF",
       "modelGroup": "buildings",
       "revision": 1,
-      "contentHash": "4539a2dea7cea5c09abcc2129bd53bff06813019ee2f6e84fd1de3f0a50d7923",
+      "contentHash": "ee6184b182e033fa2a71d930f4adaf8434430b23c484f60efad3a93089036ee3",
       "parameters": {
         "baseOffset": 0,
         "height": 18,
         "material": "building_massing",
         "storeys": 6
+      },
+      "properties": {
+        "elevation.mode": "Relative",
+        "elevation.relative": "0",
+        "elevation.source": "manual",
+        "elevation.value": "0"
       }
     },
     {
@@ -3624,17 +3638,23 @@
       "category": "buildings",
       "subcategory": "Buildings",
       "builder": "massing",
-      "name": "Building B",
+      "name": "Objekat B",
       "label": "B-002",
       "layer": "A-BLDG-REF",
       "modelGroup": "buildings",
       "revision": 1,
-      "contentHash": "35f4fc87160b4c482729e92663629f2853477dc862451f705c4782e7e8dbc50d",
+      "contentHash": "5d45bfef754882847b67d5ccc7570f0405b8ec7cd7f10268045e486af7025c83",
       "parameters": {
         "baseOffset": 0,
         "height": 15,
         "material": "building_massing",
         "storeys": 5
+      },
+      "properties": {
+        "elevation.mode": "Relative",
+        "elevation.relative": "0",
+        "elevation.source": "manual",
+        "elevation.value": "0"
       }
     },
     {
@@ -3700,12 +3720,12 @@
       "category": "surfaces",
       "subcategory": "Paving",
       "builder": "slab",
-      "name": "Parking area",
+      "name": "Parking prostor",
       "label": "P-005",
       "layer": "C-ROAD",
       "modelGroup": "surfaces",
       "revision": 1,
-      "contentHash": "205f9ed8204b9692631e5942044f8a7d705bb755c123d0fc2b3cea28bba37727",
+      "contentHash": "8a27d28e94fb1f6f7a8ec03e2b30c7993fd41c8d426535857c56fe88f1d1b33d",
       "parameters": {
         "buildup": "",
         "jointPattern": "none",
@@ -3713,6 +3733,12 @@
         "surfaceCode": "",
         "thickness": 0.1,
         "topOffset": 0
+      },
+      "properties": {
+        "elevation.mode": "RoadOffset",
+        "elevation.relative": "-0.15",
+        "elevation.source": "manual",
+        "elevation.value": "0.15"
       }
     },
     {
@@ -5171,7 +5197,7 @@
       "layer": "C-ROAD-PRKG",
       "modelGroup": "roads",
       "revision": 1,
-      "contentHash": "910a5b226450784573be498e3a5b19554515116111121039df5d86866721bee5",
+      "contentHash": "50dfa8697d4ba75c5eb1bab29d0e174825aa3bb77b69b203d5652302f4e50f50",
       "parameters": {
         "baseOffset": 0,
         "depth": 0.3,
@@ -5182,7 +5208,7 @@
         "width": 0.4
       },
       "properties": {
-        "notes": "Charger model to be confirmed"
+        "notes": "Model punjača potrebno potvrditi"
       }
     },
     {
@@ -5196,7 +5222,7 @@
       "layer": "C-ROAD-PRKG",
       "modelGroup": "roads",
       "revision": 1,
-      "contentHash": "6dc9d358446882f2ed9c6973cc394627dc40e7edfbddc60b32d1d1664049cc6f",
+      "contentHash": "4b81e112b40c3d9c9e4d968a20a6fe5b08107ff45bb90a5cb1ecf3668803a03e",
       "parameters": {
         "baseOffset": 0,
         "depth": 0.3,
@@ -5207,7 +5233,7 @@
         "width": 0.4
       },
       "properties": {
-        "notes": "Charger model to be confirmed"
+        "notes": "Model punjača potrebno potvrditi"
       }
     },
     {
@@ -5221,7 +5247,7 @@
       "layer": "C-ROAD-PRKG",
       "modelGroup": "roads",
       "revision": 1,
-      "contentHash": "a7f67fd1e8857023234efe18e84dc7b9e206814390d53d9f151505c9046c0845",
+      "contentHash": "a1ddb56e613bb03ff7cbeb21da197abd4a9be1e821edfb033694d9de045721d1",
       "parameters": {
         "baseOffset": 0,
         "depth": 0.3,
@@ -5232,7 +5258,7 @@
         "width": 0.4
       },
       "properties": {
-        "notes": "Charger model to be confirmed"
+        "notes": "Model punjača potrebno potvrditi"
       }
     },
     {
@@ -5246,7 +5272,7 @@
       "layer": "C-ROAD-PRKG",
       "modelGroup": "roads",
       "revision": 1,
-      "contentHash": "90c13b5057070de1134930dc63d914c83fac73fc18d3179db572d9089af9dc8b",
+      "contentHash": "5caac8e22f1ccfc068be33fc13aa23e5e0468773b423d07daf4467c4c7c1d9c4",
       "parameters": {
         "baseOffset": 0,
         "depth": 0.3,
@@ -5257,7 +5283,7 @@
         "width": 0.4
       },
       "properties": {
-        "notes": "Charger model to be confirmed"
+        "notes": "Model punjača potrebno potvrditi"
       }
     },
     {
@@ -5266,12 +5292,12 @@
       "category": "surfaces",
       "subcategory": "Paving",
       "builder": "slab",
-      "name": "Front paving",
+      "name": "Popločanje ispred objekata",
       "label": "P-004",
       "layer": "L-SURF",
       "modelGroup": "surfaces",
       "revision": 1,
-      "contentHash": "8bda92ab30d9ba66a83bc8c02ea08ce9bdc6cf01d659488649801a71da9cbfc1",
+      "contentHash": "7b807573b42531df1b518bb6a09c123d0c8d8819f3786561961ccad3a3ecce1e",
       "parameters": {
         "buildup": "",
         "jointPattern": "stretcher",
@@ -5279,6 +5305,12 @@
         "surfaceCode": "P1",
         "thickness": 0.08,
         "topOffset": 0
+      },
+      "properties": {
+        "elevation.mode": "ParterreOffset",
+        "elevation.relative": "0",
+        "elevation.source": "manual",
+        "elevation.value": "0"
       }
     },
     {
@@ -5287,12 +5319,12 @@
       "category": "surfaces",
       "subcategory": "Paving",
       "builder": "slab",
-      "name": "Courtyard",
+      "name": "Dvorište",
       "label": "P-003",
       "layer": "L-SURF",
       "modelGroup": "surfaces",
       "revision": 1,
-      "contentHash": "9a94c0701db870b0494a589f7fb3bab5070c0edf000217623cb91cb1fb3f51f8",
+      "contentHash": "95ab6f87ba1345a8f1363e5d0d677bfb7d1692d44862967d99fd790c826dca71",
       "parameters": {
         "buildup": "",
         "jointPattern": "random",
@@ -5352,12 +5384,12 @@
       "category": "surfaces",
       "subcategory": "Soft landscape",
       "builder": "slab",
-      "name": "North lawn",
+      "name": "Sjeverni travnjak",
       "label": "P-001",
       "layer": "L-PLNT",
       "modelGroup": "surfaces",
       "revision": 1,
-      "contentHash": "c074997948d7bbbc9d2833dce5be214206a0ffb2179a9796abfd0e974f528eab",
+      "contentHash": "3c7131480241d7bfb61bcb5d7603f991106db8f27f80a453dceaca4c169ed542",
       "parameters": {
         "buildup": "Turf on topsoil",
         "jointPattern": "none",
@@ -5365,6 +5397,12 @@
         "surfaceCode": "",
         "thickness": 0.15,
         "topOffset": 0
+      },
+      "properties": {
+        "elevation.mode": "ParterreOffset",
+        "elevation.relative": "0.15",
+        "elevation.source": "manual",
+        "elevation.value": "0.15"
       }
     },
     {
@@ -5373,12 +5411,12 @@
       "category": "surfaces",
       "subcategory": "Safety surfaces",
       "builder": "slab",
-      "name": "Playground surface",
+      "name": "Podloga igrališta",
       "label": "P-002",
       "layer": "L-SITE-RECR",
       "modelGroup": "surfaces",
       "revision": 1,
-      "contentHash": "4db3d92971f21c37ebfbbcca39371d567220487eab9b9afbeaacdb9b662b01a3",
+      "contentHash": "de81cdc8d57624b6efd5463de09876d0526943a82e0e7949284eb9a6923662fd",
       "parameters": {
         "buildup": "",
         "jointPattern": "none",
@@ -5487,7 +5525,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "980f2cbf91f94056199c2483141085aa5a8ba7495b9150c38fda5a15b338212e",
+      "contentHash": "2bac858bc5cabf3c17751ca80314b71c03cd7b0ce1334a76a0c1b9982b7b821d",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5501,9 +5539,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5517,7 +5555,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "835c646a944e29b5a86da1dd6175b2891a01a0e09074315b246e25b894d90a85",
+      "contentHash": "c7ee89f024bca574470d05fbc821b27b2c6b9719f777eee2a80693534f1a15ed",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5531,9 +5569,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5547,7 +5585,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "f5c768ca2ad2b2c94d36e8e4f182b4cd16e9ace6c263ab3bb55b265f06ece428",
+      "contentHash": "776420b581e405c53f0d4d5affbab75eb9f54b038127c240a7782df1b461a931",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5561,9 +5599,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5577,7 +5615,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "effe479e0de94912d018a5b65333b2b3aa054a44b9e992461a2d51d8b393e286",
+      "contentHash": "cbe5d209513bf6060c78ccb557044c6a70c56f97d23d05f4bef037834fe6bcad",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5591,9 +5629,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5607,7 +5645,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "828d1466ddd8eff1d351a0a17642b87d4e5889d7bc6f5b50556f503b06b49ede",
+      "contentHash": "d99bcf3d05e30b0c7f3d88cc84dd027d88ce73acb46400d0f9894965fb5eb612",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5621,9 +5659,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5637,7 +5675,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "94a65b6ed8eb01e79e76b49812f8a2caed0d1238a84392c666a5aacb7a8941c1",
+      "contentHash": "2c43d98373cccbefdb971a49949bc882f8f00c2627ca7978a33cc301b97a55b3",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5651,9 +5689,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5667,7 +5705,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "3351b209127e4a0ba852b595c176f65ca912c4618c2ce4f2c0bfe4b8d666ad51",
+      "contentHash": "feb7afa74bf9403fb210be1b844f9de43b991546989ae1c9b37dcccf7246732f",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5681,9 +5719,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5697,7 +5735,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "2e1b36708380b7b419b6c6c0c95c8747e8bc78815d2df158d4f35bfb2ba1f085",
+      "contentHash": "41226e87a6a970d5bfa11d9a8187bcab2c0fefaf7a7f52630bf5af9e797a9240",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5711,9 +5749,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5727,7 +5765,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "6f2cc6dbc91414bccccf737d1a5919f734ba74bef2945de574ee75ea72019214",
+      "contentHash": "4923643f7922c132a97858688fe456e13754939d0a289c655fef0b0f3381d94f",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5741,9 +5779,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5757,7 +5795,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "a0e758b68b5c6d09d9d1177c3e5b3d042580ca9d6103ad617ba99e3b8290008c",
+      "contentHash": "1dccbcef466b9fbafb568c7c13dcc61c83ad83aa4d334f7b7f8117e0c4b26620",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5771,9 +5809,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5787,7 +5825,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "47b12e68615c51eb762bec14d98a4a34cbd2c20be21097f44e43fd6745df64cf",
+      "contentHash": "902d71c16c2e65a92b2fb883e9c36295dbf42df7b0fb2c8b95b1aef40262d25b",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5801,9 +5839,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5817,7 +5855,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "402b3045440199d2336535ab712b96b108e067c0c441331bcc0158ef915ea23b",
+      "contentHash": "b0cd2f30c9a14673a76ed9354759e3de0ddd3a7c283a43003ecbe1ee7faed539",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5831,9 +5869,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5847,7 +5885,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "1439d56012b7843fb076f053baa37098dee3dbfc4d97e3a3de28e95c814af115",
+      "contentHash": "aace02793b0183c9c5ad8f470ba92c4f6f2ab5ab03087dc6f22880a7f8b2a2e1",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5861,9 +5899,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5877,7 +5915,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "fee425c02105cf6519bba75ace23ab76859493950cfe663fe83c78f1d8421a87",
+      "contentHash": "bfb6be40754d90b69688214ae59bf9a198d7e88e04ea41b01a5f939dc706ec0c",
       "parameters": {
         "canopyDiameter": 5,
         "clearTrunkHeight": 2.2,
@@ -5891,9 +5929,9 @@
       },
       "properties": {
         "botanicalName": "Tilia cordata",
-        "commonName": "Small-leaved lime",
-        "dataSource": "Sample project - replace with nursery data",
-        "plantingSize": "18-20 cm girth"
+        "commonName": "Sitnolisna lipa",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika",
+        "plantingSize": "obim debla 18–20 cm"
       }
     },
     {
@@ -5907,7 +5945,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "a8eb6d6df6d4adc60ed8e530916f72f6f38f12c37b62410dc955b943cbc0cf5a",
+      "contentHash": "62cc2a3cc7b43846f9ab90a9fc199c36f67540cd8445febde623c10ebb544195",
       "parameters": {
         "canopyDiameter": 4,
         "clearTrunkHeight": 0.8,
@@ -5921,8 +5959,8 @@
       },
       "properties": {
         "botanicalName": "Pinus nigra",
-        "commonName": "Black pine",
-        "dataSource": "Sample project - replace with nursery data"
+        "commonName": "Crni bor",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika"
       }
     },
     {
@@ -5936,7 +5974,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "da545c8b10447ee52d896879e6f178688b224cef61c8a6f0d11e263da906f7b5",
+      "contentHash": "726a2259393f27bea0d5cedc84a77122438c28139f1909773f98b1e167f1dc05",
       "parameters": {
         "canopyDiameter": 4,
         "clearTrunkHeight": 0.8,
@@ -5950,8 +5988,8 @@
       },
       "properties": {
         "botanicalName": "Pinus nigra",
-        "commonName": "Black pine",
-        "dataSource": "Sample project - replace with nursery data"
+        "commonName": "Crni bor",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika"
       }
     },
     {
@@ -5965,7 +6003,7 @@
       "layer": "L-PLNT-TREE",
       "modelGroup": "planting",
       "revision": 1,
-      "contentHash": "5199fa5e8c18cb195136791baadb0f266b95ae68f993a543581e4aab4bf18120",
+      "contentHash": "648bb7d693f89369d88fcaa95510aeb1672a16fc6cd76154e9b524ae16af59f0",
       "parameters": {
         "canopyDiameter": 4,
         "clearTrunkHeight": 0.8,
@@ -5979,8 +6017,8 @@
       },
       "properties": {
         "botanicalName": "Pinus nigra",
-        "commonName": "Black pine",
-        "dataSource": "Sample project - replace with nursery data"
+        "commonName": "Crni bor",
+        "dataSource": "Primjer – zamijeniti podacima rasadnika"
       }
     },
     {
@@ -6639,14 +6677,14 @@
       "layer": "C-STRM",
       "modelGroup": "drainage",
       "revision": 1,
-      "contentHash": "0eed10e76bc486885fec7e9db6163bfbd6641bc6e513dfd41aab59c560948534",
+      "contentHash": "a8c3abdfca04229e6ff70cd5dd52130f41c7ed1b09e6f0c68e0d78eee0737c47",
       "parameters": {
         "bodyMaterial": "concrete_precast",
         "depth": 0.25,
         "flowDirection": "forward",
         "gradient": 0.5,
         "grateMaterial": "grate_steel",
-        "outletTo": "IC at east end",
+        "outletTo": "RO na istočnom kraju",
         "width": 0.15
       }
     },
@@ -6841,6 +6879,16 @@
       }
     }
   ],
+  "terrain": {
+    "path": "terrain.json",
+    "surfaces": [
+      {
+        "id": "d84bcdd0-3f90-479f-b2b8-c0c11a6659cf",
+        "name": "Postojeći teren",
+        "triangles": 280
+      }
+    ]
+  },
   "validation": {
     "errors": 0,
     "warnings": 0,

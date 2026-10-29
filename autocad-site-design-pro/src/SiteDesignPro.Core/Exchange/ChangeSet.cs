@@ -68,19 +68,19 @@ namespace SiteDesignPro.Core.Exchange
             JsonElement r = doc.RootElement;
             if (!r.TryGetProperty("format", out JsonElement f) || f.GetString() != FormatId)
             {
-                throw new FormatException("Not a Site Design Pro change file.");
+                throw new FormatException("Datoteka nije datoteka izmjena programa Vanjsko uređenje PRO.");
             }
 
             string version = r.GetProperty("schemaVersion").GetString() ?? string.Empty;
             if (!version.StartsWith(PackageFormat.SupportedMajor.ToString(CultureInfo.InvariantCulture) + ".", StringComparison.Ordinal))
             {
-                throw new FormatException("Unsupported change file version " + version + ".");
+                throw new FormatException("Nepodržana verzija datoteke izmjena " + version + ".");
             }
 
             JsonElement units = r.GetProperty("units");
             if (units.GetProperty("length").GetString() != "m")
             {
-                throw new FormatException("Change file lengths must be metres.");
+                throw new FormatException("Dužine u datoteci izmjena moraju biti u metrima.");
             }
 
             var result = new ChangeSetDocument
@@ -108,7 +108,7 @@ namespace SiteDesignPro.Core.Exchange
                     var v = new Vec3(pos[0].GetDouble(), pos[1].GetDouble(), pos[2].GetDouble());
                     if (!v.IsFinite)
                     {
-                        throw new FormatException("Change for " + change.Id + " has a non-finite position.");
+                        throw new FormatException("Izmjena za " + change.Id + " ima neispravan položaj.");
                     }
 
                     change.Position = v;
@@ -134,7 +134,7 @@ namespace SiteDesignPro.Core.Exchange
             ElementType? type = catalog.FindType(drawingElement.TypeId);
             if (type == null)
             {
-                return (ChangeOutcome.Invalid, "Unknown element type " + drawingElement.TypeId + ".");
+                return (ChangeOutcome.Invalid, "Nepoznat tip elementa " + drawingElement.TypeId + ".");
             }
 
             if (!force && change.BaseContentHash != null)
@@ -142,7 +142,7 @@ namespace SiteDesignPro.Core.Exchange
                 string current = ContentHasher.Hash(PackageWriter.ToPackageFrame(drawingElement, settings));
                 if (!string.Equals(current, change.BaseContentHash, StringComparison.Ordinal))
                 {
-                    return (ChangeOutcome.Conflict, "The element was changed in AutoCAD after it was exported; the SketchUp change was not applied.");
+                    return (ChangeOutcome.Conflict, "Element je izmijenjen u AutoCAD-u nakon izvoza; izmjena iz SketchUp-a nije primijenjena.");
                 }
             }
 
@@ -151,7 +151,7 @@ namespace SiteDesignPro.Core.Exchange
             {
                 if (type.Parameter(kv.Key) == null)
                 {
-                    return (ChangeOutcome.Invalid, "Unknown parameter '" + kv.Key + "'.");
+                    return (ChangeOutcome.Invalid, "Nepoznat parametar '" + kv.Key + "'.");
                 }
 
                 probe.Parameters[kv.Key] = kv.Value;
@@ -194,12 +194,12 @@ namespace SiteDesignPro.Core.Exchange
             }
             else if (change.Position.HasValue || change.Rotation.HasValue)
             {
-                return (ChangeOutcome.Invalid, "Position changes are only supported for point elements.");
+                return (ChangeOutcome.Invalid, "Promjena položaja podržana je samo za tačkaste elemente.");
             }
 
             if (!changed)
             {
-                return (ChangeOutcome.Unchanged, "Already up to date.");
+                return (ChangeOutcome.Unchanged, "Već je ažurno.");
             }
 
             drawingElement.Revision++;

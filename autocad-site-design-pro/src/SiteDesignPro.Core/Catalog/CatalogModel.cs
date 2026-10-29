@@ -130,6 +130,9 @@ namespace SiteDesignPro.Core.Catalog
 
         public string Tag { get; set; } = string.Empty;
 
+        /// <summary>Tag name used before the Bosnian catalog (models imported with version 0.1).</summary>
+        public string LegacyTag { get; set; } = string.Empty;
+
         public int Order { get; set; }
     }
 
@@ -173,6 +176,9 @@ namespace SiteDesignPro.Core.Catalog
         public bool Plot { get; set; } = true;
 
         public string Description { get; set; } = string.Empty;
+
+        /// <summary>Layer name used before the Bosnian layer standard; renamed by SDPLAYERS when found.</summary>
+        public string LegacyName { get; set; } = string.Empty;
     }
 
     public sealed class MaterialDefinition
@@ -198,6 +204,9 @@ namespace SiteDesignPro.Core.Catalog
         public string Name { get; set; } = string.Empty;
 
         public string Category { get; set; } = string.Empty;
+
+        /// <summary>English name (search and reference); the display name is Bosnian.</summary>
+        public string NameEn { get; set; } = string.Empty;
 
         public string Subcategory { get; set; } = string.Empty;
 

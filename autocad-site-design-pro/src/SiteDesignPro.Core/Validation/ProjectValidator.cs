@@ -5,6 +5,7 @@ using System.Linq;
 using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Geometry;
 using SiteDesignPro.Core.Model;
+using SiteDesignPro.Core.Text;
 
 namespace SiteDesignPro.Core.Validation
 {
@@ -59,7 +60,7 @@ namespace SiteDesignPro.Core.Validation
             long y0 = (long)Math.Floor(b.MinY / cell), y1 = (long)Math.Floor(b.MaxY / cell);
             if ((x1 - x0 + 1) * (y1 - y0 + 1) > 100000)
             {
-                throw new InvalidOperationException("Element extent is too large for the spatial index; check units.");
+                throw new InvalidOperationException("Raspon elementa je prevelik za prostorni indeks; provjerite jedinice.");
             }
 
             for (long x = x0; x <= x1; x++)
@@ -126,13 +127,13 @@ namespace SiteDesignPro.Core.Validation
                 int before = report.Issues.Count;
                 if (!SiteElement.IsValidId(e.Id))
                 {
-                    report.Add(Severity.Error, IssueKind.DataError, "SDP-D001", null, "Element of type '" + e.TypeId + "' has a missing or malformed identifier.", "Run SDPAUDIT to assign a new stable identifier.");
+                    report.Add(Severity.Error, IssueKind.DataError, "SDP-D001", null, "Element tipa '" + e.TypeId + "' nema ispravan identifikator.", "Pokrenite SDPAUDIT da dobije novi stalni identifikator.");
                     continue;
                 }
 
                 if (ids.ContainsKey(e.Id))
                 {
-                    report.Add(new ValidationIssue(Severity.Error, IssueKind.DataError, "SDP-D002", e.Id, "Duplicate element identifier (usually an object copied with its data).", "Run SDPAUDIT; copies receive new identifiers and the original keeps its identifier.") { Label = e.Label });
+                    report.Add(new ValidationIssue(Severity.Error, IssueKind.DataError, "SDP-D002", e.Id, "Dupli identifikator elementa (obično objekat kopiran zajedno s podacima).", "Pokrenite SDPAUDIT; kopije dobijaju nove identifikatore, a original zadržava svoj.") { Label = e.Label });
                     continue;
                 }
 
@@ -140,7 +141,7 @@ namespace SiteDesignPro.Core.Validation
                 ElementType? type = catalog.FindType(e.TypeId);
                 if (type == null)
                 {
-                    report.Add(new ValidationIssue(Severity.Error, IssueKind.DataError, "SDP-D003", e.Id, "Unsupported element type '" + e.TypeId + "'. It cannot be reconstructed in 3D.", "Install the user catalog that defines this type, or change the element type.") { Label = e.Label });
+                    report.Add(new ValidationIssue(Severity.Error, IssueKind.DataError, "SDP-D003", e.Id, "Nepodržan tip elementa '" + e.TypeId + "'. Ne može se rekonstruisati u 3D.", "Instalirajte korisnički katalog koji definiše ovaj tip ili promijenite tip elementa.") { Label = e.Label });
                     continue;
                 }
 
@@ -183,8 +184,8 @@ namespace SiteDesignPro.Core.Validation
             if (e.Geometry.Kind != type.Geometry)
             {
                 report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G001", e.Id,
-                    "Geometry is a " + ElementGeometry.KindCode(e.Geometry.Kind) + " but type '" + type.Name + "' needs a " + ElementGeometry.KindCode(type.Geometry) + ".",
-                    type.Geometry == GeometryKind.Polygon ? "Use a closed polyline boundary." : type.Geometry == GeometryKind.Path ? "Use a polyline alignment." : "Use a point insertion.");
+                    "Geometrija je " + KindBs(e.Geometry.Kind) + ", a tip '" + type.Name + "' zahtijeva " + KindBs(type.Geometry) + ".",
+                    type.Geometry == GeometryKind.Polygon ? "Koristite zatvorenu poliliniju granice." : type.Geometry == GeometryKind.Path ? "Koristite poliliniju trase." : "Koristite tačku umetanja.");
                 return;
             }
 
@@ -193,7 +194,7 @@ namespace SiteDesignPro.Core.Validation
                 case PointGeometry p:
                     if (!p.Position.IsFinite || !Compat.IsFinite(p.Rotation))
                     {
-                        report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Insertion point or rotation is not a finite number.", "Move or re-insert the element.");
+                        report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Tačka umetanja ili rotacija nije konačan broj.", "Pomjerite ili ponovo umetnite element.");
                     }
                     else
                     {
@@ -205,20 +206,20 @@ namespace SiteDesignPro.Core.Validation
                     {
                         if (path.Ring.Vertices.Any(v => !v.IsFinite))
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Path contains non-finite coordinates.", "Redraw the alignment.");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Trasa sadrži neispravne koordinate.", "Ponovo nacrtajte trasu.");
                             break;
                         }
 
                         Ring cleaned = GeometryMath.RemoveDuplicateVertices(path.Ring, path.Closed);
                         if (cleaned.Count < 2 || GeometryMath.Length(cleaned, path.Closed) < 1e-4)
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G003", e.Id, "Path has zero length.", "Redraw the alignment with at least two distinct vertices.");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G003", e.Id, "Trasa ima dužinu nula.", "Ponovo nacrtajte trasu s najmanje dva različita tjemena.");
                             break;
                         }
 
                         if (cleaned.Count != path.Ring.Count)
                         {
-                            report.Add(Severity.Warning, IssueKind.GeometricError, "SDP-G004", e.Id, "Path contains duplicate consecutive vertices.", "Run SDPAUDIT or PEDIT to remove duplicate vertices; they are ignored during export.");
+                            report.Add(Severity.Warning, IssueKind.GeometricError, "SDP-G004", e.Id, "Trasa sadrži uzastopna dupla tjemena.", "Uklonite ih naredbom SDPAUDIT ili PEDIT; pri izvozu se zanemaruju.");
                         }
 
                         CheckElevation(e, path.Ring.Vertices.Average(v => v.Z), report);
@@ -229,27 +230,27 @@ namespace SiteDesignPro.Core.Validation
                     {
                         if (poly.Outer.Vertices.Any(v => !v.IsFinite))
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Boundary contains non-finite coordinates.", "Redraw the boundary.");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Granica sadrži neispravne koordinate.", "Ponovo nacrtajte granicu.");
                             break;
                         }
 
                         Ring outer = GeometryMath.RemoveDuplicateVertices(poly.Outer, true);
                         if (outer.Count < 3 && !(outer.Count == 2 && outer.HasArcs))
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G005", e.Id, "Boundary has fewer than three distinct vertices.", "Redraw the area as a closed polyline with at least three vertices.");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G005", e.Id, "Granica ima manje od tri različita tjemena.", "Nacrtajte površinu kao zatvorenu poliliniju s najmanje tri tjemena.");
                             break;
                         }
 
                         if (GeometryMath.IsSelfIntersecting(outer))
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G007", e.Id, "Boundary intersects itself.", "Edit the boundary so its edges do not cross (split figure-of-eight shapes into separate areas).");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G007", e.Id, "Granica siječe samu sebe.", "Ispravite granicu tako da se stranice ne sijeku (oblik osmice podijelite na zasebne površine).");
                             break;
                         }
 
                         double area = Math.Abs(GeometryMath.SignedArea(outer));
                         if (area < 1e-6)
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G006", e.Id, "Boundary encloses no area.", "Redraw the boundary; vertices must not be collinear.");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G006", e.Id, "Granica ne zatvara površinu.", "Ponovo nacrtajte granicu; tjemena ne smiju ležati na jednom pravcu.");
                             break;
                         }
 
@@ -260,20 +261,20 @@ namespace SiteDesignPro.Core.Validation
                             Vec2? ip = GeometryMath.InteriorPoint(holePts);
                             if (holePts.Count < 3 || ip == null || !GeometryMath.PointInPolygon(ip.Value, outerPts))
                             {
-                                report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G008", e.Id, "An opening (hole) lies outside the boundary or is degenerate.", "Redraw the opening inside the outer boundary.");
+                                report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G008", e.Id, "Otvor leži izvan granice ili je neispravan.", "Nacrtajte otvor unutar vanjske granice.");
                             }
                         }
 
                         if (RectangleBuilders.Contains(type.Builder.Id) && !GeometryMath.IsRectangle(outer))
                         {
                             report.Add(Severity.Info, IssueKind.GeometricError, "SDP-G009", e.Id,
-                                type.Name + " is generated on the oriented bounding rectangle of a non-rectangular boundary.",
-                                "Draw a rectangle whose first edge defines the orientation if the exact outline matters.");
+                                type.Name + " se generiše na orijentisanom pravougaoniku oko granice koja nije pravougaona.",
+                                "Ako je tačan oblik važan, nacrtajte pravougaonik čija prva stranica određuje orijentaciju.");
                         }
 
                         if (type.Builder.Id == "sail" && outer.Count != 3 && outer.Count != 4)
                         {
-                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G011", e.Id, "A shade sail needs exactly 3 or 4 corner points (found " + outer.Count + ").", "Redraw the sail outline with 3 or 4 vertices.");
+                            report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G011", e.Id, "Jedro za sjenu treba tačno 3 ili 4 ugaone tačke (pronađeno " + outer.Count + ").", "Nacrtajte konturu jedra s 3 ili 4 tjemena.");
                         }
 
                         CheckElevation(e, outer.Vertices.Average(v => v.Z), report);
@@ -287,8 +288,8 @@ namespace SiteDesignPro.Core.Validation
             if (Math.Abs(z) > checks.ElevationRange)
             {
                 report.Add(Severity.Warning, IssueKind.DataError, "SDP-G012", e.Id,
-                    string.Format(CultureInfo.InvariantCulture, "Elevation {0:0.###} m relative to the project origin is outside +/-{1:0} m.", z, checks.ElevationRange),
-                    "Check the project origin elevation and the drawing units (a millimetre drawing exported as metres gives 1000x values).");
+                    Bs.T("Visina {0} m u odnosu na ishodište projekta je izvan ±{1} m.", Bs.Num(z, 3), Bs.Num(checks.ElevationRange, 0)),
+                    "Provjerite visinu ishodišta projekta i jedinice crteža (crtež u milimetrima izvezen kao metri daje 1000 puta veće vrijednosti).");
             }
         }
 
@@ -301,7 +302,7 @@ namespace SiteDesignPro.Core.Validation
                 {
                     if (def.Required)
                     {
-                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P001", e.Id, "Required parameter '" + def.Label + "' is not set.", "Enter a value with SDPEDIT or the properties palette.");
+                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P001", e.Id, "Obavezni parametar '" + def.Label + "' nije unesen.", "Unesite vrijednost naredbom SDPEDIT ili u paleti svojstava.");
                     }
 
                     continue;
@@ -317,20 +318,20 @@ namespace SiteDesignPro.Core.Validation
                             double d = v.AsNumber();
                             if (v.Kind != ParamKind.Number || !Compat.IsFinite(d))
                             {
-                                report.Add(Severity.Error, IssueKind.DataError, "SDP-P002", e.Id, "Parameter '" + def.Label + "' must be a number (found '" + v.AsText() + "').", "Enter a numeric value.");
+                                report.Add(Severity.Error, IssueKind.DataError, "SDP-P002", e.Id, "Parametar '" + def.Label + "' mora biti broj (uneseno '" + v.AsText() + "').", "Unesite brojčanu vrijednost.");
                                 continue;
                             }
 
                             if (def.Type == ParameterType.Integer && Math.Abs(d - Math.Round(d)) > 1e-9)
                             {
-                                report.Add(Severity.Error, IssueKind.DataError, "SDP-P003", e.Id, "Parameter '" + def.Label + "' must be a whole number.", "Enter an integer value.");
+                                report.Add(Severity.Error, IssueKind.DataError, "SDP-P003", e.Id, "Parametar '" + def.Label + "' mora biti cijeli broj.", "Unesite cijeli broj.");
                             }
 
                             if ((def.Min.HasValue && d < def.Min.Value - 1e-12) || (def.Max.HasValue && d > def.Max.Value + 1e-12))
                             {
                                 report.Add(Severity.Error, IssueKind.DataError, "SDP-P004", e.Id,
-                                    string.Format(CultureInfo.InvariantCulture, "Parameter '{0}' = {1} {2} is outside the valid range {3} to {4}.", def.Label, d, def.DisplayUnit, def.Min?.ToString(CultureInfo.InvariantCulture) ?? "-inf", def.Max?.ToString(CultureInfo.InvariantCulture) ?? "+inf"),
-                                    "Enter a value inside the valid range. If the value is in millimetres, convert it to metres.");
+                                    Bs.T("Parametar '{0}' = {1} {2} je izvan dozvoljenog raspona {3} do {4}.", def.Label, Bs.Num(d, 3), def.DisplayUnit, def.Min.HasValue ? Bs.Num(def.Min.Value, 3) : "-∞", def.Max.HasValue ? Bs.Num(def.Max.Value, 3) : "+∞"),
+                                    "Unesite vrijednost unutar raspona. Ako je vrijednost u milimetrima, pretvorite je u metre.");
                             }
 
                             break;
@@ -339,21 +340,21 @@ namespace SiteDesignPro.Core.Validation
                     case ParameterType.Bool:
                         if (v.Kind != ParamKind.Bool)
                         {
-                            report.Add(Severity.Error, IssueKind.DataError, "SDP-P005", e.Id, "Parameter '" + def.Label + "' must be true or false.", "Choose Yes or No.");
+                            report.Add(Severity.Error, IssueKind.DataError, "SDP-P005", e.Id, "Parametar '" + def.Label + "' mora biti Da ili Ne.", "Odaberite Da ili Ne.");
                         }
 
                         break;
                     case ParameterType.Enum:
                         if (!def.Options.Contains(v.AsText()))
                         {
-                            report.Add(Severity.Error, IssueKind.DataError, "SDP-P006", e.Id, "Parameter '" + def.Label + "' has an invalid option '" + v.AsText() + "'. Valid: " + string.Join(", ", def.Options) + ".", "Choose one of the listed options.");
+                            report.Add(Severity.Error, IssueKind.DataError, "SDP-P006", e.Id, "Parametar '" + def.Label + "' ima neispravnu opciju '" + v.AsText() + "'. Dozvoljeno: " + string.Join(", ", def.Options.Select(catalog.OptionLabel)) + ".", "Odaberite jednu od navedenih opcija.");
                         }
 
                         break;
                     case ParameterType.Material:
                         if (catalog.FindMaterial(v.AsText()) == null)
                         {
-                            report.Add(Severity.Warning, IssueKind.DataError, "SDP-P007", e.Id, "Material '" + v.AsText() + "' is not in the material library; the default material is used.", "Choose a library material or add it to a user materials file.");
+                            report.Add(Severity.Warning, IssueKind.DataError, "SDP-P007", e.Id, "Materijal '" + v.AsText() + "' nije u biblioteci materijala; koristi se zadani materijal.", "Odaberite materijal iz biblioteke ili ga dodajte u korisničku datoteku materijala.");
                         }
 
                         break;
@@ -362,7 +363,7 @@ namespace SiteDesignPro.Core.Validation
 
             foreach (string key in e.Parameters.Keys.Where(k => type.Parameter(k) == null))
             {
-                report.Add(Severity.Info, IssueKind.DataError, "SDP-P008", e.Id, "Parameter '" + key + "' is not defined for type '" + type.Name + "' and is ignored.", "Move project-specific values to custom fields.");
+                report.Add(Severity.Info, IssueKind.DataError, "SDP-P008", e.Id, "Parametar '" + key + "' nije definisan za tip '" + type.Name + "' i zanemaruje se.", "Vrijednosti specifične za projekat premjestite u korisnička polja.");
             }
 
             foreach (string req in type.ReviewRequired)
@@ -386,8 +387,8 @@ namespace SiteDesignPro.Core.Validation
                 if (missing)
                 {
                     report.Add(Severity.Review, IssueKind.ProfessionalReview, "SDP-R001", e.Id,
-                        "'" + label + "' has not been defined for " + type.Name + ". Default dimensions and clearances are indicative only.",
-                        "Enter the value from the manufacturer, botanical source or applicable standard and record the source.");
+                        "'" + label + "' nije definisano za " + type.Name + ". Zadane dimenzije i razmaci su samo orijentacioni.",
+                        "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.");
                 }
             }
         }
@@ -405,8 +406,8 @@ namespace SiteDesignPro.Core.Validation
                         if (Compat.IsFinite(req) && N("width") + 1e-9 < req)
                         {
                             report.Add(Severity.Warning, IssueKind.DesignConflict, "SDP-C010", e.Id,
-                                string.Format(CultureInfo.InvariantCulture, "Width {0:0.###} m is less than the configured required clear width {1:0.###} m.", N("width"), req),
-                                "Widen the route or confirm the requirement. This compares project values only and is not a regulatory assessment.");
+                                Bs.T("Širina {0} m je manja od zadane potrebne svijetle širine {1} m.", Bs.Num(N("width"), 3), Bs.Num(req, 3)),
+                                "Proširite trasu ili potvrdite zahtjev. Upoređuju se samo vrijednosti projekta; ovo nije provjera propisa.");
                         }
 
                         break;
@@ -420,8 +421,8 @@ namespace SiteDesignPro.Core.Validation
                         if (slope > N("maxSlope") + 1e-9)
                         {
                             report.Add(Severity.Warning, IssueKind.DesignConflict, "SDP-C011", e.Id,
-                                string.Format(CultureInfo.InvariantCulture, "Ramp slope {0:0.0}% exceeds the configured maximum {1:0.0}%.", slope, N("maxSlope")),
-                                "Lengthen the ramp or reduce the rise. Verify against the applicable accessibility regulation.");
+                                Bs.T("Nagib rampe {0} % prelazi zadani najveći nagib {1} %.", Bs.Num(slope, 1), Bs.Num(N("maxSlope"), 1)),
+                                "Produžite rampu ili smanjite visinsku razliku. Provjerite prema važećem propisu o pristupačnosti.");
                         }
                     }
 
@@ -429,68 +430,68 @@ namespace SiteDesignPro.Core.Validation
                 case "pool":
                     if (N("waterLevelOffset") >= N("depth"))
                     {
-                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P010", e.Id, "Water level is at or below the pool floor.", "Reduce 'Water level below coping' or increase the depth.");
+                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P010", e.Id, "Nivo vode je na dnu bazena ili ispod njega.", "Smanjite 'Nivo vode ispod ruba' ili povećajte dubinu.");
                     }
 
                     break;
                 case "chamber":
                     if (N("coverSize") > N("innerSize"))
                     {
-                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P011", e.Id, "Cover opening is larger than the chamber's internal size.", "Check the chamber and cover dimensions.");
+                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P011", e.Id, "Otvor poklopca je veći od unutrašnje dimenzije okna.", "Provjerite dimenzije okna i poklopca.");
                     }
 
                     break;
                 case "underground_container":
                     if (p.Text("installation", type.Parameter("installation")?.Default.AsText() ?? "underground") == "underground" && N("columnDiameter") > Math.Min(N("bodyLength"), N("bodyWidth")))
                     {
-                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P012", e.Id, "Insertion column is wider than the container body.", "Check the container dimensions against the manufacturer data.");
+                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P012", e.Id, "Stub za ubacivanje je širi od tijela kontejnera.", "Provjerite dimenzije kontejnera prema podacima proizvođača.");
                     }
 
                     break;
                 case "tree":
                     if (N("clearTrunkHeight") >= N("height"))
                     {
-                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P013", e.Id, "Clear trunk height is not lower than the tree height.", "Reduce the clear trunk height or increase the height.");
+                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P013", e.Id, "Visina čistog debla nije manja od visine drveta.", "Smanjite visinu čistog debla ili povećajte visinu.");
                     }
 
                     if (Compat.IsFinite(N("matureHeight")) && N("matureHeight") < N("height"))
                     {
-                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P014", e.Id, "Mature height is lower than the planting height.", "Check the growth data source.");
+                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P014", e.Id, "Visina u zrelosti je manja od visine pri sadnji.", "Provjerite izvor podataka o rastu.");
                     }
 
                     break;
                 case "bench":
                     if (B("backrest") && N("backHeight") <= N("seatHeight"))
                     {
-                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P015", e.Id, "Backrest height is not above the seat height.", "Increase the overall height with backrest.");
+                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P015", e.Id, "Visina naslona nije iznad visine sjedišta.", "Povećajte ukupnu visinu s naslonom.");
                     }
 
                     break;
                 case "fence":
                     if (N("postSpacing") <= N("postSize"))
                     {
-                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P016", e.Id, "Post spacing must be larger than the post size.", "Increase the post spacing.");
+                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P016", e.Id, "Razmak stubova mora biti veći od dimenzije stuba.", "Povećajte razmak stubova.");
                     }
 
                     break;
                 case "wall":
                     if (N("footingWidth") > 0 && N("footingDepth") <= 0)
                     {
-                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P017", e.Id, "Footing width is set but footing depth is zero.", "Enter a footing depth or set the footing width to 0.");
+                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P017", e.Id, "Širina temelja je zadana, a dubina temelja je nula.", "Unesite dubinu temelja ili postavite širinu temelja na 0.");
                     }
 
                     break;
                 case "basin":
                     if (N("waterDepth") > N("depth"))
                     {
-                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P018", e.Id, "Design water depth exceeds the basin depth.", "Reduce the water depth or deepen the basin.");
+                        report.Add(Severity.Error, IssueKind.DataError, "SDP-P018", e.Id, "Projektovana dubina vode prelazi dubinu bazena.", "Smanjite dubinu vode ili produbite bazen.");
                     }
 
                     break;
                 case "sail":
                     if (N("highHeight") < N("lowHeight"))
                     {
-                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P019", e.Id, "High corner height is lower than the low corner height.", "Swap the values.");
+                        report.Add(Severity.Warning, IssueKind.DataError, "SDP-P019", e.Id, "Visina visokog ugla je manja od visine niskog ugla.", "Zamijenite vrijednosti.");
                     }
 
                     break;
@@ -503,7 +504,7 @@ namespace SiteDesignPro.Core.Validation
             {
                 foreach (SiteElement e in g.Skip(1))
                 {
-                    report.Add(new ValidationIssue(Severity.Warning, IssueKind.DataError, "SDP-D010", e.Id, "Label '" + g.Key + "' is used by " + g.Count() + " elements.", "Run SDPNUMBER to renumber, or edit the label.") { Label = e.Label, RelatedElementId = g.First().Id });
+                    report.Add(new ValidationIssue(Severity.Warning, IssueKind.DataError, "SDP-D010", e.Id, "Oznaku '" + g.Key + "' koristi " + Bs.Elements(g.Count()) + ".", "Prenumerišite naredbom SDPNUMBER ili izmijenite oznaku.") { Label = e.Label, RelatedElementId = g.First().Id });
                 }
             }
         }
@@ -556,8 +557,8 @@ namespace SiteDesignPro.Core.Validation
                         if (reported.Add(key))
                         {
                             report.Add(new ValidationIssue(Severity.Warning, IssueKind.DesignConflict, "SDP-C001", a.Id,
-                                "Potential collision between " + Describe(a, ta) + " and " + Describe(b, tb) + (fa.Zone == FootprintZone.Underground ? " (underground)." : "."),
-                                "Move one of the elements or confirm that the overlap is intended.") { RelatedElementId = b.Id });
+                                "Moguća kolizija: " + Describe(a, ta) + " i " + Describe(b, tb) + (fa.Zone == FootprintZone.Underground ? " (podzemno)." : "."),
+                                "Pomjerite jedan od elemenata ili potvrdite da je preklapanje namjerno.") { RelatedElementId = b.Id });
                         }
                     }
                 }
@@ -596,8 +597,8 @@ namespace SiteDesignPro.Core.Validation
                                 if (reported.Add(pair))
                                 {
                                     report.Add(new ValidationIssue(Severity.Warning, IssueKind.DesignConflict, "SDP-C002", e.Id,
-                                        string.Format(CultureInfo.InvariantCulture, "{0} lies within the {1:0.##} m {2} of {3}.", Describe(o, to), clearance, Humanize(key), Describe(e, t)),
-                                        "Relocate the element or reduce the clearance only if the source data allows it.") { RelatedElementId = o.Id });
+                                        Bs.T("{0} leži unutar {2} od {1} m elementa {3}.", Describe(o, to), Bs.Num(clearance, 2), Humanize(key), Describe(e, t)),
+                                        "Premjestite element; razmak smanjite samo ako to dozvoljavaju izvorni podaci.") { RelatedElementId = o.Id });
                                 }
                             }
                         }
@@ -633,11 +634,13 @@ namespace SiteDesignPro.Core.Validation
 
         private static string Humanize(string key) => key switch
         {
-            "serviceClearance" => "service clearance",
-            "safetyClearance" => "safety clearance",
-            "liftingClearance" => "lifting clearance",
+            "serviceClearance" => "servisnog razmaka",
+            "safetyClearance" => "sigurnosnog razmaka",
+            "liftingClearance" => "prostora za podizanje",
             _ => key,
         };
+
+        private static string KindBs(GeometryKind k) => k == GeometryKind.Point ? "tačka" : (k == GeometryKind.Path ? "trasa" : "površina");
 
         private static string Describe(SiteElement e, ElementType t) => (string.IsNullOrEmpty(e.Label) ? t.Name : e.Label + " (" + t.Name + ")");
 
@@ -673,8 +676,8 @@ namespace SiteDesignPro.Core.Validation
                     {
                         bool building = polys[i].T.Builder.Id == "massing" || polys[j].T.Builder.Id == "massing";
                         report.Add(new ValidationIssue(Severity.Warning, IssueKind.DesignConflict, building ? "SDP-C004" : "SDP-C003", polys[i].E.Id,
-                            (building ? "Area overlaps a building footprint: " : "Overlapping surfaces: ") + Describe(polys[i].E, polys[i].T) + " and " + Describe(polys[j].E, polys[j].T) + ".",
-                            "Trim one boundary so surfaces share edges without overlapping, or confirm the layering is intended (e.g. a deck over another surface).") { RelatedElementId = polys[j].E.Id });
+                            (building ? "Površina preklapa tlocrt objekta: " : "Površine se preklapaju: ") + Describe(polys[i].E, polys[i].T) + " i " + Describe(polys[j].E, polys[j].T) + ".",
+                            "Skratite jednu granicu tako da površine dijele ivice bez preklapanja ili potvrdite da je slojevitost namjerna (npr. podna obloga preko druge površine).") { RelatedElementId = polys[j].E.Id });
                     }
                 }
             }
@@ -708,8 +711,8 @@ namespace SiteDesignPro.Core.Validation
                     if (inside || d < r)
                     {
                         report.Add(new ValidationIssue(Severity.Warning, IssueKind.DesignConflict, "SDP-C005", tree.Id,
-                            string.Format(CultureInfo.InvariantCulture, "Mature canopy (diameter {0:0.#} m) of {1} reaches {2} (distance {3:0.##} m).", mature, Describe(tree, tt), Describe(b, bt), inside ? 0 : d),
-                            "Move the tree or select a species with a smaller mature canopy.") { RelatedElementId = b.Id });
+                            Bs.T("Krošnja u zrelosti (prečnik {0} m) elementa {1} dopire do {2} (udaljenost {3} m).", Bs.Num(mature, 1), Describe(tree, tt), Describe(b, bt), Bs.Num(inside ? 0 : d, 2)),
+                            "Pomjerite drvo ili odaberite vrstu s manjom krošnjom u zrelosti.") { RelatedElementId = b.Id });
                     }
                 }
             }

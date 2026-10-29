@@ -10,6 +10,7 @@ using SiteDesignPro.Core.Geometry;
 using SiteDesignPro.Core.Model;
 using SiteDesignPro.Core.Quantities;
 using SiteDesignPro.Core.Samples;
+using SiteDesignPro.Core.Terrain;
 using SiteDesignPro.Core.Validation;
 
 namespace SiteDesignPro.Cli
@@ -66,6 +67,7 @@ Exit codes: 0 success, 1 validation errors, 2 usage or I/O error.";
             (ProjectSettings settings, List<SiteElement> drawing) = SampleResidentialComplex.CreateDrawing(catalog);
             List<SiteElement> local = drawing.Select(e => PackageWriter.ToPackageFrame(e, settings)).ToList();
             ValidationReport report = new ProjectValidator(catalog, settings.Checks).Validate(local);
+            TerrainModel terrain = TerrainModel.Build(SampleResidentialComplex.CreateTerrainSources(), settings.Terrain);
             PackageWriteResult result = PackageWriter.Write(output, settings, drawing, catalog, new PackageWriteOptions
             {
                 Host = "sdp command-line tool",
@@ -73,8 +75,10 @@ Exit codes: 0 success, 1 validation errors, 2 usage or I/O error.";
                 Validation = report,
                 PackageId = SampleResidentialComplex.DeterministicId("package"),
                 CreatedUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                Terrains = { (SampleResidentialComplex.DeterministicId("terrain-existing"), "Postojeći teren", terrain) },
             });
             Console.WriteLine("Wrote {0} elements to {1}", result.ElementCount, result.Path);
+            Console.WriteLine(terrain.Summary());
             Console.WriteLine("Validation: {0} errors, {1} warnings, {2} review items", report.ErrorCount, report.WarningCount, report.ReviewCount);
             foreach (string s in result.Skipped)
             {

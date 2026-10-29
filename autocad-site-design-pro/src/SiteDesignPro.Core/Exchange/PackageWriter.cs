@@ -33,6 +33,9 @@ namespace SiteDesignPro.Core.Exchange
 
         /// <summary>Fixed creation time (tests); UtcNow when null.</summary>
         public DateTime? CreatedUtc { get; set; }
+
+        /// <summary>Terrain surfaces in the package frame (metres relative to the origin), written to terrain.json.</summary>
+        public IList<(string Id, string Name, Terrain.TerrainModel Model)> Terrains { get; set; } = new List<(string, string, Terrain.TerrainModel)>();
     }
 
     public sealed class PackageWriteResult
@@ -173,7 +176,7 @@ namespace SiteDesignPro.Core.Exchange
                 ["project"] = Compact(new JsonObject
                 {
                     ["id"] = settings.ProjectId,
-                    ["name"] = string.IsNullOrWhiteSpace(settings.Name) ? "Untitled site project" : settings.Name,
+                    ["name"] = string.IsNullOrWhiteSpace(settings.Name) ? "Projekat vanjskog uređenja" : settings.Name,
                     ["number"] = settings.Number,
                     ["client"] = settings.Client,
                     ["location"] = settings.Location,
@@ -194,6 +197,8 @@ namespace SiteDesignPro.Core.Exchange
                     ["trueNorthDegrees"] = settings.TrueNorthDegrees,
                     ["crs"] = settings.Crs,
                     ["heightDatum"] = settings.HeightDatum,
+                    ["elevation"] = ElevationJson(settings),
+                    ["georeference"] = GeoreferenceJson(settings),
                 }),
                 ["catalog"] = new JsonObject
                 {
@@ -216,6 +221,20 @@ namespace SiteDesignPro.Core.Exchange
                     ["sha256"] = a.Sha256,
                     ["description"] = a.Description,
                 })).ToArray());
+            }
+
+            if (options.Terrains.Count > 0)
+            {
+                manifest["terrain"] = new JsonObject
+                {
+                    ["path"] = PackageFormat.TerrainFile,
+                    ["surfaces"] = new JsonArray(options.Terrains.Select(t => (JsonNode)new JsonObject
+                    {
+                        ["id"] = t.Id,
+                        ["name"] = t.Name,
+                        ["triangles"] = t.Model.Triangles.Count,
+                    }).ToArray()),
+                };
             }
 
             if (options.Validation != null)
@@ -258,7 +277,7 @@ namespace SiteDesignPro.Core.Exchange
                 {
                     if (!File.Exists(a.SourceFile))
                     {
-                        throw new FileNotFoundException("Asset file not found: " + a.SourceFile, a.SourceFile);
+                        throw new FileNotFoundException("Datoteka modela nije pronađena: " + a.SourceFile, a.SourceFile);
                     }
 
                     a.Sha256 = ContentHasher.Sha256Hex(File.ReadAllBytes(a.SourceFile));
@@ -266,7 +285,7 @@ namespace SiteDesignPro.Core.Exchange
 
                 if (!a.Path.StartsWith(PackageFormat.AssetsFolder + "/", StringComparison.Ordinal) || a.Path.Contains("..", StringComparison.Ordinal))
                 {
-                    throw new ArgumentException("Asset paths must be inside assets/: " + a.Path);
+                    throw new ArgumentException("Putanje modela moraju biti unutar assets/: " + a.Path);
                 }
             }
 
@@ -276,6 +295,17 @@ namespace SiteDesignPro.Core.Exchange
                 (PackageFormat.ManifestFile, Encoding.UTF8.GetBytes(manifest.ToJsonString(Indented))),
                 (PackageFormat.GeometryFile, Encoding.UTF8.GetBytes(geometry.ToJsonString(Indented))),
             };
+            if (options.Terrains.Count > 0)
+            {
+                var terrain = new JsonObject
+                {
+                    ["schemaVersion"] = PackageFormat.SchemaVersion,
+                    ["lengthUnit"] = "m",
+                    ["surfaces"] = new JsonArray(options.Terrains.Select(t => (JsonNode)t.Model.ToJson(t.Id, t.Name)).ToArray()),
+                };
+                files.Add((PackageFormat.TerrainFile, Encoding.UTF8.GetBytes(terrain.ToJsonString(Indented))));
+            }
+
             if (options.Validation != null)
             {
                 if (options.CreatedUtc.HasValue)
@@ -356,7 +386,7 @@ namespace SiteDesignPro.Core.Exchange
                     // Only replace folders that are recognisably packages, never arbitrary user folders.
                     if (!File.Exists(System.IO.Path.Combine(target, PackageFormat.ManifestFile)) && Directory.EnumerateFileSystemEntries(target).Any())
                     {
-                        throw new IOException("Target folder exists and is not a Site Design Pro package: " + target);
+                        throw new IOException("Ciljni folder postoji i nije paket programa Vanjsko uređenje PRO: " + target);
                     }
 
                     Directory.Delete(target, true);
@@ -414,6 +444,46 @@ namespace SiteDesignPro.Core.Exchange
         }
 
         /// <summary>Removes null and empty-string properties so optional fields are omitted.</summary>
+        /// <summary>Vertical reference written to the manifest; null values mean "not defined" (never a default).</summary>
+        private static JsonObject ElevationJson(ProjectSettings settings)
+        {
+            Elevation.ElevationDatum d = settings.Elevations;
+            double originZ = settings.OriginMeters.Z;
+            double? zeroAbs = d.DrawingZ == Elevation.DrawingZMode.Absolute
+                ? originZ
+                : (d.BuildingZeroAbsolute.HasValue ? d.BuildingZeroAbsolute.Value + originZ : (double?)null);
+            return new JsonObject
+            {
+                ["buildingZeroAbsolute"] = d.BuildingZeroAbsolute.HasValue ? JsonValue.Create(GeometryJson.Round(d.BuildingZeroAbsolute.Value)) : null,
+                ["parterreRelative"] = GeometryJson.Round(d.ParterreRelativeElevation),
+                ["roadOffsetBelowParterre"] = d.DefaultRoadOffsetBelowParterre.HasValue ? JsonValue.Create(GeometryJson.Round(d.DefaultRoadOffsetBelowParterre.Value)) : null,
+                ["verticalDatum"] = d.VerticalDatum,
+                ["drawingZ"] = d.DrawingZ == Elevation.DrawingZMode.Absolute ? "absolute" : "relative",
+                ["packageZeroAbsolute"] = zeroAbs.HasValue && (d.DrawingZ == Elevation.DrawingZMode.Relative || d.IsDefined) ? JsonValue.Create(GeometryJson.Round(zeroAbs.Value)) : null,
+            };
+        }
+
+        private static JsonObject? GeoreferenceJson(ProjectSettings settings)
+        {
+            Geo.GeoreferenceSettings g = settings.Georeference;
+            if (g.Transform.Kind == Geo.TransformKind.Identity && g.ControlPoints.Count == 0)
+            {
+                return null;
+            }
+
+            Geo.TransformRecord? last = g.History.LastOrDefault();
+            return new JsonObject
+            {
+                ["kind"] = g.Transform.Kind.ToString(),
+                ["tx"] = g.Transform.Tx,
+                ["ty"] = g.Transform.Ty,
+                ["rotationDegrees"] = g.Transform.RotationDegrees,
+                ["scale"] = g.Transform.Scale,
+                ["controlPoints"] = g.ControlPoints.Count(c => c.Enabled),
+                ["rmsError"] = last?.RmsError ?? 0,
+            };
+        }
+
         private static JsonObject Compact(JsonObject o, string[]? keepNullKeys = null)
         {
             foreach (string key in o.Select(kv => kv.Key).ToList())

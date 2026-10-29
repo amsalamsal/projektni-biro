@@ -26,7 +26,7 @@ namespace SiteDesignPro.Core.Units
             LengthUnit.Meter => 1.0,
             LengthUnit.Inch => 0.0254,
             LengthUnit.Foot => 0.3048,
-            _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unsupported length unit."),
+            _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Nepodržana jedinica dužine."),
         };
 
         public static string Code(LengthUnit unit) => unit switch
@@ -36,7 +36,7 @@ namespace SiteDesignPro.Core.Units
             LengthUnit.Meter => "m",
             LengthUnit.Inch => "in",
             LengthUnit.Foot => "ft",
-            _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Unsupported length unit."),
+            _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, "Nepodržana jedinica dužine."),
         };
 
         public static LengthUnit Parse(string code)
@@ -48,7 +48,7 @@ namespace SiteDesignPro.Core.Units
                 case "m": case "meter": case "meters": case "metre": case "metres": return LengthUnit.Meter;
                 case "in": case "inch": case "inches": return LengthUnit.Inch;
                 case "ft": case "foot": case "feet": return LengthUnit.Foot;
-                default: throw new FormatException(string.Format(CultureInfo.InvariantCulture, "Unknown length unit '{0}'.", code));
+                default: throw new FormatException(string.Format(CultureInfo.InvariantCulture, "Nepoznata jedinica dužine '{0}'.", code));
             }
         }
 

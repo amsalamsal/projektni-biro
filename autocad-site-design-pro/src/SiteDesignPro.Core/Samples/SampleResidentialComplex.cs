@@ -23,6 +23,44 @@ namespace SiteDesignPro.Core.Samples
         /// <summary>Project origin (metres): easting, northing, elevation.</summary>
         public static readonly Vec3 OriginMeters = new Vec3(6550000.0, 4860000.0, 520.0);
 
+        /// <summary>Building zero ±0,00 of the sample lies 0.15 m above the origin elevation (absolute 520.15).</summary>
+        public const double BuildingZeroRelativeToOrigin = 0.15;
+
+        /// <summary>
+        /// Existing terrain of the sample in the package frame: a deterministic survey grid (10 m) around the parcel and
+        /// a breakline along the road edge. Synthetic data for demonstrating the workflow, not a real survey.
+        /// </summary>
+        public static Terrain.TerrainSources CreateTerrainSources()
+        {
+            var t = new Terrain.TerrainSources();
+            for (int i = -1; i <= 13; i++)
+            {
+                for (int j = -1; j <= 9; j++)
+                {
+                    double x = i * 10.0, y = j * 10.0;
+                    if (Math.Abs(y - 30) < 1e-9)
+                    {
+                        continue; // the road edge breakline defines this row
+                    }
+
+                    // gentle fall to the south-east plus a shallow swale - deterministic
+                    double z = 0.35 - (0.004 * x) + (0.003 * (y - 30)) - (0.12 * Math.Exp(-Math.Pow((x - 95) / 18.0, 2) - Math.Pow((y - 70) / 10.0, 2)));
+                    t.Points.Add(new Vec3(x, y, Math.Round(z, 3)));
+                }
+            }
+
+            var edge = new List<Vec3>();
+            for (int i = -1; i <= 13; i++)
+            {
+                double x = i * 10.0;
+                edge.Add(new Vec3(x, 30, Math.Round(0.35 - (0.004 * x), 3)));
+            }
+
+            t.Breaklines.Add(edge);
+            t.Boundary = new List<Vec2> { new Vec2(-10, -10), new Vec2(130, -10), new Vec2(130, 90), new Vec2(-10, 90) };
+            return t;
+        }
+
         private readonly ElementCatalog catalog;
         private readonly List<SiteElement> elements = new List<SiteElement>();
         private int counter;
@@ -37,18 +75,26 @@ namespace SiteDesignPro.Core.Samples
             return new ProjectSettings
             {
                 ProjectId = DeterministicId("project"),
-                Name = "Sample Residential Complex",
+                Name = "Primjer: stambeni kompleks",
                 Number = "SDP-SAMPLE-001",
-                Client = "Sample client",
-                Location = "Sample site",
-                Description = "Reference project for the AutoCAD to SketchUp workflow (two apartment buildings, parking and landscaped courtyard).",
-                Author = "Site Design Pro",
+                Client = "Primjer investitora",
+                Location = "Primjer lokacije",
+                Description = "Referentni projekat za tok rada AutoCAD → SketchUp (dva stambena objekta, parking i uređeno dvorište).",
+                Author = "Vanjsko uređenje PRO",
                 Revision = "A",
                 DrawingUnit = "mm",
                 Origin = new[] { OriginMeters.X * 1000, OriginMeters.Y * 1000, OriginMeters.Z * 1000 },
                 TrueNorthDegrees = 0,
-                Crs = "EPSG:31276",
-                HeightDatum = "Sample datum",
+                Crs = "EPSG:3908",
+                Elevations = new Elevation.ElevationDatum
+                {
+                    // values of this sample only - a new project has no elevation until the user defines it
+                    BuildingZeroAbsolute = OriginMeters.Z + BuildingZeroRelativeToOrigin,
+                    ParterreEqualsBuildingZero = true,
+                    DefaultRoadOffsetBelowParterre = 0.15,
+                    VerticalDatum = "Primjer – nije stvarni visinski datum",
+                    DrawingZ = Elevation.DrawingZMode.Absolute,
+                },
             };
         }
 
@@ -59,6 +105,7 @@ namespace SiteDesignPro.Core.Samples
             s.Build();
             var numbering = new LabelNumbering(new LabelSettings(), catalog);
             numbering.Assign(s.elements, true, 3.0);
+            AssignElevations(s.elements);
             return s.elements;
         }
 
@@ -75,6 +122,24 @@ namespace SiteDesignPro.Core.Samples
             }
 
             return (settings, local);
+        }
+
+        /// <summary>Records which elevation each levelled object was given (object by object, never area-wide).</summary>
+        private static void AssignElevations(List<SiteElement> elements)
+        {
+            Elevation.ElevationDatum datum = CreateSettings().Elevations;
+            foreach (SiteElement e in elements)
+            {
+                Elevation.ElevationAssignment? a = e.TypeId switch
+                {
+                    "building.footprint" => new Elevation.ElevationAssignment { Mode = Elevation.ElevationMode.Relative, Value = 0, Note = "±0,00" },
+                    "surface.concrete_paving" => new Elevation.ElevationAssignment { Mode = Elevation.ElevationMode.ParterreOffset, Value = 0 },
+                    "surface.asphalt" => new Elevation.ElevationAssignment { Mode = Elevation.ElevationMode.RoadOffset, Value = 0.15 },
+                    "surface.lawn" => new Elevation.ElevationAssignment { Mode = Elevation.ElevationMode.ParterreOffset, Value = 0.15 },
+                    _ => null,
+                };
+                a?.WriteTo(e.Properties, datum.ResolveRelative(a));
+            }
         }
 
         public static string DeterministicId(string seed)
@@ -141,8 +206,8 @@ namespace SiteDesignPro.Core.Samples
         {
             // Site and buildings
             Add("site.boundary", Rect(0, 0, 120, 80));
-            Add("building.footprint", Rect(15, 45, 55, 63, 0.15), new { height = 18.0, storeys = 6 }).Name = "Building A";
-            Add("building.footprint", Rect(70, 45, 105, 63, 0.15), new { height = 15.0, storeys = 5 }).Name = "Building B";
+            Add("building.footprint", Rect(15, 45, 55, 63, 0.15), new { height = 18.0, storeys = 6 }).Name = "Objekat A";
+            Add("building.footprint", Rect(70, 45, 105, 63, 0.15), new { height = 15.0, storeys = 5 }).Name = "Objekat B";
             Add("building.entrance", Pt(35, 44.4, 0.15, 90), new { reference = "A" });
             Add("building.entrance", Pt(87.5, 44.4, 0.15, 90), new { reference = "B" });
 
@@ -152,7 +217,7 @@ namespace SiteDesignPro.Core.Samples
             {
                 new Vec3(10, 4, 0), new Vec3(110, 4, 0), new Vec3(110, 21, 0), new Vec3(65, 21, 0),
                 new Vec3(65, 27, 0), new Vec3(55, 27, 0), new Vec3(55, 21, 0), new Vec3(10, 21, 0),
-            }))).Name = "Parking area";
+            }))).Name = "Parking prostor";
             Add("road.pedestrian_crossing", Rect(58, 27, 62, 33, 0.003));
             Add("road.arrow", Pt(20, 28.5, 0.003, 0));
             Add("road.arrow", Pt(100, 31.5, 0.003, 180));
@@ -173,20 +238,20 @@ namespace SiteDesignPro.Core.Samples
             BayRow(new Vec3(73.2, 16, 0), new Vec3(108, 16, 0), true, "road.parking_bay", null, 2.5);
             foreach (double x in new[] { 45.25, 47.75, 50.25, 52.75 })
             {
-                Add("sustainability.ev_charger_pedestal", Pt(x, 21.5, 0, 0), null, ("notes", "Charger model to be confirmed"));
+                Add("sustainability.ev_charger_pedestal", Pt(x, 21.5, 0, 0), null, ("notes", "Model punjača potrebno potvrditi"));
             }
 
             // Pedestrian surfaces
-            Add("surface.concrete_paving", Rect(5, 34, 115, 43, 0.15), new { surfaceCode = "P1" }).Name = "Front paving";
+            Add("surface.concrete_paving", Rect(5, 34, 115, 43, 0.15), new { surfaceCode = "P1" }).Name = "Popločanje ispred objekata";
             Add("surface.natural_stone", new PolygonGeometry(new Ring(
                 new[] { new Vec3(56, 45, 0.15), new Vec3(69, 45, 0.15), new Vec3(69, 63, 0.15), new Vec3(56, 63, 0.15) },
-                new[] { 0.0, 0.0, 0.3, 0.0 })), new { surfaceCode = "P2" }).Name = "Courtyard";
+                new[] { 0.0, 0.0, 0.3, 0.0 })), new { surfaceCode = "P2" }).Name = "Dvorište";
             Add("road.bollard", Pt(57, 44, 0.15));
             Add("road.bollard", Pt(68, 44, 0.15));
 
             // Soft landscape
-            Add("surface.lawn", Rect(5, 65, 115, 78, 0.3, new[] { RectRing(80, 66, 95, 76, 0.3) })).Name = "North lawn";
-            Add("surface.rubber_safety", Rect(80, 66, 95, 76, 0.3)).Name = "Playground surface";
+            Add("surface.lawn", Rect(5, 65, 115, 78, 0.3, new[] { RectRing(80, 66, 95, 76, 0.3) })).Name = "Sjeverni travnjak";
+            Add("surface.rubber_safety", Rect(80, 66, 95, 76, 0.3)).Name = "Podloga igrališta";
             Add("landscape.flower_bed", Rect(20, 43, 50, 45, 0.15));
             Add("landscape.flower_bed", Rect(75, 43, 100, 45, 0.15));
             Add("wall.planter_wall", Path(0.3, 5, 64.5, 115, 64.5), new { height = 0.6 });
@@ -196,20 +261,20 @@ namespace SiteDesignPro.Core.Samples
             foreach (Placement p in PathPlacement.Distribute(verge, false, 8, 0, 0, SpacingMode.Fit))
             {
                 Add("landscape.tree_deciduous", new PointGeometry(p.Position, 0), new { height = 7.0, canopyDiameter = 5.0, matureCanopyDiameter = 9.0 },
-                    ("botanicalName", "Tilia cordata"), ("commonName", "Small-leaved lime"), ("plantingSize", "18-20 cm girth"), ("dataSource", "Sample project - replace with nursery data"));
+                    ("botanicalName", "Tilia cordata"), ("commonName", "Sitnolisna lipa"), ("plantingSize", "obim debla 18–20 cm"), ("dataSource", "Primjer – zamijeniti podacima rasadnika"));
             }
 
             var verge2 = new Ring(new[] { new Vec3(70, 24, 0), new Vec3(112, 24, 0) });
             foreach (Placement p in PathPlacement.Distribute(verge2, false, 8, 0, 0, SpacingMode.Fit))
             {
                 Add("landscape.tree_deciduous", new PointGeometry(p.Position, 0), new { height = 7.0, canopyDiameter = 5.0, matureCanopyDiameter = 9.0 },
-                    ("botanicalName", "Tilia cordata"), ("commonName", "Small-leaved lime"), ("plantingSize", "18-20 cm girth"), ("dataSource", "Sample project - replace with nursery data"));
+                    ("botanicalName", "Tilia cordata"), ("commonName", "Sitnolisna lipa"), ("plantingSize", "obim debla 18–20 cm"), ("dataSource", "Primjer – zamijeniti podacima rasadnika"));
             }
 
             foreach ((double x, double y) in new[] { (20.0, 72.0), (35.0, 74.0), (50.0, 70.0) })
             {
                 Add("landscape.tree_evergreen", Pt(x, y, 0.3), new { height = 9.0, canopyDiameter = 4.0 },
-                    ("botanicalName", "Pinus nigra"), ("commonName", "Black pine"), ("dataSource", "Sample project - replace with nursery data"));
+                    ("botanicalName", "Pinus nigra"), ("commonName", "Crni bor"), ("dataSource", "Primjer – zamijeniti podacima rasadnika"));
             }
 
             foreach ((double x, double y) in new[] { (8.0, 50.0), (8.0, 58.0), (110.0, 50.0) })
@@ -250,7 +315,7 @@ namespace SiteDesignPro.Core.Samples
 
             // Drainage
             var channel = new PathGeometry(new Ring(new[] { new Vec3(5, 33.2, 0.25), new Vec3(115, 33.2, -0.30) }), false);
-            Add("water.drainage_channel", channel, new { gradient = 0.5, outletTo = "IC at east end" });
+            Add("water.drainage_channel", channel, new { gradient = 0.5, outletTo = "RO na istočnom kraju" });
             Add("water.inspection_chamber", Pt(117, 33.2, 0), new { depth = 1.6 });
             Add("water.drain_pipe", Path(0, 117, 33.2, 117, 12), new { axisOffset = -1.4 });
             Add("water.rainwater_tank", Pt(115, 10, 0, 90));

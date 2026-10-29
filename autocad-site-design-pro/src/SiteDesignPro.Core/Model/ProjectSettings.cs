@@ -1,7 +1,11 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using SiteDesignPro.Core.Elevation;
+using SiteDesignPro.Core.Geo;
 using SiteDesignPro.Core.Geometry;
+using SiteDesignPro.Core.Safety;
+using SiteDesignPro.Core.Terrain;
 using SiteDesignPro.Core.Units;
 
 namespace SiteDesignPro.Core.Model
@@ -57,13 +61,15 @@ namespace SiteDesignPro.Core.Model
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = true,
             DefaultIgnoreCondition = JsonIgnoreCondition.Never,
+            Converters = { new JsonStringEnumConverter() },
         };
 
-        public int SettingsVersion { get; set; } = 1;
+        /// <summary>2 = elevation datum, georeference, backups and terrain rules added (version 1 files are upgraded on read).</summary>
+        public int SettingsVersion { get; set; } = 2;
 
         public string ProjectId { get; set; } = Guid.NewGuid().ToString("D");
 
-        public string Name { get; set; } = "Untitled site project";
+        public string Name { get; set; } = "Novi projekat vanjskog uređenja";
 
         public string Number { get; set; } = string.Empty;
 
@@ -86,9 +92,32 @@ namespace SiteDesignPro.Core.Model
         /// <summary>Clockwise angle from drawing +Y to true north, degrees.</summary>
         public double TrueNorthDegrees { get; set; }
 
-        public string Crs { get; set; } = string.Empty;
+        /// <summary>Same value as Georeference.Crs (kept for settings version 1 and the package manifest).</summary>
+        public string Crs
+        {
+            get => Georeference.Crs;
+            set => Georeference.Crs = value ?? string.Empty;
+        }
 
-        public string HeightDatum { get; set; } = string.Empty;
+        /// <summary>Same value as Elevations.VerticalDatum (kept for settings version 1 and the package manifest).</summary>
+        public string HeightDatum
+        {
+            get => Elevations.VerticalDatum;
+            set => Elevations.VerticalDatum = value ?? string.Empty;
+        }
+
+        /// <summary>Vertical reference: building zero, parterre, road levels. No elevation is assumed by default.</summary>
+        public ElevationDatum Elevations { get; set; } = new ElevationDatum();
+
+        /// <summary>Coordinate system, control points and the drawing → project-coordinates transform.</summary>
+        public GeoreferenceSettings Georeference { get; set; } = new GeoreferenceSettings();
+
+        public BackupPolicy Backups { get; set; } = new BackupPolicy();
+
+        public TerrainRules Terrain { get; set; } = new TerrainRules();
+
+        /// <summary>Name of the layer mapping last used for this drawing.</summary>
+        public string LayerMappingName { get; set; } = string.Empty;
 
         public LabelSettings Labels { get; set; } = new LabelSettings();
 
@@ -120,7 +149,7 @@ namespace SiteDesignPro.Core.Model
             ProjectSettings? s = JsonSerializer.Deserialize<ProjectSettings>(json, JsonOptions);
             if (s == null)
             {
-                throw new FormatException("Project settings JSON is empty.");
+                throw new FormatException("Postavke projekta su prazne.");
             }
 
             if (s.Origin == null || s.Origin.Length < 2)
@@ -130,6 +159,11 @@ namespace SiteDesignPro.Core.Model
 
             s.Labels ??= new LabelSettings();
             s.Checks ??= new CheckSettings();
+            s.Elevations ??= new ElevationDatum();
+            s.Georeference ??= new GeoreferenceSettings();
+            s.Backups ??= new BackupPolicy();
+            s.Terrain ??= new TerrainRules();
+            s.SettingsVersion = 2; // version 1 files carried only Crs/HeightDatum, which now map into the new sections
             UnitConversion.Parse(s.DrawingUnit); // validates
             return s;
         }

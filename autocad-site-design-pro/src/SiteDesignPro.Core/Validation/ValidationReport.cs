@@ -69,14 +69,14 @@ namespace SiteDesignPro.Core.Validation
 
         public string Resolution { get; }
 
-        public override string ToString() => string.Format(CultureInfo.InvariantCulture, "[{0}] {1} {2}: {3}", Severity, Code, Label ?? ElementId ?? "project", Message);
+        public override string ToString() => string.Format(CultureInfo.InvariantCulture, "[{0}] {1} {2}: {3}", ValidationReport.SeverityName(Severity), Code, Label ?? ElementId ?? "projekat", Message);
     }
 
     public sealed class ValidationReport
     {
         public const string Disclaimer =
-            "Automated checks support design coordination only. Clearance, safety, accessibility and capacity checks use " +
-            "values entered by the user; they are not certified regulatory compliance checks and do not replace professional review.";
+            "Automatske provjere služe samo za koordinaciju projekta. Provjere razmaka, sigurnosti, pristupačnosti i kapaciteta koriste " +
+            "vrijednosti koje je unio korisnik; nisu ovjerena provjera usklađenosti s propisima i ne zamjenjuju stručni pregled.";
 
         public List<ValidationIssue> Issues { get; } = new List<ValidationIssue>();
 
@@ -123,19 +123,31 @@ namespace SiteDesignPro.Core.Validation
             };
         }
 
+        /// <summary>Bosnian name of a severity.</summary>
+        public static string SeverityName(Severity s)
+        {
+            switch (s)
+            {
+                case Severity.Error: return "Greška";
+                case Severity.Warning: return "Upozorenje";
+                case Severity.Review: return "Za stručni pregled";
+                default: return "Informacija";
+            }
+        }
+
         public string ToText()
         {
             var sb = new StringBuilder();
-            sb.AppendLine("Site Design Pro validation report");
-            sb.AppendLine("Created (UTC): " + CreatedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
-            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Elements: {0}  Errors: {1}  Warnings: {2}  Reviews: {3}", ElementCount, ErrorCount, WarningCount, ReviewCount));
+            sb.AppendLine("Vanjsko uređenje PRO – izvještaj provjere");
+            sb.AppendLine("Izrađeno (UTC): " + CreatedUtc.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture));
+            sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Elemenata: {0}  Greške: {1}  Upozorenja: {2}  Za pregled: {3}", ElementCount, ErrorCount, WarningCount, ReviewCount));
             sb.AppendLine();
             foreach (IGrouping<Severity, ValidationIssue> g in Issues.OrderBy(i => i.Severity).ThenBy(i => i.Code, StringComparer.Ordinal).GroupBy(i => i.Severity))
             {
-                sb.AppendLine(g.Key.ToString().ToUpperInvariant());
+                sb.AppendLine(SeverityName(g.Key).ToUpperInvariant());
                 foreach (ValidationIssue i in g)
                 {
-                    sb.Append("  ").Append(i.Code).Append("  ").Append(i.Label ?? i.ElementId ?? "project").Append(": ").AppendLine(i.Message);
+                    sb.Append("  ").Append(i.Code).Append("  ").Append(i.Label ?? i.ElementId ?? "projekat").Append(": ").AppendLine(i.Message);
                     sb.Append("      -> ").AppendLine(i.Resolution);
                 }
 

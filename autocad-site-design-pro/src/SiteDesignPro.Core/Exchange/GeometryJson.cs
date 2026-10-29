@@ -41,7 +41,7 @@ namespace SiteDesignPro.Core.Exchange
 
                     break;
                 default:
-                    throw new NotSupportedException("Unsupported geometry type " + g.GetType().Name);
+                    throw new NotSupportedException("Nepodržana vrsta geometrije " + g.GetType().Name);
             }
 
             return o;
@@ -74,7 +74,7 @@ namespace SiteDesignPro.Core.Exchange
                     }
 
                 default:
-                    throw new FormatException("Unknown geometry kind '" + kind + "'.");
+                    throw new FormatException("Nepoznata vrsta geometrije '" + kind + "'.");
             }
         }
 
@@ -89,13 +89,13 @@ namespace SiteDesignPro.Core.Exchange
         {
             if (a.ValueKind != JsonValueKind.Array || a.GetArrayLength() != 3)
             {
-                throw new FormatException("Coordinates must be [x, y, z] arrays.");
+                throw new FormatException("Koordinate moraju biti nizovi [x, y, z].");
             }
 
             var v = new Vec3(a[0].GetDouble(), a[1].GetDouble(), a[2].GetDouble());
             if (!v.IsFinite)
             {
-                throw new FormatException("Coordinates must be finite numbers.");
+                throw new FormatException("Koordinate moraju biti konačni brojevi.");
             }
 
             return v;

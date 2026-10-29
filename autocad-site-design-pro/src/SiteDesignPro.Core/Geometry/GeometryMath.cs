@@ -30,7 +30,7 @@ namespace SiteDesignPro.Core.Geometry
         {
             if (bulge == 0)
             {
-                throw new ArgumentException("Bulge must be non-zero for an arc.", nameof(bulge));
+                throw new ArgumentException("Ispupčenje luka ne smije biti nula.", nameof(bulge));
             }
 
             Vec2 chord = b - a;
@@ -498,7 +498,7 @@ namespace SiteDesignPro.Core.Geometry
             List<Vec3> pts = Tessellate(ring, true, 0.01);
             if (pts.Count < 2)
             {
-                throw new ArgumentException("Ring needs at least two vertices.", nameof(ring));
+                throw new ArgumentException("Kontura treba najmanje dva tjemena.", nameof(ring));
             }
 
             Vec2 o = pts[0].XY;
