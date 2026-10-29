@@ -5,11 +5,16 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors>nullable</WarningsAsErrors>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Company>Projektni biro</Company>
     <Product>Site Design Pro</Product>
     <Copyright>Copyright (c) 2026 Projektni biro</Copyright>
     <Deterministic>true</Deterministic>
     <SharedDir>$(MSBuildThisFileDirectory)..\shared\</SharedDir>
+  </PropertyGroup>
+  <!-- .NET Framework reference assemblies carry no nullability annotations; flow analysis is enforced by the
+       modern targets compiled from the same sources, so it is not repeated (as false positives) here. -->
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <Nullable>annotations</Nullable>
   </PropertyGroup>
 </Project>

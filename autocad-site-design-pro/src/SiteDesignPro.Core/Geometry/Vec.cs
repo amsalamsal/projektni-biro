@@ -63,7 +63,7 @@ namespace SiteDesignPro.Core.Geometry
 
         public Vec2 XY => new Vec2(X, Y);
 
-        public bool IsFinite => double.IsFinite(X) && double.IsFinite(Y) && double.IsFinite(Z);
+        public bool IsFinite => Compat.IsFinite(X) && Compat.IsFinite(Y) && Compat.IsFinite(Z);
 
         public static Vec3 Lerp(Vec3 a, Vec3 b, double t) => new Vec3(a.X + ((b.X - a.X) * t), a.Y + ((b.Y - a.Y) * t), a.Z + ((b.Z - a.Z) * t));
 

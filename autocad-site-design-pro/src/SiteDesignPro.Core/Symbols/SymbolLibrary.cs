@@ -142,13 +142,13 @@ namespace SiteDesignPro.Core.Symbols
             double N(string k, double fallback)
             {
                 double v = p.Number(k, double.NaN);
-                if (double.IsFinite(v))
+                if (Compat.IsFinite(v))
                 {
                     return v;
                 }
 
                 double d = defaults?.Invoke(k) ?? double.NaN;
-                return double.IsFinite(d) ? d : fallback;
+                return Compat.IsFinite(d) ? d : fallback;
             }
 
             bool B(string k) => p.Bool(k);

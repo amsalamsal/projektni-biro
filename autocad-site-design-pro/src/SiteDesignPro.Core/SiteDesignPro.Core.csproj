@@ -2,12 +2,19 @@
   <!-- Host-independent domain library: element model, catalog, units, geometry, exchange package,
        validation, schedules, layout and 2D symbol generation. No AutoCAD dependency, fully unit-tested. -->
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net47;net8.0</TargetFrameworks>
     <RootNamespace>SiteDesignPro.Core</RootNamespace>
     <AssemblyName>SiteDesignPro.Core</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <!-- AutoCAD 2020-2024 run on .NET Framework; JSON and compression come from packages/framework assemblies. -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
   <ItemGroup>
     <!-- The shared catalog is the single source of truth; it is embedded so the library works stand-alone. -->
     <EmbeddedResource Include="$(SharedDir)catalog\*.json" LogicalName="SiteDesignPro.Catalog.%(Filename)%(Extension)" />

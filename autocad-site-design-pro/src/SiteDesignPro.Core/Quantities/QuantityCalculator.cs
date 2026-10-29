@@ -39,7 +39,7 @@ namespace SiteDesignPro.Core.Quantities
                     }
                     else if (q.CountExpression != null)
                     {
-                        value = q.CountExpression.Split('*').Select(k => N(k.Trim())).Aggregate(1.0, (acc, x) => double.IsFinite(x) ? acc * Math.Round(x) : acc);
+                        value = q.CountExpression.Split('*').Select(k => N(k.Trim())).Aggregate(1.0, (acc, x) => Compat.IsFinite(x) ? acc * Math.Round(x) : acc);
                     }
 
                     break;

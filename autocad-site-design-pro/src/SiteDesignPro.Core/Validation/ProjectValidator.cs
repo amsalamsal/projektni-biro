@@ -191,7 +191,7 @@ namespace SiteDesignPro.Core.Validation
             switch (e.Geometry)
             {
                 case PointGeometry p:
-                    if (!p.Position.IsFinite || !double.IsFinite(p.Rotation))
+                    if (!p.Position.IsFinite || !Compat.IsFinite(p.Rotation))
                     {
                         report.Add(Severity.Error, IssueKind.GeometricError, "SDP-G002", e.Id, "Insertion point or rotation is not a finite number.", "Move or re-insert the element.");
                     }
@@ -315,7 +315,7 @@ namespace SiteDesignPro.Core.Validation
                     case ParameterType.Angle:
                         {
                             double d = v.AsNumber();
-                            if (v.Kind != ParamKind.Number || !double.IsFinite(d))
+                            if (v.Kind != ParamKind.Number || !Compat.IsFinite(d))
                             {
                                 report.Add(Severity.Error, IssueKind.DataError, "SDP-P002", e.Id, "Parameter '" + def.Label + "' must be a number (found '" + v.AsText() + "').", "Enter a numeric value.");
                                 continue;
@@ -402,7 +402,7 @@ namespace SiteDesignPro.Core.Validation
                 case "linear_slab":
                     {
                         double req = N("requiredClearWidth");
-                        if (double.IsFinite(req) && N("width") + 1e-9 < req)
+                        if (Compat.IsFinite(req) && N("width") + 1e-9 < req)
                         {
                             report.Add(Severity.Warning, IssueKind.DesignConflict, "SDP-C010", e.Id,
                                 string.Format(CultureInfo.InvariantCulture, "Width {0:0.###} m is less than the configured required clear width {1:0.###} m.", N("width"), req),
@@ -413,7 +413,7 @@ namespace SiteDesignPro.Core.Validation
                     }
 
                 case "ramp":
-                    if (e.Geometry is PolygonGeometry rp && double.IsFinite(N("maxSlope")))
+                    if (e.Geometry is PolygonGeometry rp && Compat.IsFinite(N("maxSlope")))
                     {
                         OrientedRect r = GeometryMath.OrientedBoundingRect(rp.Outer);
                         double slope = r.LengthV > 1e-9 ? N("rise") / r.LengthV * 100 : double.PositiveInfinity;
@@ -453,7 +453,7 @@ namespace SiteDesignPro.Core.Validation
                         report.Add(Severity.Error, IssueKind.DataError, "SDP-P013", e.Id, "Clear trunk height is not lower than the tree height.", "Reduce the clear trunk height or increase the height.");
                     }
 
-                    if (double.IsFinite(N("matureHeight")) && N("matureHeight") < N("height"))
+                    if (Compat.IsFinite(N("matureHeight")) && N("matureHeight") < N("height"))
                     {
                         report.Add(Severity.Warning, IssueKind.DataError, "SDP-P014", e.Id, "Mature height is lower than the planting height.", "Check the growth data source.");
                     }
@@ -574,7 +574,7 @@ namespace SiteDesignPro.Core.Validation
                 foreach (string key in new[] { "serviceClearance", "safetyClearance", "liftingClearance" })
                 {
                     double clearance = e.Parameters.Number(key, double.NaN);
-                    if (!double.IsFinite(clearance) || clearance <= 0)
+                    if (!Compat.IsFinite(clearance) || clearance <= 0)
                     {
                         continue;
                     }
@@ -694,7 +694,7 @@ namespace SiteDesignPro.Core.Validation
             foreach ((SiteElement tree, ElementType tt) in trees)
             {
                 double mature = tree.Parameters.Number("matureCanopyDiameter", double.NaN);
-                if (!double.IsFinite(mature))
+                if (!Compat.IsFinite(mature))
                 {
                     continue;
                 }

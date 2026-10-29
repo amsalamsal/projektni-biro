@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Assembles the distributable packages into dist/ from already-built outputs.
 
-  dist/SiteDesignPro.bundle/           AutoCAD autoloader bundle (R25 = AutoCAD 2025/2026, R26 = AutoCAD 2027)
+  dist/SiteDesignPro.bundle/           AutoCAD autoloader bundle (R23 = 2020, R24 = 2021-2024, R25 = 2025/2026, R26 = 2027)
   dist/SiteDesignPro.bundle.zip
   dist/pb_site_design_pro.rbz          SketchUp extension (install with Extension Manager > Install Extension)
   dist/samples/                        sample package, change file, schedules
@@ -32,7 +32,7 @@ def autocad_bundle() -> pathlib.Path:
     if bundle.exists():
         shutil.rmtree(bundle)
     contents = bundle / "Contents"
-    for series, tfm in (("R25", "net8.0-windows"), ("R26", "net10.0-windows")):
+    for series, tfm in (("R23", "net47"), ("R24", "net48"), ("R25", "net8.0-windows"), ("R26", "net10.0-windows")):
         out = ACAD / "src" / "SiteDesignPro.AutoCAD" / "bin" / CONFIG / tfm
         if not (out / "SiteDesignPro.AutoCAD.dll").exists():
             sys.exit(f"missing build output {out}; build with: dotnet build -c {CONFIG} autocad-site-design-pro/src/SiteDesignPro.AutoCAD")
@@ -41,6 +41,13 @@ def autocad_bundle() -> pathlib.Path:
         for name in ("SiteDesignPro.AutoCAD.dll", "SiteDesignPro.Core.dll", "SiteDesignPro.AutoCAD.deps.json", "SiteDesignPro.AutoCAD.pdb", "SiteDesignPro.Core.pdb"):
             if (out / name).exists():
                 shutil.copy2(out / name, target / name)
+        if tfm.startswith("net4"):
+            # .NET Framework: ship the System.Text.Json dependency chain next to the plug-in
+            # (loaded by DependencyResolver; AutoCAD's own copies win when present).
+            core_out = ACAD / "src" / "SiteDesignPro.Core" / "bin" / CONFIG / "net47"
+            for dep in sorted(core_out.glob("*.dll")):
+                if dep.name != "SiteDesignPro.Core.dll":
+                    shutil.copy2(dep, target / dep.name)
     shutil.copy2(ACAD / "build" / "PackageContents.xml", bundle / "PackageContents.xml")
     shutil.copytree(ROOT / "shared" / "catalog", bundle / "Resources" / "catalog")
     shutil.copytree(ROOT / "shared" / "schema", bundle / "Resources" / "schema")

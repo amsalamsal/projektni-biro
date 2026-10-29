@@ -325,7 +325,7 @@ namespace SiteDesignPro.Core.Exchange
                     }
                 }
 
-                File.Move(temp, target, true);
+                Compat.ReplaceFile(temp, target);
             }
             finally
             {

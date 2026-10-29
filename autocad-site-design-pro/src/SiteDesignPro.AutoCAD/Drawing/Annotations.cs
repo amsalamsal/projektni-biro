@@ -103,7 +103,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
             var h = new Hatch();
             ObjectId id = Add(h, layerKey);
             h.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
-            var loop = new Point2dCollection(pts.Append(pts[0]).ToArray());
+            var loop = new Point2dCollection(pts.Concat(new[] { pts[0] }).ToArray());
             h.AppendLoop(HatchLoopTypes.External, loop, new DoubleCollection(Enumerable.Repeat(0.0, loop.Count).ToArray()));
             h.EvaluateHatch(true);
             return id;

@@ -105,7 +105,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
         private static void FillHatch(Hatch h, SymFill fill, double k)
         {
             h.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
-            var pts = new Point2dCollection(fill.Points.Select(v => P(v, k)).Append(P(fill.Points[0], k)).ToArray());
+            var pts = new Point2dCollection(fill.Points.Select(v => P(v, k)).Concat(new[] { P(fill.Points[0], k) }).ToArray());
             var bulges = new DoubleCollection(Enumerable.Repeat(0.0, pts.Count).ToArray());
             h.AppendLoop(HatchLoopTypes.External, pts, bulges);
             h.EvaluateHatch(true);

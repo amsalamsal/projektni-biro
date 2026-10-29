@@ -34,7 +34,7 @@ namespace SiteDesignPro.Core.Exchange
 
         public static string Sha256Hex(string text)
         {
-            byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(text));
+            byte[] bytes = Compat.Sha256(Encoding.UTF8.GetBytes(text));
             var sb = new StringBuilder(bytes.Length * 2);
             foreach (byte b in bytes)
             {
@@ -46,7 +46,7 @@ namespace SiteDesignPro.Core.Exchange
 
         public static string Sha256Hex(byte[] data)
         {
-            byte[] bytes = SHA256.HashData(data);
+            byte[] bytes = Compat.Sha256(data);
             return string.Concat(bytes.Select(b => b.ToString("x2", System.Globalization.CultureInfo.InvariantCulture)));
         }
 

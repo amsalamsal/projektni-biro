@@ -129,7 +129,7 @@ namespace SiteDesignPro.Core.Model
 
         public override bool Equals(object? obj) => obj is ParamValue p && Equals(p);
 
-        public override int GetHashCode() => HashCode.Combine(Kind, number, text, flag);
+        public override int GetHashCode() => Compat.Hash(Kind, number, text, flag);
 
         public override string ToString() => IsNull ? "<null>" : AsText();
 

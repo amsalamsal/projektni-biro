@@ -49,10 +49,10 @@ namespace SiteDesignPro.Core.Quantities
         public string ToCsv(char separator = ',')
         {
             var sb = new StringBuilder();
-            sb.AppendLine(string.Join(separator, Columns.Select(c => Escape(c.Title, separator)).Append(Escape("Element IDs", separator))));
+            sb.AppendLine(string.Join(separator.ToString(), Columns.Select(c => Escape(c.Title, separator)).Append(Escape("Element IDs", separator))));
             foreach (ScheduleRow r in Rows)
             {
-                sb.AppendLine(string.Join(separator, r.Cells.Select(c => Escape(c, separator)).Append(Escape(string.Join(" ", r.ElementIds), separator))));
+                sb.AppendLine(string.Join(separator.ToString(), r.Cells.Select(c => Escape(c, separator)).Append(Escape(string.Join(" ", r.ElementIds), separator))));
             }
 
             foreach (KeyValuePair<string, double> t in Totals)
@@ -64,7 +64,7 @@ namespace SiteDesignPro.Core.Quantities
                     "unit" => t.Key,
                     _ => string.Empty,
                 });
-                sb.AppendLine(string.Join(separator, cells.Select(c => Escape(c, separator)).Append(string.Empty)));
+                sb.AppendLine(string.Join(separator.ToString(), cells.Select(c => Escape(c, separator)).Append(string.Empty)));
             }
 
             return sb.ToString();

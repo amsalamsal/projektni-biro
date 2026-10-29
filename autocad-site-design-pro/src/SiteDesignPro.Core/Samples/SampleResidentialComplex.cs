@@ -79,10 +79,10 @@ namespace SiteDesignPro.Core.Samples
 
         public static string DeterministicId(string seed)
         {
-            byte[] h = SHA256.HashData(Encoding.UTF8.GetBytes("site-design-pro-sample:" + seed));
+            byte[] h = Compat.Sha256(Encoding.UTF8.GetBytes("site-design-pro-sample:" + seed));
             h[6] = (byte)((h[6] & 0x0F) | 0x40);
             h[8] = (byte)((h[8] & 0x3F) | 0x80);
-            string hex = Convert.ToHexString(h, 0, 16).ToLowerInvariant();
+            string hex = string.Concat(h.Take(16).Select(b => b.ToString("x2", System.Globalization.CultureInfo.InvariantCulture)));
             return hex.Substring(0, 8) + "-" + hex.Substring(8, 4) + "-" + hex.Substring(12, 4) + "-" + hex.Substring(16, 4) + "-" + hex.Substring(20, 12);
         }
 

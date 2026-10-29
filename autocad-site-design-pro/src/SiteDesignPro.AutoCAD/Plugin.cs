@@ -22,6 +22,9 @@ namespace SiteDesignPro.AutoCAD
     /// </summary>
     public sealed class Plugin : IExtensionApplication
     {
+        // Runs before Initialize is JIT-compiled, so the dependency resolver is in place before Core touches JSON.
+        static Plugin() => DependencyResolver.Install();
+
         public void Initialize()
         {
             try
