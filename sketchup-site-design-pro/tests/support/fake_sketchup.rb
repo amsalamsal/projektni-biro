@@ -649,7 +649,8 @@ module Sketchup
 
   class Model < Entity
     attr_reader :entities, :definitions, :materials, :layers, :pages, :selection, :rendering_options, :shadow_info,
-                :active_view, :operations
+                :active_view, :operations, :saved_copies
+    attr_writer :path
 
     def initialize
       super()
@@ -663,6 +664,20 @@ module Sketchup
       @shadow_info = { 'NorthAngle' => 0.0 }
       @active_view = View.new
       @operations = []
+      @path = ''
+      @saved_copies = []
+    end
+
+    # Path of the saved .skp ('' for a model that was never saved), as Sketchup::Model#path.
+    def path
+      @path
+    end
+
+    # Model#save_copy (SketchUp 2014+): writes the current state to another file without changing #path.
+    def save_copy(target, _version = nil)
+      File.write(target, "fake-skp entities=#{@entities.to_a.length}")
+      @saved_copies << target
+      true
     end
 
     def start_operation(name, _disable_ui = false, *_rest)

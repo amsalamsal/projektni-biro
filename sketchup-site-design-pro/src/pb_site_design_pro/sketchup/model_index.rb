@@ -27,6 +27,26 @@ module ProjektniBiro
         managed_entities(model).map { |e| entry_for(e) }
       end
 
+      # Terrain surface groups (attribute terrainId; not elements, so never planned as deleted elements).
+      def terrain_entries(model)
+        out = []
+        model.definitions.each do |d|
+          next unless d.group?
+
+          d.instances.each do |g|
+            next unless g.valid?
+
+            tid = g.get_attribute(DICT, 'terrainId')
+            next unless tid
+
+            out << TerrainEntry.new(id: tid, project_id: g.get_attribute(DICT, 'projectId'), content_hash: g.get_attribute(DICT, 'contentHash'),
+                                    stored_fingerprint: g.get_attribute(DICT, 'fingerprint'), current_fingerprint: fingerprint(g),
+                                    deleted_in_source: g.get_attribute(DICT, 'deletedInSource') == true, ref: g)
+          end
+        end
+        out
+      end
+
       def entry_for(entity)
         local = entity.get_attribute(DICT, 'localParams')
         ModelEntry.new(
@@ -78,8 +98,8 @@ module ProjektniBiro
     # Project root group, one container group per model group (tagged), and special tags.
     class Organizer
       DICT = 'SiteDesignPro'
-      DELETED_TAG = 'SDP Deleted in source'
-      TAG_FOLDER = 'Site Design Pro'
+      DELETED_TAG = 'VU Obrisano u izvoru'
+      TAG_FOLDER = 'Vanjsko uređenje PRO'
 
       attr_reader :root
 
@@ -121,7 +141,7 @@ module ProjektniBiro
 
         @model.layers.folders.find { |f| f.name == TAG_FOLDER } || @model.layers.add_folder(TAG_FOLDER)
       rescue StandardError => e
-        Log.warn("Tag folder unavailable: #{e.message}")
+        Log.warn("Folder oznaka nije dostupan: #{e.message}")
         nil
       end
 
@@ -133,7 +153,7 @@ module ProjektniBiro
 
       def create_root
         g = @model.entities.add_group
-        g.name = "#{@package.project_name} (Site Design Pro)"
+        g.name = "#{@package.project_name} (Vanjsko uređenje PRO)"
         g.set_attribute(DICT, 'role', 'projectRoot')
         g.set_attribute(DICT, 'projectId', @package.project_id)
         g

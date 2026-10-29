@@ -37,9 +37,10 @@ async function open(browser, file, fixture, size) {
   try {
     console.log('import.html (preview)');
     let { page, errors } = await open(browser, 'import.html', 'preview.json');
-    check((await page.textContent('#title')).includes('Sample Residential Complex'), 'title shows project');
-    check((await page.$$('#actions tr')).length === 139, 'all 139 planned creations listed');
-    await page.fill('#filter', 'bench');
+    check((await page.textContent('#title')).includes('Primjer: stambeni kompleks'), 'title shows project');
+    check((await page.$$('#actions tr')).length === 140, 'all 139 planned elements and the terrain listed');
+    check((await page.textContent('#cards')).includes('Teren'), 'terrain change card shown');
+    await page.fill('#filter', 'klupa');
     check((await page.$$('#actions tr')).length === 4, 'filter narrows to 4 benches');
     await page.click('button[data-for=validation]');
     const issuesHtml = await page.innerHTML('#issues');
@@ -50,7 +51,10 @@ async function open(browser, file, fixture, size) {
     await page.click('#apply');
     await page.waitForTimeout(80);
     calls = await page.evaluate(() => window.__calls);
-    check(calls.some(c => c[0] === 'apply' && c[1].createScenes === true), 'apply sends options');
+    check(calls.some(c => c[0] === 'apply' && c[1].createScenes === true && c[1].backup === true), 'apply sends options (scenes, backup)');
+    await page.click('button[data-for=package]');
+    const pkgInfo = await page.textContent('#pkgInfo');
+    check(pkgInfo.includes('520,15 m n.v.') && pkgInfo.includes('Postojeći teren'), 'datum and terrain shown with decimal comma');
     check(errors.length === 0, 'no script errors' + (errors.length ? ': ' + errors.join('; ') : ''));
     if (shots) { await page.click('button[data-for=changes]'); await page.fill('#filter', ''); await page.screenshot({ path: path.join(shots, 'import-preview.png') }); }
     await page.close();
@@ -71,6 +75,8 @@ async function open(browser, file, fixture, size) {
     check((await page.$$('.param')).length >= 8, 'parameter editors rendered');
     check((await page.$$('.param.edited')).length === 1, 'SketchUp edit marked');
     check((await page.inputValue('select[data-key=material]')) === 'timber', 'material parameters use a library picker');
+    check((await page.textContent('#params')).includes('Dužina'), 'parameter labels in Bosnian');
+    check((await page.textContent('#props')).includes('Proizvođač'), 'property labels in Bosnian');
     await page.fill('input[data-key=length]', '2.6');
     await page.uncheck('input[data-key=backrest]');
     await page.click('#apply');
@@ -84,9 +90,12 @@ async function open(browser, file, fixture, size) {
     console.log('library.html');
     ({ page, errors } = await open(browser, 'library.html', 'library.json', { width: 920, height: 680 }));
     check((await page.$$('#types tr')).length === 254, 'all 254 types listed');
-    await page.fill('#search', 'tree');
+    await page.fill('#search', 'drvo');
     const n = (await page.$$('#types tr')).length;
     check(n > 3 && n < 20, 'search filters types (' + n + ')');
+    await page.fill('#search', 'tree');
+    const ne = (await page.$$('#types tr')).length;
+    check(ne > 3 && ne < 25, 'English names are searchable too (' + ne + ')');
     await page.fill('#search', '');
     await page.check('#onlyModel');
     check((await page.$$('#types tr')).length === 2, 'in-model filter');

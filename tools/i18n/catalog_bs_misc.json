@@ -1,24 +1,86 @@
 {
   "subcategories": {
-    "Amenities": "Sadržaji", "Art": "Umjetnost", "Barriers": "Barijere", "Bins": "Korpe i kante", "Boundaries": "Granice",
-    "Buildings": "Objekti", "Canopies": "Nadstrešnice", "Chambers": "Okna", "Communication": "Komunikacije", "Control": "Upravljanje",
-    "Cooling": "Hlađenje", "Decks and terraces": "Podovi i terase", "Decorative": "Dekorativno", "EV charging": "Punjenje električnih vozila",
-    "Edges and transitions": "Ivice i prelazi", "Equipment": "Oprema", "Existing conditions": "Postojeće stanje", "Fences": "Ograde",
-    "Fitness": "Fitness", "Gates": "Kapije", "Heating": "Grijanje", "Information": "Informacije", "Irrigation": "Navodnjavanje",
-    "Irrigation and supply": "Navodnjavanje i snabdijevanje", "Lawns and meadows": "Travnjaci i livade", "Level changes": "Visinske razlike",
-    "Lighting art": "Svjetlosna umjetnost", "Loose fill": "Rastresiti materijali", "Low-level": "Niska rasvjeta", "Markings": "Oznake",
-    "Monuments": "Obilježja", "Parking": "Parking", "Paths and lanes": "Staze i trake", "Pavilions": "Paviljoni", "Paving": "Popločanje",
-    "Pergolas": "Pergole", "Planters": "Žardinjere", "Planting beds": "Gredice", "Playgrounds": "Dječija igrališta", "Poles": "Stubovi",
-    "Ponds and features": "Jezerca i vodeni elementi", "Pools": "Bazeni", "Railings": "Ograde i rukohvati", "Rainwater": "Kišnica",
-    "References": "Reference", "Retaining": "Potporne konstrukcije", "Roads": "Saobraćajnice", "Routes": "Trase", "Safety": "Sigurnost",
-    "Safety surfaces": "Sigurnosne podloge", "Seating": "Sjedenje", "Security": "Sigurnosni sistemi", "Services": "Instalacije",
-    "Shading": "Zasjena", "Shelters": "Nadstrešnice za zaklon", "Shrubs and hedges": "Grmlje i žive ograde", "Signage": "Signalizacija",
-    "Soft landscape": "Zelene površine", "Solar": "Solarna energija", "Sports": "Sport", "Sports surfaces": "Sportske podloge",
-    "Stones": "Kamen", "Storage": "Skladištenje", "Surface drainage": "Površinska odvodnja", "Tables": "Stolovi", "Tanks": "Rezervoari",
-    "Technical units": "Tehničke jedinice", "Traffic calming": "Smirivanje saobraćaja", "Tree protection": "Zaštita stabala", "Trees": "Drveće",
-    "Underground drainage": "Podzemna odvodnja", "Ventilation": "Ventilacija", "Vertical greening": "Vertikalno ozelenjavanje",
-    "Wall-mounted": "Zidna montaža", "Walls": "Zidovi", "Walls and screens": "Zidovi i paravani", "Waste": "Otpad", "Water": "Voda",
-    "Wayfinding": "Orijentacija", "Wind": "Vjetar", "Zones": "Zone"
+    "Amenities": "Sadržaji",
+    "Art": "Umjetnost",
+    "Barriers": "Barijere",
+    "Bins": "Korpe i kante",
+    "Boundaries": "Granice",
+    "Buildings": "Objekti",
+    "Canopies": "Nadstrešnice",
+    "Chambers": "Okna",
+    "Communication": "Komunikacije",
+    "Control": "Upravljanje",
+    "Cooling": "Hlađenje",
+    "Decks and terraces": "Podovi i terase",
+    "Decorative": "Dekorativno",
+    "EV charging": "Punjenje električnih vozila",
+    "Edges and transitions": "Ivice i prelazi",
+    "Equipment": "Oprema",
+    "Existing conditions": "Postojeće stanje",
+    "Fences": "Ograde",
+    "Fitness": "Fitness",
+    "Gates": "Kapije",
+    "Heating": "Grijanje",
+    "Information": "Informacije",
+    "Irrigation": "Navodnjavanje",
+    "Irrigation and supply": "Navodnjavanje i snabdijevanje",
+    "Lawns and meadows": "Travnjaci i livade",
+    "Level changes": "Visinske razlike",
+    "Lighting art": "Svjetlosna umjetnost",
+    "Loose fill": "Rastresiti materijali",
+    "Low-level": "Niska rasvjeta",
+    "Markings": "Oznake",
+    "Monuments": "Obilježja",
+    "Parking": "Parking",
+    "Paths and lanes": "Staze i trake",
+    "Pavilions": "Paviljoni",
+    "Paving": "Popločanje",
+    "Pergolas": "Pergole",
+    "Planters": "Žardinjere",
+    "Planting beds": "Gredice",
+    "Playgrounds": "Dječija igrališta",
+    "Poles": "Stubovi",
+    "Ponds and features": "Jezerca i vodeni elementi",
+    "Pools": "Bazeni",
+    "Railings": "Ograde i rukohvati",
+    "Rainwater": "Kišnica",
+    "References": "Reference",
+    "Retaining": "Potporne konstrukcije",
+    "Roads": "Saobraćajnice",
+    "Routes": "Trase",
+    "Safety": "Sigurnost",
+    "Safety surfaces": "Sigurnosne podloge",
+    "Seating": "Sjedenje",
+    "Security": "Sigurnosni sistemi",
+    "Services": "Instalacije",
+    "Shading": "Zasjena",
+    "Shelters": "Nadstrešnice za zaklon",
+    "Shrubs and hedges": "Grmlje i žive ograde",
+    "Signage": "Signalizacija",
+    "Soft landscape": "Zelene površine",
+    "Solar": "Solarna energija",
+    "Sports": "Sport",
+    "Sports surfaces": "Sportske podloge",
+    "Stones": "Kamen",
+    "Storage": "Skladištenje",
+    "Surface drainage": "Površinska odvodnja",
+    "Tables": "Stolovi",
+    "Tanks": "Rezervoari",
+    "Technical units": "Tehničke jedinice",
+    "Traffic calming": "Smirivanje saobraćaja",
+    "Tree protection": "Zaštita stabala",
+    "Trees": "Drveće",
+    "Underground drainage": "Podzemna odvodnja",
+    "Ventilation": "Ventilacija",
+    "Vertical greening": "Vertikalno ozelenjavanje",
+    "Wall-mounted": "Zidna montaža",
+    "Walls": "Zidovi",
+    "Walls and screens": "Zidovi i paravani",
+    "Waste": "Otpad",
+    "Water": "Voda",
+    "Wayfinding": "Orijentacija",
+    "Wind": "Vjetar",
+    "Zones": "Zone"
   },
   "paramLabels": {
     "Above-ground height (column or upper body)": "Visina iznad tla (stub ili gornji dio)",
@@ -243,21 +305,76 @@
     "Zone type": "Vrsta zone"
   },
   "paramGroups": {
-    "Appearance": "Izgled", "Capacity": "Kapacitet", "Checks": "Provjere", "Configuration": "Konfiguracija", "Construction": "Konstrukcija",
-    "Dimensions": "Dimenzije", "Elevation": "Visine", "Equipment": "Oprema", "Foundation": "Temelj", "Growth": "Rast", "Hydraulics": "Hidraulika",
-    "Information": "Informacije", "Layout": "Raspored", "Marking": "Oznaka", "Module": "Modul", "Planting": "Sadnja",
-    "Specification": "Specifikacija", "Structure": "Konstrukcija", "Technical": "Tehnički podaci"
+    "Appearance": "Izgled",
+    "Capacity": "Kapacitet",
+    "Checks": "Provjere",
+    "Configuration": "Konfiguracija",
+    "Construction": "Konstrukcija",
+    "Dimensions": "Dimenzije",
+    "Elevation": "Visine",
+    "Equipment": "Oprema",
+    "Foundation": "Temelj",
+    "Growth": "Rast",
+    "Hydraulics": "Hidraulika",
+    "Information": "Informacije",
+    "Layout": "Raspored",
+    "Marking": "Oznaka",
+    "Module": "Modul",
+    "Planting": "Sadnja",
+    "Specification": "Specifikacija",
+    "Structure": "Konstrukcija",
+    "Technical": "Tehnički podaci"
   },
   "optionLabels": {
-    "above_ground": "nadzemno", "back": "nazad", "barrier": "rampa", "bars": "šipke", "basketweave": "pleter", "box": "kvadar",
-    "center": "sredina", "circle": "krug", "columnar": "stubasta", "conical": "kupasta", "existing_remove": "postojeće – uklanja se",
-    "existing_retain": "postojeće – zadržava se", "fabric": "platno", "flat": "ravan", "forward": "naprijed", "front": "naprijed",
-    "glass": "staklo", "herringbone": "riblja kost", "horizontal_cylinder": "horizontalni cilindar", "left": "lijevo", "mesh": "mreža",
-    "metal": "metal", "mixed": "miješani", "mono": "jednovodni", "none": "bez", "organic": "biootpad", "oval": "ovalna", "paper": "papir",
-    "plastic": "plastika", "proposed": "projektovano", "pyramid": "piramidalni", "random": "slobodan", "rectangle": "pravougaonik",
-    "reverse": "obrnuto", "right": "desno", "round": "okrugla", "semi_underground": "polupodzemno", "sliding": "klizna", "solar": "solarni",
-    "solid": "puni", "square": "kvadrat", "stack": "slog u nizu", "stretcher": "slog s preklopom", "swing_double": "dvokrilna",
-    "swing_single": "jednokrilna", "textile": "tekstil", "triangle": "trougao", "underground": "podzemno", "vertical_cylinder": "vertikalni cilindar"
+    "above_ground": "nadzemno",
+    "back": "nazad",
+    "barrier": "rampa",
+    "bars": "šipke",
+    "basketweave": "pleter",
+    "box": "kvadar",
+    "center": "sredina",
+    "circle": "krug",
+    "columnar": "stubasta",
+    "conical": "kupasta",
+    "existing_remove": "postojeće – uklanja se",
+    "existing_retain": "postojeće – zadržava se",
+    "fabric": "platno",
+    "flat": "ravan",
+    "forward": "naprijed",
+    "front": "naprijed",
+    "glass": "staklo",
+    "herringbone": "riblja kost",
+    "horizontal_cylinder": "horizontalni cilindar",
+    "left": "lijevo",
+    "mesh": "mreža",
+    "metal": "metal",
+    "mixed": "miješani",
+    "mono": "jednovodni",
+    "none": "bez",
+    "organic": "biootpad",
+    "oval": "ovalna",
+    "paper": "papir",
+    "plastic": "plastika",
+    "proposed": "projektovano",
+    "pyramid": "piramidalni",
+    "random": "slobodan",
+    "rectangle": "pravougaonik",
+    "reverse": "obrnuto",
+    "right": "desno",
+    "round": "okrugla",
+    "semi_underground": "polupodzemno",
+    "sliding": "klizna",
+    "solar": "solarni",
+    "solid": "puni",
+    "square": "kvadrat",
+    "stack": "slog u nizu",
+    "stretcher": "slog s preklopom",
+    "swing_double": "dvokrilna",
+    "swing_single": "jednokrilna",
+    "textile": "tekstil",
+    "triangle": "trougao",
+    "underground": "podzemno",
+    "vertical_cylinder": "vertikalni cilindar"
   },
   "builderDescriptions": {
     "slab": "Ploča površine ograničena zatvorenom granicom; vrh na koti granice + pomak, debljina prema dolje.",
@@ -305,105 +422,383 @@
     "boulder": "Dekorativni kamen aproksimiran fasetiranim elipsoidom, djelimično ukopan."
   },
   "materials": {
-    "concrete_paver": "Betonsko popločanje", "natural_stone": "Popločanje prirodnim kamenom", "porcelain": "Porculanske ploče", "asphalt": "Asfalt",
-    "asphalt_red": "Obojeni asfalt (biciklistički)", "permeable_paver": "Vodopropusno popločanje", "grass_grid": "Travna rešetka",
-    "gravel": "Šljunak / agregat", "rubber": "Gumena sigurnosna podloga", "tactile": "Taktilno popločanje", "soil": "Zemlja za sadnju",
-    "mulch": "Malč od kore", "sand": "Pijesak za igru", "timber_deck": "Drvena podna obloga", "timber": "Drvo", "grass": "Travnjak",
-    "meadow": "Livada", "sedum": "Zeleni krov (sedum)", "planting_mixed": "Zasad (miješani)", "planting_flowers": "Zasad (cvjetni)",
-    "foliage": "Lišće (listopadno)", "foliage_evergreen": "Lišće (zimzeleno)", "foliage_fruit": "Lišće (voćka)", "bark": "Kora",
-    "water": "Voda", "pool_finish": "Obloga bazena", "pond_liner": "Folija jezerca", "concrete": "Beton", "concrete_precast": "Montažni beton",
-    "stone_wall": "Kamena zidarija", "brick": "Opeka", "gabion": "Gabion", "steel_galv": "Pocinčani čelik",
-    "steel_dark": "Plastificirani čelik (taman)", "aluminium": "Aluminij", "glass": "Staklo", "fabric": "Membransko platno",
-    "solar_pv": "Fotonaponski modul", "plastic_dark": "Plastika (tamna)", "plastic_green": "Plastika (zelena)", "hdpe": "PEHD",
-    "grate_steel": "Čelična rešetka", "cast_iron": "Liveni poklopac", "line_paint_white": "Boja za oznake (bijela)",
-    "line_paint_yellow": "Boja za oznake (žuta)", "line_paint_blue": "Boja za oznake (plava)", "marking_green": "Biciklistička površina (zelena)",
-    "acrylic_court": "Akrilna podloga terena", "sign_plate": "Ploča znaka", "luminaire": "Svjetiljka", "building_massing": "Volumen objekta",
-    "zone_safety": "Sigurnosna zona", "zone_service": "Servisna zona / zona održavanja", "zone_excavation": "Gabarit iskopa",
-    "zone_coverage": "Ilustrativni domet", "zone_root": "Zona zaštite korijena", "zone_heat": "Grijana zona / zona komfora",
-    "zone_generic": "Zona", "default": "Zadani materijal"
+    "concrete_paver": "Betonsko popločanje",
+    "natural_stone": "Popločanje prirodnim kamenom",
+    "porcelain": "Porculanske ploče",
+    "asphalt": "Asfalt",
+    "asphalt_red": "Obojeni asfalt (biciklistički)",
+    "permeable_paver": "Vodopropusno popločanje",
+    "grass_grid": "Travna rešetka",
+    "gravel": "Šljunak / agregat",
+    "rubber": "Gumena sigurnosna podloga",
+    "tactile": "Taktilno popločanje",
+    "soil": "Zemlja za sadnju",
+    "mulch": "Malč od kore",
+    "sand": "Pijesak za igru",
+    "timber_deck": "Drvena podna obloga",
+    "timber": "Drvo",
+    "grass": "Travnjak",
+    "meadow": "Livada",
+    "sedum": "Zeleni krov (sedum)",
+    "planting_mixed": "Zasad (miješani)",
+    "planting_flowers": "Zasad (cvjetni)",
+    "foliage": "Lišće (listopadno)",
+    "foliage_evergreen": "Lišće (zimzeleno)",
+    "foliage_fruit": "Lišće (voćka)",
+    "bark": "Kora",
+    "water": "Voda",
+    "pool_finish": "Obloga bazena",
+    "pond_liner": "Folija jezerca",
+    "concrete": "Beton",
+    "concrete_precast": "Montažni beton",
+    "stone_wall": "Kamena zidarija",
+    "brick": "Opeka",
+    "gabion": "Gabion",
+    "steel_galv": "Pocinčani čelik",
+    "steel_dark": "Plastificirani čelik (taman)",
+    "aluminium": "Aluminij",
+    "glass": "Staklo",
+    "fabric": "Membransko platno",
+    "solar_pv": "Fotonaponski modul",
+    "plastic_dark": "Plastika (tamna)",
+    "plastic_green": "Plastika (zelena)",
+    "hdpe": "PEHD",
+    "grate_steel": "Čelična rešetka",
+    "cast_iron": "Liveni poklopac",
+    "line_paint_white": "Boja za oznake (bijela)",
+    "line_paint_yellow": "Boja za oznake (žuta)",
+    "line_paint_blue": "Boja za oznake (plava)",
+    "marking_green": "Biciklistička površina (zelena)",
+    "acrylic_court": "Akrilna podloga terena",
+    "sign_plate": "Ploča znaka",
+    "luminaire": "Svjetiljka",
+    "building_massing": "Volumen objekta",
+    "zone_safety": "Sigurnosna zona",
+    "zone_service": "Servisna zona / zona održavanja",
+    "zone_excavation": "Gabarit iskopa",
+    "zone_coverage": "Ilustrativni domet",
+    "zone_root": "Zona zaštite korijena",
+    "zone_heat": "Grijana zona / zona komfora",
+    "zone_generic": "Zona",
+    "default": "Zadani materijal",
+    "terrain": "Teren (postojeći)"
   },
   "layers": {
-    "existing": ["VU-POSTOJECE", "Postojeće stanje lokacije"],
-    "buildings": ["VU-OBJEKTI", "Objekti i reference objekata"],
-    "roads": ["VU-SAOBRACAJNICE", "Saobraćajnice, kolni prilazi i saobraćajne površine"],
-    "roads_marking": ["VU-SAOB-OZNAKE", "Horizontalna signalizacija, strelice i znakovi"],
-    "parking": ["VU-PARKING", "Parking mjesta i utovarne površine"],
-    "pedestrian": ["VU-PJESACKE", "Pješačke staze"],
-    "cycling": ["VU-BICIKLISTICKO", "Biciklistička infrastruktura"],
-    "surfaces": ["VU-POPLOCANJE", "Materijali površina (popločanje, podovi, rastresiti materijali)"],
-    "surfaces_pattern": ["VU-POPLOCANJE-SRAF", "Šrafure i uzorci površina"],
-    "planting": ["VU-ZELENILO", "Gredice, grmlje, travnjaci"],
-    "planting_trees": ["VU-ZELENILO-DRVECE", "Drveće"],
-    "furniture": ["VU-MOBILIJAR", "Urbani mobilijar"],
-    "recreation": ["VU-REKREACIJA", "Dječija igrališta, fitness i sport"],
-    "lighting": ["VU-RASVJETA", "Vanjska rasvjeta"],
-    "lighting_circuits": ["VU-RASVJETA-KRUGOVI", "Trase strujnih krugova rasvjete"],
-    "water": ["VU-VODA", "Bazeni, jezerca i vodeni elementi"],
-    "drainage": ["VU-ODVODNJA", "Površinska i podzemna oborinska odvodnja"],
-    "utilities": ["VU-INSTALACIJE", "Podzemne instalacije, okna i koridori"],
-    "waste": ["VU-OTPAD", "Infrastruktura za prikupljanje otpada"],
-    "walls": ["VU-ZIDOVI", "Zidovi i potporne konstrukcije"],
-    "fences": ["VU-OGRADE", "Ograde, rukohvati i kapije"],
-    "structures": ["VU-NADSTRESNICE", "Pergole, nadstrešnice i zakloni"],
-    "sustainability": ["VU-ODRZIVO", "Održive tehnologije"],
-    "climate": ["VU-KLIMA", "Vanjski klimatski sistemi i komfor"],
-    "decorative": ["VU-DEKORATIVNO", "Dekorativni i arhitektonski elementi"],
-    "information": ["VU-INFO", "Informativni, sigurnosni i komunikacijski sistemi"],
-    "anno_text": ["VU-ANO-TEKST", "Tekstualne napomene"],
-    "anno_labels": ["VU-ANO-OZNAKE", "Oznake elemenata i pokazne linije"],
-    "anno_dims": ["VU-ANO-KOTE-DIM", "Dimenzije"],
-    "anno_levels": ["VU-ANO-VISINE", "Visinske kote, oznake nivoa i strelice nagiba"],
-    "anno_symbols": ["VU-ANO-SIMBOLI", "Strelica sjevera, razmjernik, oznake presjeka i detalja"],
-    "anno_schedules": ["VU-ANO-TABELE", "Tabele i legende"],
-    "anno_revision": ["VU-ANO-REVIZIJE", "Oblaci revizija i napomene"],
-    "anno_titleblock": ["VU-ANO-OKVIR", "Okviri listova i sastavnice"],
-    "anno_clearance": ["VU-ANO-ZONE", "Zone razmaka, sigurnosti i dometa (pomoć pri pregledu)"],
-    "site_boundary": ["VU-PARCELA", "Parcelne granice"],
-    "construction": ["VU-POMOCNO", "Privremena pomoćna geometrija"],
-    "export_ref": ["VU-IZVOZ-REF", "Reference izvoza i ishodište projekta"]
+    "existing": [
+      "VU-POSTOJECE",
+      "Postojeće stanje lokacije"
+    ],
+    "buildings": [
+      "VU-OBJEKTI",
+      "Objekti i reference objekata"
+    ],
+    "roads": [
+      "VU-SAOBRACAJNICE",
+      "Saobraćajnice, kolni prilazi i saobraćajne površine"
+    ],
+    "roads_marking": [
+      "VU-SAOB-OZNAKE",
+      "Horizontalna signalizacija, strelice i znakovi"
+    ],
+    "parking": [
+      "VU-PARKING",
+      "Parking mjesta i utovarne površine"
+    ],
+    "pedestrian": [
+      "VU-PJESACKE",
+      "Pješačke staze"
+    ],
+    "cycling": [
+      "VU-BICIKLISTICKO",
+      "Biciklistička infrastruktura"
+    ],
+    "surfaces": [
+      "VU-POPLOCANJE",
+      "Materijali površina (popločanje, podovi, rastresiti materijali)"
+    ],
+    "surfaces_pattern": [
+      "VU-POPLOCANJE-SRAF",
+      "Šrafure i uzorci površina"
+    ],
+    "planting": [
+      "VU-ZELENILO",
+      "Gredice, grmlje, travnjaci"
+    ],
+    "planting_trees": [
+      "VU-ZELENILO-DRVECE",
+      "Drveće"
+    ],
+    "furniture": [
+      "VU-MOBILIJAR",
+      "Urbani mobilijar"
+    ],
+    "recreation": [
+      "VU-REKREACIJA",
+      "Dječija igrališta, fitness i sport"
+    ],
+    "lighting": [
+      "VU-RASVJETA",
+      "Vanjska rasvjeta"
+    ],
+    "lighting_circuits": [
+      "VU-RASVJETA-KRUGOVI",
+      "Trase strujnih krugova rasvjete"
+    ],
+    "water": [
+      "VU-VODA",
+      "Bazeni, jezerca i vodeni elementi"
+    ],
+    "drainage": [
+      "VU-ODVODNJA",
+      "Površinska i podzemna oborinska odvodnja"
+    ],
+    "utilities": [
+      "VU-INSTALACIJE",
+      "Podzemne instalacije, okna i koridori"
+    ],
+    "waste": [
+      "VU-OTPAD",
+      "Infrastruktura za prikupljanje otpada"
+    ],
+    "walls": [
+      "VU-ZIDOVI",
+      "Zidovi i potporne konstrukcije"
+    ],
+    "fences": [
+      "VU-OGRADE",
+      "Ograde, rukohvati i kapije"
+    ],
+    "structures": [
+      "VU-NADSTRESNICE",
+      "Pergole, nadstrešnice i zakloni"
+    ],
+    "sustainability": [
+      "VU-ODRZIVO",
+      "Održive tehnologije"
+    ],
+    "climate": [
+      "VU-KLIMA",
+      "Vanjski klimatski sistemi i komfor"
+    ],
+    "decorative": [
+      "VU-DEKORATIVNO",
+      "Dekorativni i arhitektonski elementi"
+    ],
+    "information": [
+      "VU-INFO",
+      "Informativni, sigurnosni i komunikacijski sistemi"
+    ],
+    "anno_text": [
+      "VU-ANO-TEKST",
+      "Tekstualne napomene"
+    ],
+    "anno_labels": [
+      "VU-ANO-OZNAKE",
+      "Oznake elemenata i pokazne linije"
+    ],
+    "anno_dims": [
+      "VU-ANO-KOTE-DIM",
+      "Dimenzije"
+    ],
+    "anno_levels": [
+      "VU-ANO-VISINE",
+      "Visinske kote, oznake nivoa i strelice nagiba"
+    ],
+    "anno_symbols": [
+      "VU-ANO-SIMBOLI",
+      "Strelica sjevera, razmjernik, oznake presjeka i detalja"
+    ],
+    "anno_schedules": [
+      "VU-ANO-TABELE",
+      "Tabele i legende"
+    ],
+    "anno_revision": [
+      "VU-ANO-REVIZIJE",
+      "Oblaci revizija i napomene"
+    ],
+    "anno_titleblock": [
+      "VU-ANO-OKVIR",
+      "Okviri listova i sastavnice"
+    ],
+    "anno_clearance": [
+      "VU-ANO-ZONE",
+      "Zone razmaka, sigurnosti i dometa (pomoć pri pregledu)"
+    ],
+    "site_boundary": [
+      "VU-PARCELA",
+      "Parcelne granice"
+    ],
+    "construction": [
+      "VU-POMOCNO",
+      "Privremena pomoćna geometrija"
+    ],
+    "export_ref": [
+      "VU-IZVOZ-REF",
+      "Reference izvoza i ishodište projekta"
+    ]
   },
   "categories": {
-    "buildings": "Objekti i reference", "site": "Lokacija", "surfaces": "Parter i popločanje", "roads": "Saobraćaj i parking",
-    "cycling": "Biciklistička infrastruktura", "water": "Voda i odvodnja", "landscape": "Zelenilo", "utilities": "Komunalna infrastruktura",
-    "lighting": "Rasvjeta", "walls": "Ograde i zidovi", "structures": "Nadstrešnice i zasjena", "furniture": "Urbani mobilijar i rekreacija",
-    "sustainability": "Eko tehnologije", "climate": "Vanjski klimatski sistemi", "decorative": "Dekorativni elementi",
+    "buildings": "Objekti i reference",
+    "site": "Lokacija",
+    "surfaces": "Parter i popločanje",
+    "roads": "Saobraćaj i parking",
+    "cycling": "Biciklistička infrastruktura",
+    "water": "Voda i odvodnja",
+    "landscape": "Zelenilo",
+    "utilities": "Komunalna infrastruktura",
+    "lighting": "Rasvjeta",
+    "walls": "Ograde i zidovi",
+    "structures": "Nadstrešnice i zasjena",
+    "furniture": "Urbani mobilijar i rekreacija",
+    "sustainability": "Eko tehnologije",
+    "climate": "Vanjski klimatski sistemi",
+    "decorative": "Dekorativni elementi",
     "information": "Informativni i sigurnosni sistemi"
   },
   "modelGroups": {
-    "buildings": ["Objekti i reference", "VU Objekti"],
-    "roads": ["Saobraćajnice i parking", "VU Saobraćajnice i parking"],
-    "pedestrian_cycling": ["Pješačka i biciklistička infrastruktura", "VU Pješaci i biciklisti"],
-    "surfaces": ["Parter i popločanje", "VU Parter"],
-    "planting": ["Zelenilo", "VU Zelenilo"],
-    "furniture": ["Urbani mobilijar", "VU Mobilijar"],
-    "water": ["Vodeni elementi", "VU Voda"],
-    "drainage": ["Oborinska odvodnja", "VU Odvodnja"],
-    "underground": ["Podzemne instalacije", "VU Podzemno"],
-    "lighting": ["Rasvjeta", "VU Rasvjeta"],
-    "walls": ["Zidovi i ograde", "VU Zidovi i ograde"],
-    "canopies": ["Nadstrešnice i pergole", "VU Nadstrešnice"],
-    "recreation": ["Rekreacija", "VU Rekreacija"],
-    "sustainability": ["Eko tehnologije", "VU Eko tehnologije"],
-    "climate": ["Klimatski sistemi i komfor", "VU Klimatski sistemi"],
-    "decorative": ["Dekorativni elementi", "VU Dekorativno"],
-    "information": ["Informativni i sigurnosni sistemi", "VU Informacije"],
-    "annotations": ["Anotacije i reference", "VU Reference"],
-    "review_zones": ["Zone za pregled (razmaci, domet, iskop)", "VU Zone za pregled"]
+    "buildings": [
+      "Objekti i reference",
+      "VU Objekti"
+    ],
+    "roads": [
+      "Saobraćajnice i parking",
+      "VU Saobraćajnice i parking"
+    ],
+    "pedestrian_cycling": [
+      "Pješačka i biciklistička infrastruktura",
+      "VU Pješaci i biciklisti"
+    ],
+    "surfaces": [
+      "Parter i popločanje",
+      "VU Parter"
+    ],
+    "planting": [
+      "Zelenilo",
+      "VU Zelenilo"
+    ],
+    "furniture": [
+      "Urbani mobilijar",
+      "VU Mobilijar"
+    ],
+    "water": [
+      "Vodeni elementi",
+      "VU Voda"
+    ],
+    "drainage": [
+      "Oborinska odvodnja",
+      "VU Odvodnja"
+    ],
+    "underground": [
+      "Podzemne instalacije",
+      "VU Podzemno"
+    ],
+    "lighting": [
+      "Rasvjeta",
+      "VU Rasvjeta"
+    ],
+    "walls": [
+      "Zidovi i ograde",
+      "VU Zidovi i ograde"
+    ],
+    "canopies": [
+      "Nadstrešnice i pergole",
+      "VU Nadstrešnice"
+    ],
+    "recreation": [
+      "Rekreacija",
+      "VU Rekreacija"
+    ],
+    "sustainability": [
+      "Eko tehnologije",
+      "VU Eko tehnologije"
+    ],
+    "climate": [
+      "Klimatski sistemi i komfor",
+      "VU Klimatski sistemi"
+    ],
+    "decorative": [
+      "Dekorativni elementi",
+      "VU Dekorativno"
+    ],
+    "information": [
+      "Informativni i sigurnosni sistemi",
+      "VU Informacije"
+    ],
+    "annotations": [
+      "Anotacije i reference",
+      "VU Reference"
+    ],
+    "review_zones": [
+      "Zone za pregled (razmaci, domet, iskop)",
+      "VU Zone za pregled"
+    ],
+    "terrain": [
+      "Teren",
+      "VU Teren"
+    ]
   },
   "schedules": {
-    "planting": "Tabela drveća i zasada", "surfaces": "Tabela popločanja i površina", "furniture": "Tabela urbanog mobilijara",
-    "lighting": "Tabela svjetiljki", "underground": "Tabela podzemne infrastrukture", "waste": "Tabela prikupljanja otpada",
-    "playground": "Tabela igrališta i rekreacije", "fences_walls": "Tabela ograda, zidova i kapija", "canopies": "Tabela pergola i nadstrešnica",
-    "chambers": "Tabela okana", "ev_charging": "Tabela punjenja električnih vozila", "roads": "Tabela saobraćajnica, parkinga i oznaka",
-    "cycling": "Tabela biciklističke infrastrukture", "water": "Tabela vode i odvodnje", "equipment": "Tabela tehničke opreme",
+    "planting": "Tabela drveća i zasada",
+    "surfaces": "Tabela popločanja i površina",
+    "furniture": "Tabela urbanog mobilijara",
+    "lighting": "Tabela svjetiljki",
+    "underground": "Tabela podzemne infrastrukture",
+    "waste": "Tabela prikupljanja otpada",
+    "playground": "Tabela igrališta i rekreacije",
+    "fences_walls": "Tabela ograda, zidova i kapija",
+    "canopies": "Tabela pergola i nadstrešnica",
+    "chambers": "Tabela okana",
+    "ev_charging": "Tabela punjenja električnih vozila",
+    "roads": "Tabela saobraćajnica, parkinga i oznaka",
+    "cycling": "Tabela biciklističke infrastrukture",
+    "water": "Tabela vode i odvodnje",
+    "equipment": "Tabela tehničke opreme",
     "general": "Opća tabela elemenata"
   },
   "commonProperties": {
-    "manufacturer": ["Proizvođač", "Proizvod"], "productReference": ["Oznaka proizvoda / model", "Proizvod"],
-    "finish": ["Završna obrada / boja", "Proizvod"], "specification": ["Tehnička specifikacija", "Proizvod"],
-    "installation": ["Ugradnja / montaža", "Ugradnja"], "maintenance": ["Napomene o održavanju i pregledu", "Održavanje"],
-    "unitCost": ["Jedinična cijena", "Troškovi"], "supplier": ["Dobavljač", "Troškovi"],
-    "accessibility": ["Napomene o pristupačnosti", "Pristupačnost i sigurnost"], "safetyNotes": ["Sigurnosne napomene", "Pristupačnost i sigurnost"],
-    "notes": ["Napomene", "Općenito"]
+    "manufacturer": [
+      "Proizvođač",
+      "Proizvod"
+    ],
+    "productReference": [
+      "Oznaka proizvoda / model",
+      "Proizvod"
+    ],
+    "finish": [
+      "Završna obrada / boja",
+      "Proizvod"
+    ],
+    "specification": [
+      "Tehnička specifikacija",
+      "Proizvod"
+    ],
+    "installation": [
+      "Ugradnja / montaža",
+      "Ugradnja"
+    ],
+    "maintenance": [
+      "Napomene o održavanju i pregledu",
+      "Održavanje"
+    ],
+    "unitCost": [
+      "Jedinična cijena",
+      "Troškovi"
+    ],
+    "supplier": [
+      "Dobavljač",
+      "Troškovi"
+    ],
+    "accessibility": [
+      "Napomene o pristupačnosti",
+      "Pristupačnost i sigurnost"
+    ],
+    "safetyNotes": [
+      "Sigurnosne napomene",
+      "Pristupačnost i sigurnost"
+    ],
+    "notes": [
+      "Napomene",
+      "Općenito"
+    ]
   }
 }

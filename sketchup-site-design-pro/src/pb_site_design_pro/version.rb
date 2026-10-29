@@ -5,6 +5,6 @@ module ProjektniBiro
     VERSION = '0.2.0'
     # Exchange schema major version this extension reads.
     SUPPORTED_SCHEMA_MAJOR = 1
-    SCHEMA_VERSION = '1.0.0'
+    SCHEMA_VERSION = '1.1.0'
   end
 end

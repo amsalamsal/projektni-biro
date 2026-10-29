@@ -25,9 +25,13 @@ module ProjektniBiro
     unless file_loaded?(__FILE__)
       begin
         Commands.install
-        Log.info("Site Design Pro #{VERSION} loaded (SketchUp #{Sketchup.version}, Ruby #{RUBY_VERSION})")
+        Log.info("Vanjsko uređenje PRO #{VERSION} učitano (SketchUp #{Sketchup.version}, Ruby #{RUBY_VERSION})")
+        if Sketchup.version.to_i < 22
+          UI.messagebox("Vanjsko uređenje PRO zahtijeva SketchUp 2022 ili noviji (pokrenuto: #{Sketchup.version}). " \
+                        'Proširenje može raditi nepotpuno.')
+        end
       rescue StandardError => e
-        Log.error('Site Design Pro failed to initialise', e)
+        Log.error('Vanjsko uređenje PRO se nije pokrenulo', e)
       end
       file_loaded(__FILE__)
     end

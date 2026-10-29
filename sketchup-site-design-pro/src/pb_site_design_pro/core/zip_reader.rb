@@ -35,13 +35,13 @@ module ProjektniBiro
 
       # Returns the entry contents as a binary String.
       def read(name)
-        entry = entries[name] or raise PackageError, "#{name} is missing from the package archive"
-        raise PackageError, "#{name} exceeds the maximum supported size" if entry.size > MAX_ENTRY_BYTES
+        entry = entries[name] or raise PackageError, "#{name} nedostaje u arhivi paketa"
+        raise PackageError, "#{name} prelazi najveću podržanu veličinu" if entry.size > MAX_ENTRY_BYTES
 
         File.open(@path, 'rb') do |f|
           f.seek(entry.local_offset)
           header = f.read(30)
-          raise PackageError, 'corrupt archive (local header)' unless header && header.unpack1('V') == LOCAL_SIG
+          raise PackageError, 'oštećena arhiva (lokalno zaglavlje)' unless header && header.unpack1('V') == LOCAL_SIG
 
           name_len, extra_len = header[26, 4].unpack('vv')
           f.seek(entry.local_offset + 30 + name_len + extra_len)
@@ -49,9 +49,9 @@ module ProjektniBiro
           out = case entry.method
                 when 0 then data
                 when 8 then inflate(data)
-                else raise PackageError, "unsupported compression method #{entry.method} for #{name}"
+                else raise PackageError, "nepodržana metoda kompresije #{entry.method} za #{name}"
                 end
-          raise PackageError, "CRC mismatch for #{name}" unless Zlib.crc32(out) == entry.crc
+          raise PackageError, "CRC se ne podudara za #{name}" unless Zlib.crc32(out) == entry.crc
 
           out
         end
@@ -69,26 +69,26 @@ module ProjektniBiro
         z.finish
         out
       rescue Zlib::Error => e
-        raise PackageError, "corrupt archive data (#{e.message})"
+        raise PackageError, "oštećeni podaci arhive (#{e.message})"
       ensure
         z&.close
       end
 
       def read_directory
         size = File.size(@path)
-        raise PackageError, 'file is too small to be a package archive' if size < 22
+        raise PackageError, 'datoteka je premala da bi bila arhiva paketa' if size < 22
 
         File.open(@path, 'rb') do |f|
           tail_len = [size, 65_557].min
           f.seek(size - tail_len)
           tail = f.read(tail_len)
           idx = tail.rindex([EOCD_SIG].pack('V'))
-          raise PackageError, 'not a zip archive (end of central directory not found)' unless idx
+          raise PackageError, 'datoteka nije zip arhiva (kraj centralnog direktorija nije pronađen)' unless idx
 
           eocd = tail[idx, 22]
           count = eocd[10, 2].unpack1('v')
           cd_size, cd_offset = eocd[12, 8].unpack('VV')
-          raise PackageError, 'Zip64 archives are not supported' if cd_offset == 0xFFFFFFFF
+          raise PackageError, 'Zip64 arhive nisu podržane' if cd_offset == 0xFFFFFFFF
 
           f.seek(cd_offset)
           cd = f.read(cd_size) || ''
@@ -100,7 +100,7 @@ module ProjektniBiro
         entries = {}
         pos = 0
         count.times do
-          raise PackageError, 'corrupt archive (central directory)' unless cd[pos, 4]&.unpack1('V') == CDIR_SIG
+          raise PackageError, 'oštećena arhiva (centralni direktorij)' unless cd[pos, 4]&.unpack1('V') == CDIR_SIG
 
           method = cd[pos + 10, 2].unpack1('v')
           crc, csize, usize = cd[pos + 16, 12].unpack('VVV')

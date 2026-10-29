@@ -12,22 +12,22 @@ module ProjektniBiro
           seat = mat(e, 'material', 'timber')
           frame = mat(e, 'frameMaterial', 'steel_dark')
           slab = 0.05
-          c.mesh(Mesh.box(0, 0, sh - slab, l, d, slab), material: seat, name: 'Seat')
+          c.mesh(Mesh.box(0, 0, sh - slab, l, d, slab), material: seat, name: 'Sjedište')
           leg_x = [(l / 2) - 0.15, l * 0.35].min
           [-leg_x, leg_x].each do |x|
-            c.mesh(Mesh.box(x, 0, 0, 0.06, d * 0.8, sh - slab), material: frame, name: 'Support')
+            c.mesh(Mesh.box(x, 0, 0, 0.06, d * 0.8, sh - slab), material: frame, name: 'Nosač')
           end
           if e.bool('backrest', true) && e.num('backHeight', 0.8) > sh + 0.1
             back_h = e.num('backHeight', 0.8) - (sh + 0.1)
-            c.mesh(Mesh.box(0, (d / 2) - 0.035, sh + 0.1, l, 0.04, back_h), material: seat, name: 'Backrest')
+            c.mesh(Mesh.box(0, (d / 2) - 0.035, sh + 0.1, l, 0.04, back_h), material: seat, name: 'Naslon')
             [-leg_x, leg_x].each do |x|
-              c.mesh(Mesh.box(x, (d / 2) - 0.085, sh, 0.05, 0.05, back_h + 0.1), material: frame, name: 'Back support')
+              c.mesh(Mesh.box(x, (d / 2) - 0.085, sh, 0.05, 0.05, back_h + 0.1), material: frame, name: 'Nosač naslona')
             end
           end
           return unless e.bool('armrests')
 
           [(-l / 2) + 0.03, (l / 2) - 0.03].each do |x|
-            c.mesh(Mesh.box(x, 0, sh, 0.05, d * 0.9, 0.22), material: frame, name: 'Armrest')
+            c.mesh(Mesh.box(x, 0, sh, 0.05, d * 0.9, 0.22), material: frame, name: 'Rukohvat')
           end
         end
       end
@@ -41,16 +41,16 @@ module ProjektniBiro
           h = e.num('height', 0.75)
           top = mat(e, 'material', 'timber')
           frame = mat(e, 'frameMaterial', 'steel_dark')
-          c.mesh(Mesh.box(0, 0, h - 0.05, l, w, 0.05), material: top, name: 'Table top')
+          c.mesh(Mesh.box(0, 0, h - 0.05, l, w, 0.05), material: top, name: 'Ploča stola')
           leg_x = [(l / 2) - 0.2, l * 0.3].min
-          [-leg_x, leg_x].each { |x| c.mesh(Mesh.box(x, 0, 0, 0.08, w * 0.7, h - 0.05), material: frame, name: 'Leg frame') }
+          [-leg_x, leg_x].each { |x| c.mesh(Mesh.box(x, 0, 0, 0.08, w * 0.7, h - 0.05), material: frame, name: 'Okvir nogu') }
           return unless e.bool('benches', true)
 
           bw = e.num('benchWidth', 0.3)
           [-1, 1].each do |s|
             y = s * ((w / 2) + (bw / 2) + 0.02)
-            c.mesh(Mesh.box(0, y, 0.40, l, bw, 0.05), material: top, name: 'Bench seat')
-            [-leg_x, leg_x].each { |x| c.mesh(Mesh.box(x, y, 0, 0.06, bw * 0.6, 0.40), material: frame, name: 'Bench support') }
+            c.mesh(Mesh.box(0, y, 0.40, l, bw, 0.05), material: top, name: 'Sjedište klupe')
+            [-leg_x, leg_x].each { |x| c.mesh(Mesh.box(x, y, 0, 0.06, bw * 0.6, 0.40), material: frame, name: 'Nosač klupe') }
           end
         end
       end
@@ -69,13 +69,13 @@ module ProjektniBiro
           count.times do |i|
             y = i * spacing
             if @ctx.conceptual?
-              c.mesh(Mesh.box(0, y, 0, w, 2 * r, h), material: material, name: 'Stand')
+              c.mesh(Mesh.box(0, y, 0, w, 2 * r, h), material: material, name: 'Stalak')
               next
             end
             x = (w / 2) - r
-            c.mesh(Mesh.tube([-x, y, 0], [-x, y, h - r], r, n), material: material, name: 'Leg', smooth: true)
-            c.mesh(Mesh.tube([x, y, 0], [x, y, h - r], r, n), material: material, name: 'Leg', smooth: true)
-            c.mesh(Mesh.tube([-x - r, y, h - r], [x + r, y, h - r], r, n), material: material, name: 'Top bar', smooth: true)
+            c.mesh(Mesh.tube([-x, y, 0], [-x, y, h - r], r, n), material: material, name: 'Noga', smooth: true)
+            c.mesh(Mesh.tube([x, y, 0], [x, y, h - r], r, n), material: material, name: 'Noga', smooth: true)
+            c.mesh(Mesh.tube([-x - r, y, h - r], [x + r, y, h - r], r, n), material: material, name: 'Gornja cijev', smooth: true)
           end
         end
       end
@@ -92,20 +92,20 @@ module ProjektniBiro
           sh = e.num('seatHeight', 0.45)
           material = mat(e, 'material', 'steel_dark')
           n = @ctx.conceptual? ? 6 : 10
-          c.mesh(Mesh.tube([-w / 2, 0, h], [w / 2, 0, h], r, n), material: material, name: 'Beam', smooth: true)
+          c.mesh(Mesh.tube([-w / 2, 0, h], [w / 2, 0, h], r, n), material: material, name: 'Greda', smooth: true)
           [-w / 2 + r, w / 2 - r].each do |x|
             [-spread / 2, spread / 2].each do |y|
-              c.mesh(Mesh.tube([x, y, 0], [x, 0, h - r], r, n), material: material, name: 'Leg', smooth: true)
+              c.mesh(Mesh.tube([x, y, 0], [x, 0, h - r], r, n), material: material, name: 'Noga', smooth: true)
             end
           end
           bay = (w - (4 * r)) / seats
           seats.times do |i|
             x = (-w / 2) + (2 * r) + ((i + 0.5) * bay)
-            c.mesh(Mesh.box(x, 0, sh, [0.45, bay * 0.6].min, 0.18, 0.03), material: 'rubber', name: 'Seat')
+            c.mesh(Mesh.box(x, 0, sh, [0.45, bay * 0.6].min, 0.18, 0.03), material: 'rubber', name: 'Sjedište')
             next if @ctx.conceptual?
 
             [-0.2, 0.2].each do |dx|
-              c.mesh(Mesh.tube([x + dx, 0, sh + 0.03], [x + dx, 0, h - r], 0.006, 4), material: 'steel_galv', name: 'Chain')
+              c.mesh(Mesh.tube([x + dx, 0, sh + 0.03], [x + dx, 0, h - r], 0.006, 4), material: 'steel_galv', name: 'Lanac')
             end
           end
         end

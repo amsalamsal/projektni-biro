@@ -57,20 +57,20 @@ class TestSketchupAdapter < Minitest::Test
     assert_equal 139, report.stats['created']
     assert_equal 139, managed.length
     root = @model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICT, 'role') == 'projectRoot' }
-    assert_equal 'Sample Residential Complex (Site Design Pro)', root.name
+    assert_equal 'Primjer: stambeni kompleks (Vanjsko uređenje PRO)', root.name
     containers = root.entities.grep(Sketchup::Group)
     names = containers.map(&:name)
-    assert_includes names, 'Planting and vegetation'
-    assert_includes names, 'Underground utilities'
-    containers.each { |c| assert c.layer&.name&.start_with?('SDP '), "#{c.name} is tagged" }
+    assert_includes names, 'Zelenilo'
+    assert_includes names, 'Podzemne instalacije'
+    containers.each { |c| assert c.layer&.name&.start_with?('VU '), "#{c.name} is tagged" }
     assert_equal 10, @model.pages.length
-    under = @model.pages['SDP 08 Underground utilities']
+    under = @model.pages['VU 08 Podzemne instalacije']
     assert under.xray
-    assert_equal false, under.layer_visibility['SDP Surfaces']
-    assert_equal true, under.layer_visibility['SDP Underground']
-    assert(@model.materials.any? { |m| m.name == 'SDP Lawn' })
+    assert_equal false, under.layer_visibility['VU Parter']
+    assert_equal true, under.layer_visibility['VU Podzemno']
+    assert(@model.materials.any? { |m| m.name == 'VU Travnjak' })
     assert_equal [6_550_000.0, 4_860_000.0, 520.0], root.get_attribute(DICT, 'origin')
-    assert_equal [[:start, 'Site Design Pro import'], [:commit]], @model.operations
+    assert_equal [[:start, 'Uvoz paketa Vanjsko uređenje PRO'], [:commit]], @model.operations
   end
 
   def test_units_conversion_positions_in_inches
@@ -130,7 +130,7 @@ class TestSketchupAdapter < Minitest::Test
     assert_in_delta Units.m_to_in(2.4), updated.definition.bounds.max.x - updated.definition.bounds.min.x, 1e-6
     gone = find(removed['id'])
     assert gone.get_attribute(DICT, 'deletedInSource')
-    assert_equal 'SDP Deleted in source', gone.layer.name
+    assert_equal 'VU Obrisano u izvoru', gone.layer.name
     refute gone.layer.visible?
     assert user.valid?
     assert_includes @model.entities.to_a, user
@@ -191,7 +191,7 @@ class TestSketchupAdapter < Minitest::Test
     bench = managed.find { |e| e.get_attribute(DICT, 'type') == 'furniture.bench' }
     id = bench.get_attribute(DICT, 'id')
     info = Editing.describe(@model, bench)
-    assert_equal 'Bench with backrest', info['typeName']
+    assert_equal 'Klupa s naslonom', info['typeName']
     assert(info['parameters'].any? { |p| p['key'] == 'length' && (p['value'] - 1.8).abs < 1e-9 })
 
     entity, rep = Editing.apply_parameters(@model, bench, { 'length' => '2.2', 'backrest' => 'false' }, catalog: @catalog)

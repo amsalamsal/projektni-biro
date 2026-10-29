@@ -6,18 +6,18 @@ module ProjektniBiro
     # scene) X-ray rendering. The user's current visibility and camera are restored afterwards.
     module Scenes
       REVIEW = 'review_zones'
-      SURFACE_GROUPS = %w[surfaces roads pedestrian_cycling planting buildings water].freeze
+      SURFACE_GROUPS = %w[terrain surfaces roads pedestrian_cycling planting buildings water].freeze
       DEFINITIONS = [
-        { name: 'SDP 01 Site plan', camera: :plan, hide: %w[review_zones underground] },
-        { name: 'SDP 02 3D overview', camera: :iso, hide: %w[review_zones underground] },
-        { name: 'SDP 03 Pedestrian areas', camera: :iso, show: %w[pedestrian_cycling surfaces furniture recreation buildings annotations] },
-        { name: 'SDP 04 Roads and parking', camera: :plan, show: %w[roads surfaces buildings annotations] },
-        { name: 'SDP 05 Landscape and planting', camera: :iso, show: %w[planting surfaces water buildings annotations] },
-        { name: 'SDP 06 Lighting', camera: :plan, show: %w[lighting surfaces buildings roads pedestrian_cycling annotations] },
-        { name: 'SDP 07 Water and drainage', camera: :iso, show: %w[water drainage surfaces buildings annotations] },
-        { name: 'SDP 08 Underground utilities', camera: :below, xray: true, show: %w[underground drainage buildings annotations review_zones] },
-        { name: 'SDP 09 Material review', camera: :iso, hide: %w[review_zones] },
-        { name: 'SDP 10 Presentation', camera: :perspective, hide: %w[review_zones underground annotations] }
+        { name: 'VU 01 Situacija', camera: :plan, hide: %w[review_zones underground] },
+        { name: 'VU 02 3D pregled', camera: :iso, hide: %w[review_zones underground] },
+        { name: 'VU 03 Pješačke površine', camera: :iso, show: %w[pedestrian_cycling surfaces furniture recreation buildings annotations] },
+        { name: 'VU 04 Saobraćajnice i parking', camera: :plan, show: %w[roads surfaces buildings annotations] },
+        { name: 'VU 05 Zelenilo i teren', camera: :iso, show: %w[terrain planting surfaces water buildings annotations] },
+        { name: 'VU 06 Rasvjeta', camera: :plan, show: %w[lighting surfaces buildings roads pedestrian_cycling annotations] },
+        { name: 'VU 07 Voda i odvodnja', camera: :iso, show: %w[terrain water drainage surfaces buildings annotations] },
+        { name: 'VU 08 Podzemne instalacije', camera: :below, xray: true, show: %w[underground drainage buildings annotations review_zones] },
+        { name: 'VU 09 Pregled materijala', camera: :iso, hide: %w[review_zones] },
+        { name: 'VU 10 Prezentacija', camera: :perspective, hide: %w[review_zones underground annotations] }
       ].freeze
 
       module_function

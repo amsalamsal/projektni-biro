@@ -20,6 +20,7 @@
     { "id": "information", "name": "Informativni i sigurnosni sistemi", "panel": "Information Systems", "modelGroup": "information", "nameEn": "Information Systems" }
   ],
   "modelGroups": [
+    { "id": "terrain", "name": "Teren", "tag": "VU Teren", "order": 0, "nameEn": "Terrain", "legacyTag": "SDP Terrain" },
     { "id": "buildings", "name": "Objekti i reference", "tag": "VU Objekti", "order": 1, "nameEn": "Buildings and references", "legacyTag": "SDP Buildings" },
     { "id": "roads", "name": "Saobraćajnice i parking", "tag": "VU Saobraćajnice i parking", "order": 2, "nameEn": "Roads and traffic", "legacyTag": "SDP Roads and parking" },
     { "id": "pedestrian_cycling", "name": "Pješačka i biciklistička infrastruktura", "tag": "VU Pješaci i biciklisti", "order": 3, "nameEn": "Pedestrian and cycling infrastructure", "legacyTag": "SDP Pedestrian and cycling" },

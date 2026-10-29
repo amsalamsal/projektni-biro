@@ -21,7 +21,7 @@ module ProjektniBiro
         @package_id = package_id
         @origin = origin
         @changes = []
-        @report = Report.new('SketchUp change export')
+        @report = Report.new('Izvoz izmjena iz SketchUp-a')
       end
 
       # imported: { position: [x,y,z], rotation: r } stored at import (metres, package frame) or nil
@@ -32,16 +32,16 @@ module ProjektniBiro
                             parameters: params.dup, position: nil, rotation: nil)
         if kind == 'point' && imported && current
           if current[:tilted] || current[:scaled]
-            @report.add(:warning, 'SDP-X010', id, 'Object was scaled or tilted in SketchUp; only position and rotation about the vertical axis can be sent back.',
-                        'Reset scale/tilt or update the element in AutoCAD manually.', label)
+            @report.add(:warning, 'SDP-X010', id, 'Objekat je skaliran ili nagnut u SketchUp-u; nazad se šalju samo položaj i rotacija oko vertikalne ose.',
+                        'Poništite skaliranje/nagib ili ažurirajte element ručno u AutoCAD-u.', label)
           end
           moved = (0..2).any? { |k| (current[:position][k] - imported[:position][k]).abs > POSITION_TOL }
           turned = angle_diff(current[:rotation], imported[:rotation]) > ROTATION_TOL
           change.position = current[:position].map { |v| v.round(6) } if moved
           change.rotation = normalize(current[:rotation]).round(9) if moved || turned
         elsif geometry_modified
-          @report.add(:info, 'SDP-X011', id, "Geometry of this #{kind} element was edited in SketchUp; such edits are not transferred to AutoCAD.",
-                      'Make the change in AutoCAD and re-import, or keep it as a SketchUp-only customisation.', label)
+          @report.add(:info, 'SDP-X011', id, "Geometrija ovog elementa (#{kind == 'path' ? 'trasa' : 'površina'}) izmijenjena je u SketchUp-u; takve izmjene se ne prenose u AutoCAD.",
+                      'Izmjenu napravite u AutoCAD-u i ponovo uvezite, ili je zadržite samo u SketchUp-u.', label)
         end
         return nil if change.parameters.empty? && change.position.nil? && change.rotation.nil?
 

@@ -73,7 +73,7 @@ class TestBuilders < Minitest::Test
     back = canvas.world_polygons(node).select { |_p| true }
     refute_empty back
     # backrest (local +Y) points to world -X after a 90 degree rotation
-    backrest = canvas.definitions.values.first.children.find { |c| c.name == 'Backrest' }
+    backrest = canvas.definitions.values.first.children.find { |c| c.name == 'Naslon' }
     bx = backrest.polygons.flatten(1).map { |p| p[1] }.max
     assert_operator bx, :>, 0.2
     world_backrest = canvas.world_polygons(node).flatten(1).select { |p| p[2] > 0.6 }
@@ -117,7 +117,7 @@ class TestBuilders < Minitest::Test
     min, max = bbox(canvas, node)
     assert_in_delta 0.15 - 2.4, min[2], 1e-9
     assert_in_delta 1.15, max[2], 1e-9
-    body = canvas.definitions.values.first.children.find { |c| c.name.start_with?('Container body') }
+    body = canvas.definitions.values.first.children.find { |c| c.name.start_with?('Tijelo kontejnera') }
     zs = body.polygons.flatten(1).map { |p| p[2] }
     assert_in_delta(-2.4, zs.min, 1e-9)
     assert_operator zs.max, :<, 0.0, 'body stays below ground'
@@ -128,7 +128,7 @@ class TestBuilders < Minitest::Test
     min, max = bbox(canvas, node)
     assert_in_delta(-1.7, min[2], 1e-9) # body depth 1.5 + 0.2 excavation allowance
     assert_operator max[2], :>, 1.2
-    assert(canvas.definitions.values.any? { |d| d.children.any? { |c| c.name == 'Excavation envelope' } })
+    assert(canvas.definitions.values.any? { |d| d.children.any? { |c| c.name == 'Gabarit iskopa' } })
   end
 
   def test_light_pole_height_and_arm_direction
@@ -143,7 +143,7 @@ class TestBuilders < Minitest::Test
   def test_fence_posts_follow_spacing_and_curves
     geometry = { 'kind' => 'path', 'vertices' => [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [10.0, 6.0, 0.0]], 'closed' => false }
     canvas, node, = build_one('wall.mesh_fence', parameters: { 'postSpacing' => 2.5, 'height' => 2.0 }, geometry: geometry)
-    posts = canvas.find_all { |n| n.kind == :instance && n.name == 'Post' }
+    posts = canvas.find_all { |n| n.kind == :instance && n.name == 'Stub' }
     assert_equal 8, posts.length # 10 m -> 4 bays of 2.5 m, 6 m -> 3 bays of 2.0 m, shared corner post
     assert_includes posts.map { |p| p.origin.map { |v| v.round(6) } }, [10.0, 0.0, 0.0]
     min, max = bbox(canvas, node)
@@ -157,7 +157,7 @@ class TestBuilders < Minitest::Test
   def test_fence_follows_terrain
     geometry = { 'kind' => 'path', 'vertices' => [[0.0, 0.0, 0.0], [10.0, 0.0, 1.0]], 'closed' => false }
     canvas, node, = build_one('wall.mesh_fence', parameters: { 'postSpacing' => 2.5 }, geometry: geometry)
-    posts = canvas.find_all { |n| n.kind == :instance && n.name == 'Post' }
+    posts = canvas.find_all { |n| n.kind == :instance && n.name == 'Stub' }
     assert_equal [0.0, 0.25, 0.5, 0.75, 1.0], posts.map { |p| p.origin[2].round(6) }
     assert_empty canvas.manifold_errors
     assert_in_delta 1.0 + 2.02, canvas.bounds(node)[1][2], 1e-6 # post height 2.0 + 0.02 cap at the high end
@@ -183,13 +183,13 @@ class TestBuilders < Minitest::Test
   def test_wall_alignment_and_footing
     geometry = { 'kind' => 'path', 'vertices' => [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]], 'closed' => false }
     canvas, node, = build_one('wall.retaining', parameters: { 'alignment' => 'left', 'thickness' => 0.3, 'footingWidth' => 1.2, 'footingDepth' => 0.4 }, geometry: geometry)
-    wall = canvas.find('Wall')
+    wall = canvas.find('Zid')
     ys = wall.polygons.flatten(1).map { |p| p[1] }
     assert_in_delta 0.0, ys.min, 1e-9
     assert_in_delta 0.3, ys.max, 1e-9
     min, = bbox(canvas, node)
     assert_in_delta(-0.4, min[2], 1e-9)
-    footing = canvas.find('Footing')
+    footing = canvas.find('Temelj')
     fy = footing.polygons.flatten(1).map { |p| p[1] }
     assert_in_delta 0.15 - 0.6, fy.min, 1e-9 # centred on the wall
   end
@@ -200,15 +200,15 @@ class TestBuilders < Minitest::Test
     assert_in_delta(-1.75, min[2], 1e-9)
     assert_in_delta 0.0, max[2], 1e-9
     assert_in_delta 8.5, max[0] - min[0], 1e-9
-    water = canvas.find('Water')
+    water = canvas.find('Voda')
     assert_in_delta(-0.1, water.polygons.flatten(1).map { |p| p[2] }.max, 1e-9)
   end
 
   def test_pergola_structure
     canvas, node, = build_one('structure.pergola', parameters: { 'height' => 2.6, 'columnSpacing' => 3.5, 'rafterSpacing' => 0.6 })
-    columns = canvas.find_all { |n| n.kind == :instance && n.name == 'Column' }
+    columns = canvas.find_all { |n| n.kind == :instance && n.name == 'Stub' }
     assert_equal 10, columns.length # 8 m sides: 4 columns each (3 bays <= 3.5 m); 5 m sides: one intermediate each
-    rafters = canvas.find_all { |n| n.kind == :instance && n.name == 'Rafter' }
+    rafters = canvas.find_all { |n| n.kind == :instance && n.name == 'Rožnjača' }
     assert_equal 14, rafters.length
     min, max = bbox(canvas, node)
     assert_in_delta 2.6 + 0.25 + 0.15, max[2], 1e-6
@@ -229,7 +229,7 @@ class TestBuilders < Minitest::Test
   def test_steps_and_ramp_rise
     canvas, node, = build_one('level.steps', parameters: { 'totalRise' => 0.6, 'riserHeight' => 0.15 })
     assert_in_delta 0.6, canvas.bounds(node)[1][2], 1e-9
-    assert_match(/4 risers/, canvas.find_all { |n| n.kind == :mesh }.first.name)
+    assert_match(/4 stepenika/, canvas.find_all { |n| n.kind == :mesh }.first.name)
     canvas, node, = build_one('level.ramp', parameters: { 'rise' => 0.3, 'thickness' => 0.2 })
     min, max = canvas.bounds(node)
     assert_in_delta 0.3, max[2], 1e-9
@@ -240,10 +240,10 @@ class TestBuilders < Minitest::Test
     canvas, node, = build_one('water.retention_basin', parameters: { 'depth' => 1.0, 'sideSlope' => 1.0, 'waterDepth' => 0.5 })
     min, = canvas.bounds(node)
     assert_in_delta(-1.0, min[2], 1e-9)
-    water = canvas.find('Water surface')
+    water = canvas.find('Vodena površina')
     zs = water.polygons.flatten(1).map { |p| p[2] }.uniq
     assert_equal [-0.5], zs.map { |z| z.round(9) }
-    floor = canvas.find('Basin').polygons.first
+    floor = canvas.find('Korito').polygons.first
     assert_in_delta 6.0, floor.map { |p| p[0] }.max - floor.map { |p| p[0] }.min, 1e-9
   end
 
@@ -284,6 +284,6 @@ class TestBuilders < Minitest::Test
     canvas = RecordingCanvas.new
     ElementBuilder.build(pkg.elements.first, canvas, ctx)
     assert(ctx.report.issues.any? { |i| i.code == 'SDP-M001' })
-    assert_equal 'default', canvas.find('Surface').material
+    assert_equal 'default', canvas.find('Površina').material
   end
 end

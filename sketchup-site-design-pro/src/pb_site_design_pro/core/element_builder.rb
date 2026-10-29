@@ -15,13 +15,13 @@ module ProjektniBiro
       def build(element, canvas, ctx, attributes = {})
         klass = Builders.for(element.builder)
         unless klass
-          ctx.report.add(:warning, 'SDP-B100', element.id, "No 3D builder for '#{element.builder}' (type #{element.type_id}); element skipped.",
-                         'Update Site Design Pro for SketchUp or map the type to a component in the library.', element.label)
+          ctx.report.add(:warning, 'SDP-B100', element.id, "Nema 3D generatora za '#{element.builder}' (tip #{element.type_id}); element je preskočen.",
+                         'Ažurirajte Vanjsko uređenje PRO za SketchUp ili tipu dodijelite komponentu u biblioteci.', element.label)
           return nil
         end
         if klass.geometry != element.kind
-          ctx.report.add(:error, 'SDP-B101', element.id, "Builder '#{element.builder}' expects #{klass.geometry} geometry, got #{element.kind}.",
-                         'Re-export the package.', element.label)
+          ctx.report.add(:error, 'SDP-B101', element.id, "Generator '#{element.builder}' očekuje geometriju #{klass.geometry}, a dobio je #{element.kind}.",
+                         'Ponovo izvezite paket.', element.label)
           return nil
         end
 
@@ -35,8 +35,8 @@ module ProjektniBiro
           canvas.group(element.display_name, attributes) { |gc| builder.build(element, gc) }
         end
       rescue ArgumentError, ZeroDivisionError, FloatDomainError, TypeError, NoMethodError, KeyError, RangeError => e
-        ctx.report.add(:error, 'SDP-B999', element.id, "Geometry reconstruction failed: #{e.class}: #{e.message}",
-                       'Check the element geometry and parameters in AutoCAD (SDPVALIDATE); please report reproducible failures.', element.label)
+        ctx.report.add(:error, 'SDP-B999', element.id, "Rekonstrukcija geometrije nije uspjela: #{e.class}: #{e.message}",
+                       'Provjerite geometriju i parametre elementa u AutoCAD-u (SDPVALIDATE); prijavite grešku ako se ponavlja.', element.label)
         nil
       end
     end

@@ -17,11 +17,19 @@ class TestPackageReader < Minitest::Test
 
   def test_sample_metadata_units_and_origin
     pkg, = PackageReader.read(SAMPLE_ZIP)
-    assert_equal 'Sample Residential Complex', pkg.project_name
+    assert_equal 'Primjer: stambeni kompleks', pkg.project_name
     assert_equal 'mm', pkg.units['sourceLengthUnit']
     assert_in_delta 0.001, pkg.units['sourceUnitsToMeters'], 1e-12
     assert_equal [6_550_000.0, 4_860_000.0, 520.0], pkg.origin
-    building = pkg.elements.find { |e| e.name == 'Building A' }
+    # schema 1.1: elevation datum and terrain
+    assert_in_delta 520.15, pkg.building_zero_absolute, 1e-9
+    assert_in_delta 520.0, pkg.package_zero_absolute, 1e-9
+    assert_equal 1, pkg.terrains.length
+    terrain = pkg.terrains.first
+    assert_equal 'Postojeći teren', terrain.name
+    assert_operator terrain.triangle_count, :>, 100
+    assert(terrain.triangles.flatten.all? { |i| i < terrain.vertices.length })
+    building = pkg.elements.find { |e| e.name == 'Objekat A' }
     assert_equal 'massing', building.builder
     assert_in_delta 18.0, building.num('height'), 1e-9
     # package frame: metres relative to the project origin (converted from millimetres by the exporter)
@@ -53,7 +61,7 @@ class TestPackageReader < Minitest::Test
     major = JSON.parse(m).merge('schemaVersion' => '2.0.0')
     pkg, rep = PackageReader.read_strings(JSON.generate(major), g)
     assert_nil pkg
-    assert(rep.issues.any? { |i| i.code == 'SDP-F001' && i.message.include?('unsupported schema version') })
+    assert(rep.issues.any? { |i| i.code == 'SDP-F001' && i.message.include?('nepodržana verzija sheme') })
   end
 
   def test_rejects_foreign_documents_and_wrong_units

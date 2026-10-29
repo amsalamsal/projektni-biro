@@ -1,4 +1,4 @@
-/* Shared helpers for Site Design Pro dialogs. Works without network access. */
+/* Zajedničke funkcije dijaloga Vanjsko uređenje PRO. Rade bez mrežnog pristupa. */
 (function () {
   'use strict';
   var sdp = window.sdp = window.sdp || {};
@@ -33,9 +33,13 @@
     return '<span class="badge b-' + sdp.esc(cls) + '">' + sdp.esc(text) + '</span>';
   };
 
+  // Bosnian number format: decimal comma, no thousands separator, trailing zeros removed (518,56).
   sdp.fmt = function (v, digits) {
-    if (typeof v !== 'number') { return sdp.esc(v); }
-    return v.toLocaleString(undefined, { maximumFractionDigits: digits === undefined ? 3 : digits });
+    if (typeof v !== 'number' || !isFinite(v)) { return sdp.esc(v); }
+    var s = v.toFixed(digits === undefined ? 3 : digits);
+    if (s.indexOf('.') >= 0) { s = s.replace(/0+$/, '').replace(/\.$/, ''); }
+    if (s === '-0') { s = '0'; }
+    return s.replace('.', ',');
   };
 
   document.addEventListener('keydown', function (e) {

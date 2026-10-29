@@ -7,7 +7,7 @@ module ProjektniBiro
       class BoxEquipment < PointBuilder
         def build(e, c)
           z0 = e.num('baseOffset')
-          c.mesh(Mesh.box(0, 0, z0, e.num('width', 1.0), e.num('depth', 0.6), e.num('height', 1.2)), material: mat(e, 'material', 'steel_dark'), name: 'Body')
+          c.mesh(Mesh.box(0, 0, z0, e.num('width', 1.0), e.num('depth', 0.6), e.num('height', 1.2)), material: mat(e, 'material', 'steel_dark'), name: 'Tijelo')
         end
       end
       register('box_equipment', BoxEquipment)
@@ -16,7 +16,7 @@ module ProjektniBiro
         def build(e, c)
           z0 = e.num('baseOffset')
           n = @ctx.segments(16)
-          c.mesh(Mesh.cylinder([0, 0, z0], e.num('diameter', 0.6) / 2, e.num('height', 1.0), n), material: mat(e, 'material', 'steel_dark'), name: 'Body', smooth: true)
+          c.mesh(Mesh.cylinder([0, 0, z0], e.num('diameter', 0.6) / 2, e.num('height', 1.0), n), material: mat(e, 'material', 'steel_dark'), name: 'Tijelo', smooth: true)
         end
       end
       register('cylinder_equipment', CylinderEquipment)
@@ -32,19 +32,19 @@ module ProjektniBiro
           hh = e.num('headHeight', 0.12)
           pole_mat = mat(e, 'poleMaterial', 'steel_dark')
           head_mat = mat(e, 'headMaterial', 'luminaire')
-          c.mesh(Mesh.cylinder([0, 0, 0], r, h, @ctx.segments(12)), material: pole_mat, name: 'Pole', smooth: true)
+          c.mesh(Mesh.cylinder([0, 0, 0], r, h, @ctx.segments(12)), material: pole_mat, name: 'Stub', smooth: true)
           if arm > 1e-6
-            c.mesh(Mesh.box(arm / 2, 0, h - 0.06, arm, 0.05, 0.05), material: pole_mat, name: 'Arm')
-            c.mesh(Mesh.box(arm + (hl / 2) - 0.05, 0, h - hh - 0.02, hl, hw, hh), material: head_mat, name: 'Head')
+            c.mesh(Mesh.box(arm / 2, 0, h - 0.06, arm, 0.05, 0.05), material: pole_mat, name: 'Krak')
+            c.mesh(Mesh.box(arm + (hl / 2) - 0.05, 0, h - hh - 0.02, hl, hw, hh), material: head_mat, name: 'Glava')
           else
-            c.mesh(Mesh.box(0, 0, h, hl, hw, hh), material: head_mat, name: 'Head')
+            c.mesh(Mesh.box(0, 0, h, hl, hw, hh), material: head_mat, name: 'Glava')
           end
           return unless e.bool('solarPanel')
 
           tilt = Units.deg_to_rad(30)
           corner = [-0.4, -0.25 * Math.cos(tilt), h + 0.15]
           c.mesh(Mesh.block(corner, [0.8, 0, 0], [0, 0.5 * Math.cos(tilt), 0.5 * Math.sin(tilt)], [0, -0.03 * Math.sin(tilt), 0.03 * Math.cos(tilt)]),
-                 material: 'solar_pv', name: 'Solar panel')
+                 material: 'solar_pv', name: 'Solarni panel')
         end
       end
       register('pole_mounted', PoleMounted)
@@ -56,10 +56,10 @@ module ProjektniBiro
           n = @ctx.segments(16)
           material = mat(e, 'material', 'steel_dark')
           if e.bool('lit') && h > 0.2
-            c.mesh(Mesh.cylinder([0, 0, 0], r, h - 0.12, n), material: material, name: 'Body', smooth: true)
-            c.mesh(Mesh.cylinder([0, 0, h - 0.12], r, 0.12, n), material: 'luminaire', name: 'Light', smooth: true)
+            c.mesh(Mesh.cylinder([0, 0, 0], r, h - 0.12, n), material: material, name: 'Tijelo', smooth: true)
+            c.mesh(Mesh.cylinder([0, 0, h - 0.12], r, 0.12, n), material: 'luminaire', name: 'Svjetiljka', smooth: true)
           else
-            c.mesh(Mesh.cylinder([0, 0, 0], r, h, n), material: material, name: 'Body', smooth: true)
+            c.mesh(Mesh.cylinder([0, 0, 0], r, h, n), material: material, name: 'Tijelo', smooth: true)
           end
         end
       end
@@ -83,7 +83,7 @@ module ProjektniBiro
                when 1 then [0.0]
                else [-pw * 0.4, pw * 0.4]
                end
-          xs.each { |x| c.mesh(Mesh.cylinder([x, 0, 0], pr, ph, n), material: post_mat, name: 'Post', smooth: true) }
+          xs.each { |x| c.mesh(Mesh.cylinder([x, 0, 0], pr, ph, n), material: post_mat, name: 'Stub', smooth: true) }
           y = posts.zero? ? 0.0 : -(pr + (pt / 2))
           case e.text('plateShape', 'rectangle')
           when 'circle'
@@ -122,19 +122,19 @@ module ProjektniBiro
           material = mat(e, 'material', 'steel_dark')
           px = (w / 2) + (post / 2)
           kind = e.text('gateType', 'swing_single')
-          [-px, px].each { |x| c.mesh(Mesh.box(x, 0, 0, post, post, (kind == 'barrier' ? 1.0 : h + 0.05)), material: material, name: 'Gate post') }
+          [-px, px].each { |x| c.mesh(Mesh.box(x, 0, 0, post, post, (kind == 'barrier' ? 1.0 : h + 0.05)), material: material, name: 'Stub kapije') }
           case kind
           when 'barrier'
-            c.mesh(Mesh.box(-px, 0.35, 0, 0.3, 0.3, 1.0), material: material, name: 'Barrier housing')
-            c.mesh(Mesh.tube([-w / 2, 0, h * 0.9], [w / 2 - 0.05, 0, h * 0.9], 0.04, 8), material: 'line_paint_white', name: 'Boom', smooth: true)
+            c.mesh(Mesh.box(-px, 0.35, 0, 0.3, 0.3, 1.0), material: material, name: 'Kućište rampe')
+            c.mesh(Mesh.tube([-w / 2, 0, h * 0.9], [w / 2 - 0.05, 0, h * 0.9], 0.04, 8), material: 'line_paint_white', name: 'Krak rampe', smooth: true)
           when 'swing_double'
             half = (w / 2) - 0.015
-            c.mesh(Mesh.box(-w / 4, 0, 0.05, half, lt, h - 0.05), material: material, name: 'Leaf')
-            c.mesh(Mesh.box(w / 4, 0, 0.05, half, lt, h - 0.05), material: material, name: 'Leaf')
+            c.mesh(Mesh.box(-w / 4, 0, 0.05, half, lt, h - 0.05), material: material, name: 'Krilo')
+            c.mesh(Mesh.box(w / 4, 0, 0.05, half, lt, h - 0.05), material: material, name: 'Krilo')
           when 'sliding'
-            c.mesh(Mesh.box(-0.1, -(post / 2) - (lt / 2) - 0.02, 0.05, w + 0.2, lt, h - 0.05), material: material, name: 'Sliding leaf')
+            c.mesh(Mesh.box(-0.1, -(post / 2) - (lt / 2) - 0.02, 0.05, w + 0.2, lt, h - 0.05), material: material, name: 'Klizno krilo')
           else
-            c.mesh(Mesh.box(0, 0, 0.05, w - 0.02, lt, h - 0.05), material: material, name: 'Leaf')
+            c.mesh(Mesh.box(0, 0, 0.05, w - 0.02, lt, h - 0.05), material: material, name: 'Krilo')
           end
         end
       end
@@ -156,9 +156,9 @@ module ProjektniBiro
           rows.times do |r|
             y0 = r * pitch
             per_row.times do |m|
-              c.instance(key, [m * mw, y0, low], 0.0, name: 'PV module') do |dc|
+              c.instance(key, [m * mw, y0, low], 0.0, name: 'FN modul') do |dc|
                 dc.mesh(Mesh.block([0.01, 0, 0], [mw - 0.02, 0, 0], [0, ml * Math.cos(tilt), ml * Math.sin(tilt)],
-                                   [0, -0.04 * Math.sin(tilt), 0.04 * Math.cos(tilt)]), material: material, name: 'Module')
+                                   [0, -0.04 * Math.sin(tilt), 0.04 * Math.cos(tilt)]), material: material, name: 'Modul')
               end
             end
             next if @ctx.conceptual?
@@ -166,9 +166,9 @@ module ProjektniBiro
             supports = [(per_row / 2.0).ceil, 1].max
             supports.times do |s|
               x = (s + 0.5) * per_row * mw / supports
-              c.mesh(Mesh.box(x, y0 + 0.1, 0, 0.06, 0.06, low), material: frame, name: 'Front leg')
+              c.mesh(Mesh.box(x, y0 + 0.1, 0, 0.06, 0.06, low), material: frame, name: 'Prednja noga')
               back_h = low + (ml * Math.sin(tilt)) - 0.1
-              c.mesh(Mesh.box(x, y0 + (ml * Math.cos(tilt)) - 0.15, 0, 0.06, 0.06, back_h), material: frame, name: 'Rear leg')
+              c.mesh(Mesh.box(x, y0 + (ml * Math.cos(tilt)) - 0.15, 0, 0.06, 0.06, back_h), material: frame, name: 'Stražnja noga')
             end
           end
         end
@@ -184,14 +184,14 @@ module ProjektniBiro
           rh = e.num('rotorHeight', 2.5)
           material = mat(e, 'material', 'steel_galv')
           rotor = mat(e, 'rotorMaterial', 'aluminium')
-          c.mesh(Mesh.cylinder([0, 0, 0], mr, mh + rh, @ctx.segments(12)), material: material, name: 'Mast', smooth: true)
+          c.mesh(Mesh.cylinder([0, 0, 0], mr, mh + rh, @ctx.segments(12)), material: material, name: 'Stub', smooth: true)
           3.times do |i|
             a = i * 2 * Math::PI / 3
             x = Math.cos(a) * rr
             y = Math.sin(a) * rr
-            c.mesh(Mesh.box(x, y, mh, 0.04, 0.25, rh, a), material: rotor, name: 'Blade')
+            c.mesh(Mesh.box(x, y, mh, 0.04, 0.25, rh, a), material: rotor, name: 'Lopatica')
             [mh + 0.1, mh + rh - 0.1].each do |z|
-              c.mesh(Mesh.tube([Math.cos(a) * mr, Math.sin(a) * mr, z], [x * 0.97, y * 0.97, z], 0.015, 6), material: material, name: 'Spoke')
+              c.mesh(Mesh.tube([Math.cos(a) * mr, Math.sin(a) * mr, z], [x * 0.97, y * 0.97, z], 0.015, 6), material: material, name: 'Krak')
             end
           end
         end

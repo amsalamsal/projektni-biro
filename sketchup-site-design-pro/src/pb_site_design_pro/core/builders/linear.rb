@@ -14,7 +14,7 @@ module ProjektniBiro
           if e.geometry[:closed]
             build_closed_ring(e, c, pts, w, top, bottom, material)
           else
-            c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, bottom, top)), material: material, name: 'Strip')
+            c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, bottom, top)), material: material, name: 'Traka')
           end
         end
 
@@ -25,10 +25,10 @@ module ProjektniBiro
           outer = Geometry.offset_ring(pts, w / 2)
           inner = Geometry.offset_ring(pts, -w / 2)
           if outer && inner
-            c.mesh(Mesh.prism(outer, z + bottom, z + top, [inner]), material: material, name: 'Strip')
+            c.mesh(Mesh.prism(outer, z + bottom, z + top, [inner]), material: material, name: 'Traka')
           else
-            warn(e, 'SDP-B002', 'Closed centreline is too tight for its width; built as an open strip.', 'Check the width and the alignment.')
-            c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, bottom, top), true), material: material, name: 'Strip')
+            warn(e, 'SDP-B002', 'Zatvorena osovina je preuska za zadanu širinu; izrađena je kao otvorena traka.', 'Provjerite širinu i trasu.')
+            c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, bottom, top), true), material: material, name: 'Traka')
           end
         end
       end
@@ -47,14 +47,14 @@ module ProjektniBiro
           z0 = e.num('baseOffset')
           closed = e.geometry[:closed]
           c.mesh(Mesh.sweep(pts, rect_profile(left, right, z0, z0 + e.num('height', 1.0)), closed),
-                 material: mat(e, 'material', 'concrete'), name: 'Wall')
+                 material: mat(e, 'material', 'concrete'), name: 'Zid')
           fw = e.num('footingWidth')
           fd = e.num('footingDepth')
           return unless fw.positive? && fd.positive?
 
           centre = (left - right) / 2.0
           c.mesh(Mesh.sweep(pts, rect_profile(centre + (fw / 2), (fw / 2) - centre, z0 - fd, z0), closed),
-                 material: 'concrete', name: 'Footing')
+                 material: 'concrete', name: 'Temelj')
         end
       end
       register('wall', Wall)
@@ -66,7 +66,7 @@ module ProjektniBiro
           h = e.num('height', 1.8)
           if @ctx.conceptual?
             pts = path_points(e)
-            c.mesh(Mesh.sweep(pts, rect_profile(0.02, 0.02, 0.0, h), g[:closed]), material: mat(e, 'panelMaterial', 'steel_galv'), name: 'Fence (conceptual)')
+            c.mesh(Mesh.sweep(pts, rect_profile(0.02, 0.02, 0.0, h), g[:closed]), material: mat(e, 'panelMaterial', 'steel_galv'), name: 'Ograda (šematski)')
             return
           end
 
@@ -76,10 +76,10 @@ module ProjektniBiro
           foundation = e.num('foundationDepth')
           post_key = "fence-post|#{fmt(post)}|#{fmt(h)}|#{fmt(foundation)}|#{post_mat}|#{@ctx.lod}"
           stations.each do |s|
-            c.instance(post_key, s, 0.0, name: 'Post') do |dc|
-              dc.mesh(Mesh.box(0, 0, 0, post, post, h + 0.02), material: post_mat, name: 'Post')
+            c.instance(post_key, s, 0.0, name: 'Stub') do |dc|
+              dc.mesh(Mesh.box(0, 0, 0, post, post, h + 0.02), material: post_mat, name: 'Stub')
               if foundation.positive?
-                dc.mesh(Mesh.cylinder([0, 0, -foundation], post * 2.5, foundation, 8), material: 'concrete', name: 'Post foundation')
+                dc.mesh(Mesh.cylinder([0, 0, -foundation], post * 2.5, foundation, 8), material: 'concrete', name: 'Temelj stuba')
               end
             end
           end
@@ -126,8 +126,8 @@ module ProjektniBiro
           end
 
           rail = [0.04, h * 0.1].min
-          c.mesh(Mesh.block(corner, xv, yv, [0.0, 0.0, rail]), material: material, name: 'Bottom rail')
-          c.mesh(Mesh.block(Mesh.add3(corner, [0.0, 0.0, h - rail]), xv, yv, [0.0, 0.0, rail]), material: material, name: 'Top rail')
+          c.mesh(Mesh.block(corner, xv, yv, [0.0, 0.0, rail]), material: material, name: 'Donja prečka')
+          c.mesh(Mesh.block(Mesh.add3(corner, [0.0, 0.0, h - rail]), xv, yv, [0.0, 0.0, rail]), material: material, name: 'Gornja prečka')
           inner = [corner[0], corner[1], corner[2] + rail]
           ih = h - (2 * rail)
           return if ih <= 0.01
@@ -141,11 +141,11 @@ module ProjektniBiro
             count.times do |i|
               at = ((i + 0.5) * length / count) - (bar / 2)
               base = Mesh.add3(Mesh.add3(inner, Mesh.scale3(unit, at)), ym)
-              c.mesh(Mesh.block(base, Mesh.scale3(unit, bar), Mesh.scale3(yv, 0.5), [0.0, 0.0, ih]), material: material, name: 'Bar')
+              c.mesh(Mesh.block(base, Mesh.scale3(unit, bar), Mesh.scale3(yv, 0.5), [0.0, 0.0, ih]), material: material, name: 'Šipka')
             end
           else
             ym = Mesh.scale3(yv, 0.4)
-            c.mesh(Mesh.block(Mesh.add3(inner, ym), xv, Mesh.scale3(yv, 0.2), [0.0, 0.0, ih]), material: material, name: 'Mesh infill')
+            c.mesh(Mesh.block(Mesh.add3(inner, ym), xv, Mesh.scale3(yv, 0.2), [0.0, 0.0, ih]), material: material, name: 'Mrežna ispuna')
           end
         end
       end
@@ -160,8 +160,8 @@ module ProjektniBiro
           w = e.num('width', 0.15)
           depth = e.num('depth', 0.25)
           closed = e.geometry[:closed]
-          c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, -depth, -GRATE), closed), material: mat(e, 'bodyMaterial', 'concrete_precast'), name: 'Channel body')
-          c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, -GRATE, 0.0), closed), material: mat(e, 'grateMaterial', 'grate_steel'), name: 'Grate')
+          c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, -depth, -GRATE), closed), material: mat(e, 'bodyMaterial', 'concrete_precast'), name: 'Tijelo kanala')
+          c.mesh(Mesh.sweep(pts, rect_profile(w / 2, w / 2, -GRATE, 0.0), closed), material: mat(e, 'grateMaterial', 'grate_steel'), name: 'Rešetka')
         end
       end
       register('channel', Channel)
@@ -173,7 +173,7 @@ module ProjektniBiro
           r = e.num('diameter', 0.2) / 2
           n = @ctx.conceptual? ? 6 : @ctx.segments(12)
           c.mesh(Mesh.sweep(pts, circle_profile(r, n, e.num('axisOffset', -1.0)), e.geometry[:closed]),
-                 material: mat(e, 'material', 'hdpe'), name: 'Pipe', smooth: true)
+                 material: mat(e, 'material', 'hdpe'), name: 'Cijev', smooth: true)
         end
       end
       register('pipe', Pipe)
@@ -189,11 +189,11 @@ module ProjektniBiro
           r = e.num('postDiameter', 0.2) / 2
           material = mat(e, 'material', 'steel_galv')
           n = @ctx.segments(12)
-          c.mesh(Mesh.cylinder(a, r, ha, n), material: material, name: 'Start post', smooth: true)
-          c.mesh(Mesh.cylinder(b, r, hb, n), material: material, name: 'End post', smooth: true)
+          c.mesh(Mesh.cylinder(a, r, ha, n), material: material, name: 'Početni stub', smooth: true)
+          c.mesh(Mesh.cylinder(b, r, hb, n), material: material, name: 'Krajnji stub', smooth: true)
           top_a = [a[0], a[1], a[2] + ha - 0.15]
           top_b = [b[0], b[1], b[2] + hb - 0.15]
-          c.mesh(Mesh.tube(top_a, top_b, e.num('cableDiameter', 0.02) / 2, 6), material: material, name: 'Cable')
+          c.mesh(Mesh.tube(top_a, top_b, e.num('cableDiameter', 0.02) / 2, 6), material: material, name: 'Sajla')
         end
       end
       register('cable_line', CableLine)

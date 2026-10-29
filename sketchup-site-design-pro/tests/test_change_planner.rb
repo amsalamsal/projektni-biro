@@ -88,7 +88,7 @@ class TestChangePlanner < Minitest::Test
   def test_invalid_policy_rejected_and_summary
     assert_raises(ArgumentError) { ChangePlanner.new(modified: 'merge') }
     plan = ChangePlanner.new.plan(@pkg, [])
-    assert_equal 'New: 5', plan.summary
+    assert_equal 'Novo: 5', plan.summary
     assert_equal 5, plan.to_h['actions'].length
   end
 end

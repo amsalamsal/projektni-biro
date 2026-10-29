@@ -8,7 +8,7 @@ module ProjektniBiro
         def build(e, c)
           outer, holes = polygon_rings(e)
           top = base_z(outer) + e.num('topOffset')
-          c.mesh(Mesh.prism(outer, top - e.num('thickness', 0.08), top, holes), material: mat(e, 'material'), name: 'Surface')
+          c.mesh(Mesh.prism(outer, top - e.num('thickness', 0.08), top, holes), material: mat(e, 'material'), name: 'Površina')
         end
       end
       register('slab', Slab)
@@ -18,7 +18,7 @@ module ProjektniBiro
         def build(e, c)
           outer, holes = polygon_rings(e)
           z0 = base_z(outer) + e.num('baseOffset')
-          c.mesh(Mesh.prism(outer, z0, z0 + e.num('height', 12.0), holes), material: mat(e, 'material', 'building_massing'), name: 'Massing')
+          c.mesh(Mesh.prism(outer, z0, z0 + e.num('height', 12.0), holes), material: mat(e, 'material', 'building_massing'), name: 'Volumen')
         end
       end
       register('massing', Massing)
@@ -28,7 +28,7 @@ module ProjektniBiro
         def build(e, c)
           outer, holes = polygon_rings(e)
           z0 = base_z(outer) + e.num('baseOffset')
-          c.mesh(Mesh.prism(outer, z0, z0 + e.num('height', 2.0), holes), material: mat(e, 'material', 'zone_generic'), name: 'Zone')
+          c.mesh(Mesh.prism(outer, z0, z0 + e.num('height', 2.0), holes), material: mat(e, 'material', 'zone_generic'), name: 'Zona')
         end
       end
       register('zone', Zone)
@@ -39,8 +39,8 @@ module ProjektniBiro
           outer, holes = polygon_rings(e)
           dz = e.num('lineHeight', 0.02)
           lift = ->(r) { r.map { |p| [p[0], p[1], (p[2] || 0.0) + dz] } }
-          c.edges(lift.call(outer), closed: true, name: 'Outline')
-          holes.each { |h| c.edges(lift.call(h), closed: true, name: 'Outline opening') }
+          c.edges(lift.call(outer), closed: true, name: 'Kontura')
+          holes.each { |h| c.edges(lift.call(h), closed: true, name: 'Kontura otvora') }
         end
       end
       register('outline', Outline)
@@ -52,7 +52,7 @@ module ProjektniBiro
         def build(e, c)
           outer, holes = polygon_rings(e)
           top = base_z(outer) + e.num('topOffset')
-          c.mesh(Mesh.prism(outer, top - e.num('soilThickness', 0.3), top, holes), material: mat(e, 'soilMaterial', 'soil'), name: 'Soil')
+          c.mesh(Mesh.prism(outer, top - e.num('soilThickness', 0.3), top, holes), material: mat(e, 'soilMaterial', 'soil'), name: 'Zemlja')
           h = e.num('plantHeight')
           return if h <= 0
 
@@ -61,7 +61,7 @@ module ProjektniBiro
             build_clumps(e, c, outer, holes, top, h, spacing.to_f)
           else
             inset = Geometry.offset_ring(outer, -0.05) || outer
-            c.mesh(Mesh.prism(inset, top, top + h, holes), material: mat(e, 'plantMaterial', 'planting_mixed'), name: 'Planting')
+            c.mesh(Mesh.prism(inset, top, top + h, holes), material: mat(e, 'plantMaterial', 'planting_mixed'), name: 'Zasad')
           end
         end
 
@@ -82,11 +82,11 @@ module ProjektniBiro
               if Geometry.point_in_polygon?(pt, outer) && holes.none? { |hole| Geometry.point_in_polygon?(pt, hole) }
                 count += 1
                 if count > MAX_CLUMPS
-                  warn(e, 'SDP-B010', "Planting clumps limited to #{MAX_CLUMPS}; the rest of the bed is shown as a mass.")
+                  warn(e, 'SDP-B010', "Broj grupa biljaka ograničen je na #{MAX_CLUMPS}; ostatak gredice prikazan je kao masa.")
                   return
                 end
-                c.instance(key, [x, y, top], (x * 7.3) % (2 * Math::PI), name: 'Plant') do |dc|
-                  dc.mesh(Mesh.ellipsoid([0, 0, h / 2], spacing * 0.45, spacing * 0.45, h / 2, 8, 4), material: material, name: 'Plant', smooth: true)
+                c.instance(key, [x, y, top], (x * 7.3) % (2 * Math::PI), name: 'Biljka') do |dc|
+                  dc.mesh(Mesh.ellipsoid([0, 0, h / 2], spacing * 0.45, spacing * 0.45, h / 2, 8, 4), material: material, name: 'Biljka', smooth: true)
                 end
               end
               x += spacing
@@ -106,18 +106,18 @@ module ProjektniBiro
           h = e.num('height', 0.6)
           inner = Geometry.offset_ring(outer, -e.num('wallThickness', 0.1))
           unless inner
-            warn(e, 'SDP-B001', 'Planter is too narrow for its wall thickness; built as a solid block.', 'Reduce the wall thickness or enlarge the planter.')
-            c.mesh(Mesh.prism(outer, z0, z0 + h), material: mat(e, 'material', 'concrete'), name: 'Planter')
+            warn(e, 'SDP-B001', 'Žardinjera je preuska za debljinu zida; izrađena je kao puni blok.', 'Smanjite debljinu zida ili povećajte žardinjeru.')
+            c.mesh(Mesh.prism(outer, z0, z0 + h), material: mat(e, 'material', 'concrete'), name: 'Žardinjera')
             return
           end
-          c.mesh(Mesh.prism(outer, z0, z0 + h, [inner]), material: mat(e, 'material', 'concrete'), name: 'Planter wall')
+          c.mesh(Mesh.prism(outer, z0, z0 + h, [inner]), material: mat(e, 'material', 'concrete'), name: 'Zid žardinjere')
           soil_top = z0 + h - e.num('soilDepthBelowTop', 0.05)
-          c.mesh(Mesh.prism(inner, z0, soil_top), material: mat(e, 'soilMaterial', 'soil'), name: 'Soil')
+          c.mesh(Mesh.prism(inner, z0, soil_top), material: mat(e, 'soilMaterial', 'soil'), name: 'Zemlja')
           ph = e.num('plantHeight')
           return if ph <= 0
 
           plants = Geometry.offset_ring(inner, -0.05) || inner
-          c.mesh(Mesh.prism(plants, soil_top, soil_top + ph), material: mat(e, 'plantMaterial', 'planting_mixed'), name: 'Planting')
+          c.mesh(Mesh.prism(plants, soil_top, soil_top + ph), material: mat(e, 'plantMaterial', 'planting_mixed'), name: 'Zasad')
         end
       end
       register('planter', Planter)
@@ -138,7 +138,7 @@ module ProjektniBiro
           end
           profile << [r[:length_v], 0.0]
           origin = [r[:origin][0], r[:origin][1], r[:z]]
-          c.mesh(Mesh.extrude_profile(origin, r[:u], r[:v], profile, r[:length_u]), material: mat(e, 'material', 'concrete'), name: "Steps (#{n} risers)")
+          c.mesh(Mesh.extrude_profile(origin, r[:u], r[:v], profile, r[:length_u]), material: mat(e, 'material', 'concrete'), name: "Stepenice (#{n} stepenika)")
         end
       end
       register('steps', Steps)
@@ -152,7 +152,7 @@ module ProjektniBiro
           t = e.num('thickness', 0.2)
           profile = [[0.0, -t], [r[:length_v], rise - t], [r[:length_v], rise], [0.0, 0.0]]
           origin = [r[:origin][0], r[:origin][1], r[:z]]
-          c.mesh(Mesh.extrude_profile(origin, r[:u], r[:v], profile, r[:length_u]), material: mat(e, 'material', 'concrete'), name: 'Ramp')
+          c.mesh(Mesh.extrude_profile(origin, r[:u], r[:v], profile, r[:length_u]), material: mat(e, 'material', 'concrete'), name: 'Rampa')
         end
       end
       register('ramp', Ramp)

@@ -14,6 +14,7 @@
     { "key": "rubber", "name": "Gumena sigurnosna podloga", "color": [176, 72, 58], "nameEn": "Rubber safety surface" },
     { "key": "tactile", "name": "Taktilno popločanje", "color": [222, 186, 54], "nameEn": "Tactile paving" },
     { "key": "soil", "name": "Zemlja za sadnju", "color": [102, 80, 60], "nameEn": "Planting soil" },
+    { "key": "terrain", "name": "Teren (postojeći)", "color": [164, 152, 118], "nameEn": "Terrain" },
     { "key": "mulch", "name": "Malč od kore", "color": [122, 88, 62], "nameEn": "Bark mulch" },
     { "key": "sand", "name": "Pijesak za igru", "color": [226, 208, 166], "nameEn": "Play sand" },
     { "key": "timber_deck", "name": "Drvena podna obloga", "color": [160, 118, 80], "nameEn": "Timber decking" },

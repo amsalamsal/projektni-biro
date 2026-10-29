@@ -4,19 +4,19 @@
     "path": "/projects/sample/residential-complex.sdpkg",
     "project": {
       "id": "85ca0f75-91f8-487f-a951-d1a7f14e1796",
-      "name": "Sample Residential Complex",
+      "name": "Primjer: stambeni kompleks",
       "number": "SDP-SAMPLE-001",
-      "client": "Sample client",
-      "location": "Sample site",
-      "description": "Reference project for the AutoCAD to SketchUp workflow (two apartment buildings, parking and landscaped courtyard).",
-      "author": "Site Design Pro",
+      "client": "Primjer investitora",
+      "location": "Primjer lokacije",
+      "description": "Referentni projekat za tok rada AutoCAD → SketchUp (dva stambena objekta, parking i uređeno dvorište).",
+      "author": "Vanjsko uređenje PRO",
       "revision": "A"
     },
     "packageId": "01ba9c61-4449-44a2-90ab-cc1873b828d3",
-    "schemaVersion": "1.0.0",
+    "schemaVersion": "1.1.0",
     "created": "2026-01-01T00:00:00Z",
     "generator": {
-      "application": "AutoCAD Site Design Pro",
+      "application": "Vanjsko uređenje PRO (AutoCAD)",
       "version": "0.1.0",
       "host": "sdp command-line tool",
       "sourceDocument": "SampleResidentialComplex (generated)"
@@ -33,63 +33,83 @@
       520.0
     ],
     "trueNorth": 0.0,
-    "crs": "EPSG:31276",
+    "crs": "EPSG:3908",
     "elementCount": 139,
     "groups": [
       {
-        "group": "Annotations and references",
+        "group": "Anotacije i reference",
         "count": 1
       },
       {
-        "group": "Buildings and references",
+        "group": "Objekti i reference",
         "count": 4
       },
       {
-        "group": "Roads and traffic",
+        "group": "Saobraćajnice i parking",
         "count": 73
       },
       {
-        "group": "Surfaces",
+        "group": "Parter i popločanje",
         "count": 5
       },
       {
-        "group": "Planting and vegetation",
+        "group": "Zelenilo",
         "count": 23
       },
       {
-        "group": "Walls and fences",
+        "group": "Zidovi i ograde",
         "count": 3
       },
       {
-        "group": "Lighting",
+        "group": "Rasvjeta",
         "count": 12
       },
       {
-        "group": "Street furniture",
+        "group": "Urbani mobilijar",
         "count": 5
       },
       {
-        "group": "Pedestrian and cycling infrastructure",
+        "group": "Pješačka i biciklistička infrastruktura",
         "count": 2
       },
       {
-        "group": "Underground utilities",
+        "group": "Podzemne instalacije",
         "count": 5
       },
       {
-        "group": "Drainage",
+        "group": "Oborinska odvodnja",
         "count": 3
       },
       {
-        "group": "Canopies and pergolas",
+        "group": "Nadstrešnice i pergole",
         "count": 1
       },
       {
-        "group": "Recreation",
+        "group": "Rekreacija",
         "count": 2
       }
-    ]
+    ],
+    "elevation": {
+      "buildingZeroAbsolute": 520.15,
+      "parterreRelative": 0,
+      "roadOffsetBelowParterre": 0.15,
+      "verticalDatum": "Primjer – nije stvarni visinski datum",
+      "drawingZ": "absolute",
+      "packageZeroAbsolute": 520
+    }
   },
+  "terrain": [
+    {
+      "kind": "create",
+      "id": "d84bcdd0-3f90-479f-b2b8-c0c11a6659cf",
+      "name": "Postojeći teren",
+      "reason": "Novi teren.",
+      "triangles": 280,
+      "minZ": -0.29,
+      "maxZ": 0.57
+    }
+  ],
+  "changes": true,
   "validation": {
     "errors": 0,
     "warnings": 1,
@@ -99,23 +119,23 @@
         "severity": "warning",
         "code": "SDP-F021",
         "elementId": null,
-        "message": "Asset missing: assets/tex.png",
-        "resolution": "Re-export with assets."
+        "message": "Datoteka modela nedostaje: assets/tex.png",
+        "resolution": "Ponovo izvezite s modelima."
       },
       {
         "severity": "review",
         "code": "SDP-R001",
         "elementId": "8acf4b54-319b-4152-a585-1253aa9e18a3",
         "label": "UW-001",
-        "message": "Source of dimensions not defined.",
-        "resolution": "Enter manufacturer data."
+        "message": "Izvor dimenzija nije definisan.",
+        "resolution": "Unesite podatke proizvođača."
       },
       {
         "severity": "review",
         "code": "SDP-R001",
         "elementId": "be689cb3-c63f-402c-a46b-c2691a070e4b",
         "label": "UW-002",
-        "message": "<script>alert(1)</script> must be escaped",
+        "message": "<script>alert(1)</script> mora biti zaštićeno",
         "resolution": ""
       }
     ]
@@ -143,1089 +163,1089 @@
         "kind": "create",
         "id": "8acf4b54-319b-4152-a585-1253aa9e18a3",
         "label": "SB-001",
-        "name": "Site boundary",
+        "name": "Parcelna granica",
         "type": "site.boundary",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "be689cb3-c63f-402c-a46b-c2691a070e4b",
         "label": "B-001",
-        "name": "Building A",
+        "name": "Objekat A",
         "type": "building.footprint",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "92208afb-f758-4616-8c62-4fcad43df959",
         "label": "B-002",
-        "name": "Building B",
+        "name": "Objekat B",
         "type": "building.footprint",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f55cee3d-034b-45d7-ba26-96556c34220f",
         "label": "EN-001",
-        "name": "Building entrance reference",
+        "name": "Ulaz u objekat (referenca)",
         "type": "building.entrance",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "fc05ab26-d4b9-469f-b015-8ef4af202a82",
         "label": "EN-002",
-        "name": "Building entrance reference",
+        "name": "Ulaz u objekat (referenca)",
         "type": "building.entrance",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "1c5c971d-afb9-4c9f-92a5-18711738b842",
         "label": "R-001",
-        "name": "Internal access road (centreline)",
+        "name": "Interna pristupna saobraćajnica (osovina)",
         "type": "road.access_road",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "86c4230a-9804-4c5c-bb04-e88e36c3db60",
         "label": "P-005",
-        "name": "Parking area",
+        "name": "Parking prostor",
         "type": "surface.asphalt",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "8650dd1f-8843-4c05-8225-358ae750708a",
         "label": "PC-001",
-        "name": "Pedestrian crossing (striped)",
+        "name": "Pješački prelaz (zebra)",
         "type": "road.pedestrian_crossing",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "ea588d5b-d74b-42d2-b093-6237f8659cf3",
         "label": "AR-002",
-        "name": "Traffic arrow",
+        "name": "Saobraćajna strelica",
         "type": "road.arrow",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "afa341fb-ef37-4a1a-85ec-86f2a25c1cd9",
         "label": "AR-001",
-        "name": "Traffic arrow",
+        "name": "Saobraćajna strelica",
         "type": "road.arrow",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "12ce7487-6ba2-448f-a92c-a10ab343f3dd",
         "label": "PB-032",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "39453be7-0315-455a-978d-df6c6d73486e",
         "label": "PB-033",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "38699414-4619-4431-bfc3-888a89c000db",
         "label": "PB-034",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "ef796bfa-efbc-478d-bff7-5e153ab8552f",
         "label": "PB-035",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "16a803f9-3e96-4bb6-8d6e-7cbd8bc7d83c",
         "label": "PB-036",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "6c2126e7-945b-47e5-b7c3-47bc4acb3bdb",
         "label": "PB-037",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "6b73b99b-c00b-4a7a-bd02-6ef2dcb3b49f",
         "label": "PB-038",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "959b5a2c-5df3-44f0-a651-febbd1adcfe4",
         "label": "PB-039",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "1470a9bc-4df0-4021-be99-9cc77d9e876d",
         "label": "PB-040",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f20669ca-92a3-40b6-b5c6-b4225d3e9a0c",
         "label": "PB-041",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "56ed6214-c220-475f-8e39-ee3acb710902",
         "label": "PB-042",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "3ca789f3-d7eb-4938-9164-09e6115bb1e8",
         "label": "PB-043",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "89908e30-2a04-4107-a351-510907e942ac",
         "label": "PB-044",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "00d871de-ef6c-47d0-aa7d-5c398bf8e269",
         "label": "PB-045",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a3b4ca21-b1e8-44ff-bee1-dddc3b6d7579",
         "label": "PB-046",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "fabb81ec-9dfc-4578-8480-a2b1ca4b1083",
         "label": "PB-047",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "cd70f269-8ffd-42ce-b724-be12fbb3c2e1",
         "label": "PB-048",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "370d957f-4077-4d0b-94db-71bcb12b7b6f",
         "label": "PB-049",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "097f5973-1f70-40a6-a900-23d4b2a17ecb",
         "label": "PB-050",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4b7d0e38-3d91-4e37-bc14-be3809054d3f",
         "label": "PB-051",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "ce8eb9dd-8b08-4a6e-ba71-090cb4db2ed2",
         "label": "PB-052",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f0a3f5ba-ed30-4168-ab5f-8202221f89d7",
         "label": "PB-053",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "b96cbaef-2943-42cc-8c14-a9c9de0a4f9a",
         "label": "PB-054",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "854d603c-c1b3-4fee-a2ef-fc391a985af9",
         "label": "PB-055",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "c41bc6e8-5b36-469f-84d4-796d0392b00e",
         "label": "PB-056",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "30587289-a069-4faa-ab52-c80251bf49bd",
         "label": "PB-057",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "622d6934-1157-4554-9fe9-5c2fa56c3532",
         "label": "PB-058",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "64c311db-fc7a-4dad-9528-eab7ac238a1f",
         "label": "PB-059",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "af6f7a22-f65c-406a-bb1f-8113062aa021",
         "label": "PB-060",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "94864fd2-da75-4502-b543-c47963a62489",
         "label": "PB-061",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "5fa1ff1f-2d9d-4f28-a251-ae1f1d4c59b6",
         "label": "PB-062",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "89da2d50-0e1f-4f9f-a2ed-740e857ce97e",
         "label": "PB-063",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "c16cde3a-13a5-48d4-af0b-6e5cb417b280",
         "label": "PB-001",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "037095da-8be0-4026-be0f-01753ac410a9",
         "label": "PB-002",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f0bc426f-df43-4c1f-883c-bcc80cde1116",
         "label": "PB-003",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "664e9f46-0135-433d-96a0-31ca8bc05421",
         "label": "PB-004",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "50db1c96-4f58-4b40-949a-52e31305cca9",
         "label": "PB-005",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a2e70c4b-fba6-427a-8bf4-58ad2aadf3c4",
         "label": "PB-006",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "46e5ff33-e641-4625-8244-8e7222ac6903",
         "label": "PB-007",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "d2f2f2be-dbc8-4c70-b481-ca1db39a60a7",
         "label": "PB-008",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "31bf3c64-bd18-499a-8b06-3a61cfad6579",
         "label": "PB-009",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f799b16c-f420-4272-899a-eef1a566e567",
         "label": "PB-010",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "0d9f4478-129c-4586-9582-c34fd1ff3642",
         "label": "PB-011",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4c103e5e-4eb1-4045-9409-324486033d6c",
         "label": "PB-012",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "0b0ec8b3-fadb-4333-a417-50d02b12dece",
         "label": "PB-013",
-        "name": "EV charging parking bay",
+        "name": "Parking mjesto s punjačem za električna vozila",
         "type": "road.parking_bay_ev",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "37481874-40cb-4c62-b718-fcdd3a26e496",
         "label": "PB-014",
-        "name": "EV charging parking bay",
+        "name": "Parking mjesto s punjačem za električna vozila",
         "type": "road.parking_bay_ev",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "ea59c656-882f-4e4a-9cad-1d72a8e74f4b",
         "label": "PB-015",
-        "name": "EV charging parking bay",
+        "name": "Parking mjesto s punjačem za električna vozila",
         "type": "road.parking_bay_ev",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a1f253f1-1d99-417d-ada5-6d62b8b2d2dc",
         "label": "PB-016",
-        "name": "EV charging parking bay",
+        "name": "Parking mjesto s punjačem za električna vozila",
         "type": "road.parking_bay_ev",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "c53949cf-15be-465f-bc55-3fcc59b723a7",
         "label": "PB-017",
-        "name": "Accessible parking bay",
+        "name": "Parking mjesto za osobe s invaliditetom",
         "type": "road.parking_bay_accessible",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "c8aaa43d-1d88-4a18-80f2-011648ef4c4c",
         "label": "PB-018",
-        "name": "Accessible parking bay",
+        "name": "Parking mjesto za osobe s invaliditetom",
         "type": "road.parking_bay_accessible",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a1f0afba-b997-4b2a-bc90-e1d7a8688033",
         "label": "PB-019",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4e3e2deb-b920-46f0-95c4-267ec13cca25",
         "label": "PB-020",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "e5fd25f3-fbcb-4b56-8e34-49d845fbf2ef",
         "label": "PB-021",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a4a0383e-f9a6-4050-8de6-f9445b5b1af0",
         "label": "PB-022",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "fd18214f-de46-4bb8-bbf9-158cf3b799d8",
         "label": "PB-023",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "baef1c6a-7af8-484b-baac-16c5891426c9",
         "label": "PB-024",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "5ccd0762-0226-4b63-b37f-f20873fa4eb9",
         "label": "PB-025",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "769c9154-855f-4ed1-832d-7395de1cc905",
         "label": "PB-026",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "7fadf499-5c2d-4364-a2c1-b01e4c78dca7",
         "label": "PB-027",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "0cc67498-7220-498d-88d6-879d14497f57",
         "label": "PB-028",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f995e6ab-4046-43ac-89ad-951d5406b60a",
         "label": "PB-029",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "43c41c4f-1bc3-4ae3-921d-4934b2183a90",
         "label": "PB-030",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "3aad6992-8258-46ef-829b-45367212b736",
         "label": "PB-031",
-        "name": "Parking bay",
+        "name": "Parking mjesto",
         "type": "road.parking_bay",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "ee703cde-e51c-423e-99bb-7d09eb4ef8b2",
         "label": "EV-001",
-        "name": "EV charging station (pedestal)",
+        "name": "Stanica za punjenje električnih vozila (stub)",
         "type": "sustainability.ev_charger_pedestal",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "131393f9-3a08-4f94-b236-4595e58e96ae",
         "label": "EV-002",
-        "name": "EV charging station (pedestal)",
+        "name": "Stanica za punjenje električnih vozila (stub)",
         "type": "sustainability.ev_charger_pedestal",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "94329130-285a-42c2-8146-8ed12e581bfc",
         "label": "EV-003",
-        "name": "EV charging station (pedestal)",
+        "name": "Stanica za punjenje električnih vozila (stub)",
         "type": "sustainability.ev_charger_pedestal",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "57269129-89a7-47da-99db-12ba5a10adc1",
         "label": "EV-004",
-        "name": "EV charging station (pedestal)",
+        "name": "Stanica za punjenje električnih vozila (stub)",
         "type": "sustainability.ev_charger_pedestal",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "456507c9-2adb-410d-a794-a30a0a4c5f6c",
         "label": "P-004",
-        "name": "Front paving",
+        "name": "Popločanje ispred objekata",
         "type": "surface.concrete_paving",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f142391e-6043-439d-a671-e0c5e8df1217",
         "label": "P-003",
-        "name": "Courtyard",
+        "name": "Dvorište",
         "type": "surface.natural_stone",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a362f67d-69db-48f0-845d-89a520eda259",
         "label": "BO-001",
-        "name": "Bollard",
+        "name": "Stubić",
         "type": "road.bollard",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "104b8cf4-f888-4795-a3b7-9c122dc2b112",
         "label": "BO-002",
-        "name": "Bollard",
+        "name": "Stubić",
         "type": "road.bollard",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "3c6c0b0a-4bbe-4ca5-8bce-d85a17f395ad",
         "label": "P-001",
-        "name": "North lawn",
+        "name": "Sjeverni travnjak",
         "type": "surface.lawn",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "b14c7b56-d535-49a0-95eb-b4daa1052494",
         "label": "P-002",
-        "name": "Playground surface",
+        "name": "Podloga igrališta",
         "type": "surface.rubber_safety",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "0f06c09c-3410-482c-b0cc-b91ba43152cb",
         "label": "PL-001",
-        "name": "Flower bed",
+        "name": "Cvjetna gredica",
         "type": "landscape.flower_bed",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "0da2112e-a9a9-45c9-aca5-1f01f59ca95e",
         "label": "PL-002",
-        "name": "Flower bed",
+        "name": "Cvjetna gredica",
         "type": "landscape.flower_bed",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "70ed2dea-d2d0-43cc-a90e-3a974666facb",
         "label": "WL-001",
-        "name": "Planter wall",
+        "name": "Zid žardinjere",
         "type": "wall.planter_wall",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "d4ef0874-aa61-47bb-a139-f49bb8deef82",
         "label": "H-001",
-        "name": "Hedge",
+        "name": "Živa ograda",
         "type": "landscape.hedge",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "26a825a0-9df8-436b-877a-00a8225b3175",
         "label": "T-004",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "a2678360-b750-4c07-be8d-1048f93ca63e",
         "label": "T-005",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "765a1f90-ebfe-4ab8-851e-7722577f9e57",
         "label": "T-006",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "c735c553-d080-40ce-8432-0657c1c7377b",
         "label": "T-007",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "894a5427-fd27-45e9-9c5c-069755e56c81",
         "label": "T-008",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "5e8ed2fb-ec11-427a-b1b5-7d45cff89b62",
         "label": "T-009",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "af75f535-30be-461c-9b16-f5dd9a752b9c",
         "label": "T-010",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "3e701f38-3d4c-495f-92d6-55b6a050e5ed",
         "label": "T-011",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "baae78c4-7663-4ce4-ba77-da8b6724c199",
         "label": "T-012",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "33da158d-7e2d-411f-aabc-25f4789f8632",
         "label": "T-013",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f486a301-1560-4cdc-8504-ee8218e3449e",
         "label": "T-014",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "92124185-1fa5-406a-bf2a-a76aa16210d6",
         "label": "T-015",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "911510ac-2b9b-4dfe-84fe-7f80f0e6e703",
         "label": "T-016",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f55c6300-9fc4-49d4-b74e-8c1d60d53825",
         "label": "T-017",
-        "name": "Deciduous tree",
+        "name": "Listopadno drvo",
         "type": "landscape.tree_deciduous",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4bff25b3-6ee3-4db5-a96b-d8b4873d7544",
         "label": "T-001",
-        "name": "Evergreen tree",
+        "name": "Zimzeleno drvo",
         "type": "landscape.tree_evergreen",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "104f23e4-5a19-4a1a-94c4-782e28f08730",
         "label": "T-002",
-        "name": "Evergreen tree",
+        "name": "Zimzeleno drvo",
         "type": "landscape.tree_evergreen",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "bdb1d2bf-95cf-4094-9c12-ee326b4ab70c",
         "label": "T-003",
-        "name": "Evergreen tree",
+        "name": "Zimzeleno drvo",
         "type": "landscape.tree_evergreen",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "95e37783-030c-48a3-a273-e0a38ef1cdc5",
         "label": "S-002",
-        "name": "Shrub",
+        "name": "Grm",
         "type": "landscape.shrub",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "b15e4ead-1f60-459c-941b-b095c1f35d7a",
         "label": "S-001",
-        "name": "Shrub",
+        "name": "Grm",
         "type": "landscape.shrub",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "051a419c-3755-4509-8519-5ac13c0c2270",
         "label": "S-003",
-        "name": "Shrub",
+        "name": "Grm",
         "type": "landscape.shrub",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "23c54af6-503a-4117-bb05-93a3179a07de",
         "label": "L-008",
-        "name": "Street light",
+        "name": "Ulična svjetiljka",
         "type": "lighting.street_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "adacac6a-574e-409c-adec-e37ef3e43245",
         "label": "L-009",
-        "name": "Street light",
+        "name": "Ulična svjetiljka",
         "type": "lighting.street_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "8d41350d-7371-4285-85c8-06b6ab2f2a5e",
         "label": "L-010",
-        "name": "Street light",
+        "name": "Ulična svjetiljka",
         "type": "lighting.street_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "7f3b05d5-3c9d-4517-a2ac-9f94ccf9c1cc",
         "label": "L-011",
-        "name": "Street light",
+        "name": "Ulična svjetiljka",
         "type": "lighting.street_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "eb6e019a-d2f8-4a83-92c5-fc5ec36de389",
         "label": "L-012",
-        "name": "Street light",
+        "name": "Ulična svjetiljka",
         "type": "lighting.street_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4ca153af-7698-4c11-8cc3-a3255a1e7a64",
         "label": "L-003",
-        "name": "Pedestrian light (post-top)",
+        "name": "Pješačka svjetiljka (na vrhu stuba)",
         "type": "lighting.pedestrian_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "e7edc13d-b0c0-47c2-aa84-fdaa0288e60d",
         "label": "L-004",
-        "name": "Pedestrian light (post-top)",
+        "name": "Pješačka svjetiljka (na vrhu stuba)",
         "type": "lighting.pedestrian_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "6cadb695-614e-4b5f-8ca2-e6d682e28201",
         "label": "L-005",
-        "name": "Pedestrian light (post-top)",
+        "name": "Pješačka svjetiljka (na vrhu stuba)",
         "type": "lighting.pedestrian_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "7478aa60-2db3-4556-9fef-43208222e616",
         "label": "L-006",
-        "name": "Pedestrian light (post-top)",
+        "name": "Pješačka svjetiljka (na vrhu stuba)",
         "type": "lighting.pedestrian_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "e58250be-7a1a-4da7-b2b0-2e3f1847b6b8",
         "label": "L-007",
-        "name": "Pedestrian light (post-top)",
+        "name": "Pješačka svjetiljka (na vrhu stuba)",
         "type": "lighting.pedestrian_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "d0e2f150-7835-42ab-98d3-87c44603135f",
         "label": "L-001",
-        "name": "Bollard light",
+        "name": "Stubić-svjetiljka",
         "type": "lighting.bollard_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4425f20a-119d-4071-9a83-7dbcd4ec4432",
         "label": "L-002",
-        "name": "Bollard light",
+        "name": "Stubić-svjetiljka",
         "type": "lighting.bollard_light",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "7e7013f4-0d07-4406-af8c-7d98e061a486",
         "label": "FB-003",
-        "name": "Bench with backrest",
+        "name": "Klupa s naslonom",
         "type": "furniture.bench",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "87e1d316-8330-4d9a-82dc-58fb8b8c2900",
         "label": "FB-004",
-        "name": "Bench with backrest",
+        "name": "Klupa s naslonom",
         "type": "furniture.bench",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "04319255-b2d6-4684-a243-d910919ffca4",
         "label": "FB-001",
-        "name": "Bench with backrest",
+        "name": "Klupa s naslonom",
         "type": "furniture.bench",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "e1cc5117-d7ff-4b7d-bf86-b340e02e4c7a",
         "label": "FB-002",
-        "name": "Bench with backrest",
+        "name": "Klupa s naslonom",
         "type": "furniture.bench",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "ad88e40d-7d3c-409d-9d33-de1260cc6139",
         "label": "WB-001",
-        "name": "Waste bin",
+        "name": "Korpa za otpatke",
         "type": "furniture.waste_bin",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "04964e18-1c7e-417d-9fea-5c4c93622e46",
         "label": "BS-001",
-        "name": "Bicycle rack (row of stands)",
+        "name": "Parking za bicikle (niz stalaka)",
         "type": "cycling.bike_rack",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "1de40879-59f4-4890-9c58-e71569226f39",
         "label": "BS-002",
-        "name": "Bicycle rack (row of stands)",
+        "name": "Parking za bicikle (niz stalaka)",
         "type": "cycling.bike_rack",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "3bde59e8-63db-43d2-8595-5a06d18a798e",
         "label": "UW-001",
-        "name": "Underground waste container 5 m³",
+        "name": "Podzemni kontejner za otpad 5 m³",
         "type": "utility.waste_container_ug_5m3",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "25bba43c-cc19-426d-87b9-b4f91bb790e1",
         "label": "UW-002",
-        "name": "Underground waste container 5 m³",
+        "name": "Podzemni kontejner za otpad 5 m³",
         "type": "utility.waste_container_ug_5m3",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "4f99498f-f2b9-43f2-9ba3-b42e4cc45498",
         "label": "UW-003",
-        "name": "Underground waste container 5 m³",
+        "name": "Podzemni kontejner za otpad 5 m³",
         "type": "utility.waste_container_ug_5m3",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "f6b1ee82-777f-4c46-9a0b-2ef0c63ad748",
         "label": "UW-004",
-        "name": "Underground waste container 3 m³",
+        "name": "Podzemni kontejner za otpad 3 m³",
         "type": "utility.waste_container_ug_3m3",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "0282d1a2-566e-45d0-8b5c-b6bb0403e9d3",
         "label": "D-001",
-        "name": "Linear drainage channel",
+        "name": "Linijski drenažni kanal",
         "type": "water.drainage_channel",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "e010a5c1-4939-4a8f-96a4-f603a305a59e",
         "label": "IC-001",
-        "name": "Drainage inspection chamber",
+        "name": "Reviziono okno odvodnje",
         "type": "water.inspection_chamber",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "b7eb8ace-22b6-49a2-9bd0-abed277a396f",
         "label": "DP-001",
-        "name": "Drainage pipe",
+        "name": "Cijev oborinske odvodnje",
         "type": "water.drain_pipe",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "2977953d-3630-4a5e-87d9-8bc31a84acc6",
         "label": "RT-001",
-        "name": "Underground rainwater tank",
+        "name": "Podzemni rezervoar kišnice",
         "type": "water.rainwater_tank",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "98775afe-6f40-4e89-8abc-9c6117f56cb8",
         "label": "F-001",
-        "name": "Welded-mesh fence",
+        "name": "Ograda od zavarene mreže",
         "type": "wall.mesh_fence",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "394f7c42-aff9-4a68-a63b-34b1acad9b54",
         "label": "GT-001",
-        "name": "Pedestrian gate",
+        "name": "Pješačka kapija",
         "type": "wall.pedestrian_gate",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
@@ -1233,32 +1253,33 @@
         "label": "PG-001",
         "name": "Pergola",
         "type": "structure.pergola",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "208bc87e-b349-45c8-a258-19e837f23b48",
         "label": "PE-001",
-        "name": "Swing",
+        "name": "Ljuljačka",
         "type": "recreation.swing",
-        "reason": "New element."
+        "reason": "Novi element."
       },
       {
         "kind": "create",
         "id": "99313b5b-e07c-4d71-bf33-a9c06cd87afd",
         "label": "PE-002",
-        "name": "Children's play unit",
+        "name": "Dječija igračka sprava",
         "type": "recreation.playground_unit",
-        "reason": "New element."
+        "reason": "Novi element."
       }
     ],
-    "summary": "New: 139",
+    "summary": "Novo: 139",
     "changes": true
   },
   "options": {
     "lod": "standard",
     "modifiedPolicy": "keep",
     "deletedPolicy": "mark",
-    "createScenes": true
+    "createScenes": true,
+    "backup": true
   }
 }

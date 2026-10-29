@@ -21,7 +21,7 @@ class TestSampleImport < Minitest::Test
   def test_sample_dimensions_positions_and_elevations
     canvas, = build_all(@pkg)
     nodes = canvas.top_level.zip(@pkg.elements).to_h { |n, e| [e.id, n] }
-    building = @pkg.elements.find { |e| e.name == 'Building A' }
+    building = @pkg.elements.find { |e| e.name == 'Objekat A' }
     min, max = canvas.bounds(nodes[building.id])
     assert_equal [15.0, 45.0, 0.15], min.map { |v| v.round(6) }
     assert_equal [55.0, 63.0, 18.15], max.map { |v| v.round(6) }
@@ -116,8 +116,8 @@ class TestChangeSet < Minitest::Test
 
   def test_catalog_files_model_groups
     cat = CatalogFiles.new(File.join(SHARED, 'catalog'))
-    assert_equal 'Planting and vegetation', cat.model_group('planting').name
-    assert_equal 'SDP Underground', cat.model_group('underground').tag
+    assert_equal 'Zelenilo', cat.model_group('planting').name
+    assert_equal 'VU Podzemno', cat.model_group('underground').tag
     assert_equal 'Future group', cat.model_group('future_group').name
     assert cat.materials.key?('water')
   end

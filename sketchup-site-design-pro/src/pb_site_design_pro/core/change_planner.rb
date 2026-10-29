@@ -34,7 +34,7 @@ module ProjektniBiro
       def initialize(policy = {})
         @policy = DEFAULT_POLICY.merge(policy.transform_keys(&:to_sym))
         POLICIES.each do |k, allowed|
-          raise ArgumentError, "invalid #{k} policy #{@policy[k].inspect}" unless allowed.include?(@policy[k].to_s)
+          raise ArgumentError, "neispravno pravilo #{k}: #{@policy[k].inspect}" unless allowed.include?(@policy[k].to_s)
         end
       end
 
@@ -51,14 +51,14 @@ module ProjektniBiro
           primary[id] = keep
           copies.each do |copy|
             actions << PlanAction.new(:detach_duplicate, package.element(id), copy,
-                                      'Copy of a managed object made in SketchUp; it will be kept as unmanaged geometry.')
+                                      'Kopija upravljanog objekta napravljena u SketchUp-u; zadržava se kao obična geometrija.')
           end
         end
 
         package.elements.each do |el|
           entry = primary[el.id]
           unless supported.call(el)
-            actions << PlanAction.new(:skip, el, entry, "No 3D builder for '#{el.builder}'.")
+            actions << PlanAction.new(:skip, el, entry, "Nema 3D generatora za '#{el.builder}'.")
             next
           end
           actions << plan_element(el, entry)
@@ -76,32 +76,74 @@ module ProjektniBiro
       private
 
       def plan_element(el, entry)
-        return PlanAction.new(:create, el, nil, 'New element.') unless entry
-        return PlanAction.new(:restore, el, entry, 'Element is present in the package again.') if entry.deleted_in_source
+        return PlanAction.new(:create, el, nil, 'Novi element.') unless entry
+        return PlanAction.new(:restore, el, entry, 'Element je ponovo u paketu.') if entry.deleted_in_source
 
         source_changed = entry.content_hash != el.content_hash
         local = entry.locally_modified?
         if !source_changed && !local
           PlanAction.new(:unchanged, el, entry, nil)
         elsif !source_changed
-          PlanAction.new(:keep_local, el, entry, 'Modified in SketchUp; source unchanged - SketchUp edits preserved.')
+          PlanAction.new(:keep_local, el, entry, 'Izmijenjeno u SketchUp-u; izvor nepromijenjen – izmjene iz SketchUp-a se zadržavaju.')
         elsif !local
-          PlanAction.new(:update, el, entry, 'Changed in AutoCAD.')
+          PlanAction.new(:update, el, entry, 'Izmijenjeno u AutoCAD-u.')
         elsif @policy[:modified] == 'overwrite'
-          PlanAction.new(:update, el, entry, 'Changed in AutoCAD; SketchUp edits overwritten (policy: overwrite).')
+          PlanAction.new(:update, el, entry, 'Izmijenjeno u AutoCAD-u; izmjene iz SketchUp-a se prepisuju (pravilo: prepiši).')
         else
-          PlanAction.new(:conflict, el, entry, 'Changed in AutoCAD and modified in SketchUp; not updated (policy: keep).')
+          PlanAction.new(:conflict, el, entry, 'Izmijenjeno u AutoCAD-u i u SketchUp-u; ne ažurira se (pravilo: zadrži).')
         end
       end
 
       def plan_missing(entry)
-        return PlanAction.new(:unchanged, nil, entry, 'Already marked as deleted in source.') if entry.deleted_in_source && @policy[:deleted] == 'mark'
+        return PlanAction.new(:unchanged, nil, entry, 'Već označeno kao obrisano u izvoru.') if entry.deleted_in_source && @policy[:deleted] == 'mark'
 
         case @policy[:deleted]
-        when 'delete' then PlanAction.new(:delete, nil, entry, 'Removed from the AutoCAD project.')
-        when 'keep' then PlanAction.new(:keep_orphan, nil, entry, 'Removed from the AutoCAD project; kept (policy: keep).')
-        else PlanAction.new(:mark_deleted, nil, entry, 'Removed from the AutoCAD project; moved to the "SDP Deleted in source" tag.')
+        when 'delete' then PlanAction.new(:delete, nil, entry, 'Uklonjeno iz AutoCAD projekta.')
+        when 'keep' then PlanAction.new(:keep_orphan, nil, entry, 'Uklonjeno iz AutoCAD projekta; zadržava se (pravilo: zadrži).')
+        else PlanAction.new(:mark_deleted, nil, entry, 'Uklonjeno iz AutoCAD projekta; premješteno na oznaku "VU Obrisano u izvoru".')
         end
+      end
+    end
+
+    # State of a terrain surface found in the model (group with attribute terrainId).
+    TerrainEntry = Struct.new(:id, :project_id, :content_hash, :stored_fingerprint, :current_fingerprint, :deleted_in_source, :ref,
+                              keyword_init: true) do
+      def locally_modified?
+        stored_fingerprint && current_fingerprint && stored_fingerprint != current_fingerprint
+      end
+    end
+
+    # Plans terrain surfaces with the same policies as elements. Actions carry the TerrainSurface in .element.
+    module TerrainPlanner
+      module_function
+
+      def plan(surfaces, entries, project_id, policy)
+        by_id = entries.select { |e| e.project_id == project_id }.group_by(&:id).transform_values(&:first)
+        actions = surfaces.map do |s|
+          e = by_id[s.id]
+          if e.nil?
+            PlanAction.new(:create, s, nil, 'Novi teren.')
+          elsif e.deleted_in_source
+            PlanAction.new(:restore, s, e, 'Teren je ponovo u paketu.')
+          elsif e.content_hash == s.content_hash
+            PlanAction.new(e.locally_modified? ? :keep_local : :unchanged, s, e, e.locally_modified? ? 'Teren izmijenjen u SketchUp-u; izvor nepromijenjen.' : nil)
+          elsif !e.locally_modified? || policy[:modified].to_s == 'overwrite'
+            PlanAction.new(:update, s, e, 'Teren izmijenjen u AutoCAD-u.')
+          else
+            PlanAction.new(:conflict, s, e, 'Teren izmijenjen u AutoCAD-u i u SketchUp-u; ne ažurira se (pravilo: zadrži).')
+          end
+        end
+        ids = surfaces.map(&:id)
+        by_id.each_value do |e|
+          next if ids.include?(e.id)
+
+          actions << case policy[:deleted].to_s
+                     when 'delete' then PlanAction.new(:delete, nil, e, 'Teren uklonjen iz AutoCAD projekta.')
+                     when 'keep' then PlanAction.new(:keep_orphan, nil, e, 'Teren uklonjen iz AutoCAD projekta; zadržava se.')
+                     else e.deleted_in_source ? PlanAction.new(:unchanged, nil, e, nil) : PlanAction.new(:mark_deleted, nil, e, 'Teren uklonjen iz AutoCAD projekta; označen.')
+                     end
+        end
+        actions
       end
     end
 
@@ -109,9 +151,9 @@ module ProjektniBiro
     class Plan
       ORDER = %i[create update restore conflict mark_deleted delete keep_orphan keep_local detach_duplicate skip unchanged].freeze
       LABELS = {
-        create: 'New', update: 'Changed', restore: 'Restored', conflict: 'Conflicts', mark_deleted: 'Deleted (marked)',
-        delete: 'Deleted', keep_orphan: 'Deleted (kept)', keep_local: 'SketchUp edits kept', detach_duplicate: 'Copies detached',
-        skip: 'Not reconstructable', unchanged: 'Unchanged'
+        create: 'Novo', update: 'Izmijenjeno', restore: 'Vraćeno', conflict: 'Konflikti', mark_deleted: 'Obrisano (označeno)',
+        delete: 'Obrisano', keep_orphan: 'Obrisano (zadržano)', keep_local: 'Zadržane izmjene iz SketchUp-a', detach_duplicate: 'Odvojene kopije',
+        skip: 'Ne može se rekonstruisati', unchanged: 'Nepromijenjeno'
       }.freeze
 
       attr_reader :actions, :policy

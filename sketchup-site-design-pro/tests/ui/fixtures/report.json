@@ -1,9 +1,9 @@
 {
   "mode": "report",
   "report": {
-    "title": "Site Design Pro import",
+    "title": "Vanjsko uređenje PRO – izvještaj uvoza",
     "package": "/projects/sample/residential-complex.sdpkg",
-    "startedAt": "2026-10-29T13:51:23Z",
+    "startedAt": "2026-10-29T14:39:44Z",
     "durationSeconds": 3.4,
     "stats": {
       "created": 139,
@@ -20,10 +20,10 @@
         "code": "SDP-R001",
         "elementId": "8acf4b54-319b-4152-a585-1253aa9e18a3",
         "label": "UW-001",
-        "message": "Source of dimensions not defined.",
-        "resolution": "Enter manufacturer data."
+        "message": "Izvor dimenzija nije definisan.",
+        "resolution": "Unesite podatke proizvođača."
       }
     ],
-    "disclaimer": "Automated checks support design coordination only. They use values entered by the user and are not certified regulatory compliance checks."
+    "disclaimer": "Automatske provjere služe samo za koordinaciju projekta. Koriste vrijednosti koje je unio korisnik i nisu ovjerena provjera usklađenosti s propisima."
   }
 }

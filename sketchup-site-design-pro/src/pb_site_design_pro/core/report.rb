@@ -13,20 +13,28 @@ module ProjektniBiro
       end
 
       def to_s
-        "[#{severity}] #{code} #{label || element_id || 'package'}: #{message}"
+        "[#{severity}] #{code} #{label || element_id || 'paket'}: #{message}"
       end
     end
 
     # Collects issues and import statistics; renders text and JSON reports.
     class Report
       SEVERITIES = %i[error warning review info].freeze
-      DISCLAIMER = 'Automated checks support design coordination only. They use values entered by the user ' \
-                   'and are not certified regulatory compliance checks.'
+      DISCLAIMER = 'Automatske provjere služe samo za koordinaciju projekta. Koriste vrijednosti koje je unio korisnik ' \
+                   'i nisu ovjerena provjera usklađenosti s propisima.'
+      SEVERITY_NAMES = { error: 'Greške', warning: 'Upozorenja', review: 'Za stručni pregled', info: 'Informacije' }.freeze
+      STAT_NAMES = {
+        'created' => 'novo', 'updated' => 'ažurirano', 'restored' => 'vraćeno', 'conflicts' => 'konflikti', 'kept_local' => 'zadržane izmjene',
+        'marked_deleted' => 'označeno obrisano', 'deleted' => 'obrisano', 'orphans' => 'zadržano bez izvora', 'detached' => 'odvojene kopije',
+        'skipped' => 'preskočeno', 'unchanged' => 'nepromijenjeno', 'elements' => 'elemenata', 'terrains' => 'terena',
+        'terrains_created' => 'novi tereni', 'terrains_updated' => 'ažurirani tereni', 'seconds' => 'sekundi',
+        'groups' => 'grupa', 'meshes' => 'mreža', 'definitions' => 'definicija komponenti', 'instances' => 'instanci komponenti'
+      }.freeze
 
       attr_reader :issues, :stats
       attr_accessor :title, :package_path, :started_at, :finished_at
 
-      def initialize(title = 'Site Design Pro report')
+      def initialize(title = 'Vanjsko uređenje PRO – izvještaj')
         @title = title
         @issues = []
         @stats = Hash.new(0)
@@ -34,7 +42,7 @@ module ProjektniBiro
       end
 
       def add(severity, code, element_id, message, resolution = '', label = nil)
-        raise ArgumentError, "unknown severity #{severity}" unless SEVERITIES.include?(severity)
+        raise ArgumentError, "nepoznata ozbiljnost #{severity}" unless SEVERITIES.include?(severity)
 
         @issues << Issue.new(severity, code, element_id, message, resolution, label)
         @issues.last
@@ -79,19 +87,19 @@ module ProjektniBiro
 
       def to_text
         lines = [@title]
-        lines << "Package: #{@package_path}" if @package_path
-        lines << format('Duration: %.2f s', duration) if duration
+        lines << "Paket: #{@package_path}" if @package_path
+        lines << format('Trajanje: %.2f s', duration).tr('.', ',') if duration
         unless @stats.empty?
-          lines << @stats.sort_by { |k, _| k.to_s }.map { |k, v| "#{k}: #{v}" }.join(', ')
+          lines << @stats.sort_by { |k, _| k.to_s }.map { |k, v| "#{STAT_NAMES[k.to_s] || k}: #{v}" }.join(', ')
         end
-        lines << "Errors: #{count(:error)}  Warnings: #{count(:warning)}  Reviews: #{count(:review)}"
+        lines << "Greške: #{count(:error)}  Upozorenja: #{count(:warning)}  Za pregled: #{count(:review)}"
         SEVERITIES.each do |sev|
           list = @issues.select { |i| i.severity == sev }
           next if list.empty?
 
-          lines << '' << sev.to_s.upcase
+          lines << '' << SEVERITY_NAMES[sev].upcase
           list.each do |i|
-            lines << "  #{i.code}  #{i.label || i.element_id || 'package'}: #{i.message}"
+            lines << "  #{i.code}  #{i.label || i.element_id || 'paket'}: #{i.message}"
             lines << "      -> #{i.resolution}" unless i.resolution.to_s.empty?
           end
         end

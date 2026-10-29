@@ -4,7 +4,7 @@ require 'tmpdir'
 
 module ProjektniBiro
   module SiteDesignPro
-    # Creates and reuses SketchUp materials for package material keys ("SDP <name>").
+    # Creates and reuses SketchUp materials for package material keys ("VU <naziv>").
     class MaterialLibrary
       DICT = 'SiteDesignPro'
 
@@ -27,8 +27,8 @@ module ProjektniBiro
         existing = @model.materials.find { |m| m.get_attribute(DICT, 'materialKey') == key }
         return existing if existing
 
-        d = @defs[key] || Material.new('default', 'Default', [200, 200, 200], 1.0, nil, nil)
-        mat = @model.materials.add("SDP #{d.name}")
+        d = @defs[key] || Material.new('default', 'Zadani materijal', [200, 200, 200], 1.0, nil, nil)
+        mat = @model.materials.add("VU #{d.name}")
         mat.color = Sketchup::Color.new(*d.color)
         mat.alpha = d.alpha if d.alpha && d.alpha < 1.0
         apply_texture(mat, d)
@@ -50,7 +50,7 @@ module ProjektniBiro
           mat.texture.size = [Units.m_to_in(d.texture_size[0]), Units.m_to_in(d.texture_size[1])]
         end
       rescue SystemCallError, IOError, ArgumentError => e
-        Log.warn("Texture for material #{d.key} could not be applied: #{e.message}")
+        Log.warn("Tekstura materijala #{d.key} nije primijenjena: #{e.message}")
       end
     end
   end

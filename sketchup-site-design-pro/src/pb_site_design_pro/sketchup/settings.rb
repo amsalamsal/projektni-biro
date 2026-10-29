@@ -13,7 +13,10 @@ module ProjektniBiro
         'setNorth' => true,
         'componentMappings' => {},
         'favorites' => [],
-        'lastFolder' => ''
+        'lastFolder' => '',
+        'backupEnabled' => true,
+        'backupKeep' => 10,
+        'backupMaxAgeDays' => 30
       }.freeze
 
       module_function
@@ -54,6 +57,30 @@ module ProjektniBiro
       end
     end
 
+    # Backups and recovery journal for the SketchUp side (see core/safety.rb).
+    module Safety
+      module_function
+
+      # Persistent per-user folder: %APPDATA%\SiteDesignPro (Windows), ~/Library/Application Support/SiteDesignPro (macOS).
+      def user_dir
+        base = ENV['APPDATA'].to_s.empty? ? File.join(Dir.home, 'Library', 'Application Support') : ENV['APPDATA']
+        File.join(base, 'SiteDesignPro')
+      rescue ArgumentError
+        File.join(Dir.tmpdir, 'SiteDesignPro')
+      end
+
+      def journal
+        RecoveryJournal.new(File.join(user_dir, 'sketchup-journal.jsonl'))
+      rescue StandardError => e
+        Log.warn("Dnevnik operacija nije dostupan: #{e.message}")
+        nil
+      end
+
+      def backup_manager
+        BackupManager.new(keep: Settings.get('backupKeep').to_i, max_age_days: Settings.get('backupMaxAgeDays').to_i)
+      end
+    end
+
     # Diagnostic log in SketchUp's temp folder (also echoed to the Ruby console).
     module Log
       module_function
@@ -65,10 +92,10 @@ module ProjektniBiro
 
       def write(level, message)
         line = "#{Time.now.strftime('%Y-%m-%d %H:%M:%S')} [#{level.upcase}] #{message}"
-        puts "Site Design Pro: #{line}" if level != :debug && !ENV['SDP_QUIET']
+        puts "Vanjsko uređenje PRO: #{line}" if level != :debug && !ENV['SDP_QUIET']
         File.open(path, 'a') { |f| f.puts(line) }
       rescue SystemCallError, IOError => e
-        puts "Site Design Pro: could not write log (#{e.message}): #{line}"
+        puts "Vanjsko uređenje PRO: dnevnik nije zapisan (#{e.message}): #{line}"
       end
 
       def info(msg)

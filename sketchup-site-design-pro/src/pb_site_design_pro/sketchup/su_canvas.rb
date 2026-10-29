@@ -101,7 +101,7 @@ module ProjektniBiro
 
       def definition_name(key)
         builder = key.split('|').first
-        "SDP #{builder} #{Zlib.crc32(key).to_s(16).rjust(8, '0')}"
+        "VU #{builder} #{Zlib.crc32(key).to_s(16).rjust(8, '0')}"
       end
 
       def pt(p)

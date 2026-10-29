@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Site Design Pro for SketchUp - extension registration.
-# Imports AutoCAD Site Design Pro exchange packages and reconstructs organised,
-# editable, dimensionally accurate 3D site models.
+# Vanjsko uređenje PRO (Site Design Pro) za SketchUp – registracija proširenja.
+# Uvozi pakete razmjene iz AutoCAD-a i gradi organizovane, izmjenjive 3D modele
+# vanjskog uređenja tačnih dimenzija. Podržano: SketchUp 2022 i novije verzije.
 
 require 'sketchup.rb'
 require 'extensions.rb'
@@ -15,10 +15,10 @@ module ProjektniBiro
     require File.join(PLUGIN_DIR, 'version')
 
     unless file_loaded?(__FILE__)
-      ex = SketchupExtension.new('Site Design Pro', File.join(PLUGIN_DIR, 'main'))
-      ex.description = 'Imports AutoCAD Site Design Pro packages and builds organised, ' \
-                       'editable 3D site models (surfaces, planting, lighting, furniture, ' \
-                       'utilities, walls, structures) with update and change tracking.'
+      ex = SketchupExtension.new('Vanjsko uređenje PRO', File.join(PLUGIN_DIR, 'main'))
+      ex.description = 'Uvozi pakete iz AutoCAD-a (Vanjsko uređenje PRO) i gradi organizovane, ' \
+                       'izmjenjive 3D modele vanjskog uređenja (teren, parter, zelenilo, rasvjeta, mobilijar, ' \
+                       'instalacije, zidovi, nadstrešnice) s ažuriranjem i praćenjem izmjena. SketchUp 2022+.'
       ex.version = VERSION
       ex.copyright = '2026 Projektni biro'
       ex.creator = 'Projektni biro'

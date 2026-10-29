@@ -1,57 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bs">
 <head>
 <meta charset="utf-8">
-<title>Site Design Pro - Library and settings</title>
+<title>Vanjsko uređenje PRO – biblioteka i postavke</title>
 <link rel="stylesheet" href="sdp.css">
 </head>
 <body>
 <header>
-  <h1>Library and settings</h1>
-  <div class="sub">Element types, component mappings, materials and import preferences.</div>
+  <h1>Biblioteka i postavke</h1>
+  <div class="sub">Tipovi elemenata, dodjela komponenti, materijali i postavke uvoza.</div>
 </header>
 <main>
   <div class="tabs">
-    <button class="active" data-for="types">Element types</button>
-    <button data-for="materials">Materials</button>
-    <button data-for="settings">Settings</button>
+    <button class="active" data-for="types">Tipovi elemenata</button>
+    <button data-for="materials">Materijali</button>
+    <button data-for="settings">Postavke</button>
   </div>
   <section data-tab="types">
     <div class="row" style="margin-bottom:6px">
-      <input type="search" id="search" placeholder="Search types" style="flex:1">
-      <select id="category"><option value="">All categories</option></select>
-      <label><input type="checkbox" id="onlyModel"> In this model</label>
-      <label><input type="checkbox" id="onlyFav"> Favourites</label>
+      <input type="search" id="search" placeholder="Pretraga tipova (bosanski ili engleski naziv)" style="flex:1">
+      <select id="category"><option value="">Sve kategorije</option></select>
+      <label><input type="checkbox" id="onlyModel"> U ovom modelu</label>
+      <label><input type="checkbox" id="onlyFav"> Omiljeni</label>
     </div>
-    <div class="scroll"><table><thead><tr><th></th><th>Type</th><th>Builder</th><th>In model</th><th>3D representation</th><th></th></tr></thead><tbody id="types"></tbody></table></div>
+    <div class="scroll"><table><thead><tr><th></th><th>Tip</th><th>Generator</th><th>U modelu</th><th>3D prikaz</th><th></th></tr></thead><tbody id="types"></tbody></table></div>
   </section>
   <section data-tab="materials" class="hidden">
-    <div class="scroll"><table><thead><tr><th></th><th>Material</th><th>Key</th><th>Opacity</th></tr></thead><tbody id="materials"></tbody></table></div>
+    <div class="scroll"><table><thead><tr><th></th><th>Materijal</th><th>Ključ</th><th>Neprozirnost</th></tr></thead><tbody id="materials"></tbody></table></div>
   </section>
   <section data-tab="settings" class="hidden">
     <div class="panel">
       <div class="row">
-        <label class="field">Default level of detail
-          <select id="lod"><option value="conceptual">Conceptual</option><option value="standard">Standard</option><option value="presentation">Presentation</option></select>
+        <label class="field">Zadani nivo detalja
+          <select id="lod"><option value="conceptual">Šematski prikaz</option><option value="standard">Standardni kvalitet</option><option value="presentation">Visoki kvalitet</option></select>
         </label>
-        <label class="field">Objects edited in SketchUp
-          <select id="modifiedPolicy"><option value="keep">Keep SketchUp edits, report conflict</option><option value="overwrite">Overwrite with AutoCAD version</option></select>
+        <label class="field">Objekti izmijenjeni u SketchUp-u
+          <select id="modifiedPolicy"><option value="keep">Zadrži izmjene iz SketchUp-a, prijavi konflikt</option><option value="overwrite">Prepiši verzijom iz AutoCAD-a</option></select>
         </label>
-        <label class="field">Objects removed in AutoCAD
-          <select id="deletedPolicy"><option value="mark">Move to hidden tag</option><option value="delete">Delete</option><option value="keep">Keep</option></select>
+        <label class="field">Objekti uklonjeni u AutoCAD-u
+          <select id="deletedPolicy"><option value="mark">Premjesti na skrivenu oznaku</option><option value="delete">Obriši</option><option value="keep">Zadrži</option></select>
         </label>
       </div>
       <div class="row" style="margin-top:10px">
-        <label><input type="checkbox" id="createScenes"> Create review scenes after import</label>
-        <label><input type="checkbox" id="setNorth"> Set solar north from the package</label>
+        <label><input type="checkbox" id="createScenes"> Izradi scene za pregled nakon uvoza</label>
+        <label><input type="checkbox" id="setNorth"> Postavi sjever za sunce iz paketa</label>
       </div>
-      <div style="margin-top:12px"><button class="primary" id="saveSettings">Save settings</button></div>
+      <h3 style="margin-top:14px">Sigurnosne kopije</h3>
+      <div class="row">
+        <label><input type="checkbox" id="backupEnabled"> Sigurnosna kopija sačuvanog modela prije svakog uvoza</label>
+        <label class="field">Broj kopija po modelu <input type="number" id="backupKeep" min="1" max="100" step="1"></label>
+        <label class="field">Najveća starost kopija (dana, 0 = bez ograničenja) <input type="number" id="backupMaxAgeDays" min="0" max="3650" step="1"></label>
+      </div>
+      <div class="muted">Najnovija kopija svakog modela se nikad ne briše. Kopije su u folderu _SDP_backup pored modela.</div>
+      <div style="margin-top:12px"><button class="primary" id="saveSettings">Sačuvaj postavke</button></div>
     </div>
   </section>
 </main>
 <footer>
   <span class="note" id="note"></span>
-  <button id="close">Close</button>
+  <button id="close">Zatvori</button>
 </footer>
 <script src="sdp.js"></script>
 <script>
@@ -65,25 +72,25 @@
     var q = $('#search').value.toLowerCase(), cat = $('#category').value;
     var maps = data.settings.componentMappings || {}, inModel = data.inModel || {}, f = favs();
     var rows = data.types.filter(function (t) {
-      return (!cat || t.category === cat) && (!q || (t.name + ' ' + t.id + ' ' + t.subcategory).toLowerCase().indexOf(q) >= 0) &&
+      return (!cat || t.category === cat) && (!q || (t.name + ' ' + (t.nameEn || '') + ' ' + t.id + ' ' + t.subcategory).toLowerCase().indexOf(q) >= 0) &&
         (!$('#onlyModel').checked || inModel[t.id]) && (!$('#onlyFav').checked || f.indexOf(t.id) >= 0);
     });
     $('#types').innerHTML = rows.map(function (t) {
       var fav = f.indexOf(t.id) >= 0, map = maps[t.id];
-      return '<tr><td><button class="small" data-fav="' + esc(t.id) + '" title="Favourite">' + (fav ? '&#9733;' : '&#9734;') + '</button></td>' +
+      return '<tr><td><button class="small" data-fav="' + esc(t.id) + '" title="Omiljeni">' + (fav ? '&#9733;' : '&#9734;') + '</button></td>' +
         '<td>' + esc(t.name) + '<div class="mono">' + esc(t.id) + '</div></td><td class="mono">' + esc(t.builder) + '</td>' +
-        '<td>' + (inModel[t.id] || '') + '</td><td>' + (map ? esc(map.split(/[\\/]/).pop()) + '<div class="mono">custom component</div>' : '<span class="muted">parametric</span>') + '</td>' +
-        '<td style="white-space:nowrap"><button class="small" data-map="' + esc(t.id) + '">Assign component...</button>' +
-        (map ? ' <button class="small" data-clear="' + esc(t.id) + '">Clear</button>' : '') +
-        (inModel[t.id] ? ' <button class="small" data-select="' + esc(t.id) + '">Select</button>' : '') + '</td></tr>';
-    }).join('') || '<tr><td colspan="6" class="empty">No matching types.</td></tr>';
-    $('#note').textContent = rows.length + ' of ' + data.types.length + ' types';
+        '<td>' + (inModel[t.id] || '') + '</td><td>' + (map ? esc(map.split(/[\\/]/).pop()) + '<div class="mono">vlastita komponenta</div>' : '<span class="muted">parametarski</span>') + '</td>' +
+        '<td style="white-space:nowrap"><button class="small" data-map="' + esc(t.id) + '">Dodijeli komponentu...</button>' +
+        (map ? ' <button class="small" data-clear="' + esc(t.id) + '">Ukloni</button>' : '') +
+        (inModel[t.id] ? ' <button class="small" data-select="' + esc(t.id) + '">Odaberi</button>' : '') + '</td></tr>';
+    }).join('') || '<tr><td colspan="6" class="empty">Nema tipova koji odgovaraju pretrazi.</td></tr>';
+    $('#note').textContent = rows.length + ' od ' + data.types.length + ' tipova';
   }
 
   sdp.render = function (d) {
     data = d;
     var cat = $('#category').value;
-    $('#category').innerHTML = '<option value="">All categories</option>' + d.categories.map(function (c) {
+    $('#category').innerHTML = '<option value="">Sve kategorije</option>' + d.categories.map(function (c) {
       return '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>';
     }).join('');
     $('#category').value = cat;
@@ -96,6 +103,9 @@
     ['lod', 'modifiedPolicy', 'deletedPolicy'].forEach(function (k) { $('#' + k).value = s[k]; });
     $('#createScenes').checked = !!s.createScenes;
     $('#setNorth').checked = !!s.setNorth;
+    $('#backupEnabled').checked = s.backupEnabled !== false;
+    $('#backupKeep').value = s.backupKeep;
+    $('#backupMaxAgeDays').value = s.backupMaxAgeDays;
   };
 
   sdp.tabs(document);
@@ -116,7 +126,8 @@
   });
   $('#saveSettings').addEventListener('click', function () {
     sdp.call('saveSettings', { lod: $('#lod').value, modifiedPolicy: $('#modifiedPolicy').value, deletedPolicy: $('#deletedPolicy').value,
-      createScenes: $('#createScenes').checked, setNorth: $('#setNorth').checked });
+      createScenes: $('#createScenes').checked, setNorth: $('#setNorth').checked, backupEnabled: $('#backupEnabled').checked,
+      backupKeep: Math.max(1, parseInt($('#backupKeep').value, 10) || 10), backupMaxAgeDays: Math.max(0, parseInt($('#backupMaxAgeDays').value, 10) || 0) });
   });
   $('#close').addEventListener('click', function () { sdp.call('close'); });
 })();

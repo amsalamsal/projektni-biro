@@ -14,7 +14,7 @@ module ProjektniBiro
       end
 
       # Data shown in the element properties dialog.
-      def describe(model, entity)
+      def describe(model, entity, catalog: CatalogFiles.new)
         td = type_definition(model, entity.get_attribute(DICT, 'type'))
         params = JSON.parse(entity.get_attribute(DICT, 'params') || '{}')
         local = JSON.parse(entity.get_attribute(DICT, 'localParams') || '{}')
@@ -34,7 +34,10 @@ module ProjektniBiro
             p.merge('value' => local.key?(p['key']) ? local[p['key']] : params[p['key']], 'edited' => local.key?(p['key']))
           end,
           'properties' => JSON.parse(entity.get_attribute(DICT, 'properties') || '{}'),
-          'materials' => CatalogFiles.new.materials.values.map { |m| { 'key' => m.key, 'name' => m.name } }
+          'materials' => catalog.materials.values.map { |m| { 'key' => m.key, 'name' => m.name } },
+          'optionLabels' => catalog.option_labels,
+          'propertyLabels' => catalog.property_labels,
+          'categoryName' => catalog.category_name(entity.get_attribute(DICT, 'category'))
         }
       end
 
@@ -46,9 +49,9 @@ module ProjektniBiro
       # Applies parameter edits made in SketchUp: validates them, stores them as local edits (sent back with
       # "Export changes") and rebuilds the element's geometry in place. Returns [entity, report].
       def apply_parameters(model, entity, edits, catalog: CatalogFiles.new)
-        report = Report.new('Element edit')
+        report = Report.new('Izmjena elementa')
         td_hash = type_definition(model, entity.get_attribute(DICT, 'type'))
-        raise PackageError, 'element type definition not found in this model; re-import the package' unless td_hash
+        raise PackageError, 'definicija tipa elementa nije pronađena u modelu; ponovo uvezite paket' unless td_hash
 
         td = TypeDef.new(td_hash.merge('category' => entity.get_attribute(DICT, 'category'), 'modelGroup' => entity.get_attribute(DICT, 'modelGroup')))
         clean = validate_edits(td, edits, report)
@@ -58,7 +61,7 @@ module ProjektniBiro
         local = JSON.parse(entity.get_attribute(DICT, 'localParams') || '{}').merge(clean)
         local.reject! { |k, v| base[k] == v }
         element = element_from(entity, td, base.merge(local))
-        model.start_operation('Site Design Pro: edit element', true)
+        model.start_operation('Vanjsko uređenje PRO: izmjena elementa', true)
         begin
           new_entity = rebuild(model, entity, element, catalog, report)
           if local.empty?
@@ -70,8 +73,8 @@ module ProjektniBiro
           [new_entity, report]
         rescue StandardError => e
           model.abort_operation
-          Log.error('Element edit failed', e)
-          report.add(:error, 'SDP-E999', element.id, "Edit failed and was rolled back: #{e.message}")
+          Log.error('Izmjena elementa nije uspjela', e)
+          report.add(:error, 'SDP-E999', element.id, "Izmjena nije uspjela i poništena je: #{e.message}")
           [entity, report]
         end
       end
@@ -80,7 +83,7 @@ module ProjektniBiro
         edits.each_with_object({}) do |(key, value), acc|
           pd = td.param_def(key)
           unless pd
-            report.add(:error, 'SDP-E001', nil, "Unknown parameter '#{key}'.")
+            report.add(:error, 'SDP-E001', nil, "Nepoznat parametar '#{key}'.")
             next
           end
           v = coerce(pd, value)
@@ -95,8 +98,8 @@ module ProjektniBiro
           if ok
             acc[key] = v
           else
-            report.add(:error, 'SDP-E002', nil, "Invalid value #{value.inspect} for '#{pd['label'] || key}'" \
-                                                "#{pd['min'] ? " (#{pd['min']} to #{pd['max']})" : ''}.")
+            report.add(:error, 'SDP-E002', nil, "Neispravna vrijednost #{value.inspect} za '#{pd['label'] || key}'" \
+                                                "#{pd['min'] ? " (#{pd['min']} do #{pd['max']})" : ''}.")
           end
         end
       end
@@ -118,7 +121,7 @@ module ProjektniBiro
               { kind: 'point', position: entity.get_attribute(DICT, 'position'), rotation: entity.get_attribute(DICT, 'rotation') }
             else
               raw = entity.get_attribute(DICT, 'geometry')
-              raise PackageError, 'element geometry is not stored in this model; re-import the package' unless raw
+              raise PackageError, 'geometrija elementa nije sačuvana u modelu; ponovo uvezite paket' unless raw
 
               PackageReader.parse_geometry(JSON.parse(raw))
             end
@@ -154,7 +157,7 @@ module ProjektniBiro
         layer = entity.layer
         entity.erase!
         new_entity = ElementBuilder.build(element, canvas, ctx, attrs)
-        raise PackageError, 'element could not be rebuilt' unless new_entity
+        raise PackageError, 'element nije moguće ponovo izraditi' unless new_entity
 
         new_entity.layer = layer
         new_entity.set_attribute(DICT, 'fingerprint', ModelIndex.fingerprint(new_entity))
@@ -164,7 +167,7 @@ module ProjektniBiro
       # Collects SketchUp-side changes for one project into a ChangeSet.
       def collect_changes(model, project_id)
         root = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICT, 'role') == 'projectRoot' && g.get_attribute(DICT, 'projectId') == project_id }
-        raise PackageError, 'project not found in this model' unless root
+        raise PackageError, 'projekat nije pronađen u ovom modelu' unless root
 
         cs = ChangeSet.new(project_id: project_id, package_id: root.get_attribute(DICT, 'packageId'), origin: root.get_attribute(DICT, 'origin'))
         ModelIndex.managed_entities(model).each do |e|

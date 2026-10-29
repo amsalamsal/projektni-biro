@@ -6,6 +6,7 @@ ENV['SDP_QUIET'] = '1' # adapter log lines go to the log file only
 require 'json'
 require 'securerandom'
 require 'tmpdir'
+ENV['APPDATA'] = Dir.mktmpdir('sdp-appdata') # recovery journal of the tests never touches the user's profile
 require 'fileutils'
 require_relative '../src/pb_site_design_pro/core'
 

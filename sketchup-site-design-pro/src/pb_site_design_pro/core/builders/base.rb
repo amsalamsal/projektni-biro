@@ -29,7 +29,7 @@ module ProjektniBiro
         attr_reader :lod, :materials, :report
 
         def initialize(lod: 'standard', materials: {}, report: nil)
-          raise ArgumentError, "unknown level of detail #{lod}" unless LODS.include?(lod.to_s)
+          raise ArgumentError, "nepoznat nivo detalja #{lod}" unless LODS.include?(lod.to_s)
 
           @lod = lod.to_s
           @materials = materials
@@ -80,8 +80,8 @@ module ProjektniBiro
           return fallback if value.nil? || value.to_s.empty?
           return value if @ctx.materials.empty? || @ctx.materials.key?(value)
 
-          @ctx.report.add(:warning, 'SDP-M001', element.id, "Material '#{value}' is not defined; '#{fallback}' is used.",
-                          'Add the material to a user materials file in AutoCAD and re-export.', element.label)
+          @ctx.report.add(:warning, 'SDP-M001', element.id, "Materijal '#{value}' nije definisan; koristi se '#{fallback}'.",
+                          'Dodajte materijal u korisničku datoteku materijala u AutoCAD-u i ponovo izvezite.', element.label)
           fallback
         end
 

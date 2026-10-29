@@ -101,9 +101,27 @@ module ProjektniBiro
     # In-memory exchange package (metres, package frame).
     class Package
       attr_reader :path, :schema_version, :package_id, :created_utc, :generator, :project, :units,
-                  :origin, :true_north_degrees, :crs, :catalog, :type_defs, :materials, :elements, :assets
+                  :origin, :true_north_degrees, :crs, :catalog, :type_defs, :materials, :elements, :assets,
+                  :elevation, :terrains
+
+      # Absolute elevation of package z = 0 (m above the vertical datum), or nil when the project did not define it.
+      def package_zero_absolute
+        v = (@elevation || {})['packageZeroAbsolute']
+        v.is_a?(Numeric) ? v.to_f : nil
+      end
+
+      def building_zero_absolute
+        v = (@elevation || {})['buildingZeroAbsolute']
+        v.is_a?(Numeric) ? v.to_f : nil
+      end
+
+      def vertical_datum
+        (@elevation || {})['verticalDatum'].to_s
+      end
 
       def initialize(attrs)
+        @elevation = {}
+        @terrains = []
         attrs.each { |k, v| instance_variable_set("@#{k}", v) }
         @by_id = @elements.each_with_object({}) { |e, acc| acc[e.id] = e }
       end
@@ -139,24 +157,24 @@ module ProjektniBiro
 
       # Returns [package_or_nil, report].
       def read(path)
-        report = Report.new('Package validation')
+        report = Report.new('Provjera paketa')
         report.package_path = path
         manifest_text, geometry_text, asset_reader, asset_exists = load_documents(path)
         package = parse(manifest_text, geometry_text, report, path, asset_reader, asset_exists)
         [package, report]
       rescue PackageError, JSON::ParserError, SystemCallError, IOError, KeyError, TypeError, ArgumentError, NoMethodError => e
-        report.add(:error, 'SDP-F001', nil, "The package could not be read: #{e.message}",
-                   'Check that the file is a Site Design Pro package (.sdpkg or a folder with manifest.json and ' \
-                   'geometry.json) and re-export it from AutoCAD.')
+        report.add(:error, 'SDP-F001', nil, "Paket nije moguće pročitati: #{e.message}",
+                   'Provjerite da je datoteka paket programa Vanjsko uređenje PRO (.sdpkg ili folder s manifest.json i ' \
+                   'geometry.json) i ponovo ga izvezite iz AutoCAD-a.')
         [nil, report]
       end
 
       def read_strings(manifest_text, geometry_text)
-        report = Report.new('Package validation')
+        report = Report.new('Provjera paketa')
         package = parse(manifest_text, geometry_text, report, nil, ->(_p) { nil }, ->(_p) { true })
         [package, report]
       rescue PackageError, JSON::ParserError, KeyError, TypeError, ArgumentError, NoMethodError => e
-        report.add(:error, 'SDP-F001', nil, "The package could not be parsed: #{e.message}", 'Re-export the package.')
+        report.add(:error, 'SDP-F001', nil, "Sadržaj paketa nije ispravan: #{e.message}", 'Ponovo izvezite paket.')
         [nil, report]
       end
 
@@ -169,8 +187,8 @@ module ProjektniBiro
           dir = File.directory?(path) ? path : File.dirname(path)
           manifest = File.join(dir, 'manifest.json')
           geometry = File.join(dir, 'geometry.json')
-          raise PackageError, "manifest.json not found in #{dir}" unless File.file?(manifest)
-          raise PackageError, "geometry.json not found in #{dir}" unless File.file?(geometry)
+          raise PackageError, "manifest.json nije pronađen u #{dir}" unless File.file?(manifest)
+          raise PackageError, "geometry.json nije pronađen u #{dir}" unless File.file?(geometry)
 
           root = File.expand_path(dir)
           resolve = lambda do |p|
@@ -185,20 +203,20 @@ module ProjektniBiro
       def parse(manifest_text, geometry_text, report, path, asset_reader, asset_exists)
         m = JSON.parse(manifest_text)
         g = JSON.parse(geometry_text)
-        raise PackageError, 'manifest.json is not a Site Design Pro manifest' unless m['format'] == FORMAT_ID
+        raise PackageError, 'manifest.json nije manifest programa Vanjsko uređenje PRO' unless m['format'] == FORMAT_ID
 
         version = m.fetch('schemaVersion').to_s
         major, minor, patch = version.split('.').map { |x| Integer(x, 10) }
-        raise PackageError, "unsupported schema version #{version} (this extension reads #{SUPPORTED_SCHEMA_MAJOR}.x)" unless major == SUPPORTED_SCHEMA_MAJOR
+        raise PackageError, "nepodržana verzija sheme #{version} (ovo proširenje čita #{SUPPORTED_SCHEMA_MAJOR}.x)" unless major == SUPPORTED_SCHEMA_MAJOR
 
         if ([major, minor, patch] <=> SCHEMA_VERSION.split('.').map(&:to_i)).positive?
           report.add(:warning, 'SDP-F002', nil,
-                     "Package schema #{version} is newer than this extension (#{SCHEMA_VERSION}); unknown fields are ignored.",
-                     'Update Site Design Pro for SketchUp.')
+                     "Shema paketa #{version} je novija od ovog proširenja (#{SCHEMA_VERSION}); nepoznata polja se zanemaruju.",
+                     'Ažurirajte Vanjsko uređenje PRO za SketchUp.')
         end
         units = m.fetch('units')
-        raise PackageError, 'package length unit must be metres' unless units['length'] == 'm' && g['lengthUnit'] == 'm'
-        raise PackageError, 'packageId is not a valid UUID' unless m['packageId'].to_s.match?(UUID)
+        raise PackageError, 'jedinica dužine paketa mora biti metar' unless units['length'] == 'm' && g['lengthUnit'] == 'm'
+        raise PackageError, 'packageId nije ispravan UUID' unless m['packageId'].to_s.match?(UUID)
 
         type_defs = {}
         m.fetch('typeDefinitions').each { |t| type_defs[t['id']] = TypeDef.new(t) }
@@ -213,7 +231,7 @@ module ProjektniBiro
         g.fetch('elements').each do |ge|
           id = ge['id'].to_s
           if geoms.key?(id)
-            report.add(:error, 'SDP-F010', id, 'Duplicate geometry record.', 'Re-export the package.')
+            report.add(:error, 'SDP-F010', id, 'Dupli zapis geometrije.', 'Ponovo izvezite paket.')
             next
           end
           geoms[id] = ge
@@ -225,36 +243,36 @@ module ProjektniBiro
           id = eh['id'].to_s
           label = eh['label']
           unless id.match?(UUID)
-            report.add(:error, 'SDP-D001', id.empty? ? nil : id, 'Element has a missing or malformed id.',
-                       'Run SDPAUDIT in AutoCAD, then re-export.', label)
+            report.add(:error, 'SDP-D001', id.empty? ? nil : id, 'Element nema ispravan identifikator.',
+                       'Pokrenite SDPAUDIT u AutoCAD-u, zatim ponovo izvezite.', label)
             next
           end
           if seen[id]
-            report.add(:error, 'SDP-D002', id, 'Duplicate element id in package.',
-                       'Run SDPAUDIT in AutoCAD to repair copied objects, then re-export.', label)
+            report.add(:error, 'SDP-D002', id, 'Dupli identifikator elementa u paketu.',
+                       'Pokrenite SDPAUDIT u AutoCAD-u da se poprave kopirani objekti, zatim ponovo izvezite.', label)
             next
           end
           seen[id] = true
           ge = geoms[id]
           unless ge
-            report.add(:error, 'SDP-F011', id, 'Element has no geometry record.', 'Re-export the package.', label)
+            report.add(:error, 'SDP-F011', id, 'Element nema zapis geometrije.', 'Ponovo izvezite paket.', label)
             next
           end
           type_def = type_defs[eh['type']]
           begin
             geometry = parse_geometry(ge)
           rescue PackageError, KeyError, TypeError, NoMethodError, ArgumentError => e
-            report.add(:error, 'SDP-G010', id, "Invalid geometry: #{e.message}", 'Fix the source object in AutoCAD and re-export.', label)
+            report.add(:error, 'SDP-G010', id, "Neispravna geometrija: #{e.message}", 'Ispravite izvorni objekat u AutoCAD-u i ponovo izvezite.', label)
             next
           end
           if type_def && type_def.geometry != geometry[:kind]
-            report.add(:error, 'SDP-F012', id, "Geometry kind '#{geometry[:kind]}' does not match type definition '#{type_def.geometry}'.",
-                       'Re-export the package.', label)
+            report.add(:error, 'SDP-F012', id, "Vrsta geometrije '#{geometry[:kind]}' ne odgovara definiciji tipa '#{type_def.geometry}'.",
+                       'Ponovo izvezite paket.', label)
             next
           end
           unless type_def
-            report.add(:warning, 'SDP-F013', id, "Type '#{eh['type']}' has no type definition in the manifest.",
-                       'Re-export with the current AutoCAD extension.', label)
+            report.add(:warning, 'SDP-F013', id, "Tip '#{eh['type']}' nema definiciju u manifestu.",
+                       'Ponovo izvezite trenutnom verzijom AutoCAD proširenja.', label)
           end
           element = Element.new(eh, geometry, type_def)
           check_parameters(element, report)
@@ -262,35 +280,45 @@ module ProjektniBiro
         end
 
         (geoms.keys - seen.keys).each do |orphan|
-          report.add(:warning, 'SDP-F014', orphan, 'Geometry record without a manifest element is ignored.', 'Re-export the package.')
+          report.add(:warning, 'SDP-F014', orphan, 'Zapis geometrije bez elementa u manifestu se zanemaruje.', 'Ponovo izvezite paket.')
         end
 
         assets = (m['assets'] || []).map do |a|
           asset = Asset.new(a['id'], a['path'].to_s, a['kind'], a['sha256'])
           if asset.path.include?('..') || !asset.path.start_with?('assets/')
-            report.add(:error, 'SDP-F020', nil, "Asset '#{asset.id}' has an unsafe path '#{asset.path}'.",
-                       'Asset paths must stay inside the assets/ folder.')
+            report.add(:error, 'SDP-F020', nil, "Datoteka modela '#{asset.id}' ima nesigurnu putanju '#{asset.path}'.",
+                       'Putanje datoteka moraju ostati unutar foldera assets/.')
           elsif !asset_exists.call(asset.path)
-            report.add(:warning, 'SDP-F021', nil, "Asset '#{asset.id}' is missing: #{asset.path}",
-                       'Re-export with assets; affected elements fall back to parametric geometry.')
+            report.add(:warning, 'SDP-F021', nil, "Datoteka modela '#{asset.id}' nedostaje: #{asset.path}",
+                       'Ponovo izvezite s modelima; ti elementi se prikazuju parametarskom geometrijom.')
           end
           asset
         end
 
         cs = m.fetch('coordinateSystem')
+        terrains = []
+        if m['terrain'].is_a?(Hash)
+          bytes = asset_reader.call('terrain.json')
+          if bytes.nil?
+            report.add(:error, 'SDP-F030', nil, 'Paket navodi teren, ali datoteka terrain.json nedostaje.', 'Ponovo izvezite paket iz AutoCAD-a.')
+          else
+            terrains = TerrainReader.parse(bytes.dup.force_encoding('UTF-8'), report)
+          end
+        end
         report.stats['elements'] = elements.length
+        report.stats['terrains'] = terrains.length unless terrains.empty?
         Package.new(
           path: path, schema_version: version, package_id: m['packageId'], created_utc: m['createdUtc'],
           generator: m['generator'] || {}, project: m.fetch('project'), units: units,
           origin: cs.fetch('origin').map(&:to_f), true_north_degrees: cs.fetch('trueNorthDegrees').to_f, crs: cs['crs'],
           catalog: m['catalog'] || {}, type_defs: type_defs, materials: materials, elements: elements, assets: assets,
-          asset_reader: asset_reader
+          asset_reader: asset_reader, elevation: cs['elevation'].is_a?(Hash) ? cs['elevation'] : {}, terrains: terrains
         )
       end
 
       def vec3(a)
-        raise PackageError, 'coordinates must be [x, y, z] arrays' unless a.is_a?(Array) && a.length == 3
-        raise PackageError, 'coordinates must be finite numbers' unless a.all? { |v| v.is_a?(Numeric) && v.to_f.finite? }
+        raise PackageError, 'koordinate moraju biti nizovi [x, y, z]' unless a.is_a?(Array) && a.length == 3
+        raise PackageError, 'koordinate moraju biti konačni brojevi' unless a.all? { |v| v.is_a?(Numeric) && v.to_f.finite? }
 
         a.map(&:to_f)
       end
@@ -305,21 +333,21 @@ module ProjektniBiro
         case ge.fetch('kind')
         when 'point'
           rot = ge.fetch('rotation')
-          raise PackageError, 'rotation must be a finite number' unless rot.is_a?(Numeric) && rot.to_f.finite?
+          raise PackageError, 'rotacija mora biti konačan broj' unless rot.is_a?(Numeric) && rot.to_f.finite?
 
           { kind: 'point', position: vec3(ge.fetch('position')), rotation: rot.to_f }
         when 'path'
           r = ring(ge)
-          raise PackageError, 'a path needs at least two vertices' if r[:vertices].length < 2
+          raise PackageError, 'trasa treba najmanje dva tjemena' if r[:vertices].length < 2
 
           { kind: 'path', vertices: r[:vertices], bulges: r[:bulges], closed: ge.fetch('closed') == true }
         when 'polygon'
           outer = ring(ge.fetch('outer'))
-          raise PackageError, 'a polygon needs at least three vertices' if outer[:vertices].length < 3 && !outer[:bulges]
+          raise PackageError, 'površina treba najmanje tri tjemena' if outer[:vertices].length < 3 && !outer[:bulges]
 
           { kind: 'polygon', outer: outer, holes: (ge['holes'] || []).map { |h| ring(h) } }
         else
-          raise PackageError, "unknown geometry kind '#{ge['kind']}'"
+          raise PackageError, "nepoznata vrsta geometrije '#{ge['kind']}'"
         end
       end
 
@@ -359,8 +387,8 @@ module ProjektniBiro
 
           fixes[key] = pd['default']
           report.add(:warning, 'SDP-P020', element.id,
-                     "Parameter '#{pd['label'] || key}' has an invalid value #{v.inspect}; the default #{pd['default'].inspect} is used.",
-                     'Correct the value in AutoCAD (SDPEDIT) and re-export.', element.label)
+                     "Parametar '#{pd['label'] || key}' ima neispravnu vrijednost #{v.inspect}; koristi se zadana vrijednost #{pd['default'].inspect}.",
+                     'Ispravite vrijednost u AutoCAD-u (SDPEDIT) i ponovo izvezite.', element.label)
         end
         element.params.merge!(fixes) unless fixes.empty?
       end

@@ -35,4 +35,6 @@ require File.join(__dir__, 'version')
   builders/markings
   element_builder
   change_set
+  terrain
+  safety
 ].each { |f| require File.join(ProjektniBiro::SiteDesignPro::CORE_DIR, f) }

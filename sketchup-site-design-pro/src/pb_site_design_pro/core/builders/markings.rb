@@ -12,13 +12,13 @@ module ProjektniBiro
           l = e.num('length', 5.0)
           lw = e.num('lineWidth', 0.12)
           material = mat(e, 'markingMaterial', 'line_paint_white')
-          c.mesh(Mesh.box(-w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Side line')
-          c.mesh(Mesh.box(w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Side line')
-          c.mesh(Mesh.box(0, l - (lw / 2), 0, w - lw - 0.002, lw, MARKING), material: material, name: 'End line')
+          c.mesh(Mesh.box(-w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Bočna linija')
+          c.mesh(Mesh.box(w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Bočna linija')
+          c.mesh(Mesh.box(0, l - (lw / 2), 0, w - lw - 0.002, lw, MARKING), material: material, name: 'Krajnja linija')
           if e.bool('accessible')
-            c.mesh(Mesh.box(0, l / 2, 0, [w * 0.45, 1.2].min, [w * 0.45, 1.2].min, MARKING), material: 'line_paint_blue', name: 'Accessible symbol area')
+            c.mesh(Mesh.box(0, l / 2, 0, [w * 0.45, 1.2].min, [w * 0.45, 1.2].min, MARKING), material: 'line_paint_blue', name: 'Površina simbola pristupačnosti')
           elsif e.bool('ev')
-            c.mesh(Mesh.box(0, l / 2, 0, [w * 0.4, 1.0].min, [w * 0.6, 1.5].min, MARKING), material: 'marking_green', name: 'EV symbol area')
+            c.mesh(Mesh.box(0, l / 2, 0, [w * 0.4, 1.0].min, [w * 0.6, 1.5].min, MARKING), material: 'marking_green', name: 'Površina simbola punjača')
           end
         end
       end
@@ -40,7 +40,7 @@ module ProjektniBiro
             polys.concat(Mesh.block(corner, [r[:u][0] * r[:length_u], r[:u][1] * r[:length_u], 0], [r[:v][0] * width, r[:v][1] * width, 0], [0, 0, t]))
             v += sw + gap
           end
-          c.mesh(polys, material: mat(e, 'material', 'line_paint_white'), name: 'Stripes') unless polys.empty?
+          c.mesh(polys, material: mat(e, 'material', 'line_paint_white'), name: 'Pruge') unless polys.empty?
         end
       end
       register('stripes', Stripes)
@@ -53,7 +53,7 @@ module ProjektniBiro
           sw = e.num('shaftWidth', 0.15)
           head = [l * 0.4, hw * 1.6].min
           ring = [[0, -sw / 2], [l - head, -sw / 2], [l - head, -hw / 2], [l, 0], [l - head, hw / 2], [l - head, sw / 2], [0, sw / 2]]
-          c.mesh(Mesh.prism(ring, 0, e.num('thickness', MARKING)), material: mat(e, 'material', 'line_paint_white'), name: 'Arrow')
+          c.mesh(Mesh.prism(ring, 0, e.num('thickness', MARKING)), material: mat(e, 'material', 'line_paint_white'), name: 'Strelica')
         end
       end
       register('arrow_marking', ArrowMarking)
@@ -63,7 +63,7 @@ module ProjektniBiro
         def build(e, c)
           s = e.num('size', 1.0)
           ring = [[s * 0.5, 0], [-s * 0.5, s * 0.35], [-s * 0.5, -s * 0.35]]
-          c.mesh(Mesh.prism(ring, 0.0, 0.01), material: mat(e, 'material', 'line_paint_blue'), name: 'Marker')
+          c.mesh(Mesh.prism(ring, 0.0, 0.01), material: mat(e, 'material', 'line_paint_blue'), name: 'Oznaka')
         end
       end
       register('marker', Marker)
@@ -73,7 +73,7 @@ module ProjektniBiro
         def build(e, c)
           z0 = e.num('baseOffset')
           c.mesh(Mesh.cylinder([0, 0, z0], e.num('radius', 2.0), e.num('height', 0.05), @ctx.segments(32)),
-                 material: mat(e, 'material', 'zone_generic'), name: 'Zone', smooth: true)
+                 material: mat(e, 'material', 'zone_generic'), name: 'Zona', smooth: true)
         end
       end
       register('circle_zone', CircleZone)

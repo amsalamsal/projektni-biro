@@ -13,15 +13,15 @@ module ProjektniBiro
           finish = mat(e, 'finishMaterial', 'pool_finish')
           outer = Geometry.offset_ring(inner, e.num('wallThickness', 0.25))
           if outer
-            c.mesh(Mesh.prism(outer, z - depth - floor_t, z, [inner]), material: finish, name: 'Pool walls')
+            c.mesh(Mesh.prism(outer, z - depth - floor_t, z, [inner]), material: finish, name: 'Zidovi bazena')
           else
-            warn(e, 'SDP-B030', 'Pool walls could not be offset from this boundary; only floor and water are built.', 'Simplify the pool outline.')
+            warn(e, 'SDP-B030', 'Zidovi bazena se ne mogu odmaknuti od ove granice; izrađeni su samo dno i voda.', 'Pojednostavite konturu bazena.')
           end
-          c.mesh(Mesh.prism(inner, z - depth - floor_t, z - depth), material: finish, name: 'Pool floor')
+          c.mesh(Mesh.prism(inner, z - depth - floor_t, z - depth), material: finish, name: 'Dno bazena')
           water_top = z - e.num('waterLevelOffset', 0.1)
           return unless water_top > z - depth + 1e-4
 
-          c.mesh(Mesh.prism(inner, z - depth, water_top), material: mat(e, 'waterMaterial', 'water'), name: 'Water')
+          c.mesh(Mesh.prism(inner, z - depth, water_top), material: mat(e, 'waterMaterial', 'water'), name: 'Voda')
         end
       end
       register('pool', Pool)
@@ -36,8 +36,8 @@ module ProjektniBiro
           slope = e.num('sideSlope', 3.0)
           bottom, inset = inset_ring(top, slope * depth)
           if inset < (slope * depth) - 1e-6
-            warn(e, 'SDP-B031', format('Basin is too narrow for side slope 1:%<s>.1f; sides were steepened (inset %<i>.2f m).', s: slope, i: inset),
-                 'Reduce the side slope or depth, or enlarge the basin.')
+            warn(e, 'SDP-B031', format('Bazen je preuzak za nagib kosine 1:%<s>.1f; kosine su strmije (uvlačenje %<i>.2f m).', s: slope, i: inset).tr('.', ','),
+                 'Smanjite nagib kosine ili dubinu, ili povećajte bazen.')
           end
           polys = [bottom.map { |p| [p[0], p[1], z - depth] }]
           top.each_index do |i|
@@ -47,7 +47,7 @@ module ProjektniBiro
             # sides face up into the basin (toward the air)
             polys << [[b[0], b[1], z], [bottom[j][0], bottom[j][1], z - depth], [bottom[i][0], bottom[i][1], z - depth], [a[0], a[1], z]]
           end
-          c.mesh(polys, material: mat(e, 'floorMaterial', 'grass'), name: 'Basin', solid: false)
+          c.mesh(polys, material: mat(e, 'floorMaterial', 'grass'), name: 'Korito', solid: false)
           wd = e.num('waterDepth')
           return unless wd.positive?
 
@@ -56,7 +56,7 @@ module ProjektniBiro
           water = top.each_index.map do |i|
             [bottom[i][0] + ((top[i][0] - bottom[i][0]) * ratio), bottom[i][1] + ((top[i][1] - bottom[i][1]) * ratio), level]
           end
-          c.mesh([water], material: mat(e, 'waterMaterial', 'water'), name: 'Water surface', solid: false)
+          c.mesh([water], material: mat(e, 'waterMaterial', 'water'), name: 'Vodena površina', solid: false)
         end
 
         private
@@ -84,15 +84,15 @@ module ProjektniBiro
           stone = mat(e, 'basinMaterial', 'stone_wall')
           water = mat(e, 'waterMaterial', 'water')
           if bh.positive?
-            c.mesh(Mesh.ring_wall([0, 0, -0.3], r, r - rim, bh + 0.3, n), material: stone, name: 'Basin rim', smooth: true)
+            c.mesh(Mesh.ring_wall([0, 0, -0.3], r, r - rim, bh + 0.3, n), material: stone, name: 'Rub korita', smooth: true)
           end
-          c.mesh(Mesh.cylinder([0, 0, -0.45], r - (bh.positive? ? rim : 0), 0.15, n), material: stone, name: 'Basin floor', smooth: true)
+          c.mesh(Mesh.cylinder([0, 0, -0.45], r - (bh.positive? ? rim : 0), 0.15, n), material: stone, name: 'Dno korita', smooth: true)
           level = bh.positive? ? bh - 0.05 : 0.0
-          c.mesh(Mesh.cylinder([0, 0, -0.3], r - (bh.positive? ? rim : 0), level + 0.3, n), material: water, name: 'Water', smooth: true)
+          c.mesh(Mesh.cylinder([0, 0, -0.3], r - (bh.positive? ? rim : 0), level + 0.3, n), material: water, name: 'Voda', smooth: true)
           jh = e.num('jetHeight', 2.0)
           return unless jh.positive?
 
-          c.mesh(Mesh.cylinder([0, 0, level], e.num('jetDiameter', 0.08) / 2, jh, 8), material: water, name: 'Jet', smooth: true)
+          c.mesh(Mesh.cylinder([0, 0, level], e.num('jetDiameter', 0.08) / 2, jh, 8), material: water, name: 'Mlaz', smooth: true)
         end
       end
       register('fountain', Fountain)

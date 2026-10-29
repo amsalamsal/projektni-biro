@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bs">
 <head>
 <meta charset="utf-8">
-<title>Site Design Pro - Element properties</title>
+<title>Vanjsko uređenje PRO – svojstva elementa</title>
 <link rel="stylesheet" href="sdp.css">
 </head>
 <body>
@@ -14,17 +14,17 @@
   <div class="messages" id="messages"></div>
   <div class="panel" id="status"></div>
   <div class="tabs">
-    <button class="active" data-for="params">Parameters</button>
-    <button data-for="props">Properties</button>
+    <button class="active" data-for="params">Parametri</button>
+    <button data-for="props">Svojstva</button>
   </div>
   <div data-tab="params" class="params panel" id="params"></div>
   <div data-tab="props" class="hidden panel"><table id="props"></table></div>
 </main>
 <footer>
-  <span class="note">Edits are kept in SketchUp and can be sent to AutoCAD with "Export changes".</span>
-  <button id="selectType">Select same type</button>
-  <button id="revert">Revert edits</button>
-  <button id="apply" class="primary">Apply</button>
+  <span class="note">Izmjene ostaju u SketchUp-u i mogu se poslati u AutoCAD naredbom „Izvoz izmjena".</span>
+  <button id="selectType">Odaberi isti tip</button>
+  <button id="revert">Poništi izmjene</button>
+  <button id="apply" class="primary">Primijeni</button>
 </footer>
 <script src="sdp.js"></script>
 <script>
@@ -40,7 +40,8 @@
         return '<input type="checkbox"' + attrs + (v === true ? ' checked' : '') + '>';
       case 'enum':
         return '<select' + attrs + '>' + (p.options || []).map(function (o) {
-          return '<option' + (o === v ? ' selected' : '') + '>' + esc(o) + '</option>';
+          var label = (data.optionLabels || {})[o] || o;
+          return '<option value="' + esc(o) + '"' + (o === v ? ' selected' : '') + '>' + esc(label) + '</option>';
         }).join('') + '</select>';
       case 'material':
         return '<select' + attrs + '>' + (data.materials || []).map(function (m) {
@@ -56,7 +57,7 @@
 
   function unit(p) {
     if (p.type === 'length') { return 'm'; }
-    if (p.type === 'angle') { return 'deg'; }
+    if (p.type === 'angle') { return '°'; }
     return p.unit || '';
   }
 
@@ -65,22 +66,22 @@
     $('#title').textContent = (d.label ? d.label + ' - ' : '') + (d.name || d.typeName);
     $('#subtitle').textContent = d.typeName + ' (' + d.type + ')  |  ' + d.id;
     var badges = [];
-    if (d.locallyModified) { badges.push(sdp.badge('keep_local', 'Modified in SketchUp')); }
-    if (d.deletedInSource) { badges.push(sdp.badge('mark_deleted', 'Deleted in AutoCAD')); }
-    $('#status').innerHTML = (badges.join(' ') || sdp.badge('create', 'In sync with last import')) +
-      '<div class="muted" style="margin-top:6px">Category: ' + esc(d.category) + ' &nbsp; Revision: ' + esc(d.revision) + ' &nbsp; Imported: ' + esc(d.importedAt) + '</div>';
+    if (d.locallyModified) { badges.push(sdp.badge('keep_local', 'Izmijenjeno u SketchUp-u')); }
+    if (d.deletedInSource) { badges.push(sdp.badge('mark_deleted', 'Obrisano u AutoCAD-u')); }
+    $('#status').innerHTML = (badges.join(' ') || sdp.badge('create', 'Usklađeno s posljednjim uvozom')) +
+      '<div class="muted" style="margin-top:6px">Kategorija: ' + esc(d.categoryName || d.category) + ' &nbsp; Revizija: ' + esc(d.revision) + ' &nbsp; Uvezeno: ' + esc(d.importedAt) + '</div>';
     var groups = {};
-    (d.parameters || []).forEach(function (p) { (groups[p.group || 'General'] = groups[p.group || 'General'] || []).push(p); });
+    (d.parameters || []).forEach(function (p) { (groups[p.group || 'Općenito'] = groups[p.group || 'Općenito'] || []).push(p); });
     $('#params').innerHTML = Object.keys(groups).map(function (g) {
       return '<h3>' + esc(g) + '</h3>' + groups[g].map(function (p) {
         return '<div class="param' + (p.edited ? ' edited' : '') + '"><label>' + esc(p.label || p.key) + '</label>' + input(p) +
           '<span class="unit">' + esc(unit(p)) + '</span></div>';
       }).join('');
-    }).join('') || '<div class="empty">No parameters.</div>';
+    }).join('') || '<div class="empty">Nema parametara.</div>';
     var props = d.properties || {};
     $('#props').innerHTML = Object.keys(props).length ? Object.keys(props).map(function (k) {
-      return '<tr><th style="width:180px">' + esc(k) + '</th><td>' + esc(props[k]) + '</td></tr>';
-    }).join('') : '<tr><td class="empty">No descriptive properties. Edit them in AutoCAD.</td></tr>';
+      return '<tr><th style="width:180px">' + esc((d.propertyLabels || {})[k] || k) + '</th><td>' + esc(props[k]) + '</td></tr>';
+    }).join('') : '<tr><td class="empty">Nema opisnih svojstava. Unesite ih u AutoCAD-u.</td></tr>';
     $('#messages').innerHTML = (d.messages || []).map(function (m) {
       return '<div class="' + esc(m.severity) + '">' + esc(m.message) + '</div>';
     }).join('');

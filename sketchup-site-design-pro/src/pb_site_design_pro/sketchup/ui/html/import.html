@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bs">
 <head>
 <meta charset="utf-8">
-<title>Site Design Pro - Import</title>
+<title>Vanjsko uređenje PRO – uvoz</title>
 <link rel="stylesheet" href="sdp.css">
 </head>
 <body>
 <header>
-  <h1 id="title">Site Design Pro</h1>
-  <div class="sub" id="subtitle">Loading package...</div>
+  <h1 id="title">Vanjsko uređenje PRO</h1>
+  <div class="sub" id="subtitle">Učitavanje paketa...</div>
 </header>
 <main>
   <div class="cards" id="cards"></div>
@@ -16,71 +16,78 @@
   <section id="preview" class="hidden">
     <div class="panel">
       <div class="row">
-        <label class="field">Level of detail
+        <label class="field">Nivo detalja
           <select id="lod">
-            <option value="conceptual">Conceptual (lightweight)</option>
-            <option value="standard">Standard</option>
-            <option value="presentation">Presentation (detailed)</option>
+            <option value="conceptual">Šematski prikaz (lagano)</option>
+            <option value="standard">Standardni kvalitet</option>
+            <option value="presentation">Visoki kvalitet (detaljno)</option>
           </select>
         </label>
-        <label class="field">Objects edited in SketchUp
+        <label class="field">Objekti izmijenjeni u SketchUp-u
           <select id="modifiedPolicy">
-            <option value="keep">Keep SketchUp edits, report conflict</option>
-            <option value="overwrite">Overwrite with AutoCAD version</option>
+            <option value="keep">Zadrži izmjene iz SketchUp-a, prijavi konflikt</option>
+            <option value="overwrite">Prepiši verzijom iz AutoCAD-a</option>
           </select>
         </label>
-        <label class="field">Objects removed in AutoCAD
+        <label class="field">Objekti uklonjeni u AutoCAD-u
           <select id="deletedPolicy">
-            <option value="mark">Move to hidden "Deleted in source" tag</option>
-            <option value="delete">Delete from the model</option>
-            <option value="keep">Keep unchanged</option>
+            <option value="mark">Premjesti na skrivenu oznaku „Obrisano u izvoru"</option>
+            <option value="delete">Obriši iz modela</option>
+            <option value="keep">Zadrži nepromijenjeno</option>
           </select>
         </label>
         <label class="field" style="min-width:auto"><span>&nbsp;</span>
-          <span><input type="checkbox" id="createScenes"> Create review scenes</span>
+          <span><input type="checkbox" id="createScenes"> Izradi scene za pregled</span>
+          <span><input type="checkbox" id="backup"> Sigurnosna kopija prije uvoza</span>
         </label>
       </div>
     </div>
     <div class="tabs" id="tabs">
-      <button class="active" data-for="changes">Planned changes</button>
-      <button data-for="validation">Validation</button>
-      <button data-for="package">Package</button>
+      <button class="active" data-for="changes">Planirane izmjene</button>
+      <button data-for="validation">Provjera</button>
+      <button data-for="package">Paket i visine</button>
     </div>
     <div data-tab="changes">
       <div class="row" style="margin-bottom:6px">
-        <input type="search" id="filter" placeholder="Filter by label, name or type" style="flex:1">
-        <select id="kindFilter"><option value="">All changes</option></select>
+        <input type="search" id="filter" placeholder="Filtriraj po oznaci, nazivu ili tipu" style="flex:1">
+        <select id="kindFilter"><option value="">Sve izmjene</option></select>
       </div>
-      <div class="scroll"><table><thead><tr><th>Change</th><th>No.</th><th>Element</th><th>Type</th><th>Reason</th></tr></thead><tbody id="actions"></tbody></table></div>
+      <div class="scroll"><table><thead><tr><th>Izmjena</th><th>Br.</th><th>Element</th><th>Tip</th><th>Razlog</th></tr></thead><tbody id="actions"></tbody></table></div>
     </div>
-    <div data-tab="validation" class="hidden"><div class="scroll"><table><thead><tr><th>Severity</th><th>Code</th><th>Element</th><th>Message / resolution</th></tr></thead><tbody id="issues"></tbody></table></div></div>
+    <div data-tab="validation" class="hidden"><div class="scroll"><table><thead><tr><th>Ozbiljnost</th><th>Šifra</th><th>Element</th><th>Poruka / rješenje</th></tr></thead><tbody id="issues"></tbody></table></div></div>
     <div data-tab="package" class="hidden"><div class="panel"><table id="pkgInfo"></table></div></div>
   </section>
 
   <section id="report" class="hidden">
     <div class="panel" id="reportStats"></div>
-    <div class="scroll"><table><thead><tr><th>Severity</th><th>Code</th><th>Element</th><th>Message / resolution</th></tr></thead><tbody id="reportIssues"></tbody></table></div>
+    <div class="scroll"><table><thead><tr><th>Ozbiljnost</th><th>Šifra</th><th>Element</th><th>Poruka / rješenje</th></tr></thead><tbody id="reportIssues"></tbody></table></div>
     <div class="disclaimer" id="disclaimer"></div>
   </section>
 </main>
 <footer>
   <span class="note" id="note"></span>
-  <button id="save" class="hidden">Save report...</button>
-  <button id="close">Close</button>
-  <button id="apply" class="primary hidden">Import</button>
+  <button id="save" class="hidden">Sačuvaj izvještaj...</button>
+  <button id="close">Zatvori</button>
+  <button id="apply" class="primary hidden">Uvezi</button>
 </footer>
 <script src="sdp.js"></script>
 <script>
 (function () {
   'use strict';
   var $ = sdp.$, esc = sdp.esc, state = null;
-  var LABELS = { create: 'New', update: 'Changed', restore: 'Restored', conflict: 'Conflict', mark_deleted: 'Deleted (marked)',
-    'delete': 'Deleted', keep_orphan: 'Deleted (kept)', keep_local: 'SketchUp edit kept', detach_duplicate: 'Copy detached',
-    skip: 'Not reconstructable', unchanged: 'Unchanged' };
+  var LABELS = { create: 'Novo', update: 'Izmijenjeno', restore: 'Vraćeno', conflict: 'Konflikt', mark_deleted: 'Obrisano (označeno)',
+    'delete': 'Obrisano', keep_orphan: 'Obrisano (zadržano)', keep_local: 'Zadržana izmjena iz SketchUp-a', detach_duplicate: 'Odvojena kopija',
+    skip: 'Ne može se rekonstruisati', unchanged: 'Nepromijenjeno' };
+  var SEVERITY = { error: 'Greška', warning: 'Upozorenje', review: 'Za pregled', info: 'Informacija' };
+  var STATS = { created: 'novo', updated: 'ažurirano', restored: 'vraćeno', conflicts: 'konflikti', kept_local: 'zadržane izmjene',
+    marked_deleted: 'označeno obrisano', deleted: 'obrisano', orphans: 'zadržano bez izvora', detached: 'odvojene kopije',
+    skipped: 'preskočeno', unchanged: 'nepromijenjeno', elements: 'elemenata', terrains: 'terena', terrains_created: 'novi tereni',
+    terrains_updated: 'ažurirani tereni', seconds: 'sekundi', groups: 'grupa', meshes: 'mreža', definitions: 'definicija komponenti',
+    instances: 'instanci komponenti' };
 
   function options() {
     return { lod: $('#lod').value, modifiedPolicy: $('#modifiedPolicy').value, deletedPolicy: $('#deletedPolicy').value,
-      createScenes: $('#createScenes').checked };
+      createScenes: $('#createScenes').checked, backup: $('#backup').checked };
   }
 
   function card(value, key, cls) {
@@ -88,23 +95,40 @@
   }
 
   function issueRows(issues) {
-    if (!issues.length) { return '<tr><td colspan="4" class="empty">No issues.</td></tr>'; }
+    if (!issues.length) { return '<tr><td colspan="4" class="empty">Nema napomena.</td></tr>'; }
     return issues.map(function (i) {
-      return '<tr><td>' + sdp.badge(i.severity, i.severity) + '</td><td class="mono">' + esc(i.code) + '</td><td>' +
+      return '<tr><td>' + sdp.badge(i.severity, SEVERITY[i.severity] || i.severity) + '</td><td class="mono">' + esc(i.code) + '</td><td>' +
         esc(i.label || '') + '<div class="mono">' + esc(i.elementId || '') + '</div></td><td>' + esc(i.message) +
         (i.resolution ? '<div class="muted">' + esc(i.resolution) + '</div>' : '') + '</td></tr>';
     }).join('');
   }
 
+  function allActions() {
+    var terrain = (state.terrain || []).filter(function (t) { return t.kind !== 'unchanged'; }).map(function (t) {
+      return { kind: t.kind, label: '', name: t.name, id: t.id, type: 'teren', reason: t.reason };
+    });
+    return state.plan.actions.concat(terrain);
+  }
+
   function renderActions() {
     var q = $('#filter').value.toLowerCase(), kind = $('#kindFilter').value;
-    var rows = state.plan.actions.filter(function (a) {
+    var rows = allActions().filter(function (a) {
       return (!kind || a.kind === kind) && (!q || [a.label, a.name, a.type].join(' ').toLowerCase().indexOf(q) >= 0);
     });
     $('#actions').innerHTML = rows.length ? rows.map(function (a) {
       return '<tr><td>' + sdp.badge(a.kind, LABELS[a.kind] || a.kind) + '</td><td>' + esc(a.label || '') + '</td><td>' + esc(a.name || '') +
         '<div class="mono">' + esc(a.id || '') + '</div></td><td class="mono">' + esc(a.type || '') + '</td><td class="muted">' + esc(a.reason || '') + '</td></tr>';
-    }).join('') : '<tr><td colspan="5" class="empty">' + (state.plan.changes ? 'No matching changes.' : 'The model is up to date. Nothing to import.') + '</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="empty">' + (state.changes ? 'Nema izmjena koje odgovaraju filteru.' : 'Model je ažuran. Nema ništa za uvoz.') + '</td></tr>';
+  }
+
+  function elevationRows(e) {
+    var rows = [];
+    rows.push(['Nulta kota objekta ±0,00', e.buildingZeroAbsolute === null || e.buildingZeroAbsolute === undefined ? 'nije definisana' : sdp.fmt(e.buildingZeroAbsolute, 2) + ' m n.v.']);
+    rows.push(['Kota 0 modela (apsolutno)', e.packageZeroAbsolute === null || e.packageZeroAbsolute === undefined ? 'nepoznata – model je u relativnim kotama' : sdp.fmt(e.packageZeroAbsolute, 3) + ' m n.v.']);
+    rows.push(['Parter u odnosu na ±0,00', e.parterreRelative === undefined ? '-' : sdp.fmt(e.parterreRelative, 2) + ' m']);
+    rows.push(['Saobraćajnice ispod partera', e.roadOffsetBelowParterre === null || e.roadOffsetBelowParterre === undefined ? 'nije podešeno' : sdp.fmt(e.roadOffsetBelowParterre * 100, 1) + ' cm']);
+    rows.push(['Visinski datum', e.verticalDatum || 'nije naveden']);
+    return rows;
   }
 
   function renderPreview(d) {
@@ -112,30 +136,35 @@
     $('#report').classList.add('hidden');
     $('#apply').classList.remove('hidden');
     $('#save').classList.add('hidden');
-    $('#title').textContent = 'Import: ' + (d.package.project.name || 'Site Design Pro package');
+    $('#title').textContent = 'Uvoz: ' + (d.package.project.name || 'paket Vanjsko uređenje PRO');
     $('#subtitle').textContent = d.package.path;
     var c = d.plan.counts;
-    $('#cards').innerHTML = card(d.package.elementCount, 'Elements') + card(c.create, 'New') + card(c.update + c.restore, 'Changed') +
-      card(c.conflict, 'Conflicts', c.conflict ? 'warning' : '') + card(c.mark_deleted + c['delete'] + c.keep_orphan, 'Removed in AutoCAD') +
-      card(d.validation.errors, 'Errors', d.validation.errors ? 'error' : '') + card(d.validation.warnings, 'Warnings', d.validation.warnings ? 'warning' : '') +
-      card(d.validation.reviews, 'Review items', d.validation.reviews ? 'review' : '');
+    var tc = (d.terrain || []).filter(function (t) { return t.kind === 'create' || t.kind === 'update' || t.kind === 'restore'; }).length;
+    $('#cards').innerHTML = card(d.package.elementCount, 'Elemenata') + card(c.create, 'Novo') + card(c.update + c.restore, 'Izmijenjeno') +
+      card(c.conflict, 'Konflikti', c.conflict ? 'warning' : '') + card(c.mark_deleted + c['delete'] + c.keep_orphan, 'Uklonjeno u AutoCAD-u') +
+      card(tc, 'Teren (izmjene)') +
+      card(d.validation.errors, 'Greške', d.validation.errors ? 'error' : '') + card(d.validation.warnings, 'Upozorenja', d.validation.warnings ? 'warning' : '') +
+      card(d.validation.reviews, 'Za pregled', d.validation.reviews ? 'review' : '');
     ['lod', 'modifiedPolicy', 'deletedPolicy'].forEach(function (k) { $('#' + k).value = d.options[k]; });
     $('#createScenes').checked = !!d.options.createScenes;
+    $('#backup').checked = d.options.backup !== false;
     var kinds = Object.keys(c).filter(function (k) { return c[k] > 0 && k !== 'unchanged'; });
-    $('#kindFilter').innerHTML = '<option value="">All changes</option>' + kinds.map(function (k) {
+    $('#kindFilter').innerHTML = '<option value="">Sve izmjene</option>' + kinds.map(function (k) {
       return '<option value="' + k + '">' + esc(LABELS[k]) + ' (' + c[k] + ')</option>';
     }).join('');
     renderActions();
     $('#issues').innerHTML = issueRows(d.validation.issues);
     var p = d.package;
-    var info = [['Project', p.project.name + (p.project.number ? ' (' + p.project.number + ')' : '')], ['Package id', p.packageId],
-      ['Schema version', p.schemaVersion], ['Created (UTC)', p.created], ['Generator', (p.generator.application || '') + ' ' + (p.generator.version || '')],
-      ['Source units', p.units.sourceLengthUnit + ' (x' + p.units.sourceUnitsToMeters + ' to metres)'],
-      ['Project origin (m)', p.origin.map(function (v) { return sdp.fmt(v, 3); }).join(', ')], ['True north', sdp.fmt(p.trueNorth, 2) + ' deg'],
-      ['Coordinate system', p.crs || '-']].concat(p.groups.map(function (g) { return [g.group, g.count + ' elements']; }));
-    $('#pkgInfo').innerHTML = info.map(function (r) { return '<tr><th style="width:200px">' + esc(r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>'; }).join('');
-    $('#apply').disabled = !d.plan.changes;
-    $('#apply').textContent = d.plan.changes ? 'Import' : 'Up to date';
+    var info = [['Projekat', p.project.name + (p.project.number ? ' (' + p.project.number + ')' : '')], ['ID paketa', p.packageId],
+      ['Verzija sheme', p.schemaVersion], ['Izrađeno (UTC)', p.created], ['Izvor', (p.generator.application || '') + ' ' + (p.generator.version || '')],
+      ['Jedinice izvora', p.units.sourceLengthUnit + ' (×' + sdp.fmt(p.units.sourceUnitsToMeters, 6) + ' u metre)'],
+      ['Ishodište projekta (m)', p.origin.map(function (v) { return sdp.fmt(v, 3); }).join('; ')], ['Pravac sjevera', sdp.fmt(p.trueNorth, 2) + '°'],
+      ['Koordinatni sistem', p.crs || 'nije naveden']].concat(elevationRows(p.elevation || {}))
+      .concat((d.terrain || []).map(function (t) { return ['Teren: ' + t.name, t.triangles + ' trouglova, visine ' + sdp.fmt(t.minZ, 2) + ' – ' + sdp.fmt(t.maxZ, 2) + ' m (relativno)']; }))
+      .concat(p.groups.map(function (g) { return [g.group, g.count + ' elemenata']; }));
+    $('#pkgInfo').innerHTML = info.map(function (r) { return '<tr><th style="width:220px">' + esc(r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>'; }).join('');
+    $('#apply').disabled = !d.changes;
+    $('#apply').textContent = d.changes ? 'Uvezi' : 'Ažurno';
     $('#note').textContent = d.plan.summary || '';
   }
 
@@ -144,17 +173,17 @@
     $('#report').classList.remove('hidden');
     $('#apply').classList.add('hidden');
     $('#save').classList.remove('hidden');
-    $('#title').textContent = r.title || 'Import report';
+    $('#title').textContent = r.title || 'Izvještaj uvoza';
     $('#subtitle').textContent = r['package'] || '';
     var s = r.stats || {};
-    $('#cards').innerHTML = card(s.created || 0, 'Created') + card((s.updated || 0) + (s.restored || 0), 'Updated') +
-      card(s.conflicts || 0, 'Conflicts', s.conflicts ? 'warning' : '') + card((s.marked_deleted || 0) + (s.deleted || 0), 'Removed') +
-      card(s.unchanged || 0, 'Unchanged') + card(r.errors, 'Errors', r.errors ? 'error' : '') + card(r.warnings, 'Warnings', r.warnings ? 'warning' : '') +
-      card(r.reviews, 'Review items', r.reviews ? 'review' : '');
-    $('#reportStats').innerHTML = Object.keys(s).sort().map(function (k) { return '<span class="muted">' + esc(k) + ':</span> ' + esc(s[k]); }).join(' &nbsp; ');
+    $('#cards').innerHTML = card(s.created || 0, 'Napravljeno') + card((s.updated || 0) + (s.restored || 0), 'Ažurirano') +
+      card(s.conflicts || 0, 'Konflikti', s.conflicts ? 'warning' : '') + card((s.marked_deleted || 0) + (s.deleted || 0), 'Uklonjeno') +
+      card(s.unchanged || 0, 'Nepromijenjeno') + card(r.errors, 'Greške', r.errors ? 'error' : '') + card(r.warnings, 'Upozorenja', r.warnings ? 'warning' : '') +
+      card(r.reviews, 'Za pregled', r.reviews ? 'review' : '');
+    $('#reportStats').innerHTML = Object.keys(s).sort().map(function (k) { return '<span class="muted">' + esc(STATS[k] || k) + ':</span> ' + esc(s[k]); }).join(' &nbsp; ');
     $('#reportIssues').innerHTML = issueRows(r.issues || []);
     $('#disclaimer').textContent = r.disclaimer || '';
-    $('#note').textContent = r.durationSeconds !== null && r.durationSeconds !== undefined ? 'Finished in ' + r.durationSeconds + ' s' : '';
+    $('#note').textContent = r.durationSeconds !== null && r.durationSeconds !== undefined ? 'Završeno za ' + sdp.fmt(r.durationSeconds, 2) + ' s' : '';
     state = { report: r };
   }
 
@@ -172,16 +201,16 @@
   });
   $('#apply').addEventListener('click', function () {
     $('#apply').disabled = true;
-    $('#note').textContent = 'Importing... SketchUp may be busy for large projects.';
+    $('#note').textContent = 'Uvoz u toku... Kod velikih projekata SketchUp može biti zauzet.';
     setTimeout(function () { sdp.call('apply', options()); }, 30);
   });
   $('#close').addEventListener('click', function () { sdp.call('close'); });
   $('#save').addEventListener('click', function () {
     var r = state.report, lines = [r.title, r['package'] || ''];
-    Object.keys(r.stats || {}).sort().forEach(function (k) { lines.push(k + ': ' + r.stats[k]); });
-    (r.issues || []).forEach(function (i) { lines.push('[' + i.severity + '] ' + i.code + ' ' + (i.label || i.elementId || '') + ': ' + i.message + (i.resolution ? ' -> ' + i.resolution : '')); });
+    Object.keys(r.stats || {}).sort().forEach(function (k) { lines.push((STATS[k] || k) + ': ' + r.stats[k]); });
+    (r.issues || []).forEach(function (i) { lines.push('[' + (SEVERITY[i.severity] || i.severity) + '] ' + i.code + ' ' + (i.label || i.elementId || '') + ': ' + i.message + (i.resolution ? ' -> ' + i.resolution : '')); });
     lines.push('', r.disclaimer || '');
-    sdp.call('saveReport', { filename: 'site-design-pro-import-report.txt', text: lines.join('\n') });
+    sdp.call('saveReport', { filename: 'vanjsko-uredjenje-izvjestaj-uvoza.txt', text: lines.join('\n') });
   });
 })();
 </script>
