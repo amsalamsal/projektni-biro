@@ -31,6 +31,7 @@ def zip_dir(src: pathlib.Path, target: pathlib.Path, prefix: str = "") -> None:
 
 USER_DOCS = [
     ("index", "UPUTSTVO.md", "Uputstvo"),
+    ("prirucnik", "PRIRUCNIK.md", "Priručnik (sve opcije)"),
     ("instalacija", "INSTALACIJA.md", "Instalacija i oporavak"),
     ("kompatibilnost", "KOMPATIBILNOST.md", "Kompatibilnost"),
     ("ogranicenja", "OGRANICENJA.md", "Ograničenja"),
@@ -68,7 +69,8 @@ def markdown_to_html(md: str) -> str:
             i = j + 1
         elif m := re.match(r"(#{1,4}) (.*)", line):
             n = len(m.group(1))
-            out.append("<h%d>%s</h%d>" % (n, _inline(m.group(2)), n))
+            slug = re.sub(r"[^\w\- ]", "", m.group(2).lower()).replace(" ", "-")  # GitHub-style anchor
+            out.append('<h%d id="%s">%s</h%d>' % (n, html.escape(slug), _inline(m.group(2)), n))
             i += 1
         elif line.startswith("|"):
             rows = []
@@ -94,7 +96,8 @@ def markdown_to_html(md: str) -> str:
                     out.append("</li>")
                 else:
                     stack.append((ind, tag))
-                    out.append("<%s>" % tag)
+                    num = m.group(2)[:-1]
+                    out.append("<ol start=\"%s\">" % num if tag == "ol" and num != "1" else "<%s>" % tag)
                 out.append("<li>" + _inline(m.group(3)))
             while stack:
                 out.append("</li></%s>" % stack.pop()[1])

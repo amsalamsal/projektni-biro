@@ -28,7 +28,7 @@ module ProjektniBiro
         'marked_deleted' => 'označeno obrisano', 'deleted' => 'obrisano', 'orphans' => 'zadržano bez izvora', 'detached' => 'odvojene kopije',
         'skipped' => 'preskočeno', 'unchanged' => 'nepromijenjeno', 'elements' => 'elemenata', 'terrains' => 'terena',
         'terrains_created' => 'novi tereni', 'terrains_updated' => 'ažurirani tereni', 'seconds' => 'sekundi',
-        'groups' => 'grupa', 'meshes' => 'mreža', 'definitions' => 'definicija komponenti', 'instances' => 'instanci komponenti'
+        'groups' => 'grupa', 'meshes' => 'mreža', 'definitions' => 'definicija komponenti', 'instances' => 'instanci komponenti', 'faces' => 'lica', 'failed_faces' => 'neuspjelih lica'
       }.freeze
 
       attr_reader :issues, :stats

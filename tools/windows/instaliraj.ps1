@@ -162,7 +162,7 @@ function Build-Bundle([string]$Repo, [string[]]$Tfms) {
     Copy-Item -LiteralPath (Join-Path $Repo 'shared\schema') -Destination (Join-Path $bundle 'Resources\schema') -Recurse
     $docs = Join-Path $bundle 'Contents\Docs'
     New-Item -ItemType Directory -Force -Path $docs | Out-Null
-    foreach ($md in 'UPUTSTVO.md', 'INSTALACIJA.md', 'KOMPATIBILNOST.md', 'OGRANICENJA.md', 'IZVJESTAJ_TESTIRANJA.md', 'REGISTAR_LICENCI.md') {
+    foreach ($md in 'UPUTSTVO.md', 'PRIRUCNIK.md', 'INSTALACIJA.md', 'KOMPATIBILNOST.md', 'OGRANICENJA.md', 'IZVJESTAJ_TESTIRANJA.md', 'REGISTAR_LICENCI.md') {
         $f = Join-Path $Repo ('docs\' + $md)
         if (Test-Path -LiteralPath $f) { Copy-Item -LiteralPath $f -Destination $docs }
     }

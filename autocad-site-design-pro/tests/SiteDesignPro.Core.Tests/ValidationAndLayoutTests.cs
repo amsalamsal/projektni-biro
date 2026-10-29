@@ -201,7 +201,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal("T-001..T-003", big.Cells[0]);
             Assert.Equal(4, t.Totals["pcs"]);
             string csv = t.ToCsv();
-            Assert.Contains("Element IDs", csv, StringComparison.Ordinal);
+            Assert.Contains("ID elemenata", csv, StringComparison.Ordinal);
             Assert.Contains(trees[3].Id, csv, StringComparison.Ordinal);
         }
 

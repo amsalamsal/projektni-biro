@@ -79,12 +79,12 @@ namespace SiteDesignPro.Core.Exchange
             string geometryPath = Path.Combine(dir, PackageFormat.GeometryFile);
             if (!File.Exists(manifestPath))
             {
-                throw new FileNotFoundException("manifest.json not found in " + dir);
+                throw new FileNotFoundException("manifest.json nije pronađen u folderu " + dir);
             }
 
             if (!File.Exists(geometryPath))
             {
-                throw new FileNotFoundException("geometry.json not found in " + dir);
+                throw new FileNotFoundException("geometry.json nije pronađen u folderu " + dir);
             }
 
             CheckSize(new FileInfo(manifestPath).Length);
@@ -99,7 +99,7 @@ namespace SiteDesignPro.Core.Exchange
 
         private static string ReadEntry(ZipArchive zip, string name)
         {
-            ZipArchiveEntry entry = zip.GetEntry(name) ?? throw new InvalidDataException(name + " is missing from the package archive.");
+            ZipArchiveEntry entry = zip.GetEntry(name) ?? throw new InvalidDataException(name + " nedostaje u arhivi paketa.");
             CheckSize(entry.Length);
             using var reader = new StreamReader(entry.Open());
             return reader.ReadToEnd();
@@ -123,7 +123,7 @@ namespace SiteDesignPro.Core.Exchange
 
             if (Str(m, "format") != PackageFormat.FormatId)
             {
-                throw new FormatException("manifest.json is not a Site Design Pro manifest (format field).");
+                throw new FormatException("manifest.json nije manifest paketa Vanjsko uređenje PRO (polje format).");
             }
 
             string version = Str(m, "schemaVersion");
@@ -193,7 +193,7 @@ namespace SiteDesignPro.Core.Exchange
 
             if (!SiteElement.IsValidId(pkg.PackageId))
             {
-                throw new FormatException("packageId is not a valid UUID.");
+                throw new FormatException("packageId nije ispravan UUID.");
             }
 
             var typeGeometry = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -259,7 +259,7 @@ namespace SiteDesignPro.Core.Exchange
 
                 if (!typeGeometry.ContainsKey(typeId))
                 {
-                    report.Add(Severity.Warning, IssueKind.Format, "SDP-F013", id, "Type '" + typeId + "' has no type definition in the manifest.", "Re-export with the current Site Design Pro version.");
+                    report.Add(Severity.Warning, IssueKind.Format, "SDP-F013", id, "Tip '" + typeId + "' nema definiciju u manifestu paketa.", "Ponovo izvezite paket trenutnom verzijom Vanjsko uređenje PRO.");
                 }
 
                 var element = new SiteElement(id, typeId, geometry)

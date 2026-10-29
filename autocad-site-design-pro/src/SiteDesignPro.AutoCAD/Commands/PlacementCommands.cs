@@ -181,7 +181,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             if (picked.Count > 0)
             {
-                CommandContext.Run("SDPDRAW", ctx => ctx.Write(ConvertCurves(ctx, type, picked) + " " + type.Name + " created."));
+                CommandContext.Run("SDPDRAW", ctx => ctx.Write("Napravljeno: " + ConvertCurves(ctx, type, picked) + " × " + type.Name + "."));
             }
         }
 

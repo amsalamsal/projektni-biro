@@ -11,7 +11,7 @@ infrastruktura, rasvjeta, urbani mobilijar, teren i kote).
 
 Dokumentacija:
 
-* korisnička: [Instalacija](docs/INSTALACIJA.md) · [Uputstvo](docs/UPUTSTVO.md) ·
+* korisnička: [Instalacija](docs/INSTALACIJA.md) · [Uputstvo](docs/UPUTSTVO.md) · [Priručnik – sve opcije](docs/PRIRUCNIK.md) ·
   [Kompatibilnost](docs/KOMPATIBILNOST.md) · [Ograničenja](docs/OGRANICENJA.md) ·
   [Izvještaj testiranja](docs/IZVJESTAJ_TESTIRANJA.md) · [Registar licenci](docs/REGISTAR_LICENCI.md) ·
   [Izmjene](CHANGELOG.md);

@@ -70,7 +70,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             Point3d at = ctx.Point("Početna tačka razmjernika")!.Value;
             double len = ctx.Number("Dužina (m)", Math.Max(5, Math.Round(ctx.Settings.Labels.ScaleDenominator / 10)));
-            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).ScaleBar(at, len, ctx.Integer("Segments", 4));
+            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).ScaleBar(at, len, ctx.Integer("Broj podjela", 4));
         });
 
         [CommandMethod("SITEDESIGNPRO", "SDPSPOTLEVEL", CommandFlags.Modal)]
