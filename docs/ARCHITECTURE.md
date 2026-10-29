@@ -10,7 +10,7 @@ The development environment is a Linux container: .NET SDK 8 and 10, Ruby 3.3, P
 * The host adapters (AutoCAD .NET, SketchUp Ruby API) are thin. The AutoCAD adapter is compiled against the
   official `AutoCAD.NET` NuGet reference assemblies (compile-time only). The SketchUp adapter is exercised against
   an in-repo fake of the SketchUp API (`tests/support/fake_sketchup.rb`).
-* Neither adapter has been loaded in its real host. See `KNOWN_LIMITATIONS.md`.
+* Neither adapter has been loaded in its real host. See `OGRANICENJA.md` and `KOMPATIBILNOST.md`.
 
 ## 2. Repository layout
 
@@ -21,10 +21,10 @@ shared/
   samples/      residential-complex.sdpkg (+ unpacked folder) and residential-complex-changes.json
   icons/        SVG sources of all toolbar/ribbon icons
 autocad-site-design-pro/
-  src/SiteDesignPro.Core      net8.0, no AutoCAD dependency: model, catalog, geometry, exchange, validation,
+  src/SiteDesignPro.Core      net47 + net8.0, no AutoCAD dependency: model, catalog, geometry, exchange, validation,
                               quantities, layout generators, symbols, sample project
   src/SiteDesignPro.Cli       `sdp` command line (sample, validate, schedule, catalog, stress)
-  src/SiteDesignPro.AutoCAD   AutoCAD adapter; multi-targeted net8.0-windows (R25) and net10.0-windows (R26)
+  src/SiteDesignPro.AutoCAD   AutoCAD adapter; multi-targeted net47 (R23), net48 (R24), net8.0-windows (R25), net10.0-windows (R26)
   tests/SiteDesignPro.Core.Tests  xUnit
   build/PackageContents.xml   Autoloader manifest
 sketchup-site-design-pro/
@@ -113,4 +113,4 @@ are deliberately **not** sent back: AutoCAD remains the master for 2D layout.
 | AutoCAD is master for layout; SketchUp sends back parameters and point moves only | Avoids lossy 3D→2D geometry reconstruction | Users must make plan geometry changes in AutoCAD |
 | Content hash per element | Cheap change detection both ways, conflict detection | Hash must be canonical across languages (tested) |
 | Generated symbol blocks instead of a DWG block library | No binary assets; symbols follow parameters | Symbols are schematic, not manufacturer drawings |
-| Two AutoCAD binaries (R25 net8, R26 net10) | AutoCAD 2027 moved to .NET 10 | R26 reference package version must match the shipping 2027 API |
+| Four AutoCAD binaries (R23 net47, R24 net48, R25 net8, R26 net10) | AutoCAD 2020 needs .NET Framework 4.7, 2021–2024 4.8, 2025–2026 .NET 8, 2027 .NET 10 | R26 reference package version must match the shipping 2027 API |

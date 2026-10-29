@@ -4,7 +4,7 @@
 
 | Tool | Used for |
 |---|---|
-| .NET SDK 8 **and** 10 | Core, CLI, tests, AutoCAD adapter (R25 = net8.0-windows, R26 = net10.0-windows) |
+| .NET SDK 8 **and** 10 | Core, CLI, tests, AutoCAD adapter (R23 = net47, R24 = net48, R25 = net8.0-windows, R26 = net10.0-windows); net4x builds use the Microsoft.NETFramework.ReferenceAssemblies package, so no Windows/.NET Framework install is needed to compile |
 | Ruby ≥ 2.7 with `minitest` | SketchUp core and adapter tests (`gem install parser` enables the Ruby 2.7 syntax check) |
 | Python 3 with `jsonschema` | Schema validation of the sample packages |
 | Node + Playwright with Chromium (optional) | Tests of the SketchUp HTML dialogs |
@@ -18,11 +18,11 @@ The AutoCAD adapter builds on Linux and macOS (`EnableWindowsTargeting`) because
 tools/build_and_test.sh
 ```
 
-Steps: C# build (CLI + both AutoCAD targets) → xUnit tests → regenerate the deterministic sample package and
+Steps: C# build (CLI + all four AutoCAD targets) → xUnit tests → regenerate the deterministic sample package and
 validate it against the schemas → Ruby tests → Ruby 2.7 syntax check → Chromium dialog tests → `tools/package.py`,
 which writes:
 
-* `dist/SiteDesignPro.bundle` and `dist/SiteDesignPro.bundle.zip` - AutoCAD Autoloader bundle
+* `dist/SiteDesignPro.bundle` and `dist/SiteDesignPro.bundle.zip` - AutoCAD Autoloader bundle (R23, R24, R25, R26; Bosnian help in `Contents/Docs/index.html`)
 * `dist/pb_site_design_pro.rbz` - SketchUp extension
 * `dist/samples/` - sample package and change file
 

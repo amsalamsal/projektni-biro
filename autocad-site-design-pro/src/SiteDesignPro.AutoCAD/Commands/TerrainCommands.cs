@@ -147,6 +147,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Write(Bs.T("Objekat {0} (sloj {1}): Z {2} → {3} m | {4}{5}", e.Handle, e.Layer,
                     current.HasValue ? Bs.Num(current.Value / ctx.K, 3) : "-", Bs.Num(z, 3), ElevationDatum.FormatRelative(rel),
                     d.IsDefined ? " = " + ElevationDatum.FormatAbsolute(d.ToAbsolute(rel)) : string.Empty));
+                if (e is Polyline3d)
+                {
+                    ctx.Write("Pažnja: svi vrhovi 3D polilinije dobijaju istu kotu, pa se postojeći nagib gubi.");
+                }
+
                 if (ctx.Keyword("Primijeniti kotu na ovaj objekat? [Da/Ne]", new[] { "Da", "Ne" }, "Da") != "Da")
                 {
                     throw new CommandCancelled();

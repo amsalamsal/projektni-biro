@@ -8,7 +8,9 @@
 
 Run tools/build_and_test.sh (or the dotnet build commands it lists) first.
 """
+import html
 import pathlib
+import re
 import shutil
 import sys
 import zipfile
@@ -25,6 +27,112 @@ def zip_dir(src: pathlib.Path, target: pathlib.Path, prefix: str = "") -> None:
         for f in sorted(src.rglob("*")):
             if f.is_file():
                 z.write(f, prefix + f.relative_to(src).as_posix())
+
+
+USER_DOCS = [
+    ("index", "UPUTSTVO.md", "Uputstvo"),
+    ("instalacija", "INSTALACIJA.md", "Instalacija i oporavak"),
+    ("kompatibilnost", "KOMPATIBILNOST.md", "Kompatibilnost"),
+    ("ogranicenja", "OGRANICENJA.md", "Ograničenja"),
+    ("testiranje", "IZVJESTAJ_TESTIRANJA.md", "Izvještaj testiranja"),
+    ("licence", "REGISTAR_LICENCI.md", "Registar licenci"),
+]
+
+
+def _inline(text: str) -> str:
+    links = {md: page + ".html" for page, md, _ in USER_DOCS}
+    out = []
+    for i, part in enumerate(re.split(r"(`[^`]*`)", text)):
+        if i % 2:
+            out.append("<code>" + html.escape(part[1:-1]) + "</code>")
+            continue
+        t = html.escape(part, quote=False)
+        t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+        t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", t)
+        t = re.sub(r"\[([^\]]+)\]\(([^)]+)\)",
+                   lambda m: '<a href="%s">%s</a>' % (links.get(m.group(2), m.group(2)), m.group(1)), t)
+        out.append(t)
+    return "".join(out)
+
+
+def markdown_to_html(md: str) -> str:
+    """Small Markdown subset used by the user docs: headings, paragraphs, nested lists, tables, quotes, code blocks."""
+    lines, out, i = md.splitlines(), [], 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("```"):
+            j = i + 1
+            while j < len(lines) and not lines[j].startswith("```"):
+                j += 1
+            out.append("<pre>" + html.escape("\n".join(lines[i + 1:j])) + "</pre>")
+            i = j + 1
+        elif m := re.match(r"(#{1,4}) (.*)", line):
+            n = len(m.group(1))
+            out.append("<h%d>%s</h%d>" % (n, _inline(m.group(2)), n))
+            i += 1
+        elif line.startswith("|"):
+            rows = []
+            while i < len(lines) and lines[i].startswith("|"):
+                cells = [c.strip() for c in lines[i].strip().strip("|").split("|")]
+                if not all(re.fullmatch(r":?-+:?", c) for c in cells):
+                    rows.append(cells)
+                i += 1
+            out.append("<table><thead><tr>" + "".join("<th>%s</th>" % _inline(c) for c in rows[0]) + "</tr></thead><tbody>" +
+                       "".join("<tr>" + "".join("<td>%s</td>" % _inline(c) for c in r) + "</tr>" for r in rows[1:]) + "</tbody></table>")
+        elif re.match(r"\s*(\*|\d+\.) ", line):
+            stack = []  # (indent, tag) of open lists; every list has an open <li>
+            while i < len(lines) and (re.match(r"\s*(\*|\d+\.) ", lines[i]) or (lines[i].startswith("  ") and lines[i].strip())):
+                m = re.match(r"(\s*)(\*|\d+\.) (.*)", lines[i])
+                i += 1
+                if not m:  # continuation line of the open item
+                    out[-1] += " " + _inline(lines[i - 1].strip())
+                    continue
+                ind, tag = len(m.group(1)), "ul" if m.group(2) == "*" else "ol"
+                while stack and stack[-1][0] > ind:
+                    out.append("</li></%s>" % stack.pop()[1])
+                if stack and stack[-1][0] == ind:
+                    out.append("</li>")
+                else:
+                    stack.append((ind, tag))
+                    out.append("<%s>" % tag)
+                out.append("<li>" + _inline(m.group(3)))
+            while stack:
+                out.append("</li></%s>" % stack.pop()[1])
+        elif line.startswith(">"):
+            quote = []
+            while i < len(lines) and lines[i].startswith(">"):
+                quote.append(lines[i].lstrip("> ").rstrip())
+                i += 1
+            out.append("<blockquote><p>%s</p></blockquote>" % _inline(" ".join(quote)))
+        elif line.strip():
+            para = []
+            while i < len(lines) and lines[i].strip() and not re.match(r"(#|\||>|```|\s*(\*|\d+\.) )", lines[i]):
+                para.append(lines[i].strip())
+                i += 1
+            out.append("<p>%s</p>" % _inline(" ".join(para)))
+        else:
+            i += 1
+    return "\n".join(out)
+
+
+DOC_CSS = ("body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}"
+           "nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}"
+           "table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}"
+           "th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}"
+           "blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}")
+
+
+def write_docs(target: pathlib.Path) -> None:
+    """Bosnian user documentation as HTML (index.html is opened by SDPPOMOC) plus the Markdown sources."""
+    target.mkdir(parents=True)
+    nav = "<nav>" + "".join('<a href="%s.html">%s</a>' % (page, title) for page, _, title in USER_DOCS) + "</nav>"
+    for page, md, title in USER_DOCS:
+        src = ROOT / "docs" / md
+        shutil.copy2(src, target / md)
+        body = markdown_to_html(src.read_text(encoding="utf-8"))
+        (target / (page + ".html")).write_text(
+            "<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – %s</title>"
+            "<style>%s</style></head><body>%s%s</body></html>" % (title, DOC_CSS, nav, body), encoding="utf-8")
 
 
 def autocad_bundle() -> pathlib.Path:
@@ -51,16 +159,7 @@ def autocad_bundle() -> pathlib.Path:
     shutil.copy2(ACAD / "build" / "PackageContents.xml", bundle / "PackageContents.xml")
     shutil.copytree(ROOT / "shared" / "catalog", bundle / "Resources" / "catalog")
     shutil.copytree(ROOT / "shared" / "schema", bundle / "Resources" / "schema")
-    docs = contents / "Docs"
-    docs.mkdir(parents=True)
-    for doc in ("INSTALL.md", "USER_GUIDE.md", "KNOWN_LIMITATIONS.md"):
-        if (ROOT / "docs" / doc).exists():
-            shutil.copy2(ROOT / "docs" / doc, docs / doc)
-    (docs / "README.html").write_text(
-        "<!DOCTYPE html><html><head><meta charset='utf-8'><title>Site Design Pro</title></head><body>"
-        "<h1>Site Design Pro for AutoCAD</h1><p>See USER_GUIDE.md, INSTALL.md and KNOWN_LIMITATIONS.md in this folder. "
-        "Start with SDPNEW or SDPSAMPLE; the SITE DESIGN PRO ribbon tab lists every command.</p></body></html>",
-        encoding="utf-8")
+    write_docs(contents / "Docs")
     zip_dir(bundle, DIST / "SiteDesignPro.bundle.zip", "SiteDesignPro.bundle/")
     return bundle
 
