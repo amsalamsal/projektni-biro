@@ -322,6 +322,10 @@ namespace SiteDesignPro.Core.Input
 
             // --- coordinates
             List<Vec2> allPts = objects.Where(o => mapping.RolesOf(o.Layer).Count > 0).SelectMany(o => o.Vertices.Select(v => new Vec2(v.X * k, v.Y * k))).ToList();
+            if (allPts.Count == 0)
+            {
+                allPts = objects.SelectMany(o => o.Vertices.Select(v => new Vec2(v.X * k, v.Y * k))).ToList(); // nothing mapped yet
+            }
             if (allPts.Count > 0)
             {
                 sum.CoordinateNote = GeoreferenceSolver.DescribeCoordinateMagnitude(GeometryMath.BoundsOf(allPts));

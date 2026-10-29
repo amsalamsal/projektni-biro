@@ -53,6 +53,22 @@ namespace SiteDesignPro.Core.Model
         public double ElevationRange { get; set; } = 500;
     }
 
+    /// <summary>Which data the project terrain is built from (rebuilt from the same sources at every export).</summary>
+    public sealed class TerrainDefinition
+    {
+        public bool Enabled { get; set; }
+
+        public string Id { get; set; } = Guid.NewGuid().ToString("D");
+
+        public string Name { get; set; } = "Postojeći teren";
+
+        /// <summary>Handle of a closed polyline limiting the surface; empty = convex hull of the data.</summary>
+        public string BoundaryHandle { get; set; } = string.Empty;
+
+        /// <summary>Also use the elevations assigned to objects (their boundary vertices) as terrain points.</summary>
+        public bool UseAssignedElevations { get; set; }
+    }
+
     /// <summary>Project-level settings stored with the drawing and written to the package manifest.</summary>
     public sealed class ProjectSettings
     {
@@ -119,6 +135,12 @@ namespace SiteDesignPro.Core.Model
         /// <summary>Name of the layer mapping last used for this drawing.</summary>
         public string LayerMappingName { get; set; } = string.Empty;
 
+        /// <summary>Assignment of this drawing's source layers to project roles (null until the user maps them).</summary>
+        public Input.LayerMapping? LayerMapping { get; set; }
+
+        /// <summary>Terrain built from the mapped survey layers; exported to SketchUp when enabled.</summary>
+        public TerrainDefinition TerrainSource { get; set; } = new TerrainDefinition();
+
         public LabelSettings Labels { get; set; } = new LabelSettings();
 
         public CheckSettings Checks { get; set; } = new CheckSettings();
@@ -163,6 +185,7 @@ namespace SiteDesignPro.Core.Model
             s.Georeference ??= new GeoreferenceSettings();
             s.Backups ??= new BackupPolicy();
             s.Terrain ??= new TerrainRules();
+            s.TerrainSource ??= new TerrainDefinition();
             s.SettingsVersion = 2; // version 1 files carried only Crs/HeightDatum, which now map into the new sections
             UnitConversion.Parse(s.DrawingUnit); // validates
             return s;

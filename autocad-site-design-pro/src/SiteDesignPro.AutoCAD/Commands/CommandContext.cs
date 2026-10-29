@@ -57,7 +57,16 @@ namespace SiteDesignPro.AutoCAD.Commands
         public double K => Settings.Scale.DrawingUnitsPerMeter;
 
         /// <summary>Runs a command body with error handling, logging and transaction management.</summary>
-        public static void Run(string name, Action<CommandContext> body)
+        public static void Run(string name, Action<CommandContext> body) => Run(name, null, body);
+
+        /// <summary>
+        /// Runs a major operation (bulk placement, import, terrain, synchronisation): the saved drawing is backed up
+        /// first, the operation is journalled, and everything happens in one transaction (one UNDO step); on any
+        /// error the transaction is aborted so no half-created geometry remains.
+        /// </summary>
+        public static void RunMajor(string name, string operation, Action<CommandContext> body) => Run(name, operation, body);
+
+        private static void Run(string name, string? majorOperation, Action<CommandContext> body)
         {
             Document? doc = AcApp.DocumentManager.MdiActiveDocument;
             if (doc == null)
@@ -65,23 +74,39 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
+            string journalId = string.Empty;
             try
             {
                 using var ctx = new CommandContext(doc);
+                if (majorOperation != null)
+                {
+                    string? backup = SafetyHost.BackupDrawing(doc.Database, ctx.Settings.Backups, majorOperation, out string note);
+                    if (note.Length > 0)
+                    {
+                        ctx.Write(note);
+                    }
+
+                    journalId = SafetyHost.Begin(majorOperation, doc.Database, backup);
+                }
+
                 body(ctx);
                 ctx.Commit();
+                SafetyHost.End(journalId, Core.Safety.JournalState.Completed);
             }
             catch (CommandCancelled)
             {
-                doc.Editor.WriteMessage("\n*Cancel*");
+                SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, "Prekinuo korisnik.");
+                doc.Editor.WriteMessage("\n*Prekinuto*");
             }
             catch (Autodesk.AutoCAD.Runtime.Exception ex)
             {
-                Log.Error(name + " failed (AutoCAD " + ex.ErrorStatus + ")", ex);
+                SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);
+                Log.Error(name + " nije uspjela (AutoCAD " + ex.ErrorStatus + "); izmjene su poništene", ex);
             }
-            catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is FormatException || ex is System.IO.IOException || ex is KeyNotFoundException || ex is UnauthorizedAccessException)
+            catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is FormatException || ex is System.IO.IOException || ex is KeyNotFoundException || ex is UnauthorizedAccessException || ex is NotSupportedException)
             {
-                Log.Error(name + " failed", ex);
+                SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);
+                Log.Error(name + " nije uspjela; izmjene su poništene", ex);
             }
         }
 
@@ -220,7 +245,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             var o = new PromptEntityOptions("\n" + message);
             if (allowed.Length > 0)
             {
-                o.SetRejectMessage("\nObject type not supported.");
+                o.SetRejectMessage("\nOva vrsta objekta nije podržana.");
                 foreach (Type t in allowed)
                 {
                     o.AddAllowedClass(t, false);
@@ -249,7 +274,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
             else
             {
-                var o = new PromptSelectionOptions { MessageForAdding = "\n" + message + (allowAll ? " (or Enter for all)" : string.Empty) };
+                var o = new PromptSelectionOptions { MessageForAdding = "\n" + message + (allowAll ? " (ili Enter za sve)" : string.Empty) };
                 PromptSelectionResult r = Ed.GetSelection(o, sf);
                 if (r.Status == PromptStatus.Error && allowAll)
                 {
@@ -285,7 +310,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// <summary>Asks for an element type by id or name fragment, optionally restricted to geometry kinds.</summary>
         public ElementType ChooseType(string message, string? argument, params GeometryKind[] kinds)
         {
-            string query = argument ?? Text(message + " (type id or part of the name, ? to list)", null, true);
+            string query = argument ?? Text(message + " (id tipa ili dio naziva, ? za popis)", null, true);
             for (int attempt = 0; attempt < 5; attempt++)
             {
                 IEnumerable<ElementType> pool = Catalog.Types.Where(t => kinds.Length == 0 || kinds.Contains(t.Geometry));
@@ -295,7 +320,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return exact;
                 }
 
-                List<ElementType> matches = query == "?" ? pool.ToList() : pool.Where(t => t.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || t.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+                List<ElementType> matches = query == "?" ? pool.ToList() : pool.Where(t => t.Name.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || t.NameEn.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0 || t.Id.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
                 if (matches.Count == 1)
                 {
                     return matches[0];
@@ -303,7 +328,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 if (matches.Count == 0)
                 {
-                    Write("No element type matches '" + query + "'.");
+                    Write("Nijedan tip elementa ne odgovara upitu '" + query + "'.");
                 }
                 else
                 {
@@ -314,11 +339,11 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                     if (matches.Count > 40)
                     {
-                        Write("  ... " + (matches.Count - 40) + " more; refine the search or use the Site Design Pro palette.");
+                        Write("  ... još " + (matches.Count - 40) + "; suzite pretragu ili koristite paletu Vanjsko uređenje PRO.");
                     }
                 }
 
-                query = Text(message + " (type id)", null, true);
+                query = Text(message + " (id tipa)", null, true);
             }
 
             throw new CommandCancelled();
@@ -335,6 +360,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// <summary>All elements currently in the drawing (drawing frame), for numbering.</summary>
         public List<SiteElement> ExistingElements() => Svc.ReadAll().Where(m => m.Element != null && !m.IsCopy).Select(m => m.Element!).ToList();
 
-        public static string F(double v, int decimals = 3) => v.ToString("0." + new string('#', decimals), CultureInfo.InvariantCulture);
+        /// <summary>Display number with a decimal comma (Bosnian), trailing zeros removed.</summary>
+        public static string F(double v, int decimals = 3) => v.ToString("0." + new string('#', decimals), CultureInfo.InvariantCulture).Replace('.', ',');
     }
 }

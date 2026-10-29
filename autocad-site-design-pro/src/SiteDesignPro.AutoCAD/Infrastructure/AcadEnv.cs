@@ -76,7 +76,7 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
         }
     }
 
-    /// <summary>File log in %LOCALAPPDATA%\SiteDesignPro\logs (one file per day).</summary>
+    /// <summary>Dnevnik (log) u %LOCALAPPDATA%\SiteDesignPro\logs, jedna datoteka po danu.</summary>
     internal static class Log
     {
         private static readonly object Gate = new object();
@@ -95,9 +95,10 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
 
         public static void Warn(string message) => Write("WARN", message);
 
-        public static void Error(string message, Exception? ex = null) => Write("ERROR", ex == null ? message : message + ": " + ex);
+        /// <summary>Full details go to the log file; the command line shows a short Bosnian message.</summary>
+        public static void Error(string message, Exception? ex = null) => Write("ERROR", ex == null ? message : message + ": " + ex, ex == null ? message : message + ": " + ex.Message);
 
-        private static void Write(string level, string message)
+        private static void Write(string level, string message, string? shortMessage = null)
         {
             try
             {
@@ -116,7 +117,8 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
 
             if (level != "INFO")
             {
-                AcadEnv.Message("Site Design Pro " + level.ToLowerInvariant() + ": " + message);
+                AcadEnv.Message("Vanjsko uređenje PRO – " + (level == "ERROR" ? "greška" : "upozorenje") + ": " + (shortMessage ?? message) +
+                    (level == "ERROR" ? " (detalji: " + FilePath + ")" : string.Empty));
             }
         }
     }

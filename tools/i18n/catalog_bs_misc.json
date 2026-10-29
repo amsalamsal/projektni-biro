@@ -635,6 +635,18 @@
     "export_ref": [
       "VU-IZVOZ-REF",
       "Reference izvoza i ishodište projekta"
+    ],
+    "terrain": [
+      "VU-TEREN",
+      "Površina terena (TIN)"
+    ],
+    "terrain_analysis": [
+      "VU-TEREN-ANALIZA",
+      "Oznake analize terena (najniže tačke, ravne i strme površine)"
+    ],
+    "elevation_assignments": [
+      "VU-KOTE-DODJELA",
+      "Pregled i oznake dodijeljenih kota"
     ]
   },
   "categories": {
