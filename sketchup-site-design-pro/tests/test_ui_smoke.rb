@@ -48,6 +48,11 @@ class TestUiSmoke < Minitest::Test
     end
   end
 
+  def test_toolbar_is_shown_on_first_install
+    tb = ObjectSpace.each_object(UI::Toolbar).find { |t| t.items.length == 9 }
+    assert tb.visible?, 'toolbar never shown before must be shown'
+  end
+
   def test_commands_without_model_data_report_instead_of_failing
     %i[update properties export scenes underground report recovery].each do |k|
       UI.log.clear

@@ -178,7 +178,8 @@ module ProjektniBiro
 
         tb = UI::Toolbar.new('Vanjsko uređenje PRO')
         %i[import update properties export scenes underground models library report].each { |k| tb.add_item(cmds[k]) }
-        tb.restore
+        # restore keeps the user's choice; a toolbar never shown before (first install) is shown explicitly
+        tb.get_last_state == TB_NEVER_SHOWN ? tb.show : tb.restore
 
         UI.add_context_menu_handler do |context_menu|
           entity = selected_element

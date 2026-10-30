@@ -10,6 +10,8 @@ VK_LEFT = 37
 VK_RIGHT = 39
 GL_LINES = 1
 GL_LINE_LOOP = 2
+TB_NEVER_SHOWN = -1
+TB_VISIBLE = 1
 
 module UI
   @log = []
@@ -127,6 +129,18 @@ module UI
 
     def add_item(cmd)
       @items << cmd
+    end
+
+    def get_last_state
+      TB_NEVER_SHOWN
+    end
+
+    def show
+      @visible = true
+    end
+
+    def visible?
+      @visible == true
     end
 
     def restore; end
