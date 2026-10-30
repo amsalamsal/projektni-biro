@@ -36,6 +36,7 @@
   "materials": [
     "cast_iron",
     "concrete_precast",
+    "grate_steel",
     "hdpe"
   ],
   "polygons": 124,

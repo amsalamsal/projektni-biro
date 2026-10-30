@@ -178,7 +178,7 @@ module ProjektniBiro
         def water_jet(k, e)
           r = e.num('diameter', 0.2) / 2
           k.cyl(0, 0, -0.25, r * 2, 0.25, 'plastic_dark', 'Ugradna kutija mlaznice', n: k.seg(14))
-          k.box(0, 0, -0.01, r * 4.4, r * 4.4, 0.012, 'grate_steel', 'Rešetka')
+          k.box(0, 0, -0.01, r * 4.4, r * 4.4, 0.012, k.mat('material', 'steel_galv'), 'Rešetka')
           k.lathe([[0, 0.0], [0.02, 0.0], [0.012, 1.2], [0.04, 1.4], [0, 1.45]], 'water', 'Vodeni mlaz', n: 8)
         end
 
@@ -186,13 +186,24 @@ module ProjektniBiro
           size = e.num('innerSize', 0.45)
           depth = e.num('depth', 0.9)
           t = e.num('wallThickness', 0.08)
+          top = e.num('coverLevelOffset', 0.0)
           m = k.mat('material', 'concrete_precast')
-          k.box(0, 0, -depth - 0.1, size + (2 * t), size + (2 * t), 0.1, m, 'Dno slivnika')
-          k.prism(Mesh.rect_ring(0, 0, size + (2 * t), size + (2 * t)), -depth, -0.06, m, 'Tijelo slivnika', holes: [Mesh.rect_ring(0, 0, size, size)])
-          k.prism(Mesh.rect_ring(0, 0, size + (2 * t), size + (2 * t)), -0.06, 0.0, 'cast_iron', 'Okvir rešetke', holes: [Mesh.rect_ring(0, 0, size, size)])
+          gm = k.mat('coverMaterial', 'grate_steel')
+          gs = [e.num('coverSize', size), size].min
+          round = e.text('shape', 'square') == 'round'
+          outer = round ? Mesh.circle_ring(0, 0, (size / 2) + t, k.seg(20)) : Mesh.rect_ring(0, 0, size + (2 * t), size + (2 * t))
+          inner = round ? Mesh.circle_ring(0, 0, size / 2, k.seg(20)) : Mesh.rect_ring(0, 0, size, size)
+          k.prism(outer, top - depth - 0.1, top - depth, m, 'Dno slivnika')
+          k.prism(outer, top - depth, top - 0.06, m, 'Tijelo slivnika', holes: [inner])
+          k.prism(outer, top - 0.06, top, 'cast_iron', 'Okvir rešetke', holes: [inner])
           bars = [4, 8, 12][k.detail]
-          bars.times { |i| k.box((-size / 2) + ((i + 0.5) * size / bars), 0, -0.05, size / bars * 0.55, size - 0.01, 0.05, 'cast_iron', 'Šipka rešetke') }
-          k.bar([size / 2, 0, -depth + 0.25], [size / 2 + t + 0.2, 0, -depth + 0.25], 0.08, 'hdpe', 'Izlazna cijev', n: k.seg(12))
+          if e.text('coverShape', round ? 'round' : 'square') == 'round'
+            k.cyl(0, 0, top - 0.05, gs / 2 - 0.005, 0.01, gm, 'Rešetka – nosač', n: k.seg(16))
+            bars.times { |i| k.box((-gs / 2) + ((i + 0.5) * gs / bars), 0, top - 0.04, gs / bars * 0.55, gs * Math.sqrt([1 - ((((i + 0.5) / bars) * 2) - 1)**2, 0.05].max) - 0.01, 0.04, gm, 'Šipka rešetke') }
+          else
+            bars.times { |i| k.box((-gs / 2) + ((i + 0.5) * gs / bars), 0, top - 0.05, gs / bars * 0.55, gs - 0.01, 0.05, gm, 'Šipka rešetke') }
+          end
+          k.bar([size / 2, 0, top - depth + 0.25], [size / 2 + t + 0.2, 0, top - depth + 0.25], 0.08, 'hdpe', 'Izlazna cijev', n: k.seg(12))
         end
 
         def collector(k, e)
@@ -208,6 +219,9 @@ module ProjektniBiro
         end
 
         def crates(k, e)
+          return tank(k, e, label: 'Spremnik') unless e.text('shape', 'box') == 'box'
+
+          m = k.mat('material', 'plastic_dark')
           l = e.num('length', 6.0)
           w = e.num('width', 2.4)
           h = e.num('height', 0.66)
@@ -216,7 +230,7 @@ module ProjektniBiro
           ny = [(w / 0.6).round, 1].max
           nz = [(h / 0.66).round, 1].max
           if k.detail.zero?
-            k.box(0, 0, z0, l, w, h, 'hdpe', 'Infiltracijski blokovi')
+            k.box(0, 0, z0, l, w, h, m, 'Infiltracijski blokovi')
           else
             nx.times do |i|
               ny.times do |j|
@@ -224,22 +238,27 @@ module ProjektniBiro
                   x = (-l / 2) + ((i + 0.5) * l / nx)
                   y = (-w / 2) + ((j + 0.5) * w / ny)
                   z = z0 + (kk * h / nz)
-                  k.place("blok-#{format('%.3g', l / nx)}-#{format('%.3g', w / ny)}-#{format('%.3g', h / nz)}", [x, y, z]) do |pk|
-                    crate(pk, (l / nx) - 0.01, (w / ny) - 0.01, (h / nz) - 0.01)
+                  k.place("blok-#{format('%.3g', l / nx)}-#{format('%.3g', w / ny)}-#{format('%.3g', h / nz)}-#{m}", [x, y, z]) do |pk|
+                    crate(pk, (l / nx) - 0.01, (w / ny) - 0.01, (h / nz) - 0.01, m)
                   end
                 end
               end
             end
           end
           k.box(0, 0, z0 - 0.1, l + 0.2, w + 0.2, 0.1, 'gravel', 'Šljunčana posteljica')
+          return unless e.bool('accessShaft', false)
+
+          sr = e.num('shaftDiameter', 0.6) / 2
+          k.cyl((-l / 2) + sr + 0.1, 0, z0 + h, sr, -z0 - h - 0.08, m, 'Kontrolno okno', n: k.seg(16))
+          k.place("poklopac-#{format('%.3g', sr)}", [(-l / 2) + sr + 0.1, 0, 0]) { |pk| cover(pk, 'round', sr * 2, 0.0, 'cast_iron') }
         end
 
         # One plastic infiltration crate: frame plates and open lattice.
-        def crate(k, l, w, h)
-          k.box(0, 0, 0, l, w, 0.03, 'hdpe', 'Ploča bloka')
-          k.box(0, 0, h - 0.03, l, w, 0.03, 'hdpe', 'Ploča bloka')
-          [[-1, -1], [1, -1], [1, 1], [-1, 1]].each { |sx, sy| k.cyl(sx * (l / 2 - 0.08), sy * (w / 2 - 0.08), 0.03, 0.04, h - 0.06, 'hdpe', 'Stup', n: 8) }
-          k.cyl(0, 0, 0.03, 0.05, h - 0.06, 'hdpe', 'Stup', n: 8)
+        def crate(k, l, w, h, m = 'hdpe')
+          k.box(0, 0, 0, l, w, 0.03, m, 'Ploča bloka')
+          k.box(0, 0, h - 0.03, l, w, 0.03, m, 'Ploča bloka')
+          [[-1, -1], [1, -1], [1, 1], [-1, 1]].each { |sx, sy| k.cyl(sx * (l / 2 - 0.08), sy * (w / 2 - 0.08), 0.03, 0.04, h - 0.06, m, 'Stup', n: 8) }
+          k.cyl(0, 0, 0.03, 0.05, h - 0.06, m, 'Stup', n: 8)
         end
 
         def standpipe(k, e)

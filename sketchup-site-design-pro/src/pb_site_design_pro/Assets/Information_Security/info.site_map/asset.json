@@ -29,14 +29,14 @@
   "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
   "dimensions": {
     "x": 1.04,
-    "y": 0.475,
-    "z": 1.292,
+    "y": 0.565,
+    "z": 1.336,
     "zMin": 0.0
   },
   "materials": [
     "flower_white",
     "marking_green",
-    "steel_dark"
+    "steel_galv"
   ],
   "polygons": 42,
   "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",

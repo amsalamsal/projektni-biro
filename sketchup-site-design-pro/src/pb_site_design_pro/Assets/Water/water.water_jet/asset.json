@@ -34,8 +34,8 @@
     "zMin": -0.25
   },
   "materials": [
-    "grate_steel",
     "plastic_dark",
+    "steel_galv",
     "water"
   ],
   "polygons": 68,

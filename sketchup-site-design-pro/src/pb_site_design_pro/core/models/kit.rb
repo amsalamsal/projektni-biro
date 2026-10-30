@@ -61,6 +61,17 @@ module ProjektniBiro
           @element.num(key, fallback)
         end
 
+        # The user's value of a parameter when it differs from the type default (nil otherwise): lets a model keep
+        # its own design (e.g. a red-bordered traffic sign) unless the user deliberately chose something else.
+        def chosen(key)
+          v = @element.param(key)
+          td = @element.respond_to?(:type_def) ? @element.type_def : nil
+          return nil if v.nil? || v.to_s.empty? || (td && td.defaults[key] == v)
+          return nil unless @ctx.materials.empty? || @ctx.materials.key?(v) || !v.is_a?(String)
+
+          v
+        end
+
         def mesh(polys, material, name = nil, smooth: false)
           return if polys.empty?
           return @buffer << [polys, material, name, smooth] if @buffer

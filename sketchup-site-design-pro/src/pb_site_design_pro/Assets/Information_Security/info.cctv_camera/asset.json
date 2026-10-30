@@ -28,13 +28,13 @@
   "units": "m",
   "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
   "dimensions": {
-    "x": 0.74,
+    "x": 0.739,
     "y": 0.21,
     "z": 4.0,
     "zMin": 0.0
   },
   "materials": [
-    "flower_white",
+    "plastic_dark",
     "screen_display",
     "steel_dark",
     "steel_galv"

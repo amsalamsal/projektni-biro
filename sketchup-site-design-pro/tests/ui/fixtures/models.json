@@ -1858,7 +1858,7 @@
       "geometry": "point",
       "dimensions": {
         "x": 7.9,
-        "y": 1.358,
+        "y": 1.408,
         "z": 2.05,
         "zMin": 0.0
       },
@@ -2286,8 +2286,8 @@
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
-        "grate_steel",
         "plastic_dark",
+        "steel_galv",
         "water"
       ],
       "specObjects": [
@@ -2463,6 +2463,7 @@
       "materials": [
         "cast_iron",
         "concrete_precast",
+        "grate_steel",
         "hdpe"
       ],
       "specObjects": [
@@ -2637,7 +2638,7 @@
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
         "gravel",
-        "hdpe"
+        "plastic_dark"
       ],
       "specObjects": [
         {
@@ -4649,8 +4650,8 @@
       "subcategory": "Stubovi",
       "geometry": "point",
       "dimensions": {
-        "x": 0.629,
-        "y": 1.8,
+        "x": 0.751,
+        "y": 2.4,
         "z": 9.96,
         "zMin": 0.0
       },
@@ -6446,8 +6447,8 @@
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
         "grate_steel",
-        "stainless",
-        "steel_dark"
+        "steel_dark",
+        "steel_galv"
       ],
       "specObjects": [
 
@@ -6508,9 +6509,9 @@
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
         "plastic_dark",
-        "plastic_yellow",
         "rubber_black",
         "sign_plate",
+        "steel_dark",
         "steel_galv"
       ],
       "specObjects": [
@@ -6689,7 +6690,7 @@
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
         "gravel",
-        "plastic_blue",
+        "plastic_dark",
         "rubber_black",
         "steel_galv"
       ],
@@ -6801,7 +6802,7 @@
         "glass",
         "line_paint_white",
         "plastic_red",
-        "steel_dark"
+        "steel_galv"
       ],
       "specObjects": [
         {
@@ -7366,7 +7367,7 @@
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
         "gravel",
-        "hdpe"
+        "plastic_dark"
       ],
       "specObjects": [
         {
@@ -8194,8 +8195,8 @@
       "geometry": "point",
       "dimensions": {
         "x": 1.04,
-        "y": 0.475,
-        "z": 1.292,
+        "y": 0.565,
+        "z": 1.336,
         "zMin": 0.0
       },
       "status": "Imported into library",
@@ -8205,7 +8206,7 @@
       "materials": [
         "flower_white",
         "marking_green",
-        "steel_dark"
+        "steel_galv"
       ],
       "specObjects": [
         {
@@ -8264,8 +8265,8 @@
       "subcategory": "Orijentacija",
       "geometry": "point",
       "dimensions": {
-        "x": 1.439,
-        "y": 1.447,
+        "x": 1.438,
+        "y": 1.445,
         "z": 2.68,
         "zMin": -0.05
       },
@@ -8472,7 +8473,7 @@
       "subcategory": "Sigurnosni sistemi",
       "geometry": "point",
       "dimensions": {
-        "x": 0.74,
+        "x": 0.739,
         "y": 0.21,
         "z": 4.0,
         "zMin": 0.0
@@ -8482,7 +8483,7 @@
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
-        "flower_white",
+        "plastic_dark",
         "screen_display",
         "steel_dark",
         "steel_galv"
@@ -8601,9 +8602,9 @@
       "subcategory": "Komunikacije",
       "geometry": "point",
       "dimensions": {
-        "x": 0.506,
-        "y": 0.32,
-        "z": 3.41,
+        "x": 0.576,
+        "y": 0.252,
+        "z": 3.4,
         "zMin": 0.0
       },
       "status": "Imported into library",
@@ -8611,7 +8612,7 @@
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
-        "flower_white",
+        "plastic_dark",
         "steel_dark"
       ],
       "specObjects": [
@@ -8645,7 +8646,7 @@
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "materials": [
-        "flower_white",
+        "sign_plate",
         "steel_dark"
       ],
       "specObjects": [

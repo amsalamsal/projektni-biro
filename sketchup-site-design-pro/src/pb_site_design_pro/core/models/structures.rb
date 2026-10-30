@@ -77,11 +77,11 @@ module ProjektniBiro
         end
 
         # Infill of a gate leaf: frame plus vertical bars.
-        def leaf(k, x0, x1, z0, z1, y, m, name: 'Krilo')
-          k.beam([x0, y, z0], [x1, y, z0], 0.05, m, name)
-          k.beam([x0, y, z1], [x1, y, z1], 0.05, m, name)
-          k.beam([x0, y, z0], [x0, y, z1], 0.05, m, name)
-          k.beam([x1, y, z0], [x1, y, z1], 0.05, m, name)
+        def leaf(k, x0, x1, z0, z1, y, m, name: 'Krilo', t: 0.05)
+          k.beam([x0, y, z0], [x1, y, z0], t, m, name)
+          k.beam([x0, y, z1], [x1, y, z1], t, m, name)
+          k.beam([x0, y, z0], [x0, y, z1], t, m, name)
+          k.beam([x1, y, z0], [x1, y, z1], t, m, name)
           n = [((x1 - x0) / 0.12).floor, 1].max
           n.times { |i| x = x0 + ((i + 1) * (x1 - x0) / (n + 1)); k.box(x, y, z0, 0.02, 0.02, z1 - z0, m, "#{name} – šipka") } if k.detail.positive?
         end
@@ -94,6 +94,10 @@ module ProjektniBiro
           kind = e.text('gateType', 'swing_single')
           return Traffic.barrier(k, e) if kind == 'barrier'
 
+          lt = [e.num('leafThickness', 0.05), 0.02].max
+          side = e.text('openingSide', 'back') == 'front' ? -1.0 : 1.0 # leaves open towards +Y (back) or -Y (front)
+          auto = e.bool('automatic', false)
+
           px = (w / 2) + (post / 2)
           [-px, px].each do |x|
             k.box(x, 0, -0.4, post, post, h + 0.45, m, 'Stub kapije')
@@ -101,22 +105,35 @@ module ProjektniBiro
           end
           case kind
           when 'swing_double'
-            leaf(k, -w / 2 + 0.02, -0.01, 0.08, h - 0.02, 0, m)
-            leaf(k, 0.01, w / 2 - 0.02, 0.08, h - 0.02, 0, m)
+            leaf(k, -w / 2 + 0.02, -0.01, 0.08, h - 0.02, 0, m, t: lt)
+            leaf(k, 0.01, w / 2 - 0.02, 0.08, h - 0.02, 0, m, t: lt)
             k.box(0.04, -0.04, h * 0.5, 0.04, 0.05, 0.12, 'steel_galv', 'Brava')
           when 'sliding'
+            # track and leaf on the opening side (+Y back, -Y front)
             tl = (w * 2) + 0.4
-            k.box(-w / 2, 0.15, -0.02, tl, 0.08, 0.02, 'steel_galv', 'Vodilica')
-            leaf(k, -w / 2 + 0.02, w / 2 + 0.3, 0.12, h - 0.02, 0.15, m, name: 'Klizno krilo')
-            [-w / 2 + 0.3, w / 2].each { |x| k.bar([x, 0.13, 0.06], [x, 0.17, 0.06], 0.06, 'steel_galv', 'Kotač', n: 10) }
-            k.box(-px - 0.4, 0.35, 0, 0.3, 0.25, 0.4, 'steel_galv', 'Pogonski motor') if e.bool('automatic', false)
-            k.box(-px - 0.4, 0.2, 0.42, 0.06, 0.06, 0.04, 'flower_yellow', 'Signalna lampa') if e.bool('automatic', false)
+            k.box(-w / 2, side * 0.15, -0.02, tl, 0.08, 0.02, 'steel_galv', 'Vodilica')
+            leaf(k, -w / 2 + 0.02, w / 2 + 0.3, 0.12, h - 0.02, side * 0.15, m, name: 'Klizno krilo', t: lt)
+            [-w / 2 + 0.3, w / 2].each { |x| k.bar([x, side * 0.13, 0.06], [x, side * 0.17, 0.06], 0.06, 'steel_galv', 'Kotač', n: 10) }
+            k.box(-px - 0.4, side * 0.35, 0, 0.3, 0.25, 0.4, 'steel_galv', 'Pogonski motor') if auto
+            k.box(-px - 0.4, side * 0.2, 0.42, 0.06, 0.06, 0.04, 'flower_yellow', 'Signalna lampa') if auto
           else
-            leaf(k, -w / 2 + 0.02, w / 2 - 0.02, 0.08, h - 0.02, 0, m)
+            leaf(k, -w / 2 + 0.02, w / 2 - 0.02, 0.08, h - 0.02, 0, m, t: lt)
             k.box(w / 2 - 0.08, -0.04, h * 0.5, 0.04, 0.05, 0.14, 'steel_galv', 'Brava')
             k.bar([w / 2 - 0.08, -0.05, h * 0.5 + 0.04], [w / 2 - 0.2, -0.05, h * 0.5 + 0.04], 0.012, 'steel_galv', 'Kvaka', n: 6)
           end
-          [-w / 2, w / 2 - 0.05].each { |x| k.cyl(x, 0, h * 0.25, 0.02, 0.08, 'steel_galv', 'Šarka', n: 8) } unless kind == 'sliding'
+          return if kind == 'sliding'
+
+          # hinges on the opening side of the hinge posts; automatic swing gates get arm operators there
+          hinges = kind == 'swing_double' ? [-w / 2, w / 2] : [-w / 2]
+          hinges.each do |x|
+            [h * 0.2, h * 0.75].each { |z| k.cyl(x, side * (lt / 2 + 0.01), z, 0.02, 0.08, 'steel_galv', 'Šarka', n: 8) }
+            next unless auto
+
+            px_side = x.negative? ? -px : px
+            k.box(px_side, side * (post / 2 + 0.06), h * 0.45, 0.12, 0.12, 0.16, 'steel_galv', 'Pogon krila')
+            k.bar([px_side, side * (post / 2 + 0.06), h * 0.5], [x * 0.5, side * (lt / 2 + 0.03), h * 0.5], 0.025, 'steel_galv', 'Krak pogona', n: 8)
+          end
+          k.box(-px, side * (post / 2 + 0.05), h + 0.08, 0.08, 0.08, 0.06, 'flower_yellow', 'Signalna lampa') if auto
         end
       end
 

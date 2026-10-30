@@ -30,7 +30,7 @@
     "zMin": 0.0
   },
   "materials": [
-    "flower_white",
+    "sign_plate",
     "steel_dark"
   ],
   "polygons": 184,

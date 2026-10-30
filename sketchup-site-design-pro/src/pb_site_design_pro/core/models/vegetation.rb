@@ -40,7 +40,8 @@ module ProjektniBiro
           size = k.detail >= 2 ? 0.36 : 0.46
           clusters = Array.new(count) do |i|
             rc = r * size * k.rand(0.8, 1.15)
-            rcz = [rc * (rz / r), rz * 0.7].min
+            rc *= 0.82 if form == 'oval' # oval crowns: narrower, taller clusters
+            rcz = [rc * (rz / r) * (form == 'oval' ? 1.25 : 1.0), rz * (form == 'oval' ? 0.85 : 0.7)].min
             # golden-angle spiral directions, biased to the upper crown
             t = i * 2.39996
             dz = 1.0 - (1.6 * (i + 0.5) / count)
@@ -190,7 +191,10 @@ module ProjektniBiro
           'landscape.green_roof' => { spacing: 0.3, height: 0.12, kinds: [[:mat, 'sedum'], [:mat, 'foliage_light'], [:flower, %w[flower_pink]]] }
         }.freeze
 
-        def plant(k, kind, arg, h)
+        def plant(k, kind, arg, h, leaf = nil)
+          return grass_tuft(k, h, h * 0.55, leaf) if leaf && kind == :grass
+          return flower_clump(k, h * 0.5, h, leaf, []) if leaf
+
           case kind
           when :flower then flower_clump(k, h * 0.5, h, 'foliage', arg)
           when :rose
@@ -210,12 +214,13 @@ module ProjektniBiro
           return if k.detail.zero?
 
           h = spec[:height] || (e.num('plantHeight', 0.0).positive? ? e.num('plantHeight', 0.0) : 0.5)
+          leaf = k.chosen('plantMaterial') # a chosen planting material replaces the species mix
           spacing = e.num('plantSpacing', 0.0).positive? ? e.num('plantSpacing', 0.0) : spec[:spacing]
           spacing *= 1.4 if k.detail == 1
           k.scatter(outer, holes, spacing, inset: spacing * 0.3).each_with_index do |(x, y), i|
             v = i % spec[:kinds].length
             kind, arg = spec[:kinds][v]
-            k.place("biljka-#{v}-#{format('%.3g', h)}", [x, y, z], k.rand(0, 2 * Math::PI)) { |pk| plant(pk, kind, arg, h) }
+            k.place("biljka-#{v}-#{format('%.3g', h)}-#{leaf}", [x, y, z], k.rand(0, 2 * Math::PI)) { |pk| plant(pk, kind, arg, h, leaf) }
           end
         end
       end

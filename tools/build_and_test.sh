@@ -6,6 +6,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 step() { printf '\n=== %s ===\n' "$1"; }
 
+step "3D models react to their parameters"
+ruby tools/assets/check_params.rb | tail -1
+
 step "AutoCAD command registration"
 python3 tools/check_commands.py
 

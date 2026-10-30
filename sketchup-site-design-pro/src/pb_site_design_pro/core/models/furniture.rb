@@ -179,10 +179,14 @@ module ProjektniBiro
           r = e.num('poleDiameter', 0.08) / 2
           arm = e.num('armLength', 0.3)
           k.box(0, 0, 0, 0.9, 0.9, 0.04, 'grate_steel', 'Odvodna podloga')
-          k.cyl(0, 0.3, 0.04, r * 1.8, 0.01, 'stainless', 'Prirubnica', n: 12)
+          pm = k.mat('poleMaterial', 'stainless')
+          hm = k.mat('headMaterial', 'stainless')
+          hr = e.num('headWidth', 0.2) / 2
+          k.cyl(0, 0.3, 0.04, r * 1.8, 0.01, pm, 'Prirubnica', n: 12)
           pts = [[0, 0.3, 0.04], [0, 0.3, ph - 0.12], [0, 0.26, ph], [0, 0.3 - arm, ph]]
-          k.rail(pts, r, 'stainless', 'Stub tuša')
-          k.frustum(0, 0.3 - arm, ph - 0.04, 0.1, 0.03, 0.04, 'stainless', 'Glava tuša', n: k.seg(14))
+          k.rail(pts, r, pm, 'Stub tuša')
+          k.frustum(0, 0.3 - arm, ph - 0.04, hr, hr * 0.3, [e.num('headHeight', 0.04), 0.02].max, hm, 'Glava tuša', n: k.seg(14))
+          Light.solar_panel(k, ph, r, pm, size: 0.5) if e.bool('solarPanel', false)
           k.bar([0, 0.3, 1.1], [0, 0.3 - 0.1, 1.1], 0.012, 'steel_dark', 'Ventil')
           k.bar([0, 0.3, 0.45], [0, 0.3 - 0.12, 0.45], 0.012, 'steel_dark', 'Slavina za noge')
         end
@@ -201,7 +205,7 @@ module ProjektniBiro
           w = e.num('width', 2.0)
           d = e.num('depth', 1.0)
           h = e.num('height', 2.2)
-          col = 'plastic_yellow'
+          col = k.mat('material', 'steel_dark')
           steel = 'steel_galv'
           x0 = -w / 2 + 0.1
           x1 = w / 2 - 0.1
@@ -341,7 +345,7 @@ module ProjektniBiro
 
         def trampoline(k, e)
           r = e.num('diameter', 3.0) / 2
-          k.lathe([[r * 0.82, 0.0], [r, 0.0], [r, 0.03], [r * 0.82, 0.03]], 'plastic_blue', 'Zaštitni obod', n: k.seg(24), closed_loop: true)
+          k.lathe([[r * 0.82, 0.0], [r, 0.0], [r, 0.03], [r * 0.82, 0.03]], k.mat('material', 'plastic_dark'), 'Zaštitni obod', n: k.seg(24), closed_loop: true)
           k.cyl(0, 0, -0.02, r * 0.82, 0.015, 'rubber_black', 'Skočna površina', n: k.seg(24))
           k.torus([0, 0, -0.04], r * 0.9, 0.03, 'steel_galv', 'Okvir', n: k.seg(24), m: 6)
           k.cyl(0, 0, -0.9, r * 0.85, 0.05, 'gravel', 'Drenažno dno', n: k.seg(16))
@@ -352,11 +356,14 @@ module ProjektniBiro
           pw = e.num('plateWidth', 1.8)
           plh = e.num('plateHeight', 1.05)
           pb = e.num('plateBottom', 2.9)
-          k.box(0, 0.9, 0, 0.6, 0.6, 0.02, 'steel_dark', 'Podložna ploča')
-          k.box(0, 0.9, 0, 0.15, 0.15, ph - 0.3, 'steel_dark', 'Stub')
-          k.beam([0, 0.9, ph - 0.4], [0, 0.05, pb + (plh * 0.55)], 0.1, 'steel_dark', 'Krak')
-          k.beam([0, 0.9, ph - 1.2], [0, 0.05, pb + (plh * 0.2)], 0.08, 'steel_dark', 'Kosnik')
-          k.box(0, 0, pb, pw, 0.03, plh, 'glass', 'Tabla')
+          pm = k.mat('postMaterial', 'steel_dark')
+          ps = [e.num('postDiameter', 0.15), 0.08].max
+          pt = [e.num('plateThickness', 0.03), 0.01].max
+          k.box(0, 0.9, 0, 0.6, 0.6, 0.02, pm, 'Podložna ploča')
+          k.box(0, 0.9, 0, ps, ps, ph - 0.3, pm, 'Stub')
+          k.beam([0, 0.9, ph - 0.4], [0, 0.05, pb + (plh * 0.55)], ps * 0.66, pm, 'Krak')
+          k.beam([0, 0.9, ph - 1.2], [0, 0.05, pb + (plh * 0.2)], ps * 0.53, pm, 'Kosnik')
+          k.box(0, 0, pb, pw, pt, plh, k.mat('plateMaterial', 'glass'), 'Tabla')
           k.box(0, -0.016, pb + 0.15, 0.59, 0.003, 0.45, 'line_paint_white', 'Oznaka table')
           rim_z = 3.05
           k.torus([0, -0.3, rim_z], 0.225, 0.009, 'plastic_red', 'Obruč', m: 6)

@@ -210,7 +210,10 @@ module ProjektniBiro
           spacing = k.detail >= 2 ? 0.45 : 0.6
           k.scatter(inner, [], spacing, inset: 0.15, limit: 150).each_with_index do |(x, y), i|
             v = i % 4
-            k.place("zardinjera-#{v}-#{format('%.3g', ph)}", [x, y, soil_top], k.rand(0, 6.28)) do |pk|
+            leaf = k.chosen('plantMaterial')
+            k.place("zardinjera-#{v}-#{format('%.3g', ph)}-#{leaf}", [x, y, soil_top], k.rand(0, 6.28)) do |pk|
+              next Veg.shrub(pk, ph, ph * 0.9, leaf) if leaf
+
               case v
               when 0 then Veg.shrub(pk, ph, ph * 0.9, 'foliage')
               when 1 then Veg.grass_tuft(pk, ph * 0.9, ph * 0.35, 'grass_blade')

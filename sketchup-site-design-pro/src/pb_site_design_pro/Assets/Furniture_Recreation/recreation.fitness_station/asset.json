@@ -35,9 +35,9 @@
   },
   "materials": [
     "plastic_dark",
-    "plastic_yellow",
     "rubber_black",
     "sign_plate",
+    "steel_dark",
     "steel_galv"
   ],
   "polygons": 812,

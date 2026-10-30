@@ -93,6 +93,36 @@ class TestAssetLibrary < Minitest::Test
     assert File.file?(File.expand_path(bench['preview'], File.join(ROOT, 'sketchup-site-design-pro', 'src', 'pb_site_design_pro', 'sketchup', 'ui', 'html')))
   end
 
+  def build_bounds(id, params)
+    c = RecordingCanvas.new
+    ElementBuilder.build(lib.element(id, params: params), c, Builders::Context.new(lod: 'standard'))
+    [c.bounds, c]
+  end
+
+  def test_unread_mounting_height_lifts_the_model
+    base, = build_bounds('cycling.repair_station', {})
+    lifted, = build_bounds('cycling.repair_station', 'baseOffset' => 0.5)
+    assert_in_delta base[0][2] + 0.5, lifted[0][2], 1e-9
+    assert_in_delta base[1][2] + 0.5, lifted[1][2], 1e-9
+  end
+
+  def test_unread_dimensions_scale_the_model_proportionally
+    t = TypeDef.new(lib.type_definition('cycling.repair_station'))
+    d = t.defaults['depth']
+    base, = build_bounds('cycling.repair_station', {})
+    wide, = build_bounds('cycling.repair_station', 'depth' => d * 2)
+    assert_in_delta (base[1][1] - base[0][1]) * 2, wide[1][1] - wide[0][1], 1e-6
+    assert_in_delta base[1][2], wide[1][2], 1e-9, 'height unchanged'
+  end
+
+  def test_unread_material_choice_replaces_the_default_material
+    _, c = build_bounds('cycling.pump', 'material' => 'brick')
+    mats = []
+    c.each_node { |n| mats << n.material if n.material }
+    c.definitions.each_value { |dn| q = [dn]; until q.empty?; x = q.shift; mats << x.material if x.material; q.concat(x.children); end }
+    assert_includes mats, 'brick'
+  end
+
   # ---- SketchUp side (fake API) ----
 
   def setup

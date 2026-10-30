@@ -50,38 +50,61 @@ module ProjektniBiro
           k.beam_rect([-0.32, 0, h - 0.33], [0.32, 0, h - 0.035], 0.9, 0.035, 'solar_pv', 'Solarni panel')
         end
 
+        # Solar module on a short mast above z (tilted 30 degrees towards -Y), with battery box on the pole.
+        def solar_panel(k, z, r, pm, size: 0.6)
+          k.box(0, 0, z, 0.05, 0.05, 0.2, pm, 'Nosač panela')
+          k.beam_rect([0, size * 0.43, z + 0.2 + (size * 0.25)], [0, -size * 0.43, z + 0.2], size, 0.035, 'solar_pv', 'Solarni panel')
+          k.box(-r - 0.08, 0, z * 0.55, 0.1, 0.18, 0.35, pm, 'Baterija')
+        end
+
         def lantern(k, e)
+          return street(k, e) if e.num('armLength', 0.0) > 0.05 # lantern on an arm = street-type luminaire
+
           h = e.num('poleHeight', 4.0)
           r = e.num('poleDiameter', 0.1) / 2
           lw = e.num('headWidth', 0.4)
           lh = e.num('headHeight', 0.3) + 0.25
           pm = k.mat('poleMaterial', 'steel_dark')
+          hm = k.mat('headMaterial', pm) == 'luminaire' ? pm : k.mat('headMaterial', pm)
           pole(k, h, r, pm)
-          k.lathe([[0, h], [lw * 0.35, h], [lw * 0.35, h + 0.05], [0, h + 0.05]], pm, 'Prihvat')
+          k.lathe([[0, h], [lw * 0.35, h], [lw * 0.35, h + 0.05], [0, h + 0.05]], hm, 'Prihvat')
           k.cyl(0, 0, h + 0.05, lw * 0.32, lh * 0.7, 'luminaire', 'Staklo')
-          k.lathe([[0, h + 0.05 + (lh * 0.7)], [lw * 0.5, h + 0.05 + (lh * 0.7)], [lw * 0.48, h + 0.08 + (lh * 0.7)], [0.03, h + 0.05 + lh], [0, h + 0.05 + lh]], pm, 'Kapa')
+          k.lathe([[0, h + 0.05 + (lh * 0.7)], [lw * 0.5, h + 0.05 + (lh * 0.7)], [lw * 0.48, h + 0.08 + (lh * 0.7)], [0.03, h + 0.05 + lh], [0, h + 0.05 + lh]], hm, 'Kapa')
+          solar_panel(k, h + 0.05 + lh, r, pm) if e.bool('solarPanel', false)
         end
 
         def floodlight(k, e)
           h = e.num('poleHeight', 10.0)
           r = e.num('poleDiameter', 0.12) / 2 * 1.4
           pm = k.mat('poleMaterial', 'steel_galv')
+          hm = k.mat('headMaterial', 'steel_dark') == 'luminaire' ? 'steel_dark' : k.mat('headMaterial', 'steel_dark')
+          half = 0.6 + e.num('armLength', 0.3) # half length of the cross-arm (arms reach beyond the outer heads)
+          hl = e.num('headLength', 0.45)
+          hd = e.num('headHeight', 0.12)
+          hw = e.num('headWidth', 0.5)
           pole(k, h - 0.04, r, pm)
-          k.beam([0, -0.9, h - 0.08], [0, 0.9, h - 0.08], 0.08, pm, 'Traverza')
-          [-0.65, 0.0, 0.65].each do |y|
+          k.beam([0, -half, h - 0.08], [0, half, h - 0.08], 0.08, pm, 'Traverza')
+          n = [[(2 * half / (hw + 0.1)).floor, 1].max, 4].min
+          n.times do |i|
+            y = n == 1 ? 0.0 : -half + 0.25 + (i * ((2 * half) - 0.5) / (n - 1))
             k.box(0.12, y, h - 0.17, 0.05, 0.05, 0.12, pm, 'Nosač')
-            k.beam_rect([0.05, y, h - 0.2], [0.42, y, h - 0.44], e.num('headWidth', 0.5), 0.12, 'steel_dark', 'Reflektor')
-            k.beam_rect([0.06, y, h - 0.28], [0.4, y, h - 0.5], e.num('headWidth', 0.5) * 0.85, 0.02, 'luminaire', 'Staklo reflektora')
+            k.beam_rect([0.05, y, h - 0.2], [0.05 + (hl * 0.82), y, h - 0.2 - (hl * 0.53)], hw, hd, hm, 'Reflektor')
+            k.beam_rect([0.06, y, h - 0.2 - (hd * 0.67)], [0.04 + (hl * 0.78), y, h - 0.2 - (hd * 0.67) - (hl * 0.49)], hw * 0.85, 0.02, 'luminaire', 'Staklo reflektora')
           end
+          solar_panel(k, h, r, pm, size: 1.0) if e.bool('solarPanel', false)
         end
 
         def bollard(k, e)
           h = e.num('height', 1.0)
           r = e.num('diameter', 0.2) / 2
           m = k.mat('material', 'steel_dark')
+          if e.bool('removable', false)
+            k.box(0, 0, -0.01, r * 3, r * 3, 0.012, 'steel_galv', 'Ugradna čahura')
+            k.cyl(r * 1.1, 0, 0.002, 0.02, 0.01, 'steel_dark', 'Brava', n: 8)
+          end
           k.cyl(0, 0, 0, r * 1.2, 0.02, m, 'Podnožje')
           k.cyl(0, 0, 0.02, r, h - 0.2, m, 'Tijelo')
-          k.cyl(0, 0, h - 0.18, r * 0.92, 0.12, 'luminaire', 'Svjetlosni pojas')
+          k.cyl(0, 0, h - 0.18, r * 0.92, 0.12, e.bool('lit', true) ? 'luminaire' : m, e.bool('lit', true) ? 'Svjetlosni pojas' : 'Prsten')
           if k.detail.positive?
             [0.03, 0.07].each { |dz| k.torus([0, 0, h - 0.18 + dz], r * 0.95, 0.006, m, 'Rebro') }
           end

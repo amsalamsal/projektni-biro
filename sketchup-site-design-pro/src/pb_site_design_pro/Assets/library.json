@@ -2571,7 +2571,7 @@
       "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
       "dimensions": {
         "x": 7.9,
-        "y": 1.358,
+        "y": 1.408,
         "z": 2.05,
         "zMin": 0.0
       },
@@ -3160,8 +3160,8 @@
         "zMin": -0.25
       },
       "materials": [
-        "grate_steel",
         "plastic_dark",
+        "steel_galv",
         "water"
       ],
       "polygons": 68,
@@ -3403,6 +3403,7 @@
       "materials": [
         "cast_iron",
         "concrete_precast",
+        "grate_steel",
         "hdpe"
       ],
       "polygons": 124,
@@ -3642,7 +3643,7 @@
       },
       "materials": [
         "gravel",
-        "hdpe"
+        "plastic_dark"
       ],
       "polygons": 1246,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
@@ -6461,8 +6462,8 @@
       "units": "m",
       "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
       "dimensions": {
-        "x": 0.629,
-        "y": 1.8,
+        "x": 0.751,
+        "y": 2.4,
         "z": 9.96,
         "zMin": 0.0
       },
@@ -6470,7 +6471,7 @@
         "luminaire",
         "steel_dark"
       ],
-      "polygons": 222,
+      "polygons": 240,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
@@ -7689,7 +7690,7 @@
         "steel_dark",
         "steel_galv"
       ],
-      "polygons": 290,
+      "polygons": 310,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
@@ -8946,8 +8947,8 @@
       },
       "materials": [
         "grate_steel",
-        "stainless",
-        "steel_dark"
+        "steel_dark",
+        "steel_galv"
       ],
       "polygons": 450,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
@@ -9038,9 +9039,9 @@
       },
       "materials": [
         "plastic_dark",
-        "plastic_yellow",
         "rubber_black",
         "sign_plate",
+        "steel_dark",
         "steel_galv"
       ],
       "polygons": 812,
@@ -9284,7 +9285,7 @@
       },
       "materials": [
         "gravel",
-        "plastic_blue",
+        "plastic_dark",
         "rubber_black",
         "steel_galv"
       ],
@@ -9436,7 +9437,7 @@
         "glass",
         "line_paint_white",
         "plastic_red",
-        "steel_dark"
+        "steel_galv"
       ],
       "polygons": 402,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
@@ -10213,7 +10214,7 @@
       },
       "materials": [
         "gravel",
-        "hdpe"
+        "plastic_dark"
       ],
       "polygons": 998,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
@@ -11364,14 +11365,14 @@
       "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
       "dimensions": {
         "x": 1.04,
-        "y": 0.475,
-        "z": 1.292,
+        "y": 0.565,
+        "z": 1.336,
         "zMin": 0.0
       },
       "materials": [
         "flower_white",
         "marking_green",
-        "steel_dark"
+        "steel_galv"
       ],
       "polygons": 42,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
@@ -11460,8 +11461,8 @@
       "units": "m",
       "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
       "dimensions": {
-        "x": 1.439,
-        "y": 1.447,
+        "x": 1.438,
+        "y": 1.445,
         "z": 2.68,
         "zMin": -0.05
       },
@@ -11746,13 +11747,13 @@
       "units": "m",
       "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
       "dimensions": {
-        "x": 0.74,
+        "x": 0.739,
         "y": 0.21,
         "z": 4.0,
         "zMin": 0.0
       },
       "materials": [
-        "flower_white",
+        "plastic_dark",
         "screen_display",
         "steel_dark",
         "steel_galv"
@@ -11927,13 +11928,13 @@
       "units": "m",
       "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
       "dimensions": {
-        "x": 0.506,
-        "y": 0.32,
-        "z": 3.41,
+        "x": 0.576,
+        "y": 0.252,
+        "z": 3.4,
         "zMin": 0.0
       },
       "materials": [
-        "flower_white",
+        "plastic_dark",
         "steel_dark"
       ],
       "polygons": 252,
@@ -11976,7 +11977,7 @@
         "zMin": 0.0
       },
       "materials": [
-        "flower_white",
+        "sign_plate",
         "steel_dark"
       ],
       "polygons": 184,

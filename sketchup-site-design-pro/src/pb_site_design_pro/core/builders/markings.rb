@@ -15,11 +15,10 @@ module ProjektniBiro
           c.mesh(Mesh.box(-w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Bočna linija')
           c.mesh(Mesh.box(w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Bočna linija')
           c.mesh(Mesh.box(0, l - (lw / 2), 0, w - lw - 0.002, lw, MARKING), material: material, name: 'Krajnja linija')
-          if e.bool('accessible')
-            c.mesh(Mesh.box(0, l / 2, 0, [w * 0.45, 1.2].min, [w * 0.45, 1.2].min, MARKING), material: 'line_paint_blue', name: 'Površina simbola pristupačnosti')
-          elsif e.bool('ev')
-            c.mesh(Mesh.box(0, l / 2, 0, [w * 0.4, 1.0].min, [w * 0.6, 1.5].min, MARKING), material: 'marking_green', name: 'Površina simbola punjača')
-          end
+          acc = e.bool('accessible')
+          c.mesh(Mesh.box(0, l * (e.bool('ev') ? 0.32 : 0.5), 0, [w * 0.45, 1.2].min, [w * 0.45, 1.2].min, MARKING), material: 'line_paint_blue', name: 'Površina simbola pristupačnosti') if acc
+          # an accessible bay can also have a charger: both symbols, one behind the other
+          c.mesh(Mesh.box(0, l * (acc ? 0.7 : 0.5), 0, [w * 0.4, 1.0].min, [w * 0.6, acc ? 1.2 : 1.5].min, MARKING), material: 'marking_green', name: 'Površina simbola punjača') if e.bool('ev')
         end
       end
       register('parking_bay', ParkingBay)

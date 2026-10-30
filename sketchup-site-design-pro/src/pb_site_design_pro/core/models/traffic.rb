@@ -17,7 +17,7 @@ module ProjektniBiro
           pb = e.num('plateBottom', 2.0)
           pt = [e.num('plateThickness', 0.02), 0.01].max
           pm = k.mat('postMaterial', 'steel_galv')
-          plm = plate_material || k.mat('plateMaterial', face)
+          plm = plate_material ? (k.chosen('plateMaterial') || plate_material) : k.mat('plateMaterial', face)
           xs = n == 1 ? [0.0] : Array.new(n) { |i| (-pw / 2) + (pw * 0.15) + (i * (pw * 0.7) / (n - 1)) }
           xs.each do |x|
             k.cyl(x, pr + pt, -0.05, pr, ph + 0.05, pm, 'Stub', n: k.seg(10))
@@ -83,6 +83,7 @@ module ProjektniBiro
           k.cyl(0, 0, 0, r, h - (r * 0.6), m, 'Stubić', n: k.seg(14))
           k.lathe([[0, h - (r * 0.6)], [r, h - (r * 0.6)], [r * 0.6, h - (r * 0.1)], [0, h]], m, 'Kapa', n: k.seg(14))
           [h * 0.72, h * 0.8].each { |z| k.cyl(0, 0, z, r * 1.01, 0.03, 'line_paint_white', 'Reflektivna traka', n: k.seg(14)) }
+          k.cyl(0, 0, h - (r * 0.6) - 0.07, r * 1.005, 0.05, 'luminaire', 'Svjetlosni pojas', n: k.seg(14)) if e.bool('lit', false)
         end
 
         def barrier(k, e)
@@ -185,7 +186,7 @@ module ProjektniBiro
             x = (-w / 2) + 1.4 + (i * (w - 1.6) / docks)
             k.plate([x + 0.06, 0, 0.08], [0.0, 1.0], [[-0.1, 0.0], [0.1, 0.0], [0.08, 0.75], [-0.05, 0.82], [-0.1, 0.7]], 0.12, 'steel_galv', 'Priključno mjesto')
             k.box(x, -0.12, 0.62, 0.08, 0.04, 0.08, 'luminaire', 'Indikator')
-            bicycle(k, x, -0.75, 'plastic_blue') if k.detail.positive? && i % 2 == 0 && i < 6
+            bicycle(k, x, 0.1 - (d / 2), 'plastic_blue') if k.detail.positive? && i.even? && i < 6 # docked bikes fill the depth
           end
           kx = -w / 2 + 0.4
           k.box(kx, 0, 0, 0.5, 0.4, 2.0, 'steel_dark', 'Terminal')

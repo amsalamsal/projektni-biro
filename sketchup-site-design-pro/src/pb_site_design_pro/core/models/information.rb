@@ -35,14 +35,28 @@ module ProjektniBiro
           k.box(0, 0, h, w + 0.12, d + 0.12, 0.04, m, 'Krović')
         end
 
+        # Pole-mounted device: arm of armLength along +X, housing headLength x headWidth x headHeight.
+        def device_pole(k, e, h)
+          r = e.num('poleDiameter', 0.1) / 2
+          pm = k.mat('poleMaterial', 'steel_dark')
+          Light.pole(k, h, r, pm)
+          Light.solar_panel(k, h, r, pm, size: 0.45) if e.bool('solarPanel', false)
+          [r, pm]
+        end
+
         def cctv(k, e)
           h = e.num('poleHeight', 4.0)
-          r = e.num('poleDiameter', 0.1) / 2
-          Light.pole(k, h, r, k.mat('poleMaterial', 'steel_dark'))
-          k.rail([[0, 0, h - 0.1], [0.15, 0, h - 0.05], [0.3, 0, h - 0.05]], 0.02, 'steel_galv', 'Nosač kamere')
-          k.bar([0.25, 0, h - 0.12], [0.55, 0, h - 0.18], 0.06, 'flower_white', 'Kućište kamere', n: k.seg(12))
-          k.box(0.4, 0, h - 0.07, 0.36, 0.13, 0.015, 'flower_white', 'Štitnik od sunca')
-          k.bar([0.55, 0, h - 0.18], [0.56, 0, h - 0.182], 0.045, 'screen_display', 'Objektiv', n: k.seg(12))
+          arm = [e.num('armLength', 0.3), 0.08].max
+          hl = e.num('headLength', 0.3)
+          hr = e.num('headWidth', 0.12) / 2
+          hm = k.mat('headMaterial', 'plastic_dark')
+          r, = device_pole(k, e, h)
+          k.rail([[0, 0, h - 0.1], [arm * 0.5, 0, h - 0.05], [arm, 0, h - 0.05]], 0.02, 'steel_galv', 'Nosač kamere')
+          a = [arm - (hl * 0.17), 0, h - 0.05 - [e.num('headHeight', 0.12) * 0.6, hr].max]
+          b = [a[0] + hl, 0, a[2] - (hl * 0.2)]
+          k.bar(a, b, hr, hm, 'Kućište kamere', n: k.seg(12))
+          k.box((a[0] + b[0]) / 2, 0, a[2] + hr - 0.005, hl * 1.2, hr * 2.2, 0.015, hm, 'Štitnik od sunca')
+          k.bar(b, [b[0] + 0.01, 0, b[2] - 0.002], hr * 0.75, 'screen_display', 'Objektiv', n: k.seg(12))
           k.box(-r - 0.06, 0, h * 0.4, 0.1, 0.18, 0.3, 'steel_dark', 'Razvodna kutija')
         end
 
@@ -70,16 +84,25 @@ module ProjektniBiro
 
         def speaker(k, e)
           h = e.num('poleHeight', 3.5)
-          Light.pole(k, h - 0.1, e.num('poleDiameter', 0.12) / 2, k.mat('poleMaterial', 'steel_dark'))
-          k.box(0.08, 0, h - 0.4, 0.04, 0.06, 0.3, 'steel_dark', 'Nosač')
-          k.mesh(Mesh.fix_orientation(Kit.lathe_polys([[0, 0], [0.06, 0], [0.16, 0.26], [0, 0.22]], 0, 0, k.seg(14), false).map { |p| p.map { |q| [0.12 + q[2], q[1], h - 0.25 + q[0]] } }), 'flower_white', 'Truba zvučnika')
+          hl = e.num('headLength', 0.26)
+          mouth = e.num('headWidth', 0.32) / 2
+          arm = [e.num('armLength', 0.12), 0.08].max
+          device_pole(k, e, h - 0.1)
+          k.box(arm * 0.66, 0, h - 0.4, 0.04, 0.06, 0.3, 'steel_dark', 'Nosač')
+          k.mesh(Mesh.fix_orientation(Kit.lathe_polys([[0, 0], [mouth * 0.38, 0], [mouth, hl], [0, hl * 0.85]], 0, 0, k.seg(14), false).map { |p| p.map { |q| [arm + q[2], q[1], h - 0.25 + q[0]] } }),
+                 k.mat('headMaterial', 'flower_white'), 'Truba zvučnika')
         end
 
         def wifi(k, e)
           h = e.num('poleHeight', 4.0)
-          Light.pole(k, h - 0.3, e.num('poleDiameter', 0.12) / 2, k.mat('poleMaterial', 'steel_dark'))
-          k.box(0, 0, h - 0.3, 0.2, 0.08, 0.3, 'flower_white', 'Pristupna tačka')
-          [-0.07, 0.07].each { |x| k.bar([x, 0, h - 0.02], [x, 0, h + 0.0], 0.008, 'steel_dark', 'Antena', n: 6) }
+          hl = e.num('headLength', 0.2)
+          hw = e.num('headWidth', 0.08)
+          hh = e.num('headHeight', 0.3)
+          arm = e.num('armLength', 0.0)
+          device_pole(k, e, h - hh)
+          k.box(arm, 0, h - hh, 0.05, 0.05, 0.05, 'steel_dark', 'Nosač') if arm > 0.05
+          k.box(arm, 0, h - hh, hl, hw, hh, k.mat('headMaterial', 'flower_white'), 'Pristupna tačka')
+          [-hl * 0.35, hl * 0.35].each { |x| k.bar([arm + x, 0, h - 0.02], [arm + x, 0, h + 0.0], 0.008, 'steel_dark', 'Antena', n: 6) }
         end
 
         def fingerpost(k, e)
@@ -87,13 +110,21 @@ module ProjektniBiro
           pw = e.num('plateWidth', 0.9)
           plh = e.num('plateHeight', 0.2)
           pb = e.num('plateBottom', 2.1)
-          k.cyl(0, 0, -0.05, 0.04, ph + 0.05, k.mat('postMaterial', 'steel_galv'), 'Stub', n: k.seg(10))
-          k.cyl(0, 0, ph, 0.05, 0.03, 'steel_dark', 'Kapa', n: 10)
+          pr = e.num('postDiameter', 0.08) / 2
+          pt = [e.num('plateThickness', 0.024), 0.01].max
+          k.cyl(0, 0, -0.05, pr, ph + 0.05, k.mat('postMaterial', 'steel_galv'), 'Stub', n: k.seg(10))
+          k.cyl(0, 0, ph, pr * 1.25, 0.03, 'steel_dark', 'Kapa', n: 10)
+          shape = e.text('plateShape', 'rectangle')
           [[0.0, 0], [2.2, 1], [-0.9, 2]].each do |(a, i)|
             z = pb - (i * (plh + 0.06))
             dir = [Math.cos(a), Math.sin(a)]
-            tip = [[0.0, 0.0], [pw - 0.12, 0.0], [pw, plh / 2], [pw - 0.12, plh], [0.0, plh]]
-            k.plate([dir[1] * 0.012, -dir[0] * 0.012, z], dir, tip, 0.024, k.mat('plateMaterial', 'sign_plate'), 'Putokazna tabla')
+            # fingerpost blades: 'rectangle' = the usual blade with a pointed end, 'triangle' = arrow blade, 'circle' = disc
+            tip = case shape
+                  when 'circle' then Array.new(16) { |j| t = 2 * Math::PI * j / 16; [pr + (plh / 2) + (Math.cos(t) * plh / 2), (plh / 2) + (Math.sin(t) * plh / 2)] }
+                  when 'triangle' then [[0.0, plh * 0.25], [pw - (plh * 0.8), plh * 0.25], [pw - (plh * 0.8), 0.0], [pw, plh / 2], [pw - (plh * 0.8), plh], [pw - (plh * 0.8), plh * 0.75], [0.0, plh * 0.75]]
+                  else [[0.0, 0.0], [pw - 0.12, 0.0], [pw, plh / 2], [pw - 0.12, plh], [0.0, plh]]
+                  end
+            k.plate([dir[1] * pt / 2, -dir[0] * pt / 2, z], dir, tip, pt, k.mat('plateMaterial', 'sign_plate'), 'Putokazna tabla')
           end
         end
 
@@ -101,13 +132,25 @@ module ProjektniBiro
           pw = e.num('plateWidth', 1.0)
           plh = e.num('plateHeight', 0.7)
           pb = e.num('plateBottom', 0.9)
-          [-pw / 2 + 0.06, pw / 2 - 0.06].each { |x| k.box(x, 0.1, 0, 0.06, 0.06, pb + 0.2, 'steel_dark', 'Noga') }
-          k.beam_rect([0, 0.15, pb + 0.35], [0, -0.3, pb], pw + 0.04, 0.04, 'steel_dark', 'Okvir karte')
-          k.beam_rect([0, 0.14, pb + 0.39], [0, -0.29, pb + 0.055], pw - 0.04, 0.006, 'flower_white', 'Karta lokacije')
+          # tilted map table (about 38 degrees): its slanted height is the plate height, its low edge at plateBottom
+          rise = plh * 0.61
+          run = plh * 0.79
+          top = [0, 0.15, pb + rise]
+          low = [0, 0.15 - run, pb]
+          pm = k.mat('postMaterial', 'steel_dark')
+          ps = [e.num('postDiameter', 0.06), 0.04].max
+          n = [e.num('postCount', 2).to_i, 1].max
+          xs = n == 1 ? [0.0] : Array.new(n) { |i| (-pw / 2) + 0.06 + (i * (pw - 0.12) / (n - 1)) }
+          xs.each { |x| k.box(x, 0.1, 0, ps, ps, pb + rise - 0.15, pm, 'Noga') }
+          k.beam_rect(top, low, pw + 0.04, [e.num('plateThickness', 0.04), 0.02].max, pm, 'Okvir karte')
+          lift = ->(p, dz) { [p[0], p[1] + (dz * 0.79), p[2] + (dz * 0.61) + 0.025] }
+          k.beam_rect(lift.call(top, -0.03), lift.call(low, 0.03), pw - 0.04, 0.006, k.chosen('plateMaterial') || 'flower_white', 'Karta lokacije')
           return if k.detail.zero?
 
-          [[-0.2, 0.0, 0.25], [0.15, -0.1, 0.2], [0.1, 0.12, 0.1]].each do |(x, f, s)|
-            k.beam_rect([x, 0.05 - (f * 0.4), pb + 0.27 - (f * 0.3)], [x, -0.05 - (f * 0.4), pb + 0.2 - (f * 0.3)], s, 0.004, 'marking_green', 'Zona na karti')
+          [[-0.2, 0.25, 0.25], [0.15, 0.5, 0.2], [0.1, 0.7, 0.1]].each do |(x, f, s)|
+            a = Geometry.lerp3(low, top, f)
+            b = Geometry.lerp3(low, top, [f + 0.15, 0.95].min)
+            k.beam_rect([x, a[1], a[2] + 0.032], [x, b[1], b[2] + 0.032], s, 0.004, 'marking_green', 'Zona na karti')
           end
         end
 

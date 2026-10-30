@@ -35,7 +35,7 @@
   },
   "materials": [
     "gravel",
-    "hdpe"
+    "plastic_dark"
   ],
   "polygons": 998,
   "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
