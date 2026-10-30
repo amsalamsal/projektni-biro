@@ -158,6 +158,7 @@ module ProjektniBiro
           export: command('Izvoz izmjena za AutoCAD...', 'Zapisuje izmijenjene parametre i pomjerene/zarotirane tačkaste elemente za naredbu SDPAPPLYCHANGES.', 'export') { export_changes },
           scenes: command('Izrada scena za pregled', 'Izrada ili osvježavanje scena (situacija, 3D pregled, zelenilo, rasvjeta, podzemno ...).', 'scenes') { create_scenes },
           underground: command('Prikaz podzemnog', 'Sakriva površine i prikazuje ukopane instalacije u X-ray prikazu.', 'underground') { toggle_underground },
+          models: command('Biblioteka 3D modela...', 'Pregled, umetanje i zamjena 3D modela iz lokalne biblioteke (14 kategorija, bez interneta).', 'models') { Dialogs.models },
           library: command('Biblioteka i postavke...', 'Tipovi elemenata, dodjela komponenti, materijali, nivoi detalja i pravila ažuriranja.', 'library') { library_dialog },
           report: command('Izvještaj posljednjeg uvoza', 'Prikaz izvještaja posljednjeg uvoza.', 'report') { Dialogs.show_last_report },
           recovery: command('Sigurnosne kopije i oporavak...', 'Prekinute operacije i sigurnosne kopije trenutnog modela.', nil) { recovery }
@@ -171,12 +172,12 @@ module ProjektniBiro
         menu.add_separator
         %i[scenes underground].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
-        %i[library report recovery].each { |k| menu.add_item(cmds[k]) }
+        %i[models library report recovery].each { |k| menu.add_item(cmds[k]) }
         menu.add_item('Otvori dnevnik (log)') { open_log }
         menu.add_item('O programu Vanjsko uređenje PRO') { about }
 
         tb = UI::Toolbar.new('Vanjsko uređenje PRO')
-        %i[import update properties export scenes underground library report].each { |k| tb.add_item(cmds[k]) }
+        %i[import update properties export scenes underground models library report].each { |k| tb.add_item(cmds[k]) }
         tb.restore
 
         UI.add_context_menu_handler do |context_menu|

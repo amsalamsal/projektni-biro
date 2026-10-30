@@ -54,4 +54,9 @@ library = { 'types' => types, 'categories' => JSON.parse(File.read(File.join(roo
                             'backupEnabled' => true, 'backupKeep' => 10, 'backupMaxAgeDays' => 30 },
             'inModel' => { 'furniture.bench' => 4, 'landscape.tree_deciduous' => 14 } }
 File.write(File.join(out, 'library.json'), JSON.pretty_generate(library))
+lib = AssetLibrary.new(File.join(root, 'sketchup-site-design-pro/src/pb_site_design_pro/Assets'), File.join(root, 'shared/catalog'))
+File.write(File.join(out, 'models.json'), JSON.pretty_generate(lib.index_data('furniture.bench' => 2).merge('mode' => 'index', 'missing' => [], 'lod' => 'standard')))
+File.write(File.join(out, 'models-details.json'),
+           JSON.pretty_generate('mode' => 'details', 'id' => 'furniture.bench', 'parameters' => lib.parameters('furniture.bench'), 'geometry' => 'point',
+                                'optionLabels' => cat.option_labels, 'materials' => cat.materials.values.map { |m| { 'key' => m.key, 'name' => m.name } }))
 puts "fixtures written to #{out}"

@@ -16,6 +16,7 @@ require File.join(__dir__, 'core')
   sketchup/scenes
   sketchup/importer
   sketchup/editing
+  sketchup/asset_insert
   sketchup/ui/dialogs
   sketchup/ui/commands
 ].each { |f| require File.join(__dir__, f) }

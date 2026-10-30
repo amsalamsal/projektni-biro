@@ -132,6 +132,59 @@ module ProjektniBiro
         dlg.show
       end
 
+      # ---- 3D model library ----
+
+      def models
+        lib = AssetInsert.library
+        dlg = create('Vanjsko uređenje PRO – biblioteka 3D modela', 'models.html', 'Models', 1180, 760)
+        counts = lambda do
+          ModelIndex.managed_entities(Sketchup.active_model).group_by { |e| e.get_attribute(Editing::DICT, 'type') }.transform_values(&:length)
+        end
+        message = ->(kind, text) { push(dlg, 'mode' => 'message', 'kind' => kind, 'text' => text) }
+        guarded = lambda do |label, &blk|
+          blk.call
+        rescue PackageError, ArgumentError, KeyError => e
+          message.call('error', "#{label}: #{e.message}")
+        rescue StandardError => e
+          Log.error("Biblioteka modela – #{label}", e)
+          message.call('error', "#{label} nije uspjelo: #{e.message} (detalji u dnevniku)")
+        end
+        dlg.add_action_callback('ready') do |_ctx|
+          guarded.call('Učitavanje biblioteke') do
+            push(dlg, lib.index_data(counts.call).merge('mode' => 'index', 'missing' => lib.missing_files.first(20), 'lod' => AssetInsert.lod))
+          end
+        end
+        dlg.add_action_callback('details') do |_ctx, arg|
+          id = parse(arg)['id']
+          guarded.call('Detalji modela') do
+            push(dlg, 'mode' => 'details', 'id' => id, 'parameters' => lib.parameters(id), 'geometry' => lib.type_definition(id)['geometry'],
+                      'optionLabels' => AssetInsert.catalog.option_labels,
+                      'materials' => AssetInsert.catalog.materials.values.map { |m| { 'key' => m.key, 'name' => m.name } })
+          end
+        end
+        dlg.add_action_callback('insert') do |_ctx, arg|
+          o = parse(arg)
+          guarded.call('Umetanje') { AssetInsert.start(o['id'], o['params'] || {}, o['shape'] || {}) }
+        end
+        dlg.add_action_callback('replace') do |_ctx, arg|
+          o = parse(arg)
+          guarded.call('Zamjena') do
+            n, skipped = AssetInsert.replace(o['id'], o['params'] || {})
+            text = "Zamijenjeno elemenata: #{n}."
+            text += " Preskočeno: #{skipped.join('; ')}" unless skipped.empty?
+            message.call(skipped.empty? ? 'ok' : 'warning', text)
+          end
+        end
+        dlg.add_action_callback('importDae') { |_ctx, arg| guarded.call('Uvoz DAE') { AssetInsert.import_dae(parse(arg)['id']) } }
+        dlg.add_action_callback('openFolder') do |_ctx, arg|
+          path = lib.file(parse(arg)['id'], 'model')
+          UI.openURL("file:///#{File.dirname(path).tr('\\', '/')}") if path
+        end
+        dlg.add_action_callback('selectType') { |_ctx, arg| Commands.select_type(parse(arg)['id']) }
+        dlg.add_action_callback('close') { |_ctx| dlg.close }
+        dlg.show
+      end
+
       # ---- Library and settings ----
 
       def library

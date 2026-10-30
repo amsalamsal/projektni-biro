@@ -2521,6 +2521,8 @@
           "options": [
             "mesh",
             "bars",
+            "boards",
+            "slats",
             "solid",
             "glass"
           ],
@@ -3052,6 +3054,11 @@
         64,
         112,
         150
+      ],
+      "texture": "acrylic_court.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3070,6 +3077,11 @@
         72,
         72,
         74
+      ],
+      "texture": "asphalt.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3079,6 +3091,11 @@
         150,
         64,
         52
+      ],
+      "texture": "asphalt_red.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3088,6 +3105,11 @@
         96,
         74,
         56
+      ],
+      "texture": "bark.jpg",
+      "textureSize": [
+        0.4,
+        0.4
       ]
     },
     {
@@ -3097,6 +3119,11 @@
         160,
         92,
         70
+      ],
+      "texture": "brick.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3124,6 +3151,11 @@
         170,
         170,
         166
+      ],
+      "texture": "concrete.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3133,6 +3165,11 @@
         178,
         174,
         166
+      ],
+      "texture": "concrete_paver.jpg",
+      "textureSize": [
+        0.8,
+        0.8
       ]
     },
     {
@@ -3142,6 +3179,11 @@
         150,
         150,
         146
+      ],
+      "texture": "concrete_precast.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3151,6 +3193,11 @@
         196,
         194,
         188
+      ],
+      "texture": "concrete_slab.jpg",
+      "textureSize": [
+        1.2,
+        1.2
       ]
     },
     {
@@ -3225,7 +3272,12 @@
         140,
         70
       ],
-      "alpha": 0.92
+      "alpha": 0.92,
+      "texture": "foliage.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage_dark",
@@ -3234,6 +3286,11 @@
         54,
         92,
         46
+      ],
+      "texture": "foliage_dark.jpg",
+      "textureSize": [
+        0.5,
+        0.5
       ]
     },
     {
@@ -3244,7 +3301,12 @@
         96,
         60
       ],
-      "alpha": 0.95
+      "alpha": 0.95,
+      "texture": "foliage_evergreen.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage_fruit",
@@ -3254,7 +3316,12 @@
         150,
         70
       ],
-      "alpha": 0.92
+      "alpha": 0.92,
+      "texture": "foliage_fruit.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage_light",
@@ -3263,6 +3330,11 @@
         118,
         156,
         70
+      ],
+      "texture": "foliage_light.jpg",
+      "textureSize": [
+        0.5,
+        0.5
       ]
     },
     {
@@ -3281,6 +3353,11 @@
         140,
         132,
         118
+      ],
+      "texture": "gabion.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3300,6 +3377,11 @@
         104,
         152,
         72
+      ],
+      "texture": "grass.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3318,6 +3400,11 @@
         118,
         146,
         92
+      ],
+      "texture": "grass_grid.jpg",
+      "textureSize": [
+        0.6,
+        0.6
       ]
     },
     {
@@ -3336,6 +3423,11 @@
         188,
         178,
         158
+      ],
+      "texture": "gravel.jpg",
+      "textureSize": [
+        0.5,
+        0.5
       ]
     },
     {
@@ -3399,6 +3491,11 @@
         146,
         166,
         92
+      ],
+      "texture": "meadow.jpg",
+      "textureSize": [
+        1,
+        1
       ]
     },
     {
@@ -3408,6 +3505,11 @@
         122,
         88,
         62
+      ],
+      "texture": "mulch.jpg",
+      "textureSize": [
+        0.8,
+        0.8
       ]
     },
     {
@@ -3417,6 +3519,11 @@
         196,
         186,
         168
+      ],
+      "texture": "natural_stone.jpg",
+      "textureSize": [
+        1.5,
+        1.5
       ]
     },
     {
@@ -3426,6 +3533,11 @@
         160,
         150,
         136
+      ],
+      "texture": "permeable_paver.jpg",
+      "textureSize": [
+        0.8,
+        0.8
       ]
     },
     {
@@ -3435,6 +3547,11 @@
         176,
         112,
         150
+      ],
+      "texture": "planting_flowers.jpg",
+      "textureSize": [
+        0.5,
+        0.5
       ]
     },
     {
@@ -3444,6 +3561,20 @@
         86,
         132,
         70
+      ],
+      "texture": "planting_mixed.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "key": "plastic_blue",
+      "name": "Plastika plava (igralište)",
+      "color": [
+        40,
+        104,
+        176
       ]
     },
     {
@@ -3465,6 +3596,24 @@
       ]
     },
     {
+      "key": "plastic_red",
+      "name": "Plastika crvena (igralište)",
+      "color": [
+        200,
+        52,
+        44
+      ]
+    },
+    {
+      "key": "plastic_yellow",
+      "name": "Plastika žuta (igralište)",
+      "color": [
+        238,
+        184,
+        32
+      ]
+    },
+    {
       "key": "pond_liner",
       "name": "Folija jezerca",
       "color": [
@@ -3480,6 +3629,11 @@
         176,
         214,
         226
+      ],
+      "texture": "pool_finish.jpg",
+      "textureSize": [
+        0.6,
+        0.6
       ]
     },
     {
@@ -3489,6 +3643,29 @@
         208,
         202,
         192
+      ],
+      "texture": "porcelain.jpg",
+      "textureSize": [
+        1.2,
+        1.2
+      ]
+    },
+    {
+      "key": "render_white",
+      "name": "Fasadna žbuka, svijetla",
+      "color": [
+        234,
+        230,
+        221
+      ]
+    },
+    {
+      "key": "rope",
+      "name": "Uže / mreža",
+      "color": [
+        176,
+        150,
+        108
       ]
     },
     {
@@ -3498,6 +3675,20 @@
         176,
         72,
         58
+      ],
+      "texture": "rubber.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "key": "rubber_black",
+      "name": "Guma crna",
+      "color": [
+        36,
+        36,
+        38
       ]
     },
     {
@@ -3507,6 +3698,20 @@
         226,
         208,
         166
+      ],
+      "texture": "sand.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
+    },
+    {
+      "key": "screen_display",
+      "name": "Ekran",
+      "color": [
+        24,
+        40,
+        56
       ]
     },
     {
@@ -3516,6 +3721,11 @@
         128,
         150,
         84
+      ],
+      "texture": "sedum.jpg",
+      "textureSize": [
+        0.6,
+        0.6
       ]
     },
     {
@@ -3534,6 +3744,11 @@
         102,
         80,
         60
+      ],
+      "texture": "soil.jpg",
+      "textureSize": [
+        0.8,
+        0.8
       ]
     },
     {
@@ -3543,6 +3758,20 @@
         34,
         46,
         78
+      ],
+      "texture": "solar_pv.jpg",
+      "textureSize": [
+        1,
+        1
+      ]
+    },
+    {
+      "key": "stainless",
+      "name": "Nehrđajući čelik",
+      "color": [
+        196,
+        200,
+        204
       ]
     },
     {
@@ -3570,6 +3799,11 @@
         162,
         150,
         132
+      ],
+      "texture": "stone_wall.jpg",
+      "textureSize": [
+        1.2,
+        1.2
       ]
     },
     {
@@ -3579,6 +3813,11 @@
         222,
         186,
         54
+      ],
+      "texture": "tactile.jpg",
+      "textureSize": [
+        0.6,
+        0.6
       ]
     },
     {
@@ -3588,6 +3827,11 @@
         164,
         152,
         118
+      ],
+      "texture": "terrain.jpg",
+      "textureSize": [
+        0.8,
+        0.8
       ]
     },
     {
@@ -3597,6 +3841,11 @@
         150,
         108,
         72
+      ],
+      "texture": "timber.jpg",
+      "textureSize": [
+        0.6,
+        0.6
       ]
     },
     {
@@ -3606,6 +3855,11 @@
         160,
         118,
         80
+      ],
+      "texture": "timber_deck.jpg",
+      "textureSize": [
+        1.2,
+        1.2
       ]
     },
     {
@@ -3616,7 +3870,12 @@
         160,
         206
       ],
-      "alpha": 0.55
+      "alpha": 0.55,
+      "texture": "water.jpg",
+      "textureSize": [
+        2,
+        2
+      ]
     },
     {
       "key": "zone_coverage",

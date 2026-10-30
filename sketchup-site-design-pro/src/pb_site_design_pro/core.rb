@@ -44,6 +44,7 @@ require File.join(__dir__, 'version')
   models/information
   models/linear
   models/areas
+  asset_library
   element_builder
   change_set
   terrain

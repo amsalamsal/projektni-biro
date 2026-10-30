@@ -85,6 +85,7 @@ ICONS = {
     "su_scenes": ("tool", '<rect x="4" y="9" width="17" height="13" rx="1.5" fill="A" fill-opacity=".3" stroke="S"/><rect x="11" y="5" width="17" height="13" rx="1.5" fill="none" stroke="S"/><path d="M8 26h12" stroke="S"/>'),
     "su_underground": ("utilities", '<path d="M3 12h26" stroke="S"/><path d="M3 12h26v15H3z" fill="A" fill-opacity=".2" stroke="none"/><rect x="10" y="16" width="12" height="8" rx="2" fill="none" stroke="A"/><path d="M16 12v4" stroke="A"/><path d="M8 8l3-3M22 5l3 3" stroke="S"/>'),
     "su_library": ("tool", '<rect x="4" y="5" width="6" height="22" fill="A" fill-opacity=".35" stroke="S"/><rect x="12" y="5" width="6" height="22" fill="none" stroke="S"/><path d="M21 6.5l5.5-1.5 4 21-5.5 1.5z" fill="none" stroke="S"/>'),
+    "su_models": ("tool", '<path d="M16 4l11 6v12l-11 6-11-6V10z" fill="none" stroke="S"/><path d="M5 10l11 6 11-6M16 16v12" fill="none" stroke="S"/><path d="M16 4l11 6-11 6-11-6z" fill="A" fill-opacity=".35" stroke="none"/>'),
     "su_report": ("tool", '<path d="M8 4h11l6 6v18H8z" fill="none" stroke="S"/><path d="M12 16h9M12 20h9M12 24h5" stroke="S"/><circle cx="22.5" cy="22.5" r="0" fill="A"/><path d="M12 12h3" stroke="A"/>'),
 }
 

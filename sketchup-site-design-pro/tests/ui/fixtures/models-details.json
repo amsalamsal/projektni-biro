@@ -1,0 +1,454 @@
+{
+  "mode": "details",
+  "id": "furniture.bench",
+  "parameters": [
+    {
+      "key": "length",
+      "label": "Dužina",
+      "type": "length",
+      "default": 1.8,
+      "min": 0.3,
+      "max": 20,
+      "required": true,
+      "group": "Dimenzije",
+      "labelEn": "Length",
+      "groupEn": "Dimensions"
+    },
+    {
+      "key": "depth",
+      "label": "Dubina",
+      "type": "length",
+      "default": 0.6,
+      "min": 0.2,
+      "max": 3,
+      "required": true,
+      "group": "Dimenzije",
+      "labelEn": "Depth",
+      "groupEn": "Dimensions"
+    },
+    {
+      "key": "seatHeight",
+      "label": "Visina sjedišta",
+      "type": "length",
+      "default": 0.45,
+      "min": 0.1,
+      "max": 1.2,
+      "group": "Dimenzije",
+      "labelEn": "Seat height",
+      "groupEn": "Dimensions"
+    },
+    {
+      "key": "backrest",
+      "label": "Naslon",
+      "type": "bool",
+      "default": true,
+      "group": "Konfiguracija",
+      "labelEn": "Backrest",
+      "groupEn": "Configuration"
+    },
+    {
+      "key": "backHeight",
+      "label": "Ukupna visina s naslonom",
+      "type": "length",
+      "default": 0.8,
+      "min": 0.2,
+      "max": 2,
+      "group": "Dimenzije",
+      "labelEn": "Overall height with backrest",
+      "groupEn": "Dimensions"
+    },
+    {
+      "key": "armrests",
+      "label": "Rukohvati",
+      "type": "bool",
+      "default": false,
+      "group": "Konfiguracija",
+      "labelEn": "Armrests",
+      "groupEn": "Configuration"
+    },
+    {
+      "key": "material",
+      "label": "Materijal sjedišta",
+      "type": "material",
+      "default": "timber",
+      "group": "Izgled",
+      "labelEn": "Seat material",
+      "groupEn": "Appearance"
+    },
+    {
+      "key": "frameMaterial",
+      "label": "Materijal okvira",
+      "type": "material",
+      "default": "steel_dark",
+      "group": "Izgled",
+      "labelEn": "Frame material",
+      "groupEn": "Appearance"
+    }
+  ],
+  "geometry": "point",
+  "optionLabels": {
+    "above_ground": "nadzemno",
+    "back": "nazad",
+    "barrier": "rampa",
+    "bars": "šipke",
+    "basketweave": "pleter",
+    "box": "kvadar",
+    "center": "sredina",
+    "circle": "krug",
+    "columnar": "stubasta",
+    "conical": "kupasta",
+    "existing_remove": "postojeće – uklanja se",
+    "existing_retain": "postojeće – zadržava se",
+    "fabric": "platno",
+    "flat": "ravan",
+    "forward": "naprijed",
+    "front": "naprijed",
+    "glass": "staklo",
+    "herringbone": "riblja kost",
+    "horizontal_cylinder": "horizontalni cilindar",
+    "left": "lijevo",
+    "mesh": "mreža",
+    "metal": "metal",
+    "mixed": "miješani",
+    "mono": "jednovodni",
+    "none": "bez",
+    "organic": "biootpad",
+    "oval": "ovalna",
+    "paper": "papir",
+    "plastic": "plastika",
+    "proposed": "projektovano",
+    "pyramid": "piramidalni",
+    "random": "slobodan",
+    "rectangle": "pravougaonik",
+    "reverse": "obrnuto",
+    "right": "desno",
+    "round": "okrugla",
+    "semi_underground": "polupodzemno",
+    "sliding": "klizna",
+    "solar": "solarni",
+    "solid": "puni",
+    "square": "kvadrat",
+    "stack": "slog u nizu",
+    "stretcher": "slog s preklopom",
+    "swing_double": "dvokrilna",
+    "swing_single": "jednokrilna",
+    "textile": "tekstil",
+    "triangle": "trougao",
+    "underground": "podzemno",
+    "vertical_cylinder": "vertikalni cilindar"
+  },
+  "materials": [
+    {
+      "key": "concrete_paver",
+      "name": "Betonsko popločanje"
+    },
+    {
+      "key": "natural_stone",
+      "name": "Popločanje prirodnim kamenom"
+    },
+    {
+      "key": "porcelain",
+      "name": "Porculanske ploče"
+    },
+    {
+      "key": "asphalt",
+      "name": "Asfalt"
+    },
+    {
+      "key": "asphalt_red",
+      "name": "Obojeni asfalt (biciklistički)"
+    },
+    {
+      "key": "permeable_paver",
+      "name": "Vodopropusno popločanje"
+    },
+    {
+      "key": "grass_grid",
+      "name": "Travna rešetka"
+    },
+    {
+      "key": "gravel",
+      "name": "Šljunak / agregat"
+    },
+    {
+      "key": "rubber",
+      "name": "Gumena sigurnosna podloga"
+    },
+    {
+      "key": "tactile",
+      "name": "Taktilno popločanje"
+    },
+    {
+      "key": "soil",
+      "name": "Zemlja za sadnju"
+    },
+    {
+      "key": "terrain",
+      "name": "Teren (postojeći)"
+    },
+    {
+      "key": "mulch",
+      "name": "Malč od kore"
+    },
+    {
+      "key": "sand",
+      "name": "Pijesak za igru"
+    },
+    {
+      "key": "timber_deck",
+      "name": "Drvena podna obloga"
+    },
+    {
+      "key": "timber",
+      "name": "Drvo"
+    },
+    {
+      "key": "grass",
+      "name": "Travnjak"
+    },
+    {
+      "key": "meadow",
+      "name": "Livada"
+    },
+    {
+      "key": "sedum",
+      "name": "Zeleni krov (sedum)"
+    },
+    {
+      "key": "planting_mixed",
+      "name": "Zasad (miješani)"
+    },
+    {
+      "key": "planting_flowers",
+      "name": "Zasad (cvjetni)"
+    },
+    {
+      "key": "foliage",
+      "name": "Lišće (listopadno)"
+    },
+    {
+      "key": "foliage_evergreen",
+      "name": "Lišće (zimzeleno)"
+    },
+    {
+      "key": "foliage_fruit",
+      "name": "Lišće (voćka)"
+    },
+    {
+      "key": "flower_red",
+      "name": "Cvjetovi crveni"
+    },
+    {
+      "key": "flower_yellow",
+      "name": "Cvjetovi žuti"
+    },
+    {
+      "key": "flower_white",
+      "name": "Cvjetovi bijeli"
+    },
+    {
+      "key": "flower_violet",
+      "name": "Cvjetovi ljubičasti"
+    },
+    {
+      "key": "flower_pink",
+      "name": "Cvjetovi ružičasti"
+    },
+    {
+      "key": "fruit_red",
+      "name": "Plodovi"
+    },
+    {
+      "key": "grass_blade",
+      "name": "Ukrasna trava"
+    },
+    {
+      "key": "foliage_dark",
+      "name": "Lišće tamno"
+    },
+    {
+      "key": "foliage_light",
+      "name": "Lišće svijetlo"
+    },
+    {
+      "key": "plastic_red",
+      "name": "Plastika crvena (igralište)"
+    },
+    {
+      "key": "plastic_yellow",
+      "name": "Plastika žuta (igralište)"
+    },
+    {
+      "key": "plastic_blue",
+      "name": "Plastika plava (igralište)"
+    },
+    {
+      "key": "rope",
+      "name": "Uže / mreža"
+    },
+    {
+      "key": "rubber_black",
+      "name": "Guma crna"
+    },
+    {
+      "key": "stainless",
+      "name": "Nehrđajući čelik"
+    },
+    {
+      "key": "screen_display",
+      "name": "Ekran"
+    },
+    {
+      "key": "bark",
+      "name": "Kora"
+    },
+    {
+      "key": "water",
+      "name": "Voda"
+    },
+    {
+      "key": "pool_finish",
+      "name": "Obloga bazena"
+    },
+    {
+      "key": "pond_liner",
+      "name": "Folija jezerca"
+    },
+    {
+      "key": "concrete",
+      "name": "Beton"
+    },
+    {
+      "key": "concrete_precast",
+      "name": "Montažni beton"
+    },
+    {
+      "key": "concrete_slab",
+      "name": "Betonske ploče"
+    },
+    {
+      "key": "stone_wall",
+      "name": "Kamena zidarija"
+    },
+    {
+      "key": "render_white",
+      "name": "Fasadna žbuka, svijetla"
+    },
+    {
+      "key": "brick",
+      "name": "Opeka"
+    },
+    {
+      "key": "gabion",
+      "name": "Gabion"
+    },
+    {
+      "key": "steel_galv",
+      "name": "Pocinčani čelik"
+    },
+    {
+      "key": "steel_dark",
+      "name": "Plastificirani čelik (taman)"
+    },
+    {
+      "key": "aluminium",
+      "name": "Aluminij"
+    },
+    {
+      "key": "glass",
+      "name": "Staklo"
+    },
+    {
+      "key": "fabric",
+      "name": "Membransko platno"
+    },
+    {
+      "key": "solar_pv",
+      "name": "Fotonaponski modul"
+    },
+    {
+      "key": "plastic_dark",
+      "name": "Plastika (tamna)"
+    },
+    {
+      "key": "plastic_green",
+      "name": "Plastika (zelena)"
+    },
+    {
+      "key": "hdpe",
+      "name": "PEHD"
+    },
+    {
+      "key": "grate_steel",
+      "name": "Čelična rešetka"
+    },
+    {
+      "key": "cast_iron",
+      "name": "Liveni poklopac"
+    },
+    {
+      "key": "line_paint_white",
+      "name": "Boja za oznake (bijela)"
+    },
+    {
+      "key": "line_paint_yellow",
+      "name": "Boja za oznake (žuta)"
+    },
+    {
+      "key": "line_paint_blue",
+      "name": "Boja za oznake (plava)"
+    },
+    {
+      "key": "marking_green",
+      "name": "Biciklistička površina (zelena)"
+    },
+    {
+      "key": "acrylic_court",
+      "name": "Akrilna podloga terena"
+    },
+    {
+      "key": "sign_plate",
+      "name": "Ploča znaka"
+    },
+    {
+      "key": "luminaire",
+      "name": "Svjetiljka"
+    },
+    {
+      "key": "building_massing",
+      "name": "Volumen objekta"
+    },
+    {
+      "key": "zone_safety",
+      "name": "Sigurnosna zona"
+    },
+    {
+      "key": "zone_service",
+      "name": "Servisna zona / zona održavanja"
+    },
+    {
+      "key": "zone_excavation",
+      "name": "Gabarit iskopa"
+    },
+    {
+      "key": "zone_coverage",
+      "name": "Ilustrativni domet"
+    },
+    {
+      "key": "zone_root",
+      "name": "Zona zaštite korijena"
+    },
+    {
+      "key": "zone_heat",
+      "name": "Grijana zona / zona komfora"
+    },
+    {
+      "key": "zone_generic",
+      "name": "Zona"
+    },
+    {
+      "key": "default",
+      "name": "Zadani materijal"
+    }
+  ]
+}

@@ -695,6 +695,26 @@ module Sketchup
       true
     end
 
+    def active_entities
+      @entities
+    end
+
+    # Model#edit_transform: identity outside of group editing.
+    def edit_transform
+      Geom::Transformation.new
+    end
+
+    attr_reader :tool, :imported
+
+    def select_tool(tool)
+      @tool = tool
+    end
+
+    def import(path, _show_options = true)
+      (@imported ||= []) << path
+      true
+    end
+
     def start_operation(name, _disable_ui = false, *_rest)
       @operations << [:start, name]
       true

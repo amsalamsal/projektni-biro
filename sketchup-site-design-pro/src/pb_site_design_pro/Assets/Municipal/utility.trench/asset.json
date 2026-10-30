@@ -1,0 +1,51 @@
+{
+  "assetId": "utility.trench",
+  "name": "Kanal za instalacije (gabarit)",
+  "nameEn": "Utility trench (envelope)",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Trase",
+  "geometry": "path",
+  "builder": "linear_slab",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Kablovski kanali",
+      "objectEn": "Cable trenches"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.trench v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/sand.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.654,
+    "y": 2.057,
+    "z": 0.652,
+    "zMin": -1.0
+  },
+  "materials": [
+    "plastic_dark",
+    "plastic_red",
+    "sand"
+  ],
+  "polygons": 98,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

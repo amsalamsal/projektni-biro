@@ -827,8 +827,8 @@
           "assets": [
             {
               "assetId": "utility.recycling_island",
-              "status": "Not started",
-              "statusBs": "Nije započeto"
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
             },
             {
               "assetId": "utility.waste_container_semi",
@@ -841,7 +841,7 @@
               "statusBs": "Uvezeno u biblioteku"
             }
           ],
-          "status": "Not started"
+          "status": "Imported into library"
         },
         {
           "name": "Podzemne cisterne",
@@ -878,8 +878,8 @@
           "assets": [
             {
               "assetId": "utility.trench",
-              "status": "Not started",
-              "statusBs": "Nije započeto"
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
             },
             {
               "assetId": "utility.cable_duct",
@@ -887,7 +887,7 @@
               "statusBs": "Uvezeno u biblioteku"
             }
           ],
-          "status": "Not started"
+          "status": "Imported into library"
         },
         {
           "name": "Šahtovi",
@@ -934,8 +934,8 @@
           "assets": [
             {
               "assetId": "utility.service_corridor",
-              "status": "Not started",
-              "statusBs": "Nije započeto"
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
             },
             {
               "assetId": "utility.water_pipe",
@@ -958,7 +958,7 @@
               "statusBs": "Uvezeno u biblioteku"
             }
           ],
-          "status": "Not started"
+          "status": "Imported into library"
         },
         {
           "name": "Revizione komore",
@@ -1702,8 +1702,8 @@
           "assets": [
             {
               "assetId": "climate.heated_zone",
-              "status": "Not started",
-              "statusBs": "Nije započeto"
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
             },
             {
               "assetId": "climate.patio_heater",
@@ -1711,7 +1711,7 @@
               "statusBs": "Uvezeno u biblioteku"
             }
           ],
-          "status": "Not started"
+          "status": "Imported into library"
         },
         {
           "name": "Infracrveni grijači",

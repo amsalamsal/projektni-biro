@@ -1,20 +1,76 @@
 {
   "version": "0.2.0",
   "folders": [
-    "Infrastructure",
-    "Traffic",
-    "Bicycle",
-    "Water",
-    "Greenery",
-    "Municipal",
-    "Lighting",
-    "Fences_Walls",
-    "Canopies",
-    "Furniture_Recreation",
-    "Eco_Technologies",
-    "Outdoor_Climate",
-    "Decorative",
-    "Information_Security"
+    {
+      "id": "Infrastructure",
+      "name": "Infrastruktura i površine",
+      "nameEn": "Infrastructure"
+    },
+    {
+      "id": "Traffic",
+      "name": "Saobraćaj i mobilnost",
+      "nameEn": "Traffic"
+    },
+    {
+      "id": "Bicycle",
+      "name": "Biciklistička infrastruktura",
+      "nameEn": "Bicycle"
+    },
+    {
+      "id": "Water",
+      "name": "Vodeni elementi i upravljanje vodom",
+      "nameEn": "Water"
+    },
+    {
+      "id": "Greenery",
+      "name": "Zelenilo i sadnja",
+      "nameEn": "Greenery"
+    },
+    {
+      "id": "Municipal",
+      "name": "Komunalna infrastruktura",
+      "nameEn": "Municipal"
+    },
+    {
+      "id": "Lighting",
+      "name": "Rasvjeta",
+      "nameEn": "Lighting"
+    },
+    {
+      "id": "Fences_Walls",
+      "name": "Ograde i zidovi",
+      "nameEn": "Fences Walls"
+    },
+    {
+      "id": "Canopies",
+      "name": "Nadstrešnice i zasjena",
+      "nameEn": "Canopies"
+    },
+    {
+      "id": "Furniture_Recreation",
+      "name": "Mobilijar i rekreacija",
+      "nameEn": "Furniture Recreation"
+    },
+    {
+      "id": "Eco_Technologies",
+      "name": "Eko tehnologije",
+      "nameEn": "Eco Technologies"
+    },
+    {
+      "id": "Outdoor_Climate",
+      "name": "Vanjski klimatski sistemi",
+      "nameEn": "Outdoor Climate"
+    },
+    {
+      "id": "Decorative",
+      "name": "Dekorativni elementi",
+      "nameEn": "Decorative"
+    },
+    {
+      "id": "Information_Security",
+      "name": "Informativni i sigurnosni sistemi",
+      "nameEn": "Information Security"
+    }
   ],
   "assets": [
     {
@@ -5415,6 +5471,56 @@
       "testedInSketchUp": false
     },
     {
+      "assetId": "utility.recycling_island",
+      "name": "Reciklažno ostrvo",
+      "nameEn": "Recycling island",
+      "folder": "Municipal",
+      "category": "Komunalna infrastruktura",
+      "subcategory": "Otpad",
+      "geometry": "polygon",
+      "builder": "zone",
+      "specObjects": [
+        {
+          "category": "Komunalna infrastruktura",
+          "object": "Reciklažna ostrva",
+          "objectEn": "Recycling islands"
+        }
+      ],
+      "model": {
+        "kind": "custom",
+        "generator": "Models utility.recycling_island v1"
+      },
+      "files": {
+        "model": "model.dae",
+        "preview": "preview.jpg",
+        "textures": [
+          "../../../textures/concrete.jpg"
+        ]
+      },
+      "units": "m",
+      "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+      "dimensions": {
+        "x": 4.0,
+        "y": 3.0,
+        "z": 1.81,
+        "zMin": -0.12
+      },
+      "materials": [
+        "concrete",
+        "plastic_blue",
+        "plastic_dark",
+        "plastic_green",
+        "steel_galv"
+      ],
+      "polygons": 518,
+      "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+      "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+      "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+      "status": "Imported into library",
+      "statusBs": "Uvezeno u biblioteku",
+      "testedInSketchUp": false
+    },
+    {
       "assetId": "utility.cistern",
       "name": "Podzemna cisterna",
       "nameEn": "Underground cistern",
@@ -5551,6 +5657,106 @@
         "steel_dark"
       ],
       "polygons": 576,
+      "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+      "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+      "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+      "status": "Imported into library",
+      "statusBs": "Uvezeno u biblioteku",
+      "testedInSketchUp": false
+    },
+    {
+      "assetId": "utility.trench",
+      "name": "Kanal za instalacije (gabarit)",
+      "nameEn": "Utility trench (envelope)",
+      "folder": "Municipal",
+      "category": "Komunalna infrastruktura",
+      "subcategory": "Trase",
+      "geometry": "path",
+      "builder": "linear_slab",
+      "specObjects": [
+        {
+          "category": "Komunalna infrastruktura",
+          "object": "Kablovski kanali",
+          "objectEn": "Cable trenches"
+        }
+      ],
+      "model": {
+        "kind": "custom",
+        "generator": "Models utility.trench v1"
+      },
+      "files": {
+        "model": "model.dae",
+        "preview": "preview.jpg",
+        "textures": [
+          "../../../textures/sand.jpg"
+        ]
+      },
+      "units": "m",
+      "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+      "dimensions": {
+        "x": 6.654,
+        "y": 2.057,
+        "z": 0.652,
+        "zMin": -1.0
+      },
+      "materials": [
+        "plastic_dark",
+        "plastic_red",
+        "sand"
+      ],
+      "polygons": 98,
+      "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+      "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+      "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+      "status": "Imported into library",
+      "statusBs": "Uvezeno u biblioteku",
+      "testedInSketchUp": false
+    },
+    {
+      "assetId": "utility.service_corridor",
+      "name": "Podzemni koridor instalacija",
+      "nameEn": "Underground service corridor",
+      "folder": "Municipal",
+      "category": "Komunalna infrastruktura",
+      "subcategory": "Trase",
+      "geometry": "path",
+      "builder": "linear_slab",
+      "specObjects": [
+        {
+          "category": "Komunalna infrastruktura",
+          "object": "Podzemna komunalna infrastruktura",
+          "objectEn": "Underground service infrastructure"
+        }
+      ],
+      "model": {
+        "kind": "custom",
+        "generator": "Models utility.service_corridor v1"
+      },
+      "files": {
+        "model": "model.dae",
+        "preview": "preview.jpg",
+        "textures": [
+          "../../../textures/concrete_precast.jpg",
+          "../../../textures/sand.jpg"
+        ]
+      },
+      "units": "m",
+      "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+      "dimensions": {
+        "x": 7.014,
+        "y": 3.357,
+        "z": 1.252,
+        "zMin": -1.8
+      },
+      "materials": [
+        "concrete_precast",
+        "plastic_blue",
+        "plastic_green",
+        "plastic_red",
+        "plastic_yellow",
+        "sand"
+      ],
+      "polygons": 170,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
@@ -10199,6 +10405,56 @@
         "steel_galv"
       ],
       "polygons": 326,
+      "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+      "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+      "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+      "status": "Imported into library",
+      "statusBs": "Uvezeno u biblioteku",
+      "testedInSketchUp": false
+    },
+    {
+      "assetId": "climate.heated_zone",
+      "name": "Grijana zona terase",
+      "nameEn": "Heated terrace zone",
+      "folder": "Outdoor_Climate",
+      "category": "Vanjski klimatski sistemi",
+      "subcategory": "Grijanje",
+      "geometry": "polygon",
+      "builder": "zone",
+      "specObjects": [
+        {
+          "category": "Vanjski klimatski sistemi",
+          "object": "Grijane terase",
+          "objectEn": "Heated terrace systems"
+        }
+      ],
+      "model": {
+        "kind": "custom",
+        "generator": "Models climate.heated_zone v1"
+      },
+      "files": {
+        "model": "model.dae",
+        "preview": "preview.jpg",
+        "textures": [
+          "../../../textures/porcelain.jpg",
+          "../../../textures/concrete.jpg"
+        ]
+      },
+      "units": "m",
+      "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+      "dimensions": {
+        "x": 4.0,
+        "y": 3.0,
+        "z": 0.13,
+        "zMin": -0.13
+      },
+      "materials": [
+        "concrete",
+        "plastic_dark",
+        "plastic_red",
+        "porcelain"
+      ],
+      "polygons": 910,
       "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
       "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
       "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",

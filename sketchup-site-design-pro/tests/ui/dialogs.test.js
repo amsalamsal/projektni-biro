@@ -113,6 +113,38 @@ async function open(browser, file, fixture, size) {
     check(errors.length === 0, 'no script errors');
     if (shots) { await page.uncheck('#onlyModel').catch(() => {}); await page.click('button[data-for=types]'); await page.screenshot({ path: path.join(shots, 'library.png') }); }
     await page.close();
+    console.log('models.html');
+    ({ page, errors } = await open(browser, 'models.html', 'models.json', { width: 1180, height: 760 }));
+    check((await page.$$('#cats button')).length === 14, '14 library categories');
+    check((await page.textContent('#cats')).includes('Zelenilo i sadnja'), 'Bosnian category names');
+    await page.click('#cats button:nth-child(5)');
+    const greenery = await page.$$('#grid .asset');
+    check(greenery.length > 20, 'greenery category lists its models (' + greenery.length + ')');
+    const imgOk = await page.waitForFunction(() => Array.from(document.querySelectorAll('#grid img')).slice(0, 6).every((i) => i.complete && i.naturalWidth > 0), null, { timeout: 5000 }).then(() => true, () => false);
+    check(imgOk, 'preview images load from the local library');
+    await page.click('#subs button:nth-child(2)');
+    check((await page.$$('#grid .asset')).length < greenery.length, 'subcategory chips narrow the grid');
+    await page.fill('#search', 'klupa');
+    check((await page.$$('#grid .asset')).length >= 3, 'search finds benches across categories');
+    await page.click('#grid .asset[data-id="furniture.bench"]');
+    let mcalls = await page.evaluate(() => window.__calls);
+    check(mcalls.some((c) => c[0] === 'details' && c[1].id === 'furniture.bench'), 'selecting a model requests its details');
+    await page.evaluate((d) => window.sdp.render(d), JSON.parse(fs.readFileSync(path.join(FIX, 'models-details.json'), 'utf8')));
+    const detail = await page.textContent('#detail');
+    check(detail.includes('AutoCAD blok') && detail.includes('Licenca') && detail.includes('Izvor'), 'details show block link, source and licence');
+    check((await page.$$('#detail .param')).length > 3, 'parameter form rendered');
+    await page.fill('#p_length', '2.4');
+    await page.click('#insert');
+    mcalls = await page.evaluate(() => window.__calls);
+    check(mcalls.some((c) => c[0] === 'insert' && c[1].id === 'furniture.bench' && c[1].params.length === 2.4), 'insert sends the asset and changed parameters');
+    await page.click('#replace');
+    mcalls = await page.evaluate(() => window.__calls);
+    check(mcalls.some((c) => c[0] === 'replace' && c[1].id === 'furniture.bench'), 'replace sends the asset');
+    await page.evaluate(() => window.sdp.render({ mode: 'message', kind: 'warning', text: '<b>x</b> preskočeno' }));
+    check((await page.innerHTML('#detail')).includes('&lt;b&gt;x&lt;/b&gt;'), 'messages are HTML-escaped');
+    check(errors.length === 0, 'no script errors' + (errors.length ? ': ' + errors.join('; ') : ''));
+    if (shots) { await page.screenshot({ path: path.join(shots, 'models.png') }); }
+    await page.close();
   } finally {
     await browser.close();
   }

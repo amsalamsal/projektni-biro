@@ -520,6 +520,85 @@ module ProjektniBiro
           k.bar([e_[0], e_[1], e_[2]], [e_[0] - (dir[0] * 0.5), e_[1] - (dir[1] * 0.5), e_[2] - (0.5 * ((ha - hb) / [Geometry.dist(a, b), 1].max))], 0.06, 'rubber_black', 'Kočnica (amortizer)', n: 12)
         end
 
+        # Recycling island: concrete pad with a row of bell containers (glass, paper, plastic, metal) on the long axis.
+        def recycling_island(k, e)
+          outer, holes = k.outline
+          z = outer.first[2] || 0.0
+          k.prism(outer, z - 0.12, z + 0.02, 'concrete', 'Betonska podloga', holes: holes)
+          return if k.detail.zero?
+
+          r = Geometry.oriented_rect(outer)
+          long_u = r[:length_u] >= r[:length_v]
+          len = long_u ? r[:length_u] : r[:length_v]
+          n = [[(len / 1.9).floor, 1].max, 4].min
+          kinds = [%w[plastic_green Staklo], %w[plastic_blue Papir], %w[plastic_yellow Plastika], %w[steel_galv Metal]]
+          n.times do |i|
+            t = (i + 0.5) * len / n
+            a, b = long_u ? [t, r[:length_v] / 2] : [r[:length_u] / 2, t]
+            p = Geometry.rect_point(r, a, b, z + 0.02)
+            mat, label = kinds[i % kinds.length]
+            k.place("zvono-#{mat}", p, Math.atan2(r[:u][1], r[:u][0])) do |pk|
+              pk.lathe([[0, 0], [0.72, 0], [0.75, 0.08], [0.74, 1.05], [0.62, 1.38], [0.32, 1.55], [0, 1.58]], mat, "Kontejner – #{label}", n: pk.seg(20))
+              pk.cyl(0, 0, 1.55, 0.06, 0.12, 'steel_galv', 'Kuka za pražnjenje', n: 8)
+              pk.box(0, -0.66, 1.0, 0.24, 0.18, 0.12, 'plastic_dark', 'Otvor za ubacivanje', angle: 0.0) if pk.detail.positive?
+            end
+          end
+        end
+
+        # Cable trench (envelope from the catalog): sand bedding with cable ducts and a warning tape; the backfill
+        # is ordinary soil and is not modelled, so the ducts stay visible in the underground view.
+        def cable_trench(k, e)
+          pts = k.path
+          closed = e.geometry[:closed]
+          w = e.num('width', 0.6)
+          depth = e.num('thickness', 1.0)
+          top = e.num('topOffset', 0.0)
+          bottom = top - depth
+          Lin.sweep(k, pts, Lin.rect(w / 2, w / 2, bottom, bottom + 0.35), closed, 'sand', 'Pješčana posteljica')
+          Lin.sweep(k, pts, Lin.rect(w * 0.3, w * 0.3, top - 0.35, top - 0.348), closed, 'plastic_red', 'Upozoravajuća traka')
+          ducts = [[-w / 4, bottom + 0.15], [w / 4, bottom + 0.15], [0.0, bottom + 0.27]]
+          ducts.each { |(u, z)| Lin.sweep(k, pts, Array.new(12) { |i| a = 2 * Math::PI * i / 12; [u + (Math.cos(a) * 0.055), z + (Math.sin(a) * 0.055)] }, closed, 'plastic_dark', 'Kablovska cijev (110 mm)') }
+        end
+
+        # Underground service corridor: water, sewer, electric and telecom lines at their usual relative positions
+        # within the corridor envelope (positions are representative, the real routes come from the utility design).
+        def service_corridor(k, e)
+          pts = k.path
+          closed = e.geometry[:closed]
+          w = e.num('width', 2.0)
+          top = e.num('topOffset', -0.3)
+          bottom = top - e.num('thickness', 1.5)
+          circle = ->(u, z, r) { Array.new(14) { |i| a = 2 * Math::PI * i / 14; [u + (Math.cos(a) * r), z + (Math.sin(a) * r)] } }
+          lines = [[-w * 0.35, bottom + 0.2, 0.1, 'concrete_precast', 'Kanalizacija (DN 200)'], [-w * 0.05, bottom + 0.5, 0.05, 'plastic_blue', 'Vodovod (DN 100)'],
+                   [w * 0.2, top - 0.4, 0.055, 'plastic_red', 'Elektro kabl u cijevi'], [w * 0.35, top - 0.35, 0.055, 'plastic_green', 'Telekomunikacije u cijevi']]
+          lines.each { |(u, z, r, m, name)| Lin.sweep(k, pts, circle.call(u, z, r), closed, m, name, smooth: true) }
+          lines.each { |(u, _z, _r, _m, _n)| Lin.sweep(k, pts, Lin.rect(u + 0.1, -u + 0.1, top - 0.25, top - 0.248), closed, 'plastic_yellow', 'Upozoravajuća traka') }
+          Lin.sweep(k, pts, Lin.rect(w / 2, w / 2, bottom, bottom + 0.1), closed, 'sand', 'Posteljica')
+        end
+
+        # Heated terrace: paving on a screed with an embedded heating cable loop over insulation.
+        def heated_terrace(k, e)
+          outer, holes = k.outline
+          z = (outer.first[2] || 0.0) + e.num('baseOffset', 0.0)
+          k.prism(outer, z - 0.02, z, 'porcelain', 'Površina', holes: holes)
+          k.prism(outer, z - 0.08, z - 0.02, 'concrete', 'Estrih s grijaćim kablom', holes: holes)
+          k.prism(outer, z - 0.13, z - 0.08, 'plastic_dark', 'Toplotna izolacija', holes: holes)
+          return if k.detail.zero?
+
+          inner = Geometry.offset_ring(Area.ring_ccw(outer), -0.15)
+          return unless inner
+
+          r = Geometry.oriented_rect(inner)
+          n = [(r[:length_v] / 0.15).floor, 2].max
+          pts = []
+          n.times do |i|
+            b = 0.05 + (i * (r[:length_v] - 0.1) / (n - 1))
+            row = [Geometry.rect_point(r, 0.05, b, z - 0.05), Geometry.rect_point(r, r[:length_u] - 0.05, b, z - 0.05)]
+            pts.concat(i.even? ? row : row.reverse)
+          end
+          k.rail(pts, 0.004, 'plastic_red', 'Grijaći kabl', n: 6)
+        end
+
         # Lawn: topsoil with a turf layer.
         def lawn_area(k, e)
           outer, holes = k.outline
@@ -554,6 +633,10 @@ module ProjektniBiro
       define('recreation.platform', geometry: 'polygon') { |k, e| Area.deck(k, e) }
       define('surface.sports_court', geometry: 'polygon') { |k, e| Area.court(k, e) }
       define('landscape.lawn_area', geometry: 'polygon') { |k, e| Area.lawn_area(k, e) }
+      define('utility.recycling_island', geometry: 'polygon') { |k, e| Area.recycling_island(k, e) }
+      define('climate.heated_zone', geometry: 'polygon') { |k, e| Area.heated_terrace(k, e) }
+      define('utility.trench', geometry: 'path') { |k, e| Area.cable_trench(k, e) }
+      define('utility.service_corridor', geometry: 'path') { |k, e| Area.service_corridor(k, e) }
       %w[water.drainage_channel water.slot_drain water.overflow_channel].each { |id| define(id, geometry: 'path') { |k, e| Area.channel(k, e) } }
       define('climate.misting_line', geometry: 'path') { |k, e| Area.misting(k, e) }
       define('recreation.zip_line', geometry: 'path') { |k, e| Area.zip_line(k, e) }

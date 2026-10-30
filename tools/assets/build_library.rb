@@ -34,9 +34,9 @@ FOLDERS = {
   'furniture' => 'Furniture_Recreation', 'sustainability' => 'Eco_Technologies', 'climate' => 'Outdoor_Climate',
   'decorative' => 'Decorative', 'information' => 'Information_Security'
 }.freeze
-# drawing aids, zones and references are not 3D models
+# drawing aids, zones and references are not 3D models (unless the type has its own real model)
 NOT_MODELS = %w[zone circle_zone outline marker massing].freeze
-EXCLUDED = %w[road.swept_path_placeholder utility.trench utility.service_corridor].freeze
+EXCLUDED = %w[road.swept_path_placeholder].freeze
 # Builders whose parametric geometry already is the real object (textured surfaces, strips, paint, pipes).
 PARAMETRIC_REAL = %w[slab linear_slab stripes pipe].freeze
 
@@ -323,7 +323,7 @@ library = []
 TYPES.each do |t|
   folder = FOLDERS[t['category']]
   next unless folder
-  next if NOT_MODELS.include?(t['builder']) || EXCLUDED.include?(t['id'])
+  next if (NOT_MODELS.include?(t['builder']) && !Models.for(t['id'])) || EXCLUDED.include?(t['id'])
   next unless ONLY.empty? || ONLY.include?(t['id'])
 
   pkg = package_for(t)
@@ -373,7 +373,7 @@ TYPES.each do |t|
 end
 
 if ONLY.empty?
-  File.write(File.join(OUT, 'library.json'), JSON.pretty_generate({ 'version' => ProjektniBiro::SiteDesignPro::VERSION, 'folders' => FOLDERS.values.uniq,
+  File.write(File.join(OUT, 'library.json'), JSON.pretty_generate({ 'version' => ProjektniBiro::SiteDesignPro::VERSION, 'folders' => SPEC['categories'].map { |c| { 'id' => c['folder'], 'name' => c['name'], 'nameEn' => c['nameEn'] || c['folder'].tr('_', ' ') } },
                                                                     'assets' => library.map { |a| a.reject { |k, _| k == 'problems' } } }))
   by_id = library.to_h { |a| [a['assetId'], a] }
   inventory = SPEC['categories'].map do |c|
