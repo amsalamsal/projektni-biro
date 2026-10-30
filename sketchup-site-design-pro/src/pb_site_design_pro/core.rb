@@ -40,6 +40,8 @@ require File.join(__dir__, 'version')
   models/traffic
   models/utilities
   models/equipment
+  models/structures
+  models/information
   element_builder
   change_set
   terrain
