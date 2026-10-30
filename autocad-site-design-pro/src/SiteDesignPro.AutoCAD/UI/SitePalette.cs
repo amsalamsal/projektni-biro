@@ -50,7 +50,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 set.AddVisual("Biblioteka", library);
                 set.AddVisual("Svojstva", properties);
                 set.AddVisual("Provjera", validation);
-                AcApp.DocumentManager.DocumentActivated += (s, e) => properties?.Refresh();
+                AcApp.DocumentManager.DocumentActivated += (s, e) => Log.Guard("Osvježavanje palete", () => properties?.Refresh());
             }
 
             set.Visible = true;
@@ -202,22 +202,25 @@ namespace SiteDesignPro.AutoCAD.UI
             list.Background = SitePalette.Back;
             VirtualizingPanel.SetIsVirtualizing(list, true);
             Children.Add(list);
-            search.TextChanged += (s, e) => Fill();
-            category.SelectionChanged += (s, e) => Fill();
-            list.MouseDoubleClick += (s, e) => PlaceSelected();
+            search.TextChanged += (s, e) => Log.Guard("Pretraga palete", Fill);
+            category.SelectionChanged += (s, e) => Log.Guard("Pretraga palete", Fill);
+            list.MouseDoubleClick += (s, e) => Log.Guard("Postavljanje iz palete", PlaceSelected);
             list.KeyDown += (s, e) =>
             {
                 if (e.Key == Key.Enter)
                 {
-                    PlaceSelected();
+                    Log.Guard("Postavljanje iz palete", PlaceSelected);
                 }
             };
             list.MouseRightButtonUp += (s, e) =>
             {
                 if (list.SelectedItem is ListBoxItem item && item.Tag is string id)
                 {
-                    Preferences.Current.ToggleFavorite(id);
-                    Fill();
+                    Log.Guard("Omiljeni elementi", () =>
+                    {
+                        Preferences.Current.ToggleFavorite(id);
+                        Fill();
+                    });
                 }
             };
             Fill();
@@ -309,7 +312,7 @@ namespace SiteDesignPro.AutoCAD.UI
         {
             Background = SitePalette.Back;
             var apply = new Button { Content = "Primijeni izmjene", Margin = new Thickness(6), Padding = new Thickness(8, 3, 8, 3) };
-            apply.Click += (s, e) => Apply();
+            apply.Click += (s, e) => Log.Guard("Primjena parametara", Apply);
             SetDock(apply, Dock.Bottom);
             Children.Add(apply);
             Children.Add(new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
@@ -519,17 +522,20 @@ namespace SiteDesignPro.AutoCAD.UI
     public sealed class PaletteCommands
     {
         [CommandMethod("SITEDESIGNPRO", "SDPBROWSER", CommandFlags.Modal)]
-        public void Browser() => SitePalette.Show();
+        public void Browser() => SiteDesignPro.AutoCAD.Commands.CommandContext.Safe("SDPBROWSER", () => SitePalette.Show());
 
         [CommandMethod("SITEDESIGNPRO", "SDPBROWSECAT", CommandFlags.Modal)]
         public void BrowseCategory()
         {
-            Editor ed = AcApp.DocumentManager.MdiActiveDocument.Editor;
-            PromptResult r = ed.GetString(new PromptStringOptions("\nKategorija: ") { AllowSpaces = false });
-            if (r.Status == PromptStatus.OK)
+            SiteDesignPro.AutoCAD.Commands.CommandContext.Safe("SDPBROWSECAT", () =>
             {
-                SitePalette.Show(r.StringResult);
-            }
+                Editor ed = AcApp.DocumentManager.MdiActiveDocument.Editor;
+                PromptResult r = ed.GetString(new PromptStringOptions("\nKategorija: ") { AllowSpaces = false });
+                if (r.Status == PromptStatus.OK)
+                {
+                    SitePalette.Show(r.StringResult);
+                }
+            });
         }
     }
 }

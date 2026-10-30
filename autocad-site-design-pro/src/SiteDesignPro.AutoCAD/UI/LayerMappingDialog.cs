@@ -55,7 +55,7 @@ namespace SiteDesignPro.AutoCAD.UI
             }
 
             grid.Columns.Add(roleColumn);
-            grid.CellEnter += (s, e) => ShowHint(e.RowIndex);
+            grid.CellEnter += (s, e) => Log.Guard("Prikaz pomoći", () => ShowHint(e.RowIndex));
             grid.CurrentCellDirtyStateChanged += (s, e) => { if (grid.IsCurrentCellDirty) { grid.CommitEdit(DataGridViewDataErrorContexts.Commit); } };
             grid.DataError += (s, e) => e.ThrowException = false;
 
@@ -75,9 +75,9 @@ namespace SiteDesignPro.AutoCAD.UI
             var save = new Button { Text = "Sačuvaj predložak...", Width = 140 };
             var load = new Button { Text = "Učitaj predložak...", Width = 140 };
             var suggest = new Button { Text = "Prijedlog prema nazivima", Width = 170 };
-            save.Click += (s, e) => SavePreset();
-            load.Click += (s, e) => LoadPreset();
-            suggest.Click += (s, e) => Apply(LayerMapping.Suggest(usage.Keys), onlyEmpty: true);
+            save.Click += (s, e) => Log.Guard("Čuvanje predloška mapiranja", SavePreset);
+            load.Click += (s, e) => Log.Guard("Učitavanje predloška mapiranja", LoadPreset);
+            suggest.Click += (s, e) => Log.Guard("Prijedlog mapiranja", () => Apply(LayerMapping.Suggest(usage.Keys), onlyEmpty: true));
             buttons.Controls.AddRange(new Control[] { ok, cancel, save, load, suggest });
             AcceptButton = ok;
             CancelButton = cancel;

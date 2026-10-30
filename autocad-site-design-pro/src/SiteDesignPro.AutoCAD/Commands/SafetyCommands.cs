@@ -124,7 +124,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                         break;
                 }
             }
-            catch (System.Exception ex) when (ex is IOException || ex is UnauthorizedAccessException || ex is Autodesk.AutoCAD.Runtime.Exception || ex is InvalidOperationException)
+            catch (System.Exception ex)
             {
                 Log.Error("SDPOPORAVAK nije uspio", ex);
             }
@@ -134,14 +134,17 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPPOMOC", CommandFlags.Modal)]
         public void Help()
         {
-            string docs = Path.GetFullPath(Path.Combine(AcadEnv.PluginDirectory, "..", "..", "Docs", "index.html"));
-            if (!File.Exists(docs))
+            CommandContext.Safe("SDPPOMOC", () =>
             {
-                AcadEnv.Message("Dokumentacija nije pronađena (" + docs + "). Pogledajte folder docs/ u izvornom paketu.");
-                return;
-            }
+                string docs = Path.GetFullPath(Path.Combine(AcadEnv.PluginDirectory, "..", "..", "Docs", "index.html"));
+                if (!File.Exists(docs))
+                {
+                    AcadEnv.Message("Dokumentacija nije pronađena (" + docs + "). Pogledajte folder docs/ u izvornom paketu.");
+                    return;
+                }
 
-            Process.Start(new ProcessStartInfo(docs) { UseShellExecute = true });
+                Process.Start(new ProcessStartInfo(docs) { UseShellExecute = true });
+            });
         }
 
         /// <summary>Reports interrupted operations once, after AutoCAD starts (called from the plug-in initialisation).</summary>

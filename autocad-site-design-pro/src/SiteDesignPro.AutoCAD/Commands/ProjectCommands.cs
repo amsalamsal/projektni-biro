@@ -336,16 +336,22 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPCATALOGFOLDER", CommandFlags.Modal)]
         public void CatalogFolder()
         {
-            string dir = AcadEnv.UserCatalogDirectory;
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = dir, UseShellExecute = true });
-            AcadEnv.Message("Korisnički katalozi: " + dir + " (dodajte *.json datoteke s \"types\", \"layers\" ili \"materials\", zatim pokrenite SDPRELOAD).");
+            CommandContext.Safe("SDPCATALOGFOLDER", () =>
+            {
+                string dir = AcadEnv.UserCatalogDirectory;
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = dir, UseShellExecute = true });
+                AcadEnv.Message("Korisnički katalozi: " + dir + " (dodajte *.json datoteke s \"types\", \"layers\" ili \"materials\", zatim pokrenite SDPRELOAD).");
+            });
         }
 
         [CommandMethod("SITEDESIGNPRO", "SDPABOUT", CommandFlags.Modal)]
         public void About()
         {
-            AcadEnv.Message("Vanjsko uređenje PRO za AutoCAD " + AcadEnv.Version + " (.NET " + Environment.Version + ") | shema razmjene " + Core.Exchange.PackageFormat.SchemaVersion +
-                " | katalog " + AcadEnv.Catalog.CatalogId + " " + AcadEnv.Catalog.Version + " (" + AcadEnv.Catalog.Types.Count() + " tipova) | dnevnik: " + Log.FilePath);
+            CommandContext.Safe("SDPABOUT", () =>
+            {
+                AcadEnv.Message("Vanjsko uređenje PRO za AutoCAD " + AcadEnv.Version + " (.NET " + Environment.Version + ") | shema razmjene " + Core.Exchange.PackageFormat.SchemaVersion +
+                    " | katalog " + AcadEnv.Catalog.CatalogId + " " + AcadEnv.Catalog.Version + " (" + AcadEnv.Catalog.Types.Count() + " tipova) | dnevnik: " + Log.FilePath);
+            });
         }
     }
 }

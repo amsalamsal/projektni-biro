@@ -40,8 +40,26 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
             }
         }
 
-        /// <summary>Catalog folder shipped in the bundle (optional; the embedded catalog is used otherwise).</summary>
-        public static string BundleCatalogDirectory => Path.GetFullPath(Path.Combine(PluginDirectory, "..", "Resources", "catalog"));
+        /// <summary>
+        /// Catalog folder shipped in the bundle (SiteDesignPro.bundle/Resources/catalog, three levels above
+        /// Contents/Win64/Rxx); the catalog embedded in the DLL is used when it is missing.
+        /// </summary>
+        public static string BundleCatalogDirectory
+        {
+            get
+            {
+                foreach (string rel in new[] { Path.Combine("..", "..", "..", "Resources", "catalog"), Path.Combine("..", "Resources", "catalog") })
+                {
+                    string dir = Path.GetFullPath(Path.Combine(PluginDirectory, rel));
+                    if (File.Exists(Path.Combine(dir, "element-types.json")))
+                    {
+                        return dir;
+                    }
+                }
+
+                return Path.GetFullPath(Path.Combine(PluginDirectory, "..", "..", "..", "Resources", "catalog"));
+            }
+        }
 
         public static ElementCatalog Catalog
         {
@@ -92,6 +110,22 @@ namespace SiteDesignPro.AutoCAD.Infrastructure
         }
 
         public static void Info(string message) => Write("INFO", message);
+
+        /// <summary>
+        /// Runs an event handler (palette, ribbon, document events) so that an error is logged and reported instead of
+        /// reaching AutoCAD, where an unhandled exception in an event shows the crash dialog or closes AutoCAD.
+        /// </summary>
+        public static void Guard(string what, Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                Error(what + " nije uspjelo", ex);
+            }
+        }
 
         public static void Warn(string message) => Write("WARN", message);
 

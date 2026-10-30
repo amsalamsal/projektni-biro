@@ -44,7 +44,7 @@ namespace SiteDesignPro.AutoCAD
                 }
 
                 AcApp.SystemVariableChanged += OnSystemVariableChanged;
-                AcApp.DocumentManager.DocumentCreated += (s, e) => Hook(e.Document);
+                AcApp.DocumentManager.DocumentCreated += (s, e) => Log.Guard("Priprema crteža", () => Hook(e.Document));
                 foreach (Document doc in AcApp.DocumentManager)
                 {
                     Hook(doc);
@@ -67,7 +67,7 @@ namespace SiteDesignPro.AutoCAD
 
         private static void Hook(Document doc)
         {
-            doc.ImpliedSelectionChanged += (s, e) => SitePalette.SelectionChanged();
+            doc.ImpliedSelectionChanged += (s, e) => Log.Guard("Osvježavanje palete", SitePalette.SelectionChanged);
         }
 
         private static void OnItemInitialized(object? sender, RibbonItemEventArgs e)
@@ -75,7 +75,7 @@ namespace SiteDesignPro.AutoCAD
             if (ComponentManager.Ribbon != null)
             {
                 ComponentManager.ItemInitialized -= OnItemInitialized;
-                RibbonBuilder.Create();
+                Log.Guard("Izrada trake", RibbonBuilder.Create);
             }
         }
 
@@ -83,8 +83,11 @@ namespace SiteDesignPro.AutoCAD
         {
             if (string.Equals(e.Name, "WSCURRENT", StringComparison.OrdinalIgnoreCase) || string.Equals(e.Name, "COLORTHEME", StringComparison.OrdinalIgnoreCase))
             {
-                Icons.ClearCache();
-                RibbonBuilder.Create();
+                Log.Guard("Izrada trake", () =>
+                {
+                    Icons.ClearCache();
+                    RibbonBuilder.Create();
+                });
             }
         }
     }

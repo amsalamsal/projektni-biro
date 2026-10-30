@@ -103,10 +103,28 @@ namespace SiteDesignPro.AutoCAD.Commands
                 SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);
                 Log.Error(name + " nije uspjela (AutoCAD " + ex.ErrorStatus + "); izmjene su poništene", ex);
             }
-            catch (Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is FormatException || ex is System.IO.IOException || ex is KeyNotFoundException || ex is UnauthorizedAccessException || ex is NotSupportedException)
+            catch (Exception ex)
             {
+                // Every other error is reported too: an exception escaping a command shows AutoCAD's crash dialog.
                 SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);
                 Log.Error(name + " nije uspjela; izmjene su poništene", ex);
+            }
+        }
+
+        /// <summary>Runs a command body that needs no transaction (opening files, palettes) with the same error reporting.</summary>
+        public static void Safe(string name, Action body)
+        {
+            try
+            {
+                body();
+            }
+            catch (CommandCancelled)
+            {
+                AcadEnv.Message("*Prekinuto*");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(name + " nije uspjela", ex);
             }
         }
 
