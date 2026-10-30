@@ -383,7 +383,8 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            if (sel.Select(m => m.Type!.Id).Distinct().Count() > 1)
+            int typeCount = sel.Select(m => m.Type!.Id).Distinct().Count();
+            if (typeCount > 1)
             {
                 ctx.Write("Odabrani elementi su različitih tipova; mijenjaju se samo zajednički parametri.");
             }
@@ -393,7 +394,13 @@ namespace SiteDesignPro.AutoCAD.Commands
             while (true)
             {
                 SiteElement first = sel[0].Element!;
-                ctx.Write(type.Name + (sel.Count > 1 ? " (" + Bs.Elements(sel.Count) + ")" : " " + first.Label) + ":");
+                string heading = typeCount > 1 ? Bs.T("Različiti tipovi ({0})", typeCount) : type.Name;
+                ctx.Write(heading + (sel.Count > 1 ? " (" + Bs.Elements(sel.Count) + ")" : " " + first.Label) + ":");
+                if (shared.Count == 0)
+                {
+                    ctx.Write("  Nema parametara zajedničkih svim odabranim tipovima; mogu se mijenjati oznaka i svojstva.");
+                }
+
                 int n = 0;
                 foreach (ParameterDefinition p in shared)
                 {
@@ -402,7 +409,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
 
                 string[] keys = shared.Select((p, i) => p.Key + "|P" + (i + 1).ToString(CultureInfo.InvariantCulture)).Concat(new[] { "Label|Oznaka", "Property|Svojstvo", "eXit|Izlaz" }).ToArray();
-                string key = ctx.Keyword("Parametar za izmjenu [P1...P" + shared.Count + "/Oznaka/Svojstvo/Izlaz]", keys, "eXit");
+                string key = ctx.Keyword(shared.Count > 0 ? "Parametar za izmjenu [P1...P" + shared.Count + "/Oznaka/Svojstvo/Izlaz]" : "Izmjena [Oznaka/Svojstvo/Izlaz]", keys, "eXit");
                 if (key == "eXit")
                 {
                     break;
@@ -524,7 +531,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             string raw = ctx.Text("Vrijednost", null, true);
             foreach (string h in handles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (!ctx.Db.TryGetObjectId(new Handle(Convert.ToInt64(h, 16)), out ObjectId id) || id.IsErased)
+                if (!TryHandle(ctx, h, out ObjectId id))
                 {
                     ctx.Write("Element " + h + " nije pronađen.");
                     continue;
@@ -630,12 +637,20 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Write("Odabrano: " + Bs.Elements(ids.Length) + ".");
         });
 
+        /// <summary>Handle text (hex) to a live object id; false for text that is not a handle or a missing/erased object.</summary>
+        private static bool TryHandle(CommandContext ctx, string text, out ObjectId id)
+        {
+            id = ObjectId.Null;
+            return long.TryParse(text.Trim(), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out long value) &&
+                ctx.Db.TryGetObjectId(new Handle(value), out id) && !id.IsErased;
+        }
+
         /// <summary>Zooms to an element by handle (used by the validation palette).</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPZOOM", CommandFlags.Modal | CommandFlags.Redraw)]
         public void Zoom() => CommandContext.Run("SDPZOOM", ctx =>
         {
             string h = ctx.Text("Handle elementa", null, false);
-            if (!ctx.Db.TryGetObjectId(new Handle(Convert.ToInt64(h, 16)), out ObjectId id) || id.IsErased)
+            if (!TryHandle(ctx, h, out ObjectId id))
             {
                 ctx.Write("Element nije pronađen.");
                 return;
