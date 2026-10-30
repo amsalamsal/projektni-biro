@@ -41,8 +41,9 @@ class TestBuilders < Minitest::Test
     assert_in_delta 1.5, min[2], 1e-6       # stands on its insertion elevation
     assert_in_delta 11.5, max[2], 1e-6      # overall height
     assert_in_delta 6.0, max[0] - min[0], 1e-6
-    assert_in_delta 5.0, (max[0] + min[0]) / 2, 1e-6
-    assert_in_delta 7.0, (max[1] + min[1]) / 2, 1e-6
+    # organic crown: exact envelope, centred on the trunk within 2 % of the canopy diameter
+    assert_in_delta 5.0, (max[0] + min[0]) / 2, 0.12
+    assert_in_delta 7.0, (max[1] + min[1]) / 2, 0.12
   end
 
   def test_conical_and_conceptual_trees_keep_overall_size

@@ -41,6 +41,14 @@
       "builder": "slab"
     },
     {
+      "id": "surface.concrete_slabs",
+      "name": "Betonske ploče velikog formata",
+      "nameEn": "Large-format concrete slabs",
+      "category": "surfaces",
+      "subcategory": "Popločanje",
+      "builder": "slab"
+    },
+    {
       "id": "surface.natural_stone",
       "name": "Popločanje prirodnim kamenom",
       "nameEn": "Natural stone paving",
@@ -377,6 +385,14 @@
       "builder": "box_equipment"
     },
     {
+      "id": "road.parking_meter",
+      "name": "Parking automat",
+      "nameEn": "Parking pay station",
+      "category": "roads",
+      "subcategory": "Parking oprema",
+      "builder": "box_equipment"
+    },
+    {
       "id": "road.traffic_sign",
       "name": "Saobraćajni znak",
       "nameEn": "Traffic sign",
@@ -468,6 +484,14 @@
       "id": "cycling.repair_station",
       "name": "Stanica za popravak bicikala",
       "nameEn": "Bicycle repair station",
+      "category": "cycling",
+      "subcategory": "Instalacije",
+      "builder": "box_equipment"
+    },
+    {
+      "id": "cycling.service_stand",
+      "name": "Servisni stalak za bicikl",
+      "nameEn": "Bicycle service stand",
       "category": "cycling",
       "subcategory": "Instalacije",
       "builder": "box_equipment"
@@ -737,6 +761,14 @@
       "builder": "shrub"
     },
     {
+      "id": "landscape.planting_group",
+      "name": "Grupa sadnje (mješoviti grmovi)",
+      "nameEn": "Planting group (mixed shrubs)",
+      "category": "landscape",
+      "subcategory": "Grmlje i žive ograde",
+      "builder": "shrub"
+    },
+    {
       "id": "landscape.hedge",
       "name": "Živa ograda",
       "nameEn": "Hedge",
@@ -852,6 +884,14 @@
       "id": "landscape.planting_container",
       "name": "Velika posuda za sadnju",
       "nameEn": "Large planting container",
+      "category": "landscape",
+      "subcategory": "Žardinjere",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "landscape.seasonal_planter",
+      "name": "Posuda sa sezonskim cvijećem",
+      "nameEn": "Seasonal flower bowl",
       "category": "landscape",
       "subcategory": "Žardinjere",
       "builder": "cylinder_equipment"
@@ -1084,6 +1124,14 @@
       "id": "lighting.smart_light",
       "name": "Pametna svjetiljka (sa senzorom pokreta)",
       "nameEn": "Smart light (with sensor)",
+      "category": "lighting",
+      "subcategory": "Stubovi",
+      "builder": "pole_mounted"
+    },
+    {
+      "id": "lighting.area_floodlight",
+      "name": "Reflektorska rasvjeta površine",
+      "nameEn": "Area floodlight mast",
       "category": "lighting",
       "subcategory": "Stubovi",
       "builder": "pole_mounted"
@@ -1609,6 +1657,14 @@
       "builder": "table"
     },
     {
+      "id": "recreation.football_goal",
+      "name": "Gol za mali fudbal",
+      "nameEn": "Small-sided football goal",
+      "category": "furniture",
+      "subcategory": "Sport",
+      "builder": "box_equipment"
+    },
+    {
       "id": "recreation.platform",
       "name": "Rekreativna platforma",
       "nameEn": "Recreational platform",
@@ -1750,6 +1806,14 @@
       "nameEn": "Patio heater (freestanding)",
       "category": "climate",
       "subcategory": "Grijanje",
+      "builder": "cylinder_equipment"
+    },
+    {
+      "id": "climate.misting_post",
+      "name": "Stub za raspršivanje vode (misting)",
+      "nameEn": "Misting post",
+      "category": "climate",
+      "subcategory": "Hlađenje",
       "builder": "cylinder_equipment"
     },
     {
@@ -1908,6 +1972,14 @@
       "id": "info.site_board",
       "name": "Informativna tabla lokacije",
       "nameEn": "Site information board",
+      "category": "information",
+      "subcategory": "Informacije",
+      "builder": "sign_post"
+    },
+    {
+      "id": "info.site_map",
+      "name": "Plan lokacije (stalak s kartom)",
+      "nameEn": "Site map stand",
       "category": "information",
       "subcategory": "Informacije",
       "builder": "sign_post"
@@ -2392,6 +2464,96 @@
       "nameEn": "Foliage (fruit tree)"
     },
     {
+      "key": "flower_red",
+      "name": "Cvjetovi crveni",
+      "color": [
+        196,
+        42,
+        52
+      ],
+      "nameEn": "Flowers red"
+    },
+    {
+      "key": "flower_yellow",
+      "name": "Cvjetovi žuti",
+      "color": [
+        236,
+        196,
+        48
+      ],
+      "nameEn": "Flowers yellow"
+    },
+    {
+      "key": "flower_white",
+      "name": "Cvjetovi bijeli",
+      "color": [
+        240,
+        238,
+        230
+      ],
+      "nameEn": "Flowers white"
+    },
+    {
+      "key": "flower_violet",
+      "name": "Cvjetovi ljubičasti",
+      "color": [
+        128,
+        84,
+        168
+      ],
+      "nameEn": "Flowers violet"
+    },
+    {
+      "key": "flower_pink",
+      "name": "Cvjetovi ružičasti",
+      "color": [
+        226,
+        120,
+        160
+      ],
+      "nameEn": "Flowers pink"
+    },
+    {
+      "key": "fruit_red",
+      "name": "Plodovi",
+      "color": [
+        178,
+        34,
+        34
+      ],
+      "nameEn": "Fruit"
+    },
+    {
+      "key": "grass_blade",
+      "name": "Ukrasna trava",
+      "color": [
+        150,
+        160,
+        92
+      ],
+      "nameEn": "Ornamental grass"
+    },
+    {
+      "key": "foliage_dark",
+      "name": "Lišće tamno",
+      "color": [
+        54,
+        92,
+        46
+      ],
+      "nameEn": "Foliage dark"
+    },
+    {
+      "key": "foliage_light",
+      "name": "Lišće svijetlo",
+      "color": [
+        118,
+        156,
+        70
+      ],
+      "nameEn": "Foliage light"
+    },
+    {
       "key": "bark",
       "name": "Kora",
       "color": [
@@ -2451,6 +2613,16 @@
         146
       ],
       "nameEn": "Precast concrete"
+    },
+    {
+      "key": "concrete_slab",
+      "name": "Betonske ploče",
+      "color": [
+        196,
+        194,
+        188
+      ],
+      "nameEn": "Concrete slabs"
     },
     {
       "key": "stone_wall",

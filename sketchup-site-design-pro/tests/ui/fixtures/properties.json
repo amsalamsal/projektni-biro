@@ -195,6 +195,42 @@
       "name": "Lišće (voćka)"
     },
     {
+      "key": "flower_red",
+      "name": "Cvjetovi crveni"
+    },
+    {
+      "key": "flower_yellow",
+      "name": "Cvjetovi žuti"
+    },
+    {
+      "key": "flower_white",
+      "name": "Cvjetovi bijeli"
+    },
+    {
+      "key": "flower_violet",
+      "name": "Cvjetovi ljubičasti"
+    },
+    {
+      "key": "flower_pink",
+      "name": "Cvjetovi ružičasti"
+    },
+    {
+      "key": "fruit_red",
+      "name": "Plodovi"
+    },
+    {
+      "key": "grass_blade",
+      "name": "Ukrasna trava"
+    },
+    {
+      "key": "foliage_dark",
+      "name": "Lišće tamno"
+    },
+    {
+      "key": "foliage_light",
+      "name": "Lišće svijetlo"
+    },
+    {
       "key": "bark",
       "name": "Kora"
     },
@@ -217,6 +253,10 @@
     {
       "key": "concrete_precast",
       "name": "Montažni beton"
+    },
+    {
+      "key": "concrete_slab",
+      "name": "Betonske ploče"
     },
     {
       "key": "stone_wall",

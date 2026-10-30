@@ -11,3 +11,4 @@ TestResults/
 .DS_Store
 Thumbs.db
 *.swp
+tools/assets/node_modules

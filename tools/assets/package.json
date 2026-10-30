@@ -1,0 +1,6 @@
+{
+  "name": "vanjsko-uredjenje-pro-asset-tools",
+  "private": true,
+  "description": "Razvojni alat: render pregleda modela biblioteke (nije dio proširenja).",
+  "devDependencies": { "three": "0.160.0" }
+}

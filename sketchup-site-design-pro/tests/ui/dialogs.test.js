@@ -89,7 +89,8 @@ async function open(browser, file, fixture, size) {
 
     console.log('library.html');
     ({ page, errors } = await open(browser, 'library.html', 'library.json', { width: 920, height: 680 }));
-    check((await page.$$('#types tr')).length === 254, 'all 254 types listed');
+    const typeCount = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', '..', 'shared', 'catalog', 'element-types.json'), 'utf8')).types.length;
+    check((await page.$$('#types tr')).length === typeCount, `all ${typeCount} types listed`);
     await page.fill('#search', 'drvo');
     const n = (await page.$$('#types tr')).length;
     check(n > 3 && n < 20, 'search filters types (' + n + ')');

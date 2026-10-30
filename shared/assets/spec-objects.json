@@ -1,0 +1,1045 @@
+{
+ "$comment": "Spisak objekata iz glavne specifikacije (14 kategorija) i ID-evi modela (= ID tipa u katalogu) koji ih pokrivaju. Izvor za popis modela (tools/assets/build_library.rb).",
+ "categories": [
+  {
+   "id": "infrastructure",
+   "name": "Infrastruktura i površine",
+   "folder": "Infrastructure",
+   "objects": [
+    {
+     "name": "Betonsko popločanje",
+     "nameEn": "Concrete paving",
+     "assets": [
+      "surface.concrete_paving"
+     ]
+    },
+    {
+     "name": "Prirodni kamen",
+     "nameEn": "Natural stone",
+     "assets": [
+      "surface.natural_stone"
+     ]
+    },
+    {
+     "name": "Betonske ploče",
+     "nameEn": "Concrete slabs",
+     "assets": [
+      "surface.concrete_slabs"
+     ]
+    },
+    {
+     "name": "Gumene sigurnosne podloge",
+     "nameEn": "Rubber safety surfaces",
+     "assets": [
+      "surface.rubber_safety"
+     ]
+    },
+    {
+     "name": "Taktilno popločanje",
+     "nameEn": "Tactile paving",
+     "assets": [
+      "surface.tactile_paving"
+     ]
+    },
+    {
+     "name": "Šljunak i dekorativni agregat",
+     "nameEn": "Gravel and decorative aggregate",
+     "assets": [
+      "surface.gravel"
+     ]
+    },
+    {
+     "name": "Asfalt",
+     "nameEn": "Asphalt",
+     "assets": [
+      "surface.asphalt"
+     ]
+    },
+    {
+     "name": "Vodopropusno popločanje",
+     "nameEn": "Permeable paving",
+     "assets": [
+      "surface.permeable_paving",
+      "surface.grass_grid"
+     ]
+    },
+    {
+     "name": "Ivičnjaci",
+     "nameEn": "Kerbs",
+     "assets": [
+      "edge.kerb",
+      "edge.edging"
+     ]
+    },
+    {
+     "name": "Prelazi površina",
+     "nameEn": "Surface transitions",
+     "assets": [
+      "edge.flush_kerb",
+      "edge.surface_joint"
+     ]
+    },
+    {
+     "name": "Materijali ispune i podloge",
+     "nameEn": "Fill and substrate materials",
+     "assets": [
+      "surface.sand",
+      "surface.mulch"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "traffic",
+   "name": "Saobraćaj i mobilnost",
+   "folder": "Traffic",
+   "objects": [
+    {
+     "name": "Stanice za punjenje električnih vozila",
+     "nameEn": "EV charging stations",
+     "assets": [
+      "sustainability.ev_charger_pedestal",
+      "sustainability.ev_charger_wallbox",
+      "road.parking_bay_ev"
+     ]
+    },
+    {
+     "name": "Usporivači (ležeći policajci)",
+     "nameEn": "Speed humps",
+     "assets": [
+      "road.speed_hump"
+     ]
+    },
+    {
+     "name": "Saobraćajni znakovi",
+     "nameEn": "Traffic signs",
+     "assets": [
+      "road.traffic_sign"
+     ]
+    },
+    {
+     "name": "Stubići",
+     "nameEn": "Bollards",
+     "assets": [
+      "road.bollard",
+      "road.removable_bollard"
+     ]
+    },
+    {
+     "name": "Barijere za vozila",
+     "nameEn": "Vehicle barriers",
+     "assets": [
+      "road.vehicle_barrier"
+     ]
+    },
+    {
+     "name": "Parking oprema",
+     "nameEn": "Parking equipment",
+     "assets": [
+      "road.parking_meter",
+      "road.wheel_stop",
+      "road.parking_bay"
+     ]
+    },
+    {
+     "name": "Pješački prelazi",
+     "nameEn": "Pedestrian crossings",
+     "assets": [
+      "road.pedestrian_crossing",
+      "road.raised_crossing"
+     ]
+    },
+    {
+     "name": "Parking za osobe s invaliditetom",
+     "nameEn": "Accessible parking features",
+     "assets": [
+      "road.parking_bay_accessible",
+      "info.accessibility_sign"
+     ]
+    },
+    {
+     "name": "Elementi smirivanja saobraćaja",
+     "nameEn": "Traffic-calming elements",
+     "assets": [
+      "road.raised_crossing",
+      "road.speed_hump"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bicycle",
+   "name": "Biciklistička infrastruktura",
+   "folder": "Bicycle",
+   "objects": [
+    {
+     "name": "Biciklističke staze",
+     "nameEn": "Bicycle paths",
+     "assets": [
+      "cycling.bike_path",
+      "cycling.shared_path",
+      "cycling.bike_lane"
+     ]
+    },
+    {
+     "name": "Stalci za bicikle",
+     "nameEn": "Bicycle racks",
+     "assets": [
+      "cycling.bike_stand",
+      "cycling.bike_rack"
+     ]
+    },
+    {
+     "name": "Nadstrešnice za bicikle",
+     "nameEn": "Bicycle parking shelters",
+     "assets": [
+      "cycling.bike_shelter"
+     ]
+    },
+    {
+     "name": "Bike box",
+     "nameEn": "Bike boxes",
+     "assets": [
+      "cycling.bike_box"
+     ]
+    },
+    {
+     "name": "Stanice javnih bicikala",
+     "nameEn": "Bike-sharing stations",
+     "assets": [
+      "cycling.share_station"
+     ]
+    },
+    {
+     "name": "Stanice za popravak bicikala",
+     "nameEn": "Bicycle repair stations",
+     "assets": [
+      "cycling.repair_station"
+     ]
+    },
+    {
+     "name": "Pumpe za bicikle",
+     "nameEn": "Bicycle pumps",
+     "assets": [
+      "cycling.pump"
+     ]
+    },
+    {
+     "name": "Servisni stalci za bicikle",
+     "nameEn": "Bicycle service stands",
+     "assets": [
+      "cycling.service_stand"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "water",
+   "name": "Vodeni elementi i upravljanje vodom",
+   "folder": "Water",
+   "objects": [
+    {
+     "name": "Bazeni, uključujući infinity bazen",
+     "nameEn": "Swimming pools, including infinity pools",
+     "assets": [
+      "water.swimming_pool",
+      "water.infinity_pool"
+     ]
+    },
+    {
+     "name": "Kaskade",
+     "nameEn": "Cascades",
+     "assets": [
+      "water.cascade_wall"
+     ]
+    },
+    {
+     "name": "Fontane",
+     "nameEn": "Fountains",
+     "assets": [
+      "water.fountain",
+      "water.water_jet"
+     ]
+    },
+    {
+     "name": "Dekorativni vodeni elementi",
+     "nameEn": "Decorative water features",
+     "assets": [
+      "water.decorative_pond",
+      "water.reflecting_pool"
+     ]
+    },
+    {
+     "name": "Drenažni kanali",
+     "nameEn": "Drainage channels",
+     "assets": [
+      "water.drainage_channel",
+      "water.slot_drain",
+      "water.overflow_channel"
+     ]
+    },
+    {
+     "name": "Sistemi zadržavanja kišnice",
+     "nameEn": "Rainwater retention systems",
+     "assets": [
+      "water.retention_basin",
+      "water.infiltration_crates",
+      "water.rain_garden",
+      "water.bioswale"
+     ]
+    },
+    {
+     "name": "Vodopropusni kolovozni sistemi",
+     "nameEn": "Permeable road systems",
+     "assets": [
+      "surface.permeable_paving",
+      "surface.grass_grid"
+     ]
+    },
+    {
+     "name": "Elementi prikupljanja kišnice",
+     "nameEn": "Rainwater collection elements",
+     "assets": [
+      "water.rainwater_tank",
+      "water.rainwater_collector",
+      "water.surface_inlet"
+     ]
+    },
+    {
+     "name": "Revizioni i pristupni elementi",
+     "nameEn": "Inspection and access elements",
+     "assets": [
+      "water.inspection_chamber"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "greenery",
+   "name": "Zelenilo i sadnja",
+   "folder": "Greenery",
+   "objects": [
+    {
+     "name": "Pojedinačna stabla",
+     "nameEn": "Individual trees",
+     "assets": [
+      "landscape.tree_deciduous",
+      "landscape.tree_evergreen",
+      "landscape.tree_fruit",
+      "landscape.tree_columnar",
+      "landscape.tree_existing"
+     ]
+    },
+    {
+     "name": "Grmlje",
+     "nameEn": "Shrubs",
+     "assets": [
+      "landscape.shrub"
+     ]
+    },
+    {
+     "name": "Žive ograde",
+     "nameEn": "Hedges",
+     "assets": [
+      "landscape.hedge"
+     ]
+    },
+    {
+     "name": "Ukrasne trave",
+     "nameEn": "Ornamental grasses",
+     "assets": [
+      "landscape.ornamental_grasses"
+     ]
+    },
+    {
+     "name": "Cvjetne gredice",
+     "nameEn": "Flower beds",
+     "assets": [
+      "landscape.flower_bed"
+     ]
+    },
+    {
+     "name": "Ružičnjaci",
+     "nameEn": "Rose gardens",
+     "assets": [
+      "landscape.rose_garden"
+     ]
+    },
+    {
+     "name": "Voćnjaci",
+     "nameEn": "Orchards",
+     "assets": [
+      "landscape.orchard_tree"
+     ]
+    },
+    {
+     "name": "Zeleni krovovi",
+     "nameEn": "Green roofs",
+     "assets": [
+      "landscape.green_roof"
+     ]
+    },
+    {
+     "name": "Krovni vrtovi",
+     "nameEn": "Roof gardens",
+     "assets": [
+      "landscape.raised_planter",
+      "landscape.green_roof"
+     ]
+    },
+    {
+     "name": "Zeleni zidovi",
+     "nameEn": "Green walls",
+     "assets": [
+      "landscape.green_wall",
+      "landscape.vertical_garden",
+      "landscape.climber"
+     ]
+    },
+    {
+     "name": "Grupe sadnje",
+     "nameEn": "Planting groups",
+     "assets": [
+      "landscape.planting_group"
+     ]
+    },
+    {
+     "name": "Sezonsko zelenilo",
+     "nameEn": "Seasonal vegetation",
+     "assets": [
+      "landscape.seasonal_planter",
+      "landscape.perennials"
+     ]
+    },
+    {
+     "name": "Pokrivači tla",
+     "nameEn": "Ground covers",
+     "assets": [
+      "landscape.ground_cover"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "municipal",
+   "name": "Komunalna infrastruktura",
+   "folder": "Municipal",
+   "objects": [
+    {
+     "name": "Podzemni kontejneri 3 m³ i 5 m³",
+     "nameEn": "Underground waste containers 3 m³ and 5 m³",
+     "assets": [
+      "utility.waste_container_ug_3m3",
+      "utility.waste_container_ug_5m3"
+     ]
+    },
+    {
+     "name": "Reciklažna ostrva",
+     "nameEn": "Recycling islands",
+     "assets": [
+      "utility.recycling_island",
+      "utility.waste_container_semi",
+      "utility.waste_container_above"
+     ]
+    },
+    {
+     "name": "Podzemne cisterne",
+     "nameEn": "Underground cisterns",
+     "assets": [
+      "utility.cistern",
+      "utility.water_tank"
+     ]
+    },
+    {
+     "name": "Septičke jame",
+     "nameEn": "Septic tanks",
+     "assets": [
+      "utility.septic_tank"
+     ]
+    },
+    {
+     "name": "Kablovski kanali",
+     "nameEn": "Cable trenches",
+     "assets": [
+      "utility.trench",
+      "utility.cable_duct"
+     ]
+    },
+    {
+     "name": "Šahtovi",
+     "nameEn": "Manholes",
+     "assets": [
+      "utility.manhole"
+     ]
+    },
+    {
+     "name": "Poklopci komunalnih okana",
+     "nameEn": "Utility access covers",
+     "assets": [
+      "utility.electrical_chamber",
+      "utility.telecom_chamber",
+      "utility.water_meter_chamber",
+      "utility.valve_chamber"
+     ]
+    },
+    {
+     "name": "Podzemna komunalna infrastruktura",
+     "nameEn": "Underground service infrastructure",
+     "assets": [
+      "utility.service_corridor",
+      "utility.water_pipe",
+      "utility.service_connection",
+      "utility.pump_chamber",
+      "utility.equipment_enclosure"
+     ]
+    },
+    {
+     "name": "Revizione komore",
+     "nameEn": "Inspection chambers",
+     "assets": [
+      "water.inspection_chamber"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lighting",
+   "name": "Rasvjeta",
+   "folder": "Lighting",
+   "objects": [
+    {
+     "name": "Solarne svjetiljke",
+     "nameEn": "Solar lights",
+     "assets": [
+      "lighting.solar_light"
+     ]
+    },
+    {
+     "name": "Pametne svjetiljke sa senzorom pokreta",
+     "nameEn": "Smart motion-sensor lights",
+     "assets": [
+      "lighting.smart_light"
+     ]
+    },
+    {
+     "name": "Rasvjetni stubići",
+     "nameEn": "Bollard lights",
+     "assets": [
+      "lighting.bollard_light"
+     ]
+    },
+    {
+     "name": "Svjetiljke za staze",
+     "nameEn": "Pathway lights",
+     "assets": [
+      "lighting.path_light",
+      "lighting.pedestrian_light"
+     ]
+    },
+    {
+     "name": "Podvodna rasvjeta",
+     "nameEn": "Underwater lighting",
+     "assets": [
+      "lighting.underwater_light"
+     ]
+    },
+    {
+     "name": "Fasadna rasvjeta",
+     "nameEn": "Facade lighting",
+     "assets": [
+      "lighting.facade_light"
+     ]
+    },
+    {
+     "name": "Dekorativna rasvjeta",
+     "nameEn": "Decorative lighting",
+     "assets": [
+      "lighting.garden_light",
+      "lighting.led_strip",
+      "lighting.pergola_light"
+     ]
+    },
+    {
+     "name": "Rasvjeta površina",
+     "nameEn": "Area lighting",
+     "assets": [
+      "lighting.area_floodlight",
+      "lighting.street_light"
+     ]
+    },
+    {
+     "name": "Zidne svjetiljke",
+     "nameEn": "Wall-mounted luminaires",
+     "assets": [
+      "lighting.wall_light",
+      "lighting.step_light"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "fences_walls",
+   "name": "Ograde i zidovi",
+   "folder": "Fences_Walls",
+   "objects": [
+    {
+     "name": "Gabionski zidovi",
+     "nameEn": "Gabion walls",
+     "assets": [
+      "wall.gabion"
+     ]
+    },
+    {
+     "name": "Staklene ograde",
+     "nameEn": "Glass fences",
+     "assets": [
+      "wall.glass_railing"
+     ]
+    },
+    {
+     "name": "Metalne ograde",
+     "nameEn": "Metal fences",
+     "assets": [
+      "wall.metal_fence",
+      "wall.mesh_fence"
+     ]
+    },
+    {
+     "name": "Drvene ograde",
+     "nameEn": "Wooden fences",
+     "assets": [
+      "wall.timber_fence"
+     ]
+    },
+    {
+     "name": "Dekorativne ograde",
+     "nameEn": "Decorative fences",
+     "assets": [
+      "wall.decorative_fence"
+     ]
+    },
+    {
+     "name": "Potporni zidovi",
+     "nameEn": "Retaining walls",
+     "assets": [
+      "wall.retaining"
+     ]
+    },
+    {
+     "name": "Vrtni zidovi",
+     "nameEn": "Garden walls",
+     "assets": [
+      "wall.stone",
+      "wall.concrete",
+      "wall.planter_wall"
+     ]
+    },
+    {
+     "name": "Automatske kapije",
+     "nameEn": "Automatic gates",
+     "assets": [
+      "wall.sliding_gate",
+      "wall.access_barrier"
+     ]
+    },
+    {
+     "name": "Pješačke kapije",
+     "nameEn": "Pedestrian gates",
+     "assets": [
+      "wall.pedestrian_gate"
+     ]
+    },
+    {
+     "name": "Sistemi ograđivanja",
+     "nameEn": "Boundary systems",
+     "assets": [
+      "wall.mesh_fence",
+      "wall.vehicle_gate",
+      "wall.swing_gate",
+      "wall.safety_railing"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "canopies",
+   "name": "Nadstrešnice i zasjena",
+   "folder": "Canopies",
+   "objects": [
+    {
+     "name": "Bioklimatske pergole",
+     "nameEn": "Bioclimatic pergolas",
+     "assets": [
+      "structure.bioclimatic_pergola",
+      "structure.pergola"
+     ]
+    },
+    {
+     "name": "Solarne nadstrešnice",
+     "nameEn": "Solar canopies",
+     "assets": [
+      "structure.solar_canopy"
+     ]
+    },
+    {
+     "name": "Solarni krovovi",
+     "nameEn": "Solar roofs",
+     "assets": [
+      "structure.solar_canopy",
+      "sustainability.solar_array"
+     ]
+    },
+    {
+     "name": "Membranske konstrukcije",
+     "nameEn": "Tensile structures",
+     "assets": [
+      "structure.tensile_membrane"
+     ]
+    },
+    {
+     "name": "Vanjska skloništa",
+     "nameEn": "Outdoor shelters",
+     "assets": [
+      "structure.seating_shelter",
+      "structure.bus_shelter",
+      "structure.gazebo",
+      "structure.pavilion"
+     ]
+    },
+    {
+     "name": "Nadstrešnice za bicikle",
+     "nameEn": "Bicycle shelters",
+     "assets": [
+      "cycling.bike_shelter"
+     ]
+    },
+    {
+     "name": "Nadstrešnice za parking",
+     "nameEn": "Parking canopies",
+     "assets": [
+      "structure.carport"
+     ]
+    },
+    {
+     "name": "Jedra za sjenu",
+     "nameEn": "Shade sails",
+     "assets": [
+      "climate.shade_sail"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "furniture_recreation",
+   "name": "Mobilijar i rekreacija",
+   "folder": "Furniture_Recreation",
+   "objects": [
+    {
+     "name": "Klupe",
+     "nameEn": "Benches",
+     "assets": [
+      "furniture.bench",
+      "furniture.bench_backless",
+      "furniture.accessible_bench"
+     ]
+    },
+    {
+     "name": "Stolovi",
+     "nameEn": "Tables",
+     "assets": [
+      "furniture.dining_table"
+     ]
+    },
+    {
+     "name": "Korpe za otpatke",
+     "nameEn": "Waste bins",
+     "assets": [
+      "furniture.waste_bin"
+     ]
+    },
+    {
+     "name": "Vanjske fitness sprave",
+     "nameEn": "Outdoor fitness equipment",
+     "assets": [
+      "recreation.fitness_station"
+     ]
+    },
+    {
+     "name": "Igrališta",
+     "nameEn": "Playgrounds",
+     "assets": [
+      "recreation.playground_unit",
+      "recreation.swing",
+      "recreation.climbing_structure"
+     ]
+    },
+    {
+     "name": "Tobogani",
+     "nameEn": "Slides",
+     "assets": [
+      "recreation.slide"
+     ]
+    },
+    {
+     "name": "Trampolini",
+     "nameEn": "Trampolines",
+     "assets": [
+      "recreation.trampoline"
+     ]
+    },
+    {
+     "name": "Zip-line",
+     "nameEn": "Zip lines",
+     "assets": [
+      "recreation.zip_line"
+     ]
+    },
+    {
+     "name": "Piknik mobilijar",
+     "nameEn": "Picnic furniture",
+     "assets": [
+      "furniture.picnic_table"
+     ]
+    },
+    {
+     "name": "Vanjsko sjedenje",
+     "nameEn": "Outdoor seating",
+     "assets": [
+      "furniture.chair",
+      "furniture.lounger"
+     ]
+    },
+    {
+     "name": "Sportska i rekreativna oprema",
+     "nameEn": "Sports and recreation equipment",
+     "assets": [
+      "recreation.basketball_hoop",
+      "recreation.table_tennis",
+      "recreation.chess_table",
+      "recreation.football_goal"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "eco",
+   "name": "Eko tehnologije",
+   "folder": "Eco_Technologies",
+   "objects": [
+    {
+     "name": "Solarni paneli",
+     "nameEn": "Solar panels",
+     "assets": [
+      "sustainability.solar_array"
+     ]
+    },
+    {
+     "name": "Toplotne pumpe",
+     "nameEn": "Heat pumps",
+     "assets": [
+      "sustainability.heat_pump",
+      "sustainability.outdoor_unit"
+     ]
+    },
+    {
+     "name": "Vjetroturbine s vertikalnom osom",
+     "nameEn": "Vertical-axis wind turbines",
+     "assets": [
+      "sustainability.wind_turbine"
+     ]
+    },
+    {
+     "name": "Kućišta energetske opreme",
+     "nameEn": "Energy equipment enclosures",
+     "assets": [
+      "sustainability.energy_cabinet",
+      "sustainability.battery_cabinet",
+      "sustainability.inverter"
+     ]
+    },
+    {
+     "name": "Održiva infrastruktura lokacije",
+     "nameEn": "Sustainable site infrastructure",
+     "assets": [
+      "sustainability.rainwater_harvesting",
+      "sustainability.greywater_unit",
+      "sustainability.compost_station",
+      "sustainability.suds_crate"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "climate",
+   "name": "Vanjski klimatski sistemi",
+   "folder": "Outdoor_Climate",
+   "objects": [
+    {
+     "name": "Sistemi za raspršivanje vode",
+     "nameEn": "Misting systems",
+     "assets": [
+      "climate.misting_post",
+      "climate.misting_line"
+     ]
+    },
+    {
+     "name": "Grijane terase",
+     "nameEn": "Heated terrace systems",
+     "assets": [
+      "climate.heated_zone",
+      "climate.patio_heater"
+     ]
+    },
+    {
+     "name": "Infracrveni grijači",
+     "nameEn": "Infrared heaters",
+     "assets": [
+      "climate.infrared_heater"
+     ]
+    },
+    {
+     "name": "Vanjski rashladni elementi",
+     "nameEn": "Outdoor cooling elements",
+     "assets": [
+      "climate.evaporative_cooler",
+      "climate.cooling_unit"
+     ]
+    },
+    {
+     "name": "Vanjska klimatska oprema",
+     "nameEn": "Outdoor climate equipment",
+     "assets": [
+      "climate.ventilation_unit",
+      "climate.awning",
+      "climate.wind_screen"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "decorative",
+   "name": "Dekorativni elementi",
+   "folder": "Decorative",
+   "objects": [
+    {
+     "name": "Skulpture",
+     "nameEn": "Sculptures",
+     "assets": [
+      "decorative.sculpture"
+     ]
+    },
+    {
+     "name": "Zeleni zidovi",
+     "nameEn": "Green walls",
+     "assets": [
+      "landscape.green_wall"
+     ]
+    },
+    {
+     "name": "Murali",
+     "nameEn": "Murals",
+     "assets": [
+      "decorative.mural"
+     ]
+    },
+    {
+     "name": "Dekorativni paravani",
+     "nameEn": "Decorative screens",
+     "assets": [
+      "decorative.screen"
+     ]
+    },
+    {
+     "name": "Akcentna rasvjeta",
+     "nameEn": "Feature lighting",
+     "assets": [
+      "lighting.feature_light",
+      "decorative.light_installation"
+     ]
+    },
+    {
+     "name": "Umjetnički elementi pejzaža",
+     "nameEn": "Artistic landscape elements",
+     "assets": [
+      "decorative.public_art",
+      "decorative.boulder",
+      "decorative.focal_point"
+     ]
+    },
+    {
+     "name": "Dekorativne konstrukcije",
+     "nameEn": "Decorative structures",
+     "assets": [
+      "decorative.entrance_monument",
+      "decorative.decorative_wall",
+      "decorative.signage_structure",
+      "decorative.feature_planter"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "information",
+   "name": "Informativni i sigurnosni sistemi",
+   "folder": "Information_Security",
+   "objects": [
+    {
+     "name": "QR informativni paneli",
+     "nameEn": "QR information panels",
+     "assets": [
+      "info.qr_panel"
+     ]
+    },
+    {
+     "name": "Informativni kiosci",
+     "nameEn": "Information kiosks",
+     "assets": [
+      "info.digital_kiosk"
+     ]
+    },
+    {
+     "name": "CCTV kamere",
+     "nameEn": "CCTV cameras",
+     "assets": [
+      "info.cctv_camera"
+     ]
+    },
+    {
+     "name": "Vanjski audio sistemi",
+     "nameEn": "Outdoor audio systems",
+     "assets": [
+      "info.speaker"
+     ]
+    },
+    {
+     "name": "Znakovi za orijentaciju",
+     "nameEn": "Wayfinding signs",
+     "assets": [
+      "info.wayfinding_sign"
+     ]
+    },
+    {
+     "name": "Putokazi",
+     "nameEn": "Directional signage",
+     "assets": [
+      "info.directional_sign"
+     ]
+    },
+    {
+     "name": "Planovi lokacije",
+     "nameEn": "Site maps",
+     "assets": [
+      "info.site_map"
+     ]
+    },
+    {
+     "name": "Informativne table",
+     "nameEn": "Information boards",
+     "assets": [
+      "info.site_board"
+     ]
+    }
+   ]
+  }
+ ]
+}

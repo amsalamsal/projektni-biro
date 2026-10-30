@@ -33,6 +33,8 @@ require File.join(__dir__, 'version')
   builders/structures
   builders/water
   builders/markings
+  models/kit
+  models/vegetation
   element_builder
   change_set
   terrain

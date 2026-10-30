@@ -3145,6 +3145,15 @@
       ]
     },
     {
+      "key": "concrete_slab",
+      "name": "Betonske ploče",
+      "color": [
+        196,
+        194,
+        188
+      ]
+    },
+    {
       "key": "default",
       "name": "Zadani materijal",
       "color": [
@@ -3164,6 +3173,51 @@
       "alpha": 0.9
     },
     {
+      "key": "flower_pink",
+      "name": "Cvjetovi ružičasti",
+      "color": [
+        226,
+        120,
+        160
+      ]
+    },
+    {
+      "key": "flower_red",
+      "name": "Cvjetovi crveni",
+      "color": [
+        196,
+        42,
+        52
+      ]
+    },
+    {
+      "key": "flower_violet",
+      "name": "Cvjetovi ljubičasti",
+      "color": [
+        128,
+        84,
+        168
+      ]
+    },
+    {
+      "key": "flower_white",
+      "name": "Cvjetovi bijeli",
+      "color": [
+        240,
+        238,
+        230
+      ]
+    },
+    {
+      "key": "flower_yellow",
+      "name": "Cvjetovi žuti",
+      "color": [
+        236,
+        196,
+        48
+      ]
+    },
+    {
       "key": "foliage",
       "name": "Lišće (listopadno)",
       "color": [
@@ -3172,6 +3226,15 @@
         70
       ],
       "alpha": 0.92
+    },
+    {
+      "key": "foliage_dark",
+      "name": "Lišće tamno",
+      "color": [
+        54,
+        92,
+        46
+      ]
     },
     {
       "key": "foliage_evergreen",
@@ -3192,6 +3255,24 @@
         70
       ],
       "alpha": 0.92
+    },
+    {
+      "key": "foliage_light",
+      "name": "Lišće svijetlo",
+      "color": [
+        118,
+        156,
+        70
+      ]
+    },
+    {
+      "key": "fruit_red",
+      "name": "Plodovi",
+      "color": [
+        178,
+        34,
+        34
+      ]
     },
     {
       "key": "gabion",
@@ -3219,6 +3300,15 @@
         104,
         152,
         72
+      ]
+    },
+    {
+      "key": "grass_blade",
+      "name": "Ukrasna trava",
+      "color": [
+        150,
+        160,
+        92
       ]
     },
     {
