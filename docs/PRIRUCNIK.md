@@ -595,8 +595,10 @@ Ispisuje:
 #### SDPDRAW – crtanje trase ili površine
 1. Tip (samo linijski i površinski).
 2. Za površinu – *Granica [Polilinija/Pravougaonik/Unutar/Odaberi]*; za trasu – *Trasa [Polilinija/Odaberi]*:
-   * **Polilinija** – pokreće se standardni `PLINE` (lukovi, snapovi); Enter završava;
-   * **Pravougaonik** – standardni `RECTANG`;
+   * **Polilinija** – klikajte tačke (snapovi i polarno praćenje rade); *Zatvori* zatvara liniju, *Ponisti* briše
+     zadnju tačku, Enter završava. Za površinu se linija uvijek zatvara. Za trasu s **lukovima** nacrtajte običan
+     `PLINE` s lukovima, pa izaberite **Odaberi**;
+   * **Pravougaonik** – prvi ugao, pa suprotni ugao (prati trenutni UCS);
    * **Unutar** – klikajte **unutar** zatvorenih površina, a program sam nalazi granicu (kao šrafura); Enter za kraj;
    * **Odaberi** – odaberite postojeće krive.
 3. Nacrtani ili odabrani objekat postaje element (kao `SDPCONVERT`).

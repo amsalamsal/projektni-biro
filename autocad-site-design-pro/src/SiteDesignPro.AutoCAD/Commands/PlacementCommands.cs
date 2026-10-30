@@ -119,7 +119,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
         }
 
-        /// <summary>Polyline by points: Enter ends, [Zatvori] closes, [Poništi] removes the last point.</summary>
+        /// <summary>Polyline by points: Enter ends, [Zatvori] closes, [Ponisti] removes the last point.</summary>
         private static ObjectId DrawPolyline(CommandContext ctx, bool closeArea)
         {
             var pts = new List<Point3d>();
@@ -133,9 +133,10 @@ namespace SiteDesignPro.AutoCAD.Commands
             pts.Add(first.Value);
             while (true)
             {
-                var o = new PromptPointOptions(pts.Count >= 2 ? "\nSljedeća tačka [Zatvori/Poništi] <kraj>" : "\nSljedeća tačka [Poništi] <kraj>")
+                var o = new PromptPointOptions(pts.Count >= 2 ? "\nSljedeća tačka [Zatvori/Ponisti] <kraj>" : "\nSljedeća tačka [Ponisti] <kraj>")
                 {
                     AllowNone = true,
+                    AppendKeywordsToMessage = false,
                     UseBasePoint = true,
                     BasePoint = pts[pts.Count - 1].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()),
                 };
@@ -144,7 +145,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     o.Keywords.Add("Close", "Zatvori", "Zatvori");
                 }
 
-                o.Keywords.Add("Undo", "Poništi", "Poništi");
+                o.Keywords.Add("Undo", "Ponisti", "Ponisti");
                 PromptPointResult r = ctx.Ed.GetPoint(o);
                 if (r.Status == PromptStatus.Keyword && r.StringResult == "Close")
                 {

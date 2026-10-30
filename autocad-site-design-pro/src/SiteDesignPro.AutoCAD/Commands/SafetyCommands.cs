@@ -80,6 +80,8 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
 
                 o.Keywords.Default = "Izlaz";
+                o.AppendKeywordsToMessage = false;
+                o.Message = "\nOporavak [Otvori/Folder/Oznaci/Izlaz] <Izlaz>";
                 o.AllowNone = true;
                 PromptResult r = ed.GetKeywords(o);
                 string choice = r.Status == PromptStatus.OK ? r.StringResult : "Izlaz";

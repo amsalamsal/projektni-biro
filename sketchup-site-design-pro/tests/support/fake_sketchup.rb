@@ -82,6 +82,19 @@ module Geom
     def to_a
       m[0] + [0.0] + m[1] + [0.0] + m[2] + [0.0] + t + [1.0]
     end
+
+    # Inverse of a rigid transformation (orthonormal axes, as used by the extension).
+    def inverse
+      rt = [0, 1, 2].map { |c| [0, 1, 2].map { |r| m[r][c] } }
+      inv = Transformation.new(rt)
+      Transformation.new(rt, inv.apply(t).map(&:-@))
+    end
+  end
+
+  class Point3d
+    def transform(tr)
+      Point3d.new(*tr.apply(self))
+    end
   end
 
   class BoundingBox

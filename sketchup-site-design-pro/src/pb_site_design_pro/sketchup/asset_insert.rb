@@ -79,18 +79,18 @@ module ProjektniBiro
 
       # ---- geometry from the selection --------------------------------------------------------------------
 
-      def to_m(point, tr)
-        p = point.transform(tr)
-        [Units.in_to_m(p.x), Units.in_to_m(p.y), Units.in_to_m(p.z)]
+      # Vertex positions of the selection are already in the coordinates of the active (edited) context, which is
+      # where the model is built, so they are converted to metres without any transformation.
+      def to_m(point)
+        [Units.in_to_m(point.x), Units.in_to_m(point.y), Units.in_to_m(point.z)]
       end
 
-      # Polygon from the first selected face (outer loop and holes), in model coordinates (metres).
+      # Polygon from the first selected face (outer loop and holes), in the active context (metres).
       def polygon_from(model)
         face = model.selection.grep(Sketchup::Face).first
         return nil unless face
 
-        tr = model.edit_transform
-        ring = ->(loop) { { vertices: loop.vertices.map { |v| to_m(v.position, tr) }, bulges: [0.0] * loop.vertices.length } }
+        ring = ->(loop) { { vertices: loop.vertices.map { |v| to_m(v.position) }, bulges: [0.0] * loop.vertices.length } }
         holes = face.loops.reject(&:outer?).map { |l| ring.call(l) }
         { kind: 'polygon', outer: ring.call(face.outer_loop), holes: holes }
       end
@@ -100,7 +100,6 @@ module ProjektniBiro
         edges = model.selection.grep(Sketchup::Edge)
         return nil if edges.empty?
 
-        tr = model.edit_transform
         left = edges.dup
         count = Hash.new(0)
         edges.each { |e| e.vertices.each { |v| count[v] += 1 } }
@@ -119,7 +118,7 @@ module ProjektniBiro
 
         closed = pts.length > 2 && pts.first == pts.last
         pts.pop if closed
-        { kind: 'path', vertices: pts.map { |x| to_m(x.position, tr) }, bulges: [0.0] * pts.length, closed: closed }
+        { kind: 'path', vertices: pts.map { |x| to_m(x.position) }, bulges: [0.0] * pts.length, closed: closed }
       end
 
       # ---- dialog actions ---------------------------------------------------------------------------------
@@ -290,7 +289,8 @@ module ProjektniBiro
         return unless @ip.valid?
 
         model = Sketchup.active_model
-        p = @ip.position
+        # the input point is in model coordinates; the model is built in the active (possibly edited) context
+        p = @ip.position.transform(model.edit_transform.inverse)
         origin = [Units.in_to_m(p.x), Units.in_to_m(p.y), Units.in_to_m(p.z)]
         w, d = @extent
         geometry = AssetInsert.library.default_geometry(@id, origin, @rotation, width: w, depth: d, length: w)

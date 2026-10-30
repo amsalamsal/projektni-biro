@@ -176,6 +176,17 @@ namespace SiteDesignPro.AutoCAD.Commands
                 o.Keywords.Default = defaultKeyword;
             }
 
+            // The messages already list the keywords in [...]; AutoCAD must not append them a second time.
+            if (message.Contains("["))
+            {
+                o.AppendKeywordsToMessage = false;
+                if (defaultKeyword != null)
+                {
+                    string shown = keywords.Select(k => k.Split('|')).Where(p => p[0] == defaultKeyword).Select(p => p[p.Length - 1]).FirstOrDefault() ?? defaultKeyword;
+                    o.Message = "\n" + message + " <" + shown + ">";
+                }
+            }
+
             o.AllowNone = defaultKeyword != null;
             PromptResult r = Ed.GetKeywords(o);
             if (r.Status == PromptStatus.None && defaultKeyword != null)
