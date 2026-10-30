@@ -35,6 +35,11 @@ require File.join(__dir__, 'version')
   builders/markings
   models/kit
   models/vegetation
+  models/furniture
+  models/lighting
+  models/traffic
+  models/utilities
+  models/equipment
   element_builder
   change_set
   terrain

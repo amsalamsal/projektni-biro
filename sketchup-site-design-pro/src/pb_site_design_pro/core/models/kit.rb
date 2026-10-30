@@ -197,6 +197,12 @@ module ProjektniBiro
           end
         end
 
+        # Draws the element with its parametric builder (for objects whose builder geometry already is the
+        # real object, e.g. paint markings).
+        def builder_draw(element = @element)
+          Builders.for(element.builder).new(@ctx).build(element, @c)
+        end
+
         def rand(a = 1.0, b = nil)
           b.nil? ? @rng.rand * a : a + (@rng.rand * (b - a))
         end

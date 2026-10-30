@@ -257,6 +257,7 @@ class TestBuilders < Minitest::Test
     pkg, = package([{ type: 'furniture.bench' }])
     el = pkg.elements.first
     el.instance_variable_set(:@builder, 'teleporter')
+    el.instance_variable_set(:@type_id, 'user.teleporter') # a user type without its own model
     ctx = context(pkg)
     assert_nil ElementBuilder.build(el, RecordingCanvas.new, ctx)
     assert(ctx.report.issues.any? { |i| i.code == 'SDP-B100' })
@@ -265,7 +266,7 @@ class TestBuilders < Minitest::Test
   def test_lod_changes_detail_not_size
     sizes = %w[conceptual standard presentation].map do |lod|
       canvas, node, = build_one('furniture.bench', lod: lod)
-      [canvas.bounds(node), canvas.stats[:definition_faces]]
+      [canvas.bounds(node).map { |c| c.map { |v| v.round(9) } }, canvas.stats[:definition_faces]]
     end
     assert_equal 1, sizes.map(&:first).uniq.length
     faces = %w[conceptual standard presentation].map do |lod|
