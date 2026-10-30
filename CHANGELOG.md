@@ -1,5 +1,18 @@
 # Izmjene (Changelog)
 
+## Neobjavljeno
+
+### Ispravljeno
+* AutoCAD 2021: površine sa šrafurom (22 tipa) nisu se mogle napraviti (`eInvalidInput`); `SDPSAMPLE` i `SDPDRAW` su padali.
+* `SDPDRAW`: nakon greške više ne ostaje zaostala polilinija.
+* Ključne riječi s istim početnim slovom dobile su različite skraćenice (npr. `PRavougaonik`).
+* `SDPUVOZPAKETA`: element zamijenjen paketom vraća se ako novi ne uspije; režim kota čita se iz paketa.
+* SketchUp: površine bez tri različita tjemena ili bez površine odbijaju se jasnom porukom (SDP-G005/G006),
+  a granica koja siječe samu sebe javlja upozorenje (SDP-G007).
+
+### Dodano
+* GitHub Actions: izgradnja i testovi pri svakom slanju; gotovi paketi na grani `builds/<grana>`.
+
 ## 0.2.0 – 29.10.2026.
 
 ### Dodano

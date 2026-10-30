@@ -48,6 +48,34 @@ kontejneru nema Mono/.NET Framework okruženja). Testovi rade pod .NET 8.
 | SketchUp | umetanje modela unutar grupe/komponente u uređivanju bilo je pomaknuto | pregled koda |
 | Modeli | visinski pomak (58 modela), materijal (35), dimenzije (40) i niz posebnih parametara nisu mijenjali model | nova provjera parametara |
 
+## Test u AutoCAD-u 2021 (stvarni program, 30.10.2026.)
+
+Prvi test u stvarnom AutoCAD-u 2021 (R24, .NET Framework 4.8) na korisnikovom računaru.
+
+Pronađeno u verziji 0.2.0 i ispravljeno:
+
+| Greška | Posljedica | Ispravka |
+|---|---|---|
+| `Hatch.PatternAngle` postavljan prije `SetHatchPattern` → `eInvalidInput` | nijedan od 22 tipa površina sa šrafurom nije se mogao napraviti; `SDPSAMPLE` i `SDPDRAW` (npr. asfalt) uvijek padaju | uzorak se postavlja prvi, zatim razmjer i ugao |
+| `SDPDRAW` crta granicu u jednoj, a pretvara u drugoj transakciji | pri grešci ostaje obična polilinija, iako poruka kaže „izmjene su poništene" | crtanje i pretvaranje u istoj transakciji |
+| ključne riječi s istim početnim slovom (`Polilinija/Pravougaonik` i još 6 upita) | „P" uvijek bira prvu opciju | različite skraćenice (`POlilinija/PRavougaonik` …) |
+
+Nakon ispravke (izgradnja na GitHub Actions, instalirana u `%AppData%\Autodesk\ApplicationPlugins`):
+
+| Naredba | Rezultat |
+|---|---|
+| `SDPABOUT` | verzija 0.2.0, katalog 263 tipa |
+| `SDPSAMPLE` (Oba) | 139 elemenata i 161 objekat izvornog crteža, šrafure prikazane |
+| `SDPDRAW` asfalt, opcija `PR` | pravougaonik, 1 × Asfaltna površina sa šrafurom |
+| `SDPPLACE` klupa | postavljena |
+| `SDPEXPORT` | 140 elemenata izvezeno |
+| `SDPUVOZPAKETA` u prazan crtež | 140 kreirano, 0 neuspjelo; preuzeti jedinica mm, ishodište i ±0,00 = 520,15 |
+| `SDPUVOZPAKETA` ponovo, *Zamijeni* | 140 zamijenjeno, 0 neuspjelo |
+| `SDPVALIDATE` | 0 grešaka; 2 upozorenja za testni asfalt nacrtan na Z = 0 u projektu s apsolutnim kotama |
+
+Napomene: AutoCAD se tokom testa dva puta zatvorio bez zapisa u dnevniku dodatka; u isto vrijeme se pojavio AMD-ov
+prozor za prijavu greške grafičkog drajvera. SketchUp 2026 nije testiran (veza s računarom prekinuta).
+
 ## Nije testirano
 
 * učitavanje i rad dodatka u AutoCAD-u 2020–2027;
