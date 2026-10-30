@@ -1,6 +1,6 @@
 # Izvještaj testiranja
 
-Datum: 30.10.2026. Verzija: 0.2.0 s bibliotekom 3D modela.
+Datum: 30.10.2026. Verzija: 0.2.0 s bibliotekom 3D modela, nakon cjelovitog pregleda.
 
 Okruženje:
 
@@ -22,15 +22,31 @@ Ovdje su upisani **samo stvarno dobijeni rezultati**. Ništa nije pokrenuto u Au
 | C# build – AutoCAD dodatak | net47 (R23, 2020), net48 (R24, 2021–2024), net8.0-windows (R25, 2025–2026), net10.0-windows (R26, 2027), protiv NuGet referentnih biblioteka AutoCAD.NET | 0 grešaka, 0 upozorenja u dodatku |
 | C# testovi (xUnit, net8.0) | 147 testnih slučajeva | 147 prošlo |
 | Primjer paketa | ponovo generisan i provjeren prema JSON shemama (manifest, geometrija, teren, izmjene) | ispravno |
-| Ruby testovi (minitest) | 93 testa, 6286 provjera | 93 prošlo |
+| Ruby testovi (minitest) | 104 testa, 6467 provjera | 104 prošlo |
 | Ruby 2.7 sintaksa | svaki `.rb` proširenja parsiran s `parser --27` (SketchUp 2022–2023) | sve ispravno |
 | HTML dijalozi | 41 provjera u Chromiumu nad generisanim podacima (uvoz, izvještaj, svojstva, biblioteka i postavke, biblioteka 3D modela) | 41 prošlo |
 | Biblioteka 3D modela | 253 modela: zatvorena tijela na 3 nivoa detalja, potpunost prema katalogu i specifikaciji (122 objekta, 14 kategorija), ispravan COLLADA i postojeće teksture | sve prošlo |
+| Parametri modela | `tools/assets/check_params.rb`: svaki od 1402 parametra svih 253 modela promijenjen, model ponovo izgrađen; parametar bez efekta je greška (osim pregledanog spiska opisnih) | 1402 provjereno, 0 bez efekta |
+| Registracija AutoCAD naredbi | `tools/check_commands.py`: svaka klasa s naredbama registrovana u `Plugin.cs` | 58 naredbi, 8 klasa |
+| Cijelo SketchUp proširenje | `test_ui_smoke.rb`: `main.rb` učitan kao u SketchUpu, svaka stavka menija i svaki poziv svakog dijaloga, alat za umetanje za svih 253 modela | prošlo |
 | COLLADA nezavisnim čitačem | `tools/assets/check_dae.js`: svaki `model.dae` učitan three.js ColladaLoaderom u Chromiumu, dimenzije upoređene s `asset.json` | 253 provjereno, 0 neusklađeno |
 | Pakovanje | `.bundle` (R23, R24, R25, R26), `.bundle.zip`, `.rbz` | napravljeno, nije instalirano |
 
 Napomena: net47 build zajedničke biblioteke je kompajliran, ali testovi nisu pokrenuti pod .NET Frameworkom (u
 kontejneru nema Mono/.NET Framework okruženja). Testovi rade pod .NET 8.
+
+## Greške pronađene pregledom i ispravljene
+
+| Gdje | Greška | Kako je otkrivena |
+|---|---|---|
+| AutoCAD 2021, SDPDRAW | naredba je pokretala `PLINE`/`RECTANG` iz koda → `eInvalidInput` i prozor greške | prijava korisnika |
+| AutoCAD | 15 naredbi (SDPPOMOC, SDPMAPIRANJE, SDPTEREN, SDPDATUM, SDPOPORAVAK …) „Unknown command": klase nisu bile registrovane | prijava korisnika; sada provjera pri izgradnji |
+| AutoCAD | `CommandContext` je hvatao samo neke vrste grešaka; ostale su rušile naredbu | pregled koda |
+| AutoCAD | 5 naredbi i rukovaoci događajima palete, trake i dijaloga mapiranja bez zaštite od grešaka | pregled koda |
+| AutoCAD | katalog iz instalacije se tražio u pogrešnom folderu (koristila se kopija iz DLL-a) | pregled putanja |
+| AutoCAD | ključne riječi mogle su se ispisati dvaput u komandnoj liniji; „Poništi" s kvačicom | pregled koda |
+| SketchUp | umetanje modela unutar grupe/komponente u uređivanju bilo je pomaknuto | pregled koda |
+| Modeli | visinski pomak (58 modela), materijal (35), dimenzije (40) i niz posebnih parametara nisu mijenjali model | nova provjera parametara |
 
 ## Nije testirano
 
@@ -72,7 +88,8 @@ kontejneru nema Mono/.NET Framework okruženja). Testovi rade pod .NET 8.
 | test_sample_and_changes.rb | 8 | primjer na svim nivoima, izmjene prema AutoCAD-u |
 | test_sketchup_adapter.rb | 12 | uvoz u lažni SketchUp API: organizacija, ažuriranje, konflikti, vraćanje pri grešci |
 | test_safety_and_terrain.rb | 9 | kopije i dnevnik, čitanje terena, gradnja terena, ažuriranje terena bez dupliranja |
-| test_asset_library.rb | 13 | biblioteka modela: 14 kategorija, model i pregled za svaki tip, pokrivenost specifikacije, COLLADA i teksture, zatvorena tijela za svaki model, umetanje, zamjena i uvoz DAE (lažni API) |
+| test_ui_smoke.rb | 8 | cijelo proširenje učitano kao u SketchUpu (lažni UI): meni, traka, ikone, sve naredbe, svi dijalozi i njihovi pozivi (imena usklađena sa stranicama), uvoz/ponovni uvoz, svojstva, biblioteka modela, alat za umetanje (rotacija, uređivanje unutar grupe), zamjena |
+| test_asset_library.rb | 16 | biblioteka modela: 14 kategorija, model i pregled za svaki tip, pokrivenost specifikacije, COLLADA i teksture, zatvorena tijela za svaki model, umetanje, zamjena i uvoz DAE (lažni API) |
 
 ## Postupak ručnog prihvatnog testa (u host aplikacijama)
 
