@@ -492,12 +492,27 @@ module Sketchup
     end
   end
 
+  class Texture
+    attr_accessor :size
+    attr_reader :filename
+
+    def initialize(filename)
+      @filename = filename
+    end
+  end
+
   class Material < Entity
-    attr_accessor :name, :color, :alpha, :texture
+    attr_accessor :name, :color, :alpha
+    attr_reader :texture
 
     def initialize(name)
       super()
       @name = name
+    end
+
+    # Like SketchUp: an existing image becomes a Texture, a missing file leaves the material untextured.
+    def texture=(file)
+      @texture = file && File.file?(file.to_s) ? Texture.new(file.to_s) : nil
     end
   end
 

@@ -129,6 +129,30 @@ def colour(key)
   [c[0] / 255.0, c[1] / 255.0, c[2] / 255.0, m && m['alpha'] ? m['alpha'] : 1.0]
 end
 
+TEXTURES = File.join(ROOT, 'sketchup-site-design-pro/src/pb_site_design_pro/textures')
+
+# Bundled texture of a material: [file name, tile size in metres] or nil.
+def texture(key)
+  m = MATERIALS.find { |x| x['key'] == key }
+  return nil unless m && m['texture'] && File.file?(File.join(TEXTURES, m['texture']))
+
+  [m['texture'], (m['textureSize'] || [1.0, 1.0]).map(&:to_f)]
+end
+
+# Planar (box) projection of a polygon's points by its dominant normal axis, in texture tiles.
+def planar_uv(points, size)
+  n = [0.0, 0.0, 0.0]
+  points.each_with_index do |p, i|
+    q = points[(i + 1) % points.length]
+    n[0] += (p[1] - q[1]) * (p[2] + q[2])
+    n[1] += (p[2] - q[2]) * (p[0] + q[0])
+    n[2] += (p[0] - q[0]) * (p[1] + q[1])
+  end
+  ax = n.map(&:abs).each_with_index.max[1]
+  u, v = { 0 => [1, 2], 1 => [0, 2], 2 => [0, 1] }[ax]
+  points.map { |q| [(q[u] / size[0]).round(5), (q[v] / size[1]).round(5)] }
+end
+
 def fmt(v)
   format('%.5f', v).sub(/\.?0+$/, '')
 end
@@ -137,6 +161,8 @@ end
 def write_dae(path, asset_id, polys_by_mat)
   geoms = []
   effects = []
+  images = []
+  used_textures = []
   mats = []
   nodes = []
   polys_by_mat.each_with_index do |(mat, polys), gi|
@@ -146,28 +172,62 @@ def write_dae(path, asset_id, polys_by_mat)
       key = p.map { |v| v.round(6) }
       index[key] ||= (verts << key; verts.length - 1)
     end
-    simple = polys.reject { |p| p.is_a?(Hash) }.map { |p| p.map(&vid) }
-    holed = polys.select { |p| p.is_a?(Hash) }.map { |p| [p[:outer].map(&vid), p[:holes].map { |h| h.map(&vid) }] }
+    tex = texture(mat)
+    uvs = []
+    uindex = {}
+    uid = ->(t) { uindex[t] ||= (uvs << t; uvs.length - 1) }
+    # with a texture every corner is "vertex uv" (offset 0 and 1), else just the vertex
+    ring = lambda do |pts, all_pts|
+      next pts.map(&vid) unless tex
+
+      pts.map(&vid).zip(planar_uv(all_pts, tex[1]).first(pts.length).map(&uid)).flatten
+    end
+    simple = polys.reject { |p| p.is_a?(Hash) }.map { |p| ring.call(p, p) }
+    holed = polys.select { |p| p.is_a?(Hash) }.map do |p|
+      outer_uv = tex ? planar_uv(p[:outer] + p[:holes].flatten(1), tex[1]) : nil
+      hole_rings = []
+      offset = p[:outer].length
+      p[:holes].each do |h|
+        hole_rings << (tex ? h.map(&vid).zip(outer_uv[offset, h.length].map(&uid)).flatten : h.map(&vid))
+        offset += h.length
+      end
+      [tex ? p[:outer].map(&vid).zip(outer_uv.first(p[:outer].length).map(&uid)).flatten : p[:outer].map(&vid), hole_rings]
+    end
     gid = "g#{gi}"
     mid = "m_#{mat.gsub(/[^A-Za-z0-9_]/, '_')}"
+    inputs = %(<input semantic="VERTEX" source="##{gid}-v" offset="0"/>) + (tex ? %(<input semantic="TEXCOORD" source="##{gid}-uv" offset="1" set="0"/>) : '')
+    stride = tex ? 2 : 1
     prims = []
     unless simple.empty?
-      prims << %(<polylist material="#{mid}" count="#{simple.length}"><input semantic="VERTEX" source="##{gid}-v" offset="0"/><vcount>#{simple.map(&:length).join(' ')}</vcount><p>#{simple.flatten.join(' ')}</p></polylist>)
+      prims << %(<polylist material="#{mid}" count="#{simple.length}">#{inputs}<vcount>#{simple.map { |r| r.length / stride }.join(' ')}</vcount><p>#{simple.flatten.join(' ')}</p></polylist>)
     end
     unless holed.empty?
       body = holed.map { |o, hs| "<ph><p>#{o.join(' ')}</p>#{hs.map { |h| "<h>#{h.join(' ')}</h>" }.join}</ph>" }.join
-      prims << %(<polygons material="#{mid}" count="#{holed.length}"><input semantic="VERTEX" source="##{gid}-v" offset="0"/>#{body}</polygons>)
+      prims << %(<polygons material="#{mid}" count="#{holed.length}">#{inputs}#{body}</polygons>)
     end
-    geoms << %(<geometry id="#{gid}"><mesh><source id="#{gid}-p"><float_array id="#{gid}-pa" count="#{verts.length * 3}">#{verts.flatten.map { |v| fmt(v) }.join(' ')}</float_array><technique_common><accessor source="##{gid}-pa" count="#{verts.length}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source><vertices id="#{gid}-v"><input semantic="POSITION" source="##{gid}-p"/></vertices>#{prims.join}</mesh></geometry>)
+    uv_src = tex ? %(<source id="#{gid}-uv"><float_array id="#{gid}-uva" count="#{uvs.length * 2}">#{uvs.flatten.map { |v| fmt(v) }.join(' ')}</float_array><technique_common><accessor source="##{gid}-uva" count="#{uvs.length}" stride="2"><param name="S" type="float"/><param name="T" type="float"/></accessor></technique_common></source>) : ''
+    geoms << %(<geometry id="#{gid}"><mesh><source id="#{gid}-p"><float_array id="#{gid}-pa" count="#{verts.length * 3}">#{verts.flatten.map { |v| fmt(v) }.join(' ')}</float_array><technique_common><accessor source="##{gid}-pa" count="#{verts.length}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>#{uv_src}<vertices id="#{gid}-v"><input semantic="POSITION" source="##{gid}-p"/></vertices>#{prims.join}</mesh></geometry>)
     r, g, b, a = colour(mat)
-    effects << %(<effect id="#{mid}-fx"><profile_COMMON><technique sid="common"><lambert><diffuse><color>#{fmt(r)} #{fmt(g)} #{fmt(b)} 1</color></diffuse>#{a < 1 ? "<transparency><float>#{fmt(a)}</float></transparency>" : ''}</lambert></technique></profile_COMMON></effect>)
+    if tex
+      images << %(<image id="#{mid}-img" name="#{tex[0]}"><init_from>#{tex[0]}</init_from></image>)
+      used_textures << tex[0]
+    end
+    diffuse = if tex
+                %(<texture texture="#{mid}-sampler" texcoord="UVSET0"/>)
+              else
+                %(<color>#{fmt(r)} #{fmt(g)} #{fmt(b)} 1</color>)
+              end
+    params = tex ? %(<newparam sid="#{mid}-surface"><surface type="2D"><init_from>#{mid}-img</init_from></surface></newparam><newparam sid="#{mid}-sampler"><sampler2D><source>#{mid}-surface</source></sampler2D></newparam>) : ''
+    effects << %(<effect id="#{mid}-fx"><profile_COMMON>#{params}<technique sid="common"><lambert><diffuse>#{diffuse}</diffuse>#{a < 1 ? "<transparency><float>#{fmt(a)}</float></transparency>" : ''}</lambert></technique></profile_COMMON></effect>)
     mats << %(<material id="#{mid}" name="#{mat}"><instance_effect url="##{mid}-fx"/></material>)
-    nodes << %(<node id="n#{gi}" name="#{mat}"><instance_geometry url="##{gid}"><bind_material><technique_common><instance_material symbol="#{mid}" target="##{mid}"/></technique_common></bind_material></instance_geometry></node>)
+    bind = tex ? %(<bind_vertex_input semantic="UVSET0" input_semantic="TEXCOORD" input_set="0"/>) : ''
+    nodes << %(<node id="n#{gi}" name="#{mat}"><instance_geometry url="##{gid}"><bind_material><technique_common><instance_material symbol="#{mid}" target="##{mid}">#{bind}</instance_material></technique_common></bind_material></instance_geometry></node>)
   end
   File.write(path, <<~DAE)
     <?xml version="1.0" encoding="utf-8"?>
     <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
     <asset><contributor><authoring_tool>Vanjsko uređenje PRO #{ProjektniBiro::SiteDesignPro::VERSION}</authoring_tool></contributor><created>2026-01-01T00:00:00Z</created><modified>2026-01-01T00:00:00Z</modified><unit name="meter" meter="1"/><up_axis>Z_UP</up_axis></asset>
+    <library_images>#{images.join}</library_images>
     <library_effects>#{effects.join}</library_effects>
     <library_materials>#{mats.join}</library_materials>
     <library_geometries>#{geoms.join}</library_geometries>
@@ -175,12 +235,15 @@ def write_dae(path, asset_id, polys_by_mat)
     <scene><instance_visual_scene url="#scene"/></scene>
     </COLLADA>
   DAE
+  used_textures.each { |f| FileUtils.cp(File.join(TEXTURES, f), File.join(File.dirname(path), f)) }
+  used_textures
 end
 
 # Triangle mesh for the preview renderer: { mat => { c: rgba, p: [[outer, holes], ...] } }.
 def write_mesh_json(path, polys_by_mat)
   data = polys_by_mat.to_h do |mat, polys|
-    [mat, { 'c' => colour(mat), 'p' => polys.map { |p| p.is_a?(Hash) ? [p[:outer].map { |q| q.map { |v| v.round(4) } }, p[:holes].map { |h| h.map { |q| q.map { |v| v.round(4) } } }] : [p.map { |q| q.map { |v| v.round(4) } }, []] } }]
+    tex = texture(mat)
+    [mat, { 'c' => colour(mat), 't' => tex&.first, 's' => tex&.last, 'p' => polys.map { |p| p.is_a?(Hash) ? [p[:outer].map { |q| q.map { |v| v.round(4) } }, p[:holes].map { |h| h.map { |q| q.map { |v| v.round(4) } } }] : [p.map { |q| q.map { |v| v.round(4) } }, []] } }]
   end
   File.write(path, JSON.generate(data))
 end
@@ -207,7 +270,7 @@ TYPES.each do |t|
   polys = flatten(canvas)
   dir = File.join(OUT, folder, t['id'])
   FileUtils.mkdir_p(dir)
-  write_dae(File.join(dir, 'model.dae'), t['id'], polys)
+  textures = write_dae(File.join(dir, 'model.dae'), t['id'], polys)
   write_mesh_json(File.join(dir, 'mesh.json'), polys)
   min, max = bbox(polys) || [[0, 0, 0], [0, 0, 0]]
   status = if !errors.empty? || !solid.empty? then :blocked
@@ -220,7 +283,7 @@ TYPES.each do |t|
     'subcategory' => t['subcategory'], 'geometry' => element.kind, 'builder' => t['builder'],
     'specObjects' => spec_refs[t['id']],
     'model' => model ? { 'kind' => 'custom', 'generator' => "Models #{t['id']} v#{model.version}" } : { 'kind' => 'generic', 'generator' => "Builder #{t['builder']}" },
-    'files' => { 'model' => 'model.dae', 'preview' => 'preview.png' },
+    'files' => { 'model' => 'model.dae', 'preview' => 'preview.png', 'textures' => textures },
     'units' => 'm', 'insertionPoint' => element.kind == 'point' ? 'tačka umetanja = podnožje objekta, +X = smjer elementa' : 'uzorak u lokalnim koordinatama (0,0,0)',
     'dimensions' => { 'x' => (max[0] - min[0]).round(3), 'y' => (max[1] - min[1]).round(3), 'z' => (max[2] - min[2]).round(3), 'zMin' => min[2].round(3) },
     'materials' => polys.keys.sort, 'polygons' => polys.values.sum(&:length),

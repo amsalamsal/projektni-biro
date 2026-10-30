@@ -231,6 +231,34 @@
       "name": "Lišće svijetlo"
     },
     {
+      "key": "plastic_red",
+      "name": "Plastika crvena (igralište)"
+    },
+    {
+      "key": "plastic_yellow",
+      "name": "Plastika žuta (igralište)"
+    },
+    {
+      "key": "plastic_blue",
+      "name": "Plastika plava (igralište)"
+    },
+    {
+      "key": "rope",
+      "name": "Uže / mreža"
+    },
+    {
+      "key": "rubber_black",
+      "name": "Guma crna"
+    },
+    {
+      "key": "stainless",
+      "name": "Nehrđajući čelik"
+    },
+    {
+      "key": "screen_display",
+      "name": "Ekran"
+    },
+    {
       "key": "bark",
       "name": "Kora"
     },

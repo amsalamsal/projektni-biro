@@ -16,12 +16,14 @@ const page_html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>html,
 const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(${size}, ${size}); renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-window.renderAsset = (data) => {
+window.renderAsset = async (data) => {
+  const loadTex = (url, s) => new Promise((res) => { const img = new Image(); img.onload = () => { const t = new THREE.Texture(img);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.needsUpdate = true; res(t); }; img.onerror = () => res(null); img.src = url; });
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0xf4f5f2);
   const root = new THREE.Group(); root.rotation.x = -Math.PI / 2; scene.add(root); // Z up -> Y up
   const box = new THREE.Box3();
   for (const key of Object.keys(data)) {
-    const m = data[key]; const pos = [];
+    const m = data[key]; const pos = []; const uv = []; const ts = m.s || [1, 1];
     for (const [outer, holes] of m.p) {
       // triangulate in the polygon plane (handles concave outlines and holes)
       const all = [outer, ...holes]; const a = outer;
@@ -36,11 +38,14 @@ window.renderAsset = (data) => {
       if (a.length === 3 && holes.length === 0) tris = [[0, 1, 2]];
       else tris = THREE.ShapeUtils.triangulateShape(outer.map(to2), holes.map(h => h.map(to2)));
       const flat = all.flat();
-      for (const t of tris) for (const i of t) pos.push(...flat[i]);
+      const ax = [Math.abs(n.x), Math.abs(n.y), Math.abs(n.z)]; const d = ax.indexOf(Math.max(...ax));
+      const [iu, iv] = d === 0 ? [1, 2] : d === 1 ? [0, 2] : [0, 1];
+      for (const t of tris) for (const i of t) { pos.push(...flat[i]); uv.push(flat[i][iu] / ts[0], flat[i][iv] / ts[1]); }
     }
     if (!pos.length) continue;
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
-    const c = m.c; const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(c[0], c[1], c[2]).convertSRGBToLinear(), roughness: 0.85, metalness: 0.05,
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.computeVertexNormals();
+    const map = m.img ? await loadTex(m.img) : null;
+    const c = m.c; const mat = new THREE.MeshStandardMaterial({ map, color: map ? 0xffffff : new THREE.Color(c[0], c[1], c[2]).convertSRGBToLinear(), roughness: 0.85, metalness: 0.05,
       transparent: c[3] < 1, opacity: c[3], side: THREE.DoubleSide, flatShading: false });
     const mesh = new THREE.Mesh(g, mat); mesh.castShadow = true; mesh.receiveShadow = true; root.add(mesh);
   }
@@ -59,7 +64,7 @@ window.renderAsset = (data) => {
   cam.position.copy(centre).addScaledVector(dir, r / Math.sin(THREE.MathUtils.degToRad(15)) * 1.08);
   cam.lookAt(centre);
   renderer.render(scene, cam);
-  scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  scene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
   return true;
 };
 </script></body></html>`;
@@ -77,6 +82,10 @@ window.renderAsset = (data) => {
       const meshFile = path.join(fdir, id, 'mesh.json');
       if (!fs.existsSync(meshFile)) continue;
       const data = JSON.parse(fs.readFileSync(meshFile, 'utf8'));
+      for (const m of Object.values(data)) {
+        const tf = m.t && path.join(fdir, id, m.t);
+        if (tf && fs.existsSync(tf)) m.img = 'data:image/jpeg;base64,' + fs.readFileSync(tf).toString('base64');
+      }
       await page.evaluate((d) => window.renderAsset(d), data);
       await page.locator('#c').screenshot({ path: path.join(fdir, id, 'preview.png') });
       n++;

@@ -2228,7 +2228,12 @@
         174,
         166
       ],
-      "nameEn": "Concrete paving"
+      "nameEn": "Concrete paving",
+      "texture": "concrete_paver.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
     },
     {
       "key": "natural_stone",
@@ -2238,7 +2243,12 @@
         186,
         168
       ],
-      "nameEn": "Natural stone paving"
+      "nameEn": "Natural stone paving",
+      "texture": "natural_stone.jpg",
+      "textureSize": [
+        1.5,
+        1.5
+      ]
     },
     {
       "key": "porcelain",
@@ -2248,7 +2258,12 @@
         202,
         192
       ],
-      "nameEn": "Porcelain tiles"
+      "nameEn": "Porcelain tiles",
+      "texture": "porcelain.jpg",
+      "textureSize": [
+        1.2,
+        1.2
+      ]
     },
     {
       "key": "asphalt",
@@ -2258,7 +2273,12 @@
         72,
         74
       ],
-      "nameEn": "Asphalt"
+      "nameEn": "Asphalt",
+      "texture": "asphalt.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "asphalt_red",
@@ -2268,7 +2288,12 @@
         64,
         52
       ],
-      "nameEn": "Coloured asphalt (cycle)"
+      "nameEn": "Coloured asphalt (cycle)",
+      "texture": "asphalt_red.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "permeable_paver",
@@ -2278,7 +2303,12 @@
         150,
         136
       ],
-      "nameEn": "Permeable paving"
+      "nameEn": "Permeable paving",
+      "texture": "permeable_paver.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
     },
     {
       "key": "grass_grid",
@@ -2288,7 +2318,12 @@
         146,
         92
       ],
-      "nameEn": "Grass grid"
+      "nameEn": "Grass grid",
+      "texture": "grass_grid.jpg",
+      "textureSize": [
+        0.6,
+        0.6
+      ]
     },
     {
       "key": "gravel",
@@ -2298,7 +2333,12 @@
         178,
         158
       ],
-      "nameEn": "Gravel / aggregate"
+      "nameEn": "Gravel / aggregate",
+      "texture": "gravel.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "rubber",
@@ -2308,7 +2348,12 @@
         72,
         58
       ],
-      "nameEn": "Rubber safety surface"
+      "nameEn": "Rubber safety surface",
+      "texture": "rubber.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "tactile",
@@ -2318,7 +2363,12 @@
         186,
         54
       ],
-      "nameEn": "Tactile paving"
+      "nameEn": "Tactile paving",
+      "texture": "tactile.jpg",
+      "textureSize": [
+        0.6,
+        0.6
+      ]
     },
     {
       "key": "soil",
@@ -2328,7 +2378,12 @@
         80,
         60
       ],
-      "nameEn": "Planting soil"
+      "nameEn": "Planting soil",
+      "texture": "soil.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
     },
     {
       "key": "terrain",
@@ -2338,7 +2393,12 @@
         152,
         118
       ],
-      "nameEn": "Terrain"
+      "nameEn": "Terrain",
+      "texture": "terrain.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
     },
     {
       "key": "mulch",
@@ -2348,7 +2408,12 @@
         88,
         62
       ],
-      "nameEn": "Bark mulch"
+      "nameEn": "Bark mulch",
+      "texture": "mulch.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
     },
     {
       "key": "sand",
@@ -2358,7 +2423,12 @@
         208,
         166
       ],
-      "nameEn": "Play sand"
+      "nameEn": "Play sand",
+      "texture": "sand.jpg",
+      "textureSize": [
+        0.8,
+        0.8
+      ]
     },
     {
       "key": "timber_deck",
@@ -2368,7 +2438,12 @@
         118,
         80
       ],
-      "nameEn": "Timber decking"
+      "nameEn": "Timber decking",
+      "texture": "timber_deck.jpg",
+      "textureSize": [
+        1.2,
+        1.2
+      ]
     },
     {
       "key": "timber",
@@ -2378,7 +2453,12 @@
         108,
         72
       ],
-      "nameEn": "Timber"
+      "nameEn": "Timber",
+      "texture": "timber.jpg",
+      "textureSize": [
+        0.6,
+        0.6
+      ]
     },
     {
       "key": "grass",
@@ -2388,7 +2468,12 @@
         152,
         72
       ],
-      "nameEn": "Lawn"
+      "nameEn": "Lawn",
+      "texture": "grass.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "meadow",
@@ -2398,7 +2483,12 @@
         166,
         92
       ],
-      "nameEn": "Meadow"
+      "nameEn": "Meadow",
+      "texture": "meadow.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "sedum",
@@ -2408,7 +2498,12 @@
         150,
         84
       ],
-      "nameEn": "Green roof (sedum)"
+      "nameEn": "Green roof (sedum)",
+      "texture": "sedum.jpg",
+      "textureSize": [
+        0.6,
+        0.6
+      ]
     },
     {
       "key": "planting_mixed",
@@ -2418,7 +2513,12 @@
         132,
         70
       ],
-      "nameEn": "Planting (mixed)"
+      "nameEn": "Planting (mixed)",
+      "texture": "planting_mixed.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "planting_flowers",
@@ -2428,7 +2528,12 @@
         112,
         150
       ],
-      "nameEn": "Planting (flowering)"
+      "nameEn": "Planting (flowering)",
+      "texture": "planting_flowers.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage",
@@ -2439,7 +2544,12 @@
         70
       ],
       "alpha": 0.92,
-      "nameEn": "Foliage (deciduous)"
+      "nameEn": "Foliage (deciduous)",
+      "texture": "foliage.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage_evergreen",
@@ -2450,7 +2560,12 @@
         60
       ],
       "alpha": 0.95,
-      "nameEn": "Foliage (evergreen)"
+      "nameEn": "Foliage (evergreen)",
+      "texture": "foliage_evergreen.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage_fruit",
@@ -2461,7 +2576,12 @@
         70
       ],
       "alpha": 0.92,
-      "nameEn": "Foliage (fruit tree)"
+      "nameEn": "Foliage (fruit tree)",
+      "texture": "foliage_fruit.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "flower_red",
@@ -2541,7 +2661,12 @@
         92,
         46
       ],
-      "nameEn": "Foliage dark"
+      "nameEn": "Foliage dark",
+      "texture": "foliage_dark.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
     },
     {
       "key": "foliage_light",
@@ -2551,7 +2676,82 @@
         156,
         70
       ],
-      "nameEn": "Foliage light"
+      "nameEn": "Foliage light",
+      "texture": "foliage_light.jpg",
+      "textureSize": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "key": "plastic_red",
+      "name": "Plastika crvena (igralište)",
+      "color": [
+        200,
+        52,
+        44
+      ],
+      "nameEn": "Plastic red"
+    },
+    {
+      "key": "plastic_yellow",
+      "name": "Plastika žuta (igralište)",
+      "color": [
+        238,
+        184,
+        32
+      ],
+      "nameEn": "Plastic yellow"
+    },
+    {
+      "key": "plastic_blue",
+      "name": "Plastika plava (igralište)",
+      "color": [
+        40,
+        104,
+        176
+      ],
+      "nameEn": "Plastic blue"
+    },
+    {
+      "key": "rope",
+      "name": "Uže / mreža",
+      "color": [
+        176,
+        150,
+        108
+      ],
+      "nameEn": "Rope net"
+    },
+    {
+      "key": "rubber_black",
+      "name": "Guma crna",
+      "color": [
+        36,
+        36,
+        38
+      ],
+      "nameEn": "Black rubber"
+    },
+    {
+      "key": "stainless",
+      "name": "Nehrđajući čelik",
+      "color": [
+        196,
+        200,
+        204
+      ],
+      "nameEn": "Stainless steel"
+    },
+    {
+      "key": "screen_display",
+      "name": "Ekran",
+      "color": [
+        24,
+        40,
+        56
+      ],
+      "nameEn": "Display screen"
     },
     {
       "key": "bark",
@@ -2561,7 +2761,12 @@
         74,
         56
       ],
-      "nameEn": "Bark"
+      "nameEn": "Bark",
+      "texture": "bark.jpg",
+      "textureSize": [
+        0.4,
+        0.4
+      ]
     },
     {
       "key": "water",
@@ -2572,7 +2777,12 @@
         206
       ],
       "alpha": 0.55,
-      "nameEn": "Water"
+      "nameEn": "Water",
+      "texture": "water.jpg",
+      "textureSize": [
+        2.0,
+        2.0
+      ]
     },
     {
       "key": "pool_finish",
@@ -2582,7 +2792,12 @@
         214,
         226
       ],
-      "nameEn": "Pool finish"
+      "nameEn": "Pool finish",
+      "texture": "pool_finish.jpg",
+      "textureSize": [
+        0.6,
+        0.6
+      ]
     },
     {
       "key": "pond_liner",
@@ -2602,7 +2817,12 @@
         170,
         166
       ],
-      "nameEn": "Concrete"
+      "nameEn": "Concrete",
+      "texture": "concrete.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "concrete_precast",
@@ -2612,7 +2832,12 @@
         150,
         146
       ],
-      "nameEn": "Precast concrete"
+      "nameEn": "Precast concrete",
+      "texture": "concrete_precast.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "concrete_slab",
@@ -2622,7 +2847,12 @@
         194,
         188
       ],
-      "nameEn": "Concrete slabs"
+      "nameEn": "Concrete slabs",
+      "texture": "concrete_slab.jpg",
+      "textureSize": [
+        1.2,
+        1.2
+      ]
     },
     {
       "key": "stone_wall",
@@ -2632,7 +2862,12 @@
         150,
         132
       ],
-      "nameEn": "Stone masonry"
+      "nameEn": "Stone masonry",
+      "texture": "stone_wall.jpg",
+      "textureSize": [
+        1.2,
+        1.2
+      ]
     },
     {
       "key": "brick",
@@ -2642,7 +2877,12 @@
         92,
         70
       ],
-      "nameEn": "Brick"
+      "nameEn": "Brick",
+      "texture": "brick.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "gabion",
@@ -2652,7 +2892,12 @@
         132,
         118
       ],
-      "nameEn": "Gabion"
+      "nameEn": "Gabion",
+      "texture": "gabion.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "steel_galv",
@@ -2714,7 +2959,12 @@
         46,
         78
       ],
-      "nameEn": "Solar PV module"
+      "nameEn": "Solar PV module",
+      "texture": "solar_pv.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "plastic_dark",
@@ -2814,7 +3064,12 @@
         112,
         150
       ],
-      "nameEn": "Sports court acrylic"
+      "nameEn": "Sports court acrylic",
+      "texture": "acrylic_court.jpg",
+      "textureSize": [
+        1.0,
+        1.0
+      ]
     },
     {
       "key": "sign_plate",
