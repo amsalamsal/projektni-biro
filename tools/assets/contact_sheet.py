@@ -22,7 +22,7 @@ for i, d in enumerate(items):
     im = Image.open(os.path.join(base, d, 'preview.png')).convert('RGB').resize((tile, tile))
     x, y = (i % cols) * tile, (i // cols) * (tile + cap)
     sheet.paste(im, (x, y))
-    mark = '' if a['model']['kind'] == 'custom' else '  [GENERIČKI]'
+    mark = {'custom': '', 'parametric': '  [PARAMETARSKI]'}.get(a['model']['kind'], '  [GENERIČKI]')
     draw.text((x + 4, y + tile + 2), a['name'][:34], fill=(0, 0, 0), font=font)
     draw.text((x + 4, y + tile + 18), (d + mark)[:40], fill=(150, 0, 0) if mark else (90, 90, 90), font=font)
 sheet.save(out)

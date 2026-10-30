@@ -12,6 +12,12 @@ class TestBuilders < Minitest::Test
     [canvas, node, ctx, pkg.elements.first]
   end
 
+  # Points of a named mesh (rings with holes included).
+  def mesh_points(canvas, name)
+    mesh = canvas.find_all { |n| n.kind == :mesh && n.name == name }.first
+    mesh.polygons.flat_map { |p| p.is_a?(Hash) ? p[:outer] + p[:holes].flatten(1) : p }
+  end
+
   def bbox(canvas, node)
     canvas.bounds(node).map { |v| v.map { |x| x.round(6) } }
   end
@@ -197,10 +203,12 @@ class TestBuilders < Minitest::Test
 
   def test_pool_has_walls_floor_and_water
     canvas, node, = build_one('water.swimming_pool', parameters: { 'depth' => 1.5, 'waterLevelOffset' => 0.1, 'wallThickness' => 0.25, 'floorThickness' => 0.25 })
-    min, max = bbox(canvas, node)
+    min, = bbox(canvas, node)
     assert_in_delta(-1.75, min[2], 1e-9)
-    assert_in_delta 0.0, max[2], 1e-9
-    assert_in_delta 8.5, max[0] - min[0], 1e-9
+    shell = mesh_points(canvas, 'Zidovi bazena') + mesh_points(canvas, 'Obloga ruba')
+    assert_in_delta 0.0, shell.map { |p| p[2] }.max, 1e-9, 'coping top = pool edge level'
+    assert_in_delta 8.5, shell.map { |p| p[0] }.max - shell.map { |p| p[0] }.min, 1e-9
+    refute_nil canvas.find('Ljestve'), 'swimming pool has a ladder'
     water = canvas.find('Voda')
     assert_in_delta(-0.1, water.polygons.flatten(1).map { |p| p[2] }.max, 1e-9)
   end
@@ -229,12 +237,15 @@ class TestBuilders < Minitest::Test
 
   def test_steps_and_ramp_rise
     canvas, node, = build_one('level.steps', parameters: { 'totalRise' => 0.6, 'riserHeight' => 0.15 })
-    assert_in_delta 0.6, canvas.bounds(node)[1][2], 1e-9
-    assert_match(/4 stepenika/, canvas.find_all { |n| n.kind == :mesh }.first.name)
-    canvas, node, = build_one('level.ramp', parameters: { 'rise' => 0.3, 'thickness' => 0.2 })
-    min, max = canvas.bounds(node)
-    assert_in_delta 0.3, max[2], 1e-9
-    assert_in_delta(-0.2, min[2], 1e-9)
+    flight = canvas.find_all { |n| n.kind == :mesh }.first
+    assert_match(/4 stepenika/, flight.name)
+    assert_in_delta 0.6, flight.polygons.flatten(1).map { |p| p[2] }.max, 1e-9
+    assert_in_delta 0.6 + 0.9, canvas.bounds(node)[1][2], 0.03, 'handrail 0.9 m above the top nosing'
+    canvas, = build_one('level.ramp', parameters: { 'rise' => 0.3, 'thickness' => 0.2 })
+    zs = mesh_points(canvas, 'Rampa').map { |p| p[2] }
+    assert_in_delta 0.3, zs.max, 1e-9
+    assert_in_delta(-0.2, zs.min, 1e-9)
+    refute_nil canvas.find('Rukohvat')
   end
 
   def test_basin_slopes_and_water

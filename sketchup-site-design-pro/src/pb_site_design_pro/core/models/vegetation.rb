@@ -186,6 +186,7 @@ module ProjektniBiro
           'landscape.perennials' => { spacing: 0.5, kinds: [[:flower, %w[flower_violet]], [:flower, %w[flower_white]], [:mound, 'foliage_light']] },
           'landscape.ground_cover' => { spacing: 0.35, kinds: [[:mat, 'foliage'], [:mat, 'foliage_dark'], [:mat, 'foliage_light']] },
           'landscape.meadow' => { spacing: 0.4, kinds: [[:grass, 'meadow'], [:flower, %w[flower_yellow flower_white]], [:grass, 'grass']] },
+          'landscape.planting_bed' => { spacing: 0.55, kinds: [[:mound, 'foliage'], [:flower, %w[flower_white]], [:grass, 'grass_blade'], [:mound, 'foliage_dark']] },
           'landscape.green_roof' => { spacing: 0.3, height: 0.12, kinds: [[:mat, 'sedum'], [:mat, 'foliage_light'], [:flower, %w[flower_pink]]] }
         }.freeze
 
@@ -208,7 +209,7 @@ module ProjektniBiro
           k.prism(outer, z - soil, z, k.mat('soilMaterial', 'soil'), 'Supstrat', holes: holes)
           return if k.detail.zero?
 
-          h = spec[:height] || e.num('plantHeight', 0.6)
+          h = spec[:height] || (e.num('plantHeight', 0.0).positive? ? e.num('plantHeight', 0.0) : 0.5)
           spacing = e.num('plantSpacing', 0.0).positive? ? e.num('plantSpacing', 0.0) : spec[:spacing]
           spacing *= 1.4 if k.detail == 1
           k.scatter(outer, holes, spacing, inset: spacing * 0.3).each_with_index do |(x, y), i|

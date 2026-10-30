@@ -35,8 +35,10 @@ FOLDERS = {
   'decorative' => 'Decorative', 'information' => 'Information_Security'
 }.freeze
 # drawing aids, zones and references are not 3D models
-NOT_MODELS = %w[zone circle_zone outline marker massing arrow_marking].freeze
-EXCLUDED = %w[road.swept_path_placeholder].freeze
+NOT_MODELS = %w[zone circle_zone outline marker massing].freeze
+EXCLUDED = %w[road.swept_path_placeholder utility.trench utility.service_corridor].freeze
+# Builders whose parametric geometry already is the real object (textured surfaces, strips, paint, pipes).
+PARAMETRIC_REAL = %w[slab linear_slab stripes pipe].freeze
 
 STATUS = {
   not_started: ['Not started', 'Nije započeto'], custom: ['Custom model created', 'Napravljen vlastiti model'],
@@ -273,8 +275,9 @@ TYPES.each do |t|
   textures = write_dae(File.join(dir, 'model.dae'), t['id'], polys)
   write_mesh_json(File.join(dir, 'mesh.json'), polys)
   min, max = bbox(polys) || [[0, 0, 0], [0, 0, 0]]
+  real = !model && PARAMETRIC_REAL.include?(t['builder'])
   status = if !errors.empty? || !solid.empty? then :blocked
-           elsif model then :imported
+           elsif model || real then :imported
            else :not_started
            end
   cat = CATEGORIES.find { |c| c['id'] == t['category'] }
@@ -282,12 +285,18 @@ TYPES.each do |t|
     'assetId' => t['id'], 'name' => t['name'], 'nameEn' => t['nameEn'], 'folder' => folder, 'category' => cat ? cat['name'] : t['category'],
     'subcategory' => t['subcategory'], 'geometry' => element.kind, 'builder' => t['builder'],
     'specObjects' => spec_refs[t['id']],
-    'model' => model ? { 'kind' => 'custom', 'generator' => "Models #{t['id']} v#{model.version}" } : { 'kind' => 'generic', 'generator' => "Builder #{t['builder']}" },
+    'model' => if model then { 'kind' => 'custom', 'generator' => "Models #{t['id']} v#{model.version}" }
+               elsif real then { 'kind' => 'parametric', 'generator' => "Builder #{t['builder']}" }
+               else { 'kind' => 'generic', 'generator' => "Builder #{t['builder']}" }
+               end,
     'files' => { 'model' => 'model.dae', 'preview' => 'preview.png', 'textures' => textures },
     'units' => 'm', 'insertionPoint' => element.kind == 'point' ? 'tačka umetanja = podnožje objekta, +X = smjer elementa' : 'uzorak u lokalnim koordinatama (0,0,0)',
     'dimensions' => { 'x' => (max[0] - min[0]).round(3), 'y' => (max[1] - min[1]).round(3), 'z' => (max[2] - min[2]).round(3), 'zMin' => min[2].round(3) },
     'materials' => polys.keys.sort, 'polygons' => polys.values.sum(&:length),
-    'source' => model ? 'Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)' : 'Generički parametarski prikaz (nije realističan model)',
+    'source' => if model then 'Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)'
+                elsif real then 'Parametarska površina/trasa u stvarnim dimenzijama, s materijalom i teksturom (Vanjsko uređenje PRO)'
+                else 'Generički parametarski prikaz (nije realističan model)'
+                end,
     'license' => 'Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana',
     'sketchup' => 'SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)',
     'status' => STATUS[status][0], 'statusBs' => STATUS[status][1], 'testedInSketchUp' => false,
