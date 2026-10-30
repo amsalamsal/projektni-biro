@@ -894,7 +894,46 @@ Ponovno pokretanje osvježava postojeće scene.
 Uključuje ili isključuje: skriva površine i prikazuje ukopane instalacije (šahtovi, cijevi, podzemni kontejneri) u
 X-ray prikazu.
 
-### 8.7 Biblioteka i postavke...
+### 8.7 Biblioteka 3D modela...
+Lokalna biblioteka realističnih 3D modela za svaki objekt iz kataloga (253 modela u 14 kategorija). Radi bez interneta;
+datoteke su u folderu proširenja `pb_site_design_pro/Assets/<Kategorija>/<ID modela>/`.
+
+**Prozor:**
+* **lijevo** – 14 kategorija (Infrastruktura i površine, Saobraćaj i mobilnost, Biciklistička infrastruktura, Vodeni
+  elementi, Zelenilo i sadnja, Komunalna infrastruktura, Rasvjeta, Ograde i zidovi, Nadstrešnice i zasjena, Mobilijar i
+  rekreacija, Eko tehnologije, Vanjski klimatski sistemi, Dekorativni elementi, Informativni i sigurnosni sistemi) s
+  brojem modela;
+* **sredina** – podkategorije (dugmad iznad), pretraga po nazivu ili ID-u (traži kroz sve kategorije), ☑ *U ovom
+  modelu* i mreža pregleda (slike);
+* **desno** – odabrani model: velika slika, kategorija/podkategorija, vrsta (tačkasti, linijski, površinski),
+  dimenzije uzorka, **veza s AutoCAD-om** (ID modela = tip elementa koji nosi svaki AutoCAD element), vrsta modela, status, **izvor i licenca**, materijali,
+  broj u modelu i obrazac **parametara** (dužina, visina, materijal…).
+
+**Dugmad:**
+* **Umetni u model**
+  * *tačkasti* model (klupa, stub, kontejner…): pokazivač postaje alat za umetanje. Klik = umetni (ponavlja se dok ne
+    pritisnete Esc), **strelice lijevo/desno** = rotacija ±15°, ili upišite ugao u stepenima pa Enter. Plavi okvir
+    pokazuje tlocrt, crvena linija smjer (+X) modela.
+  * *linijski* model (zid, ograda, živica, kanal…): ako su u modelu odabrane **ivice** koje čine jednu liniju, model se
+    izrađuje duž njih; inače klik umeće uzorak zadane dužine.
+  * *površinski* model (bazen, pergola, popločanje, gredica…): ako je odabrano **lice**, model dobija njegovu konturu
+    (s otvorima); inače klik umeće pravougaonik zadane širine i dubine.
+* **Zamijeni odabrano** – zamjenjuje odabrane elemente ovim modelom na istom mjestu, s istom rotacijom i oznakom. Radi
+  za elemente umetnute iz biblioteke i za obične komponente/grupe. Elemente iz AutoCAD paketa **ne mijenja** (tip se
+  mijenja u AutoCAD-u, ili tipu dodijelite komponentu u *Biblioteka i postavke*) – to se navodi u poruci.
+* **Uvezi DAE** – uvozi `model.dae` SketchUpovim uvozom (kao nezavisnu komponentu, bez parametara).
+* **Otvori folder** – otvara folder modela (`model.dae`, `asset.json`, `preview.jpg`).
+* **Odaberi** (u redu *U ovom modelu*) – odabire sve elemente tog tipa.
+
+**Važno:**
+* Umetnuti model nosi tip, parametre i geometriju kao uvezeni element, pa ga mijenjate u **Svojstva elementa**.
+* Elementi iz biblioteke nisu dio AutoCAD projekta i **ne šalju se** naredbom *Izvoz izmjena za AutoCAD*.
+* Nivo detalja umetanja je onaj iz *Biblioteka i postavke → Postavke*.
+* Ponovljeni dijelovi (biljke u gredici, stubovi ograde) su komponente, pa model ostaje malen.
+* Ako datoteka modela nedostaje, to se piše u dnu prozora i dugme *Umetni* je onemogućeno – model se nikad ne
+  zamjenjuje drugim.
+
+### 8.8 Biblioteka i postavke...
 * **Tipovi elemenata**:
   * pretraga;
   * filter: *Sve kategorije* / *U ovom modelu* / *Omiljeni* (☆ klik);
@@ -911,15 +950,15 @@ X-ray prikazu.
   * sigurnosne kopije: uključeno, broj kopija po modelu, najveća starost u danima (0 = bez ograničenja);
   * **Sačuvaj postavke**.
 
-### 8.8 Izvještaj posljednjeg uvoza, Otvori dnevnik (log), O programu
+### 8.9 Izvještaj posljednjeg uvoza, Otvori dnevnik (log), O programu
 * izvještaj ponovo prikazuje zadnji uvoz;
 * dnevnik (`site_design_pro.log`) – pošaljite ga uz prijavu problema;
 * *O programu* – verzija.
 
-### 8.9 Sigurnosne kopije i oporavak...
+### 8.10 Sigurnosne kopije i oporavak...
 Lista prekinutih operacija (npr. SketchUp se srušio tokom uvoza) i sigurnosnih kopija modela.
 
-### 8.10 Organizacija modela
+### 8.11 Organizacija modela
 * Korijenska grupa projekta → grupa po modelskoj grupi (oznake/tagovi `VU Objekti`, `VU Zelenilo`, `VU Parter`…) →
   elementi.
 * Ponovljeni elementi (stabla, parking) su **komponente**: jedna definicija, mnogo instanci, mala datoteka.

@@ -37,7 +37,7 @@
 <body>
 <header>
   <h1>Biblioteka 3D modela</h1>
-  <div class="sub">Lokalna biblioteka (bez interneta): odaberite kategoriju, model i parametre, pa umetnite klikom u model ili zamijenite odabrani element. ID modela = naziv AutoCAD bloka.</div>
+  <div class="sub">Lokalna biblioteka (bez interneta): odaberite kategoriju, model i parametre, pa umetnite klikom u model ili zamijenite odabrani element. ID modela = tip elementa u AutoCAD-u.</div>
 </header>
 <main>
   <div class="layout">
@@ -128,7 +128,7 @@
       '<tr><td>Kategorija</td><td>' + esc(a.category) + ' / ' + esc(a.subcategory) + '</td></tr>' +
       '<tr><td>Vrsta</td><td>' + esc(GEOM[a.geometry] || a.geometry) + '</td></tr>' +
       '<tr><td>Dimenzije uzorka</td><td>' + sdp.fmt(d.x, 2) + ' × ' + sdp.fmt(d.y, 2) + ' × ' + sdp.fmt(d.z, 2) + ' m' + (d.zMin < 0 ? ' (ispod terena do ' + sdp.fmt(d.zMin, 2) + ' m)' : '') + '</td></tr>' +
-      '<tr><td>AutoCAD blok</td><td class="mono">' + esc(a.assetId) + '</td></tr>' +
+      '<tr><td>Veza s AutoCAD-om</td><td>tip elementa <span class="mono">' + esc(a.assetId) + '</span> (2D simbol i podaci elementa)</td></tr>' +
       '<tr><td>Model</td><td>' + (a.kind === 'custom' ? 'vlastiti detaljni model' : a.kind === 'parametric' ? 'parametarska površina/trasa s teksturom' : 'generički prikaz') + '</td></tr>' +
       '<tr><td>Status</td><td>' + sdp.badge(a.hasModel ? 'create' : 'error', a.hasModel ? a.statusBs : 'Datoteka modela nedostaje') + '</td></tr>' +
       '<tr><td>Izvor</td><td>' + esc(a.source) + '</td></tr>' +

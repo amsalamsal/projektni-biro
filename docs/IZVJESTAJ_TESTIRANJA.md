@@ -1,6 +1,6 @@
 # Izvještaj testiranja
 
-Datum: 29.10.2026. Verzija: 0.2.0.
+Datum: 30.10.2026. Verzija: 0.2.0 s bibliotekom 3D modela.
 
 Okruženje:
 
@@ -22,9 +22,11 @@ Ovdje su upisani **samo stvarno dobijeni rezultati**. Ništa nije pokrenuto u Au
 | C# build – AutoCAD dodatak | net47 (R23, 2020), net48 (R24, 2021–2024), net8.0-windows (R25, 2025–2026), net10.0-windows (R26, 2027), protiv NuGet referentnih biblioteka AutoCAD.NET | 0 grešaka, 0 upozorenja u dodatku |
 | C# testovi (xUnit, net8.0) | 147 testnih slučajeva | 147 prošlo |
 | Primjer paketa | ponovo generisan i provjeren prema JSON shemama (manifest, geometrija, teren, izmjene) | ispravno |
-| Ruby testovi (minitest) | 80 testova, 1171 provjera | 80 prošlo |
+| Ruby testovi (minitest) | 93 testa, 6286 provjera | 93 prošlo |
 | Ruby 2.7 sintaksa | svaki `.rb` proširenja parsiran s `parser --27` (SketchUp 2022–2023) | sve ispravno |
-| HTML dijalozi | 28 provjera u Chromiumu nad generisanim podacima | 28 prošlo |
+| HTML dijalozi | 41 provjera u Chromiumu nad generisanim podacima (uvoz, izvještaj, svojstva, biblioteka i postavke, biblioteka 3D modela) | 41 prošlo |
+| Biblioteka 3D modela | 253 modela: zatvorena tijela na 3 nivoa detalja, potpunost prema katalogu i specifikaciji (122 objekta, 14 kategorija), ispravan COLLADA i postojeće teksture | sve prošlo |
+| COLLADA nezavisnim čitačem | `tools/assets/check_dae.js`: svaki `model.dae` učitan three.js ColladaLoaderom u Chromiumu, dimenzije upoređene s `asset.json` | 253 provjereno, 0 neusklađeno |
 | Pakovanje | `.bundle` (R23, R24, R25, R26), `.bundle.zip`, `.rbz` | napravljeno, nije instalirano |
 
 Napomena: net47 build zajedničke biblioteke je kompajliran, ali testovi nisu pokrenuti pod .NET Frameworkom (u
@@ -34,6 +36,8 @@ kontejneru nema Mono/.NET Framework okruženja). Testovi rade pod .NET 8.
 
 * učitavanje i rad dodatka u AutoCAD-u 2020–2027;
 * rad proširenja u SketchUpu 2022+ (testirano samo protiv lažnog API-ja);
+* umetanje, rotacija, zamjena i izgled modela biblioteke u stvarnom SketchUpu (nijedan model nema status *Testirano u SketchUpu*);
+* uvoz `model.dae` naredbom SketchUpa *File > Import* (provjereno samo nezavisnim COLLADA čitačem);
 * instalacija `.bundle` i `.rbz` paketa;
 * WinForms dijalog mapiranja slojeva, traka (ribbon), paleta i pregledi (jig) u AutoCAD-u;
 * sigurnosne kopije stvarnih DWG/SKP datoteka (testirano na običnim datotekama);
@@ -61,13 +65,14 @@ kontejneru nema Mono/.NET Framework okruženja). Testovi rade pod .NET 8.
 
 | Datoteka | Testova | Pokriva |
 |---|---|---|
-| test_builders.rb | 26 | svi graditelji, svaka vrsta na svakom nivou detalja daje zatvorena tijela |
+| test_builders.rb | 26 | svi graditelji i modeli, svaka vrsta na svakom nivou detalja daje zatvorena tijela |
 | test_geometry.rb | 8 | jedinice, lukovi, offset, stacionaže, mreže |
 | test_package_reader.rb | 10 | zip i folder, verzije sheme, neispravni i nesigurni paketi |
 | test_change_planner.rb | 7 | prvi uvoz, ponovni uvoz, konflikti, pravila brisanja |
 | test_sample_and_changes.rb | 8 | primjer na svim nivoima, izmjene prema AutoCAD-u |
 | test_sketchup_adapter.rb | 12 | uvoz u lažni SketchUp API: organizacija, ažuriranje, konflikti, vraćanje pri grešci |
 | test_safety_and_terrain.rb | 9 | kopije i dnevnik, čitanje terena, gradnja terena, ažuriranje terena bez dupliranja |
+| test_asset_library.rb | 13 | biblioteka modela: 14 kategorija, model i pregled za svaki tip, pokrivenost specifikacije, COLLADA i teksture, zatvorena tijela za svaki model, umetanje, zamjena i uvoz DAE (lažni API) |
 
 ## Postupak ručnog prihvatnog testa (u host aplikacijama)
 
@@ -92,3 +97,18 @@ SketchUp:
    i scene.
 2. Promijeniti element u AutoCAD-u, izvesti i *Ažuriranje iz paketa* → jedna izmjena u pregledu, teren se ne duplira.
 3. Pomjeriti klupu, promijeniti parametar, *Izvoz izmjena za AutoCAD...*, pa u AutoCAD-u `SDPAPPLYCHANGES`.
+
+### Prihvatni test biblioteke 3D modela (SketchUp)
+
+Za svaki model iz [inventara](INVENTAR_MODELA.md), u SketchUpu 2022 i najnovijoj verziji:
+
+1. *Biblioteka 3D modela...* → kategorija → model → **Umetni u model**; klik u model.
+2. Strelicama zarotirati prije klika; provjeriti da crvena linija pokazuje smjer modela.
+3. Promijeniti jedan parametar u obrascu i ponovo umetnuti; provjeriti dimenziju (Tape Measure).
+4. Odabrati umetnuti element → *Svojstva elementa* → promijeniti parametar → *Primijeni*.
+5. Odabrati element → drugi model iste vrste → **Zamijeni odabrano**; položaj i rotacija ostaju.
+6. Linijski/površinski modeli: nacrtati liniju/pravougaonik, odabrati ivice/lice → **Umetni u model**.
+7. **Uvezi DAE** – model se uvozi s teksturama.
+8. Upisati rezultat (verzija SketchUpa, ID modela, prošlo/nije, napomena). Tek tada model dobija status
+   *Testirano u SketchUpu*, a nakon odobrenja *Završeno*.
+

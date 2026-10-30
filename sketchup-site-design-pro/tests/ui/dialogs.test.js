@@ -131,7 +131,7 @@ async function open(browser, file, fixture, size) {
     check(mcalls.some((c) => c[0] === 'details' && c[1].id === 'furniture.bench'), 'selecting a model requests its details');
     await page.evaluate((d) => window.sdp.render(d), JSON.parse(fs.readFileSync(path.join(FIX, 'models-details.json'), 'utf8')));
     const detail = await page.textContent('#detail');
-    check(detail.includes('AutoCAD blok') && detail.includes('Licenca') && detail.includes('Izvor'), 'details show block link, source and licence');
+    check(detail.includes('Veza s AutoCAD-om') && detail.includes('Licenca') && detail.includes('Izvor'), 'details show block link, source and licence');
     check((await page.$$('#detail .param')).length > 3, 'parameter form rendered');
     await page.fill('#p_length', '2.4');
     await page.click('#insert');

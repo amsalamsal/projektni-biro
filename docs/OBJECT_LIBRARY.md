@@ -2,341 +2,350 @@
 
 Generated from `shared/catalog` by `tools/gen_object_library.py` - do not edit by hand.
 
-254 element types, 43 parametric builders. Types marked **review** carry values that must be confirmed against local regulations or a specialist design (they are reported as review items by validation).
+263 element types, 43 parametric builders. Types marked **review** carry values that must be confirmed against local regulations or a specialist design (they are reported as review items by validation).
 
-## Buildings & References (2)
-
-| Type id | Name | Subcategory | Builder | Geometry | Layer |
-|---|---|---|---|---|---|
-| `building.footprint` | Building footprint (reference massing) | Buildings | massing | polygon | buildings |
-| `building.entrance` | Building entrance reference | References | marker | point | buildings |
-
-## Site (2)
+## Objekti i reference (2)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `site.boundary` | Site boundary | Boundaries | outline | polygon | site_boundary |
-| `site.existing_feature` | Existing feature outline | Existing conditions | outline | polygon | existing |
+| `building.footprint` | Tlocrt objekta (referentni volumen) | Objekti | massing | polygon | buildings |
+| `building.entrance` | Ulaz u objekat (referenca) | Reference | marker | point | buildings |
 
-## Surfaces (23)
-
-| Type id | Name | Subcategory | Builder | Geometry | Layer |
-|---|---|---|---|---|---|
-| `surface.concrete_paving` | Concrete paving | Paving | slab | polygon | surfaces |
-| `surface.natural_stone` | Natural stone paving | Paving | slab | polygon | surfaces |
-| `surface.porcelain_tiles` | Outdoor porcelain / ceramic tiles | Paving | slab | polygon | surfaces |
-| `surface.asphalt` | Asphalt surface | Paving | slab | polygon | roads |
-| `surface.permeable_paving` | Permeable paving | Paving | slab | polygon | surfaces |
-| `surface.grass_grid` | Grass grid / reinforced turf | Paving | slab | polygon | surfaces |
-| `surface.gravel` | Gravel / decorative aggregate | Loose fill | slab | polygon | surfaces |
-| `surface.rubber_safety` | Rubber safety surface | Safety surfaces | slab | polygon | recreation |
-| `surface.tactile_paving` | Tactile paving | Paving | slab | polygon | surfaces |
-| `surface.sand` | Sand / loose-fill play surface | Loose fill | slab | polygon | recreation |
-| `surface.mulch` | Bark mulch | Loose fill | slab | polygon | planting |
-| `surface.lawn` | Lawn | Soft landscape | slab | polygon | planting |
-| `surface.timber_deck` | Timber decking / platform | Decks and terraces | slab | polygon | surfaces |
-| `surface.raised_terrace` | Raised terrace floor (pedestal system) | Decks and terraces | slab | polygon | surfaces |
-| `surface.sports_court` | Sports court surface | Sports surfaces | slab | polygon | recreation |
-| `edge.kerb` | Kerb | Edges and transitions | wall | path | roads |
-| `edge.flush_kerb` | Flush kerb / transition edge | Edges and transitions | wall | path | surfaces |
-| `edge.edging` | Edging / border strip | Edges and transitions | wall | path | surfaces |
-| `edge.retaining_edge` | Retaining edge | Edges and transitions | wall | path | surfaces |
-| `edge.surface_joint` | Movement / surface joint | Edges and transitions | linear_slab | path | surfaces |
-| `level.steps` | Steps | Level changes | steps | polygon | surfaces |
-| `level.ramp` | Ramp **review** | Level changes | ramp | polygon | surfaces |
-| `level.landing` | Landing | Level changes | slab | polygon | surfaces |
-
-## Roads & Mobility (21)
+## Lokacija (2)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `road.access_road` | Internal access road (centreline) | Roads | linear_slab | path | roads |
-| `road.driveway` | Driveway (centreline) | Roads | linear_slab | path | roads |
-| `road.service_route` | Service route (centreline) | Roads | linear_slab | path | roads |
-| `road.fire_access` | Fire-service access route (centreline) **review** | Roads | linear_slab | path | roads |
-| `road.turning_area` | Turning area | Roads | slab | polygon | roads |
-| `road.swept_path_placeholder` | Swept-path placeholder (not an analysis) | Roads | zone | polygon | anno_clearance |
-| `road.parking_bay` | Parking bay | Parking | parking_bay | point | parking |
-| `road.parking_bay_accessible` | Accessible parking bay **review** | Parking | parking_bay | point | parking |
-| `road.parking_bay_ev` | EV charging parking bay | Parking | parking_bay | point | parking |
-| `road.loading_bay` | Loading / unloading bay | Parking | parking_bay | point | parking |
-| `road.pedestrian_crossing` | Pedestrian crossing (striped) | Markings | stripes | polygon | roads_marking |
-| `road.hatched_area` | Hatched marking area | Markings | stripes | polygon | roads_marking |
-| `road.marking_line` | Road marking line | Markings | linear_slab | path | roads_marking |
-| `road.arrow` | Traffic arrow | Markings | arrow_marking | point | roads_marking |
-| `road.speed_hump` | Speed hump | Traffic calming | box_equipment | point | roads |
-| `road.raised_crossing` | Raised crossing / table | Traffic calming | slab | polygon | roads |
-| `road.bollard` | Bollard | Barriers | bollard | point | furniture |
-| `road.removable_bollard` | Removable bollard | Barriers | bollard | point | furniture |
-| `road.vehicle_barrier` | Vehicle barrier (boom) | Barriers | gate | point | roads |
-| `road.wheel_stop` | Parking stop / wheel guide | Parking | box_equipment | point | parking |
-| `road.traffic_sign` | Traffic sign | Signage | sign_post | point | roads_marking |
+| `site.boundary` | Parcelna granica | Granice | outline | polygon | site_boundary |
+| `site.existing_feature` | Kontura postojećeg elementa | Postojeće stanje | outline | polygon | existing |
 
-## Cycling Infrastructure (15)
+## Parter i popločanje (24)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `cycling.bike_path` | Dedicated bicycle path (centreline) | Paths and lanes | linear_slab | path | cycling |
-| `cycling.shared_path` | Shared-use path (centreline) | Paths and lanes | linear_slab | path | pedestrian |
-| `cycling.bike_lane` | Bicycle lane marking | Paths and lanes | linear_slab | path | cycling |
-| `cycling.separation_line` | Bicycle / pedestrian separation line | Paths and lanes | linear_slab | path | cycling |
-| `cycling.bike_box` | Bike box (advanced stop area) | Paths and lanes | slab | polygon | cycling |
-| `cycling.bike_stand` | Bicycle stand (hoop) | Parking | bike_stand | point | cycling |
-| `cycling.bike_rack` | Bicycle rack (row of stands) | Parking | bike_stand | point | cycling |
-| `cycling.bike_shelter` | Covered bicycle shelter | Parking | shelter | point | structures |
-| `cycling.bike_locker` | Bicycle locker | Parking | box_equipment | point | cycling |
-| `cycling.share_station` | Bicycle-sharing station **review** | Services | box_equipment | point | cycling |
-| `cycling.repair_station` | Bicycle repair station | Services | box_equipment | point | cycling |
-| `cycling.pump` | Public bicycle pump | Services | cylinder_equipment | point | cycling |
-| `cycling.charging_point` | Bicycle charging point | Services | box_equipment | point | cycling |
-| `cycling.route_marking` | Bicycle route marking | Signage | arrow_marking | point | cycling |
-| `cycling.direction_sign` | Bicycle directional sign | Signage | sign_post | point | cycling |
+| `surface.concrete_paving` | Betonsko popločanje | Popločanje | slab | polygon | surfaces |
+| `surface.concrete_slabs` | Betonske ploče velikog formata | Popločanje | slab | polygon | surfaces |
+| `surface.natural_stone` | Popločanje prirodnim kamenom | Popločanje | slab | polygon | surfaces |
+| `surface.porcelain_tiles` | Vanjske porculanske / keramičke ploče | Popločanje | slab | polygon | surfaces |
+| `surface.asphalt` | Asfaltna površina | Popločanje | slab | polygon | roads |
+| `surface.permeable_paving` | Vodopropusno popločanje | Popločanje | slab | polygon | surfaces |
+| `surface.grass_grid` | Travna rešetka / ojačani travnjak | Popločanje | slab | polygon | surfaces |
+| `surface.gravel` | Šljunak / dekorativni agregat | Rastresiti materijali | slab | polygon | surfaces |
+| `surface.rubber_safety` | Gumena sigurnosna podloga | Sigurnosne podloge | slab | polygon | recreation |
+| `surface.tactile_paving` | Taktilno popločanje | Popločanje | slab | polygon | surfaces |
+| `surface.sand` | Pijesak / rastresita podloga za igru | Rastresiti materijali | slab | polygon | recreation |
+| `surface.mulch` | Malč od kore | Rastresiti materijali | slab | polygon | planting |
+| `surface.lawn` | Travnjak | Zelene površine | slab | polygon | planting |
+| `surface.timber_deck` | Drvena podna obloga / platforma | Podovi i terase | slab | polygon | surfaces |
+| `surface.raised_terrace` | Podignuti pod terase (sistem podmetača) | Podovi i terase | slab | polygon | surfaces |
+| `surface.sports_court` | Podloga sportskog terena | Sportske podloge | slab | polygon | recreation |
+| `edge.kerb` | Ivičnjak | Ivice i prelazi | wall | path | roads |
+| `edge.flush_kerb` | Upušteni ivičnjak / prelaz površina | Ivice i prelazi | wall | path | surfaces |
+| `edge.edging` | Rubnjak / rubna traka | Ivice i prelazi | wall | path | surfaces |
+| `edge.retaining_edge` | Potporna ivica | Ivice i prelazi | wall | path | surfaces |
+| `edge.surface_joint` | Dilatacijska / razdjelna fuga | Ivice i prelazi | linear_slab | path | surfaces |
+| `level.steps` | Stepenice | Visinske razlike | steps | polygon | surfaces |
+| `level.ramp` | Rampa **review** | Visinske razlike | ramp | polygon | surfaces |
+| `level.landing` | Podest | Visinske razlike | slab | polygon | surfaces |
 
-## Water & Drainage (22)
-
-| Type id | Name | Subcategory | Builder | Geometry | Layer |
-|---|---|---|---|---|---|
-| `water.swimming_pool` | Swimming pool | Pools | pool | polygon | water |
-| `water.infinity_pool` | Infinity pool | Pools | pool | polygon | water |
-| `water.decorative_pond` | Decorative pond | Ponds and features | pool | polygon | water |
-| `water.reflecting_pool` | Reflecting pool | Ponds and features | pool | polygon | water |
-| `water.fountain` | Fountain | Ponds and features | fountain | point | water |
-| `water.water_jet` | Water jet (ground nozzle) | Ponds and features | cylinder_equipment | point | water |
-| `water.cascade_wall` | Waterfall / cascade wall | Ponds and features | wall | path | water |
-| `water.equipment_zone` | Pool equipment zone | Pools | zone | polygon | water |
-| `water.drainage_channel` | Linear drainage channel | Surface drainage | channel | path | drainage |
-| `water.slot_drain` | Slot drain | Surface drainage | channel | path | drainage |
-| `water.overflow_channel` | Overflow channel | Surface drainage | channel | path | drainage |
-| `water.surface_inlet` | Surface inlet / gully grate | Surface drainage | chamber | point | drainage |
-| `water.inspection_chamber` | Drainage inspection chamber | Underground drainage | chamber | point | drainage |
-| `water.drain_pipe` | Drainage pipe | Underground drainage | pipe | path | drainage |
-| `water.rainwater_tank` | Underground rainwater tank | Rainwater | tank | point | drainage |
-| `water.rainwater_collector` | Rainwater collection butt (above ground) | Rainwater | tank | point | drainage |
-| `water.infiltration_crates` | Infiltration / attenuation crates | Rainwater | tank | point | drainage |
-| `water.retention_basin` | Retention / detention basin | Rainwater | basin | polygon | drainage |
-| `water.rain_garden` | Rain garden | Rainwater | basin | polygon | drainage |
-| `water.bioswale` | Bioswale | Rainwater | basin | polygon | drainage |
-| `water.irrigation_line` | Irrigation line | Irrigation and supply | pipe | path | drainage |
-| `water.supply_point` | Water supply point / tap | Irrigation and supply | box_equipment | point | drainage |
-
-## Landscape (27)
+## Saobraćaj i parking (22)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `landscape.tree_deciduous` | Deciduous tree **review** | Trees | tree | point | planting_trees |
-| `landscape.tree_evergreen` | Evergreen tree **review** | Trees | tree | point | planting_trees |
-| `landscape.tree_fruit` | Fruit tree **review** | Trees | tree | point | planting_trees |
-| `landscape.tree_columnar` | Columnar tree **review** | Trees | tree | point | planting_trees |
-| `landscape.tree_existing` | Existing tree | Trees | tree | point | existing |
-| `landscape.orchard_tree` | Orchard tree (row planting) **review** | Trees | tree | point | planting_trees |
-| `landscape.shrub` | Shrub | Shrubs and hedges | shrub | point | planting |
-| `landscape.hedge` | Hedge | Shrubs and hedges | wall | path | planting |
-| `landscape.flower_bed` | Flower bed | Planting beds | planting_area | polygon | planting |
-| `landscape.rose_garden` | Rose garden | Planting beds | planting_area | polygon | planting |
-| `landscape.ornamental_grasses` | Ornamental grasses | Planting beds | planting_area | polygon | planting |
-| `landscape.perennials` | Perennial planting | Planting beds | planting_area | polygon | planting |
-| `landscape.ground_cover` | Ground cover | Planting beds | planting_area | polygon | planting |
-| `landscape.planting_bed` | Planting bed (soil only) | Planting beds | planting_area | polygon | planting |
-| `landscape.meadow` | Natural meadow | Lawns and meadows | planting_area | polygon | planting |
-| `landscape.lawn_area` | Lawn area | Lawns and meadows | planting_area | polygon | planting |
-| `landscape.climber` | Climbing plant | Vertical greening | box_equipment | point | planting |
-| `landscape.green_roof` | Green roof | Vertical greening | slab | polygon | planting |
-| `landscape.green_wall` | Green wall | Vertical greening | wall | path | planting |
-| `landscape.vertical_garden` | Vertical garden module | Vertical greening | box_equipment | point | planting |
-| `landscape.raised_planter` | Raised planter | Planters | planter | polygon | planting |
-| `landscape.planting_container` | Large planting container | Planters | cylinder_equipment | point | planting |
-| `landscape.tree_grate` | Tree pit grate | Tree protection | box_equipment | point | planting_trees |
-| `landscape.tree_pit` | Tree pit (soil volume) | Tree protection | box_equipment | point | planting_trees |
-| `landscape.root_protection_zone` | Root protection zone **review** | Tree protection | circle_zone | point | anno_clearance |
-| `landscape.tree_protection_barrier` | Tree protection barrier | Tree protection | fence | path | construction |
-| `landscape.irrigation_point` | Irrigation point / valve box | Irrigation | cylinder_equipment | point | planting |
+| `road.access_road` | Interna pristupna saobraćajnica (osovina) | Saobraćajnice | linear_slab | path | roads |
+| `road.driveway` | Kolni prilaz (osovina) | Saobraćajnice | linear_slab | path | roads |
+| `road.service_route` | Servisni put (osovina) | Saobraćajnice | linear_slab | path | roads |
+| `road.fire_access` | Vatrogasni pristup (osovina) **review** | Saobraćajnice | linear_slab | path | roads |
+| `road.turning_area` | Okretište | Saobraćajnice | slab | polygon | roads |
+| `road.swept_path_placeholder` | Oznaka prohodnosti vozila (nije analiza) | Saobraćajnice | zone | polygon | anno_clearance |
+| `road.parking_bay` | Parking mjesto | Parking | parking_bay | point | parking |
+| `road.parking_bay_accessible` | Parking mjesto za osobe s invaliditetom **review** | Parking | parking_bay | point | parking |
+| `road.parking_bay_ev` | Parking mjesto s punjačem za električna vozila | Parking | parking_bay | point | parking |
+| `road.loading_bay` | Mjesto za utovar / istovar | Parking | parking_bay | point | parking |
+| `road.pedestrian_crossing` | Pješački prelaz (zebra) | Oznake | stripes | polygon | roads_marking |
+| `road.hatched_area` | Šrafirana površina oznake | Oznake | stripes | polygon | roads_marking |
+| `road.marking_line` | Linija horizontalne signalizacije | Oznake | linear_slab | path | roads_marking |
+| `road.arrow` | Saobraćajna strelica | Oznake | arrow_marking | point | roads_marking |
+| `road.speed_hump` | Usporivač brzine (ležeći policajac) | Smirivanje saobraćaja | box_equipment | point | roads |
+| `road.raised_crossing` | Uzdignuti pješački prelaz / plato | Smirivanje saobraćaja | slab | polygon | roads |
+| `road.bollard` | Stubić | Barijere | bollard | point | furniture |
+| `road.removable_bollard` | Pokretni stubić | Barijere | bollard | point | furniture |
+| `road.vehicle_barrier` | Rampa za vozila | Barijere | gate | point | roads |
+| `road.wheel_stop` | Graničnik točka na parkingu | Parking | box_equipment | point | parking |
+| `road.parking_meter` | Parking automat | Parking oprema | box_equipment | point | roads |
+| `road.traffic_sign` | Saobraćajni znak | Signalizacija | sign_post | point | roads_marking |
 
-## Utilities (20)
+## Biciklistička infrastruktura (16)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `utility.waste_container_ug_3m3` | Underground waste container 3 m³ **review** | Waste | underground_container | point | waste |
-| `utility.waste_container_ug_5m3` | Underground waste container 5 m³ **review** | Waste | underground_container | point | waste |
-| `utility.waste_container_semi` | Semi-underground waste container **review** | Waste | underground_container | point | waste |
-| `utility.waste_container_above` | Above-ground waste container | Waste | box_equipment | point | waste |
-| `utility.recycling_island` | Recycling island | Waste | zone | polygon | waste |
-| `utility.cistern` | Underground cistern | Tanks | tank | point | utilities |
-| `utility.water_tank` | Water tank (above ground) | Tanks | tank | point | utilities |
-| `utility.septic_tank` | Septic tank | Tanks | tank | point | utilities |
-| `utility.trench` | Utility trench (envelope) | Routes | linear_slab | path | utilities |
-| `utility.service_corridor` | Underground service corridor | Routes | linear_slab | path | utilities |
-| `utility.cable_duct` | Cable duct | Routes | pipe | path | utilities |
-| `utility.water_pipe` | Water supply pipe | Routes | pipe | path | utilities |
-| `utility.service_connection` | Service connection | Routes | pipe | path | utilities |
-| `utility.electrical_chamber` | Electrical inspection chamber | Chambers | chamber | point | utilities |
-| `utility.telecom_chamber` | Telecommunications chamber | Chambers | chamber | point | utilities |
-| `utility.water_meter_chamber` | Water meter chamber | Chambers | chamber | point | utilities |
-| `utility.valve_chamber` | Valve chamber | Chambers | chamber | point | utilities |
-| `utility.manhole` | Manhole | Chambers | chamber | point | utilities |
-| `utility.pump_chamber` | Pump chamber | Chambers | chamber | point | utilities |
-| `utility.equipment_enclosure` | Equipment enclosure **review** | Equipment | box_equipment | point | utilities |
+| `cycling.bike_path` | Biciklistička staza (osovina) | Staze i trake | linear_slab | path | cycling |
+| `cycling.shared_path` | Zajednička pješačko-biciklistička staza (osovina) | Staze i trake | linear_slab | path | pedestrian |
+| `cycling.bike_lane` | Oznaka biciklističke trake | Staze i trake | linear_slab | path | cycling |
+| `cycling.separation_line` | Razdjelna linija biciklisti / pješaci | Staze i trake | linear_slab | path | cycling |
+| `cycling.bike_box` | Biciklistički zaustavni prostor (bike box) | Staze i trake | slab | polygon | cycling |
+| `cycling.bike_stand` | Stalak za bicikl (luk) | Parking | bike_stand | point | cycling |
+| `cycling.bike_rack` | Parking za bicikle (niz stalaka) | Parking | bike_stand | point | cycling |
+| `cycling.bike_shelter` | Natkriveni parking za bicikle | Parking | shelter | point | structures |
+| `cycling.bike_locker` | Ormarić za bicikl | Parking | box_equipment | point | cycling |
+| `cycling.share_station` | Stanica za iznajmljivanje bicikala **review** | Instalacije | box_equipment | point | cycling |
+| `cycling.repair_station` | Stanica za popravak bicikala | Instalacije | box_equipment | point | cycling |
+| `cycling.service_stand` | Servisni stalak za bicikl | Instalacije | box_equipment | point | cycling |
+| `cycling.pump` | Javna pumpa za bicikle | Instalacije | cylinder_equipment | point | cycling |
+| `cycling.charging_point` | Punjač za električne bicikle | Instalacije | box_equipment | point | cycling |
+| `cycling.route_marking` | Oznaka biciklističke rute | Signalizacija | arrow_marking | point | cycling |
+| `cycling.direction_sign` | Biciklistički putokaz | Signalizacija | sign_post | point | cycling |
 
-## Lighting (18)
+## Voda i odvodnja (22)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `lighting.street_light` | Street light | Poles | pole_mounted | point | lighting |
-| `lighting.pedestrian_light` | Pedestrian light (post-top) | Poles | pole_mounted | point | lighting |
-| `lighting.solar_light` | Solar light | Poles | pole_mounted | point | lighting |
-| `lighting.smart_light` | Smart light (with sensor) | Poles | pole_mounted | point | lighting |
-| `lighting.bollard_light` | Bollard light | Low-level | bollard | point | lighting |
-| `lighting.path_light` | Pathway light | Low-level | bollard | point | lighting |
-| `lighting.recessed_ground_light` | Recessed ground light | Low-level | cylinder_equipment | point | lighting |
-| `lighting.underwater_light` | Underwater light | Low-level | cylinder_equipment | point | lighting |
-| `lighting.step_light` | Step light | Wall-mounted | box_equipment | point | lighting |
-| `lighting.wall_light` | Wall-mounted light | Wall-mounted | box_equipment | point | lighting |
-| `lighting.facade_light` | Facade light | Wall-mounted | box_equipment | point | lighting |
-| `lighting.garden_light` | Decorative garden light | Decorative | cylinder_equipment | point | lighting |
-| `lighting.led_strip` | LED strip | Decorative | linear_slab | path | lighting |
-| `lighting.pergola_light` | Pergola light | Decorative | box_equipment | point | lighting |
-| `lighting.feature_light` | Architectural feature light (uplight) | Decorative | cylinder_equipment | point | lighting |
-| `lighting.control_cabinet` | Lighting control cabinet **review** | Control | box_equipment | point | lighting |
-| `lighting.circuit_route` | Lighting circuit route | Control | pipe | path | lighting_circuits |
-| `lighting.coverage_zone` | Illustrative lighting coverage (not photometric) | Control | circle_zone | point | anno_clearance |
+| `water.swimming_pool` | Bazen | Bazeni | pool | polygon | water |
+| `water.infinity_pool` | Infinity bazen (preljevni rub) | Bazeni | pool | polygon | water |
+| `water.decorative_pond` | Ukrasno jezerce | Jezerca i vodeni elementi | pool | polygon | water |
+| `water.reflecting_pool` | Reflektujući bazen | Jezerca i vodeni elementi | pool | polygon | water |
+| `water.fountain` | Fontana | Jezerca i vodeni elementi | fountain | point | water |
+| `water.water_jet` | Vodeni mlaz (podna mlaznica) | Jezerca i vodeni elementi | cylinder_equipment | point | water |
+| `water.cascade_wall` | Kaskada / vodeni zid | Jezerca i vodeni elementi | wall | path | water |
+| `water.equipment_zone` | Zona opreme bazena | Bazeni | zone | polygon | water |
+| `water.drainage_channel` | Linijski drenažni kanal | Površinska odvodnja | channel | path | drainage |
+| `water.slot_drain` | Prorezni kanal | Površinska odvodnja | channel | path | drainage |
+| `water.overflow_channel` | Preljevni kanal | Površinska odvodnja | channel | path | drainage |
+| `water.surface_inlet` | Slivnik / rešetka slivnika | Površinska odvodnja | chamber | point | drainage |
+| `water.inspection_chamber` | Reviziono okno odvodnje | Podzemna odvodnja | chamber | point | drainage |
+| `water.drain_pipe` | Cijev oborinske odvodnje | Podzemna odvodnja | pipe | path | drainage |
+| `water.rainwater_tank` | Podzemni rezervoar kišnice | Kišnica | tank | point | drainage |
+| `water.rainwater_collector` | Nadzemna posuda za kišnicu | Kišnica | tank | point | drainage |
+| `water.infiltration_crates` | Infiltracijski / retencijski blokovi | Kišnica | tank | point | drainage |
+| `water.retention_basin` | Retencijski / detencijski bazen | Kišnica | basin | polygon | drainage |
+| `water.rain_garden` | Kišni vrt | Kišnica | basin | polygon | drainage |
+| `water.bioswale` | Bio-kanal (zatravljeni jarak) | Kišnica | basin | polygon | drainage |
+| `water.irrigation_line` | Linija navodnjavanja | Navodnjavanje i snabdijevanje | pipe | path | drainage |
+| `water.supply_point` | Točilo / izljevno mjesto vode | Navodnjavanje i snabdijevanje | box_equipment | point | drainage |
 
-## Walls & Fences (16)
-
-| Type id | Name | Subcategory | Builder | Geometry | Layer |
-|---|---|---|---|---|---|
-| `wall.metal_fence` | Metal bar fence | Fences | fence | path | fences |
-| `wall.mesh_fence` | Welded-mesh fence | Fences | fence | path | fences |
-| `wall.glass_railing` | Glass railing | Railings | fence | path | fences |
-| `wall.timber_fence` | Timber fence | Fences | fence | path | fences |
-| `wall.decorative_fence` | Decorative fence | Fences | fence | path | fences |
-| `wall.safety_railing` | Safety railing **review** | Railings | fence | path | fences |
-| `wall.gabion` | Gabion wall | Walls | wall | path | walls |
-| `wall.concrete` | Concrete wall | Walls | wall | path | walls |
-| `wall.stone` | Stone wall | Walls | wall | path | walls |
-| `wall.retaining` | Retaining wall **review** | Retaining | wall | path | walls |
-| `wall.planter_wall` | Planter wall | Walls | wall | path | walls |
-| `wall.pedestrian_gate` | Pedestrian gate | Gates | gate | point | fences |
-| `wall.vehicle_gate` | Vehicle gate (double swing) | Gates | gate | point | fences |
-| `wall.sliding_gate` | Automatic sliding gate | Gates | gate | point | fences |
-| `wall.swing_gate` | Swing gate | Gates | gate | point | fences |
-| `wall.access_barrier` | Access-control barrier | Gates | gate | point | fences |
-
-## Structures (12)
+## Zelenilo (29)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `structure.pergola` | Pergola | Pergolas | pergola | polygon | structures |
-| `structure.bioclimatic_pergola` | Bioclimatic pergola (adjustable louvers) | Pergolas | pergola | polygon | structures |
-| `structure.retractable_shade` | Pergola with retractable shade | Pergolas | pergola | polygon | structures |
-| `structure.tensile_membrane` | Tensile membrane canopy (simplified) | Canopies | sail | polygon | structures |
-| `structure.carport` | Carport | Canopies | pergola | polygon | structures |
-| `structure.solar_canopy` | Solar canopy | Canopies | pergola | polygon | structures |
-| `structure.bus_shelter` | Bus-style shelter | Shelters | shelter | point | structures |
-| `structure.gazebo` | Gazebo | Pavilions | shelter | point | structures |
-| `structure.pavilion` | Outdoor pavilion | Pavilions | shelter | point | structures |
-| `structure.terrace_roof` | Terrace roof (glass) | Canopies | pergola | polygon | structures |
-| `structure.entrance_canopy` | Lightweight entrance canopy | Canopies | box_equipment | point | structures |
-| `structure.seating_shelter` | Outdoor seating shelter | Shelters | shelter | point | structures |
+| `landscape.tree_deciduous` | Listopadno drvo **review** | Drveće | tree | point | planting_trees |
+| `landscape.tree_evergreen` | Zimzeleno drvo **review** | Drveće | tree | point | planting_trees |
+| `landscape.tree_fruit` | Voćka **review** | Drveće | tree | point | planting_trees |
+| `landscape.tree_columnar` | Stubasto drvo **review** | Drveće | tree | point | planting_trees |
+| `landscape.tree_existing` | Postojeće drvo | Drveće | tree | point | existing |
+| `landscape.orchard_tree` | Voćka u voćnjaku (sadnja u redu) **review** | Drveće | tree | point | planting_trees |
+| `landscape.shrub` | Grm | Grmlje i žive ograde | shrub | point | planting |
+| `landscape.planting_group` | Grupa sadnje (mješoviti grmovi) | Grmlje i žive ograde | shrub | point | planting |
+| `landscape.hedge` | Živa ograda | Grmlje i žive ograde | wall | path | planting |
+| `landscape.flower_bed` | Cvjetna gredica | Gredice | planting_area | polygon | planting |
+| `landscape.rose_garden` | Ružičnjak | Gredice | planting_area | polygon | planting |
+| `landscape.ornamental_grasses` | Ukrasne trave | Gredice | planting_area | polygon | planting |
+| `landscape.perennials` | Trajnice | Gredice | planting_area | polygon | planting |
+| `landscape.ground_cover` | Pokrivači tla | Gredice | planting_area | polygon | planting |
+| `landscape.planting_bed` | Gredica za sadnju (samo zemlja) | Gredice | planting_area | polygon | planting |
+| `landscape.meadow` | Prirodna livada | Travnjaci i livade | planting_area | polygon | planting |
+| `landscape.lawn_area` | Površina travnjaka | Travnjaci i livade | planting_area | polygon | planting |
+| `landscape.climber` | Penjačica | Vertikalno ozelenjavanje | box_equipment | point | planting |
+| `landscape.green_roof` | Zeleni krov | Vertikalno ozelenjavanje | slab | polygon | planting |
+| `landscape.green_wall` | Zeleni zid | Vertikalno ozelenjavanje | wall | path | planting |
+| `landscape.vertical_garden` | Modul vertikalnog vrta | Vertikalno ozelenjavanje | box_equipment | point | planting |
+| `landscape.raised_planter` | Podignuta žardinjera | Žardinjere | planter | polygon | planting |
+| `landscape.planting_container` | Velika posuda za sadnju | Žardinjere | cylinder_equipment | point | planting |
+| `landscape.seasonal_planter` | Posuda sa sezonskim cvijećem | Žardinjere | cylinder_equipment | point | planting |
+| `landscape.tree_grate` | Rešetka oko stabla | Zaštita stabala | box_equipment | point | planting_trees |
+| `landscape.tree_pit` | Sadna jama stabla (volumen tla) | Zaštita stabala | box_equipment | point | planting_trees |
+| `landscape.root_protection_zone` | Zona zaštite korijena **review** | Zaštita stabala | circle_zone | point | anno_clearance |
+| `landscape.tree_protection_barrier` | Zaštitna ograda stabla | Zaštita stabala | fence | path | construction |
+| `landscape.irrigation_point` | Priključak za navodnjavanje / ventilska kutija | Navodnjavanje | cylinder_equipment | point | planting |
 
-## Furniture & Recreation (25)
-
-| Type id | Name | Subcategory | Builder | Geometry | Layer |
-|---|---|---|---|---|---|
-| `furniture.bench` | Bench with backrest | Seating | bench | point | furniture |
-| `furniture.bench_backless` | Backless bench | Seating | bench | point | furniture |
-| `furniture.accessible_bench` | Accessible bench (armrests) | Seating | bench | point | furniture |
-| `furniture.chair` | Outdoor chair | Seating | bench | point | furniture |
-| `furniture.lounger` | Lounge seating | Seating | bench | point | furniture |
-| `furniture.picnic_table` | Picnic table | Tables | table | point | furniture |
-| `furniture.dining_table` | Outdoor dining table | Tables | table | point | furniture |
-| `furniture.waste_bin` | Waste bin | Bins | cylinder_equipment | point | furniture |
-| `furniture.ashtray` | Ashtray / cigarette bin | Bins | cylinder_equipment | point | furniture |
-| `furniture.planter` | Planter (furniture) | Planters | box_equipment | point | furniture |
-| `furniture.drinking_fountain` | Drinking fountain | Amenities | box_equipment | point | furniture |
-| `furniture.outdoor_shower` | Outdoor shower | Amenities | pole_mounted | point | furniture |
-| `furniture.pet_waste_station` | Pet waste station | Amenities | box_equipment | point | furniture |
-| `recreation.fitness_station` | Outdoor fitness equipment **review** | Fitness | box_equipment | point | recreation |
-| `recreation.playground_unit` | Children's play unit **review** | Playgrounds | box_equipment | point | recreation |
-| `recreation.slide` | Slide **review** | Playgrounds | box_equipment | point | recreation |
-| `recreation.swing` | Swing **review** | Playgrounds | swing | point | recreation |
-| `recreation.climbing_structure` | Climbing structure **review** | Playgrounds | box_equipment | point | recreation |
-| `recreation.trampoline` | In-ground trampoline **review** | Playgrounds | cylinder_equipment | point | recreation |
-| `recreation.zip_line` | Zip-line installation **review** | Playgrounds | cable_line | path | recreation |
-| `recreation.table_tennis` | Outdoor table tennis | Sports | table | point | recreation |
-| `recreation.basketball_hoop` | Basketball hoop | Sports | sign_post | point | recreation |
-| `recreation.chess_table` | Outdoor chess table | Sports | table | point | recreation |
-| `recreation.platform` | Recreational platform | Sports | slab | polygon | recreation |
-| `recreation.safety_zone` | Playground safety envelope **review** | Playgrounds | zone | polygon | anno_clearance |
-
-## Sustainability (13)
+## Komunalna infrastruktura (20)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `sustainability.solar_array` | Ground-mounted solar array | Solar | solar_array | point | sustainability |
-| `sustainability.inverter` | Inverter **review** | Solar | box_equipment | point | sustainability |
-| `sustainability.battery_cabinet` | Battery storage cabinet **review** | Storage | box_equipment | point | sustainability |
-| `sustainability.ev_charger_pedestal` | EV charging station (pedestal) | EV charging | box_equipment | point | parking |
-| `sustainability.ev_charger_wallbox` | EV charger (wallbox) | EV charging | box_equipment | point | parking |
-| `sustainability.heat_pump` | Heat pump (outdoor unit) **review** | Technical units | box_equipment | point | sustainability |
-| `sustainability.outdoor_unit` | Outdoor technical unit **review** | Technical units | box_equipment | point | sustainability |
-| `sustainability.wind_turbine` | Vertical-axis wind turbine | Wind | vawt | point | sustainability |
-| `sustainability.rainwater_harvesting` | Rainwater harvesting tank | Water | tank | point | sustainability |
-| `sustainability.greywater_unit` | Greywater treatment unit **review** | Water | box_equipment | point | sustainability |
-| `sustainability.compost_station` | Composting station | Waste | box_equipment | point | sustainability |
-| `sustainability.energy_cabinet` | Energy monitoring cabinet | Technical units | box_equipment | point | sustainability |
-| `sustainability.suds_crate` | SuDS attenuation unit | Water | tank | point | drainage |
+| `utility.waste_container_ug_3m3` | Podzemni kontejner za otpad 3 m³ **review** | Otpad | underground_container | point | waste |
+| `utility.waste_container_ug_5m3` | Podzemni kontejner za otpad 5 m³ **review** | Otpad | underground_container | point | waste |
+| `utility.waste_container_semi` | Polupodzemni kontejner za otpad **review** | Otpad | underground_container | point | waste |
+| `utility.waste_container_above` | Nadzemni kontejner za otpad | Otpad | box_equipment | point | waste |
+| `utility.recycling_island` | Reciklažno ostrvo | Otpad | zone | polygon | waste |
+| `utility.cistern` | Podzemna cisterna | Rezervoari | tank | point | utilities |
+| `utility.water_tank` | Nadzemni rezervoar vode | Rezervoari | tank | point | utilities |
+| `utility.septic_tank` | Septička jama | Rezervoari | tank | point | utilities |
+| `utility.trench` | Kanal za instalacije (gabarit) | Trase | linear_slab | path | utilities |
+| `utility.service_corridor` | Podzemni koridor instalacija | Trase | linear_slab | path | utilities |
+| `utility.cable_duct` | Kablovska cijev | Trase | pipe | path | utilities |
+| `utility.water_pipe` | Vodovodna cijev | Trase | pipe | path | utilities |
+| `utility.service_connection` | Priključak instalacije | Trase | pipe | path | utilities |
+| `utility.electrical_chamber` | Elektro reviziono okno | Okna | chamber | point | utilities |
+| `utility.telecom_chamber` | Telekomunikacijsko okno | Okna | chamber | point | utilities |
+| `utility.water_meter_chamber` | Vodomjerno okno | Okna | chamber | point | utilities |
+| `utility.valve_chamber` | Ventilsko okno | Okna | chamber | point | utilities |
+| `utility.manhole` | Šaht | Okna | chamber | point | utilities |
+| `utility.pump_chamber` | Pumpno okno | Okna | chamber | point | utilities |
+| `utility.equipment_enclosure` | Kućište opreme **review** | Oprema | box_equipment | point | utilities |
 
-## Climate Systems (11)
-
-| Type id | Name | Subcategory | Builder | Geometry | Layer |
-|---|---|---|---|---|---|
-| `climate.misting_line` | Misting system line | Cooling | pipe | path | climate |
-| `climate.infrared_heater` | Infrared heater (mounted) **review** | Heating | box_equipment | point | climate |
-| `climate.patio_heater` | Patio heater (freestanding) **review** | Heating | cylinder_equipment | point | climate |
-| `climate.heated_zone` | Heated terrace zone | Heating | zone | polygon | climate |
-| `climate.cooling_unit` | Outdoor cooling unit **review** | Cooling | box_equipment | point | climate |
-| `climate.evaporative_cooler` | Evaporative cooling installation **review** | Cooling | box_equipment | point | climate |
-| `climate.shade_sail` | Shade sail | Shading | sail | polygon | climate |
-| `climate.awning` | Retractable awning | Shading | box_equipment | point | climate |
-| `climate.wind_screen` | Wind screen | Shading | fence | path | climate |
-| `climate.ventilation_unit` | Outdoor ventilation equipment **review** | Ventilation | box_equipment | point | climate |
-| `climate.comfort_zone` | Thermal comfort equipment zone | Zones | zone | polygon | climate |
-
-## Decorative Elements (11)
+## Rasvjeta (19)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `decorative.sculpture` | Sculpture (placeholder or custom asset) | Art | box_equipment | point | decorative |
-| `decorative.public_art` | Public art installation | Art | box_equipment | point | decorative |
-| `decorative.decorative_wall` | Decorative wall | Walls and screens | wall | path | decorative |
-| `decorative.mural` | Mural (mapped surface) | Art | wall | path | decorative |
-| `decorative.feature_planter` | Feature planter | Planters | planter | polygon | decorative |
-| `decorative.boulder` | Decorative stone / boulder | Stones | boulder | point | decorative |
-| `decorative.focal_point` | Landscape focal point | Art | cylinder_equipment | point | decorative |
-| `decorative.light_installation` | Decorative lighting installation | Lighting art | box_equipment | point | decorative |
-| `decorative.entrance_monument` | Entrance monument | Monuments | box_equipment | point | decorative |
-| `decorative.screen` | Decorative screen | Walls and screens | fence | path | decorative |
-| `decorative.signage_structure` | Signage structure | Monuments | sign_post | point | decorative |
+| `lighting.street_light` | Ulična svjetiljka | Stubovi | pole_mounted | point | lighting |
+| `lighting.pedestrian_light` | Pješačka svjetiljka (na vrhu stuba) | Stubovi | pole_mounted | point | lighting |
+| `lighting.solar_light` | Solarna svjetiljka | Stubovi | pole_mounted | point | lighting |
+| `lighting.smart_light` | Pametna svjetiljka (sa senzorom pokreta) | Stubovi | pole_mounted | point | lighting |
+| `lighting.area_floodlight` | Reflektorska rasvjeta površine | Stubovi | pole_mounted | point | lighting |
+| `lighting.bollard_light` | Stubić-svjetiljka | Niska rasvjeta | bollard | point | lighting |
+| `lighting.path_light` | Svjetiljka za staze | Niska rasvjeta | bollard | point | lighting |
+| `lighting.recessed_ground_light` | Ugradna podna svjetiljka | Niska rasvjeta | cylinder_equipment | point | lighting |
+| `lighting.underwater_light` | Podvodna svjetiljka | Niska rasvjeta | cylinder_equipment | point | lighting |
+| `lighting.step_light` | Svjetiljka za stepenice | Zidna montaža | box_equipment | point | lighting |
+| `lighting.wall_light` | Zidna svjetiljka | Zidna montaža | box_equipment | point | lighting |
+| `lighting.facade_light` | Fasadna rasvjeta | Zidna montaža | box_equipment | point | lighting |
+| `lighting.garden_light` | Dekorativna vrtna svjetiljka | Dekorativno | cylinder_equipment | point | lighting |
+| `lighting.led_strip` | LED traka | Dekorativno | linear_slab | path | lighting |
+| `lighting.pergola_light` | Svjetiljka pergole | Dekorativno | box_equipment | point | lighting |
+| `lighting.feature_light` | Akcentna rasvjeta (usmjerena naviše) | Dekorativno | cylinder_equipment | point | lighting |
+| `lighting.control_cabinet` | Ormar upravljanja rasvjetom **review** | Upravljanje | box_equipment | point | lighting |
+| `lighting.circuit_route` | Trasa strujnog kruga rasvjete | Upravljanje | pipe | path | lighting_circuits |
+| `lighting.coverage_zone` | Ilustrativni domet rasvjete (nije fotometrija) | Upravljanje | circle_zone | point | anno_clearance |
 
-## Information Systems (16)
+## Ograde i zidovi (16)
 
 | Type id | Name | Subcategory | Builder | Geometry | Layer |
 |---|---|---|---|---|---|
-| `info.site_board` | Site information board | Information | sign_post | point | information |
-| `info.qr_panel` | QR-code information panel | Information | sign_post | point | information |
-| `info.directional_sign` | Directional sign | Wayfinding | sign_post | point | information |
-| `info.wayfinding_sign` | Wayfinding sign (monolith) | Wayfinding | box_equipment | point | information |
-| `info.building_sign` | Building identification sign | Wayfinding | box_equipment | point | information |
-| `info.accessibility_sign` | Accessibility signage | Wayfinding | sign_post | point | information |
-| `info.fire_info_point` | Fire-safety information point | Safety | sign_post | point | information |
-| `info.digital_kiosk` | Digital kiosk | Information | box_equipment | point | information |
-| `info.cctv_camera` | CCTV camera (pole) | Security | pole_mounted | point | information |
-| `info.security_cabinet` | Security equipment cabinet | Security | box_equipment | point | information |
-| `info.access_reader` | Access-control reader (post) | Security | box_equipment | point | information |
-| `info.intercom` | Intercom (post) | Communication | box_equipment | point | information |
-| `info.speaker` | Outdoor speaker / PA (pole) | Communication | pole_mounted | point | information |
-| `info.wifi_ap` | Wi-Fi access point (pole) | Communication | pole_mounted | point | information |
-| `info.emergency_call_point` | Emergency call point | Safety | box_equipment | point | information |
-| `info.cable_route` | Communication cable route | Communication | pipe | path | information |
+| `wall.metal_fence` | Metalna ograda od šipki | Ograde | fence | path | fences |
+| `wall.mesh_fence` | Ograda od zavarene mreže | Ograde | fence | path | fences |
+| `wall.glass_railing` | Staklena ograda | Ograde i rukohvati | fence | path | fences |
+| `wall.timber_fence` | Drvena ograda | Ograde | fence | path | fences |
+| `wall.decorative_fence` | Dekorativna ograda | Ograde | fence | path | fences |
+| `wall.safety_railing` | Zaštitna ograda **review** | Ograde i rukohvati | fence | path | fences |
+| `wall.gabion` | Gabionski zid | Zidovi | wall | path | walls |
+| `wall.concrete` | Betonski zid | Zidovi | wall | path | walls |
+| `wall.stone` | Kameni zid | Zidovi | wall | path | walls |
+| `wall.retaining` | Potporni zid **review** | Potporne konstrukcije | wall | path | walls |
+| `wall.planter_wall` | Zid žardinjere | Zidovi | wall | path | walls |
+| `wall.pedestrian_gate` | Pješačka kapija | Kapije | gate | point | fences |
+| `wall.vehicle_gate` | Kolna kapija (dvokrilna) | Kapije | gate | point | fences |
+| `wall.sliding_gate` | Automatska klizna kapija | Kapije | gate | point | fences |
+| `wall.swing_gate` | Krilna kapija | Kapije | gate | point | fences |
+| `wall.access_barrier` | Rampa kontrole pristupa | Kapije | gate | point | fences |
+
+## Nadstrešnice i zasjena (12)
+
+| Type id | Name | Subcategory | Builder | Geometry | Layer |
+|---|---|---|---|---|---|
+| `structure.pergola` | Pergola | Pergole | pergola | polygon | structures |
+| `structure.bioclimatic_pergola` | Bioklimatska pergola (pomične lamele) | Pergole | pergola | polygon | structures |
+| `structure.retractable_shade` | Pergola s pomičnom tendom | Pergole | pergola | polygon | structures |
+| `structure.tensile_membrane` | Membranska nadstrešnica (pojednostavljeno) | Nadstrešnice | sail | polygon | structures |
+| `structure.carport` | Nadstrešnica za automobile | Nadstrešnice | pergola | polygon | structures |
+| `structure.solar_canopy` | Solarna nadstrešnica | Nadstrešnice | pergola | polygon | structures |
+| `structure.bus_shelter` | Nadstrešnica tipa stajališta | Nadstrešnice za zaklon | shelter | point | structures |
+| `structure.gazebo` | Sjenica | Paviljoni | shelter | point | structures |
+| `structure.pavilion` | Vanjski paviljon | Paviljoni | shelter | point | structures |
+| `structure.terrace_roof` | Krov terase (staklo) | Nadstrešnice | pergola | polygon | structures |
+| `structure.entrance_canopy` | Laka ulazna nadstrešnica | Nadstrešnice | box_equipment | point | structures |
+| `structure.seating_shelter` | Nadstrešnica za sjedenje | Nadstrešnice za zaklon | shelter | point | structures |
+
+## Urbani mobilijar i rekreacija (26)
+
+| Type id | Name | Subcategory | Builder | Geometry | Layer |
+|---|---|---|---|---|---|
+| `furniture.bench` | Klupa s naslonom | Sjedenje | bench | point | furniture |
+| `furniture.bench_backless` | Klupa bez naslona | Sjedenje | bench | point | furniture |
+| `furniture.accessible_bench` | Pristupačna klupa (s rukohvatima) | Sjedenje | bench | point | furniture |
+| `furniture.chair` | Vanjska stolica | Sjedenje | bench | point | furniture |
+| `furniture.lounger` | Ležaljka | Sjedenje | bench | point | furniture |
+| `furniture.picnic_table` | Stol za piknik | Stolovi | table | point | furniture |
+| `furniture.dining_table` | Vanjski trpezarijski stol | Stolovi | table | point | furniture |
+| `furniture.waste_bin` | Korpa za otpatke | Korpe i kante | cylinder_equipment | point | furniture |
+| `furniture.ashtray` | Pepeljara | Korpe i kante | cylinder_equipment | point | furniture |
+| `furniture.planter` | Žardinjera (mobilijar) | Žardinjere | box_equipment | point | furniture |
+| `furniture.drinking_fountain` | Česma za piće | Sadržaji | box_equipment | point | furniture |
+| `furniture.outdoor_shower` | Vanjski tuš | Sadržaji | pole_mounted | point | furniture |
+| `furniture.pet_waste_station` | Stanica za otpad kućnih ljubimaca | Sadržaji | box_equipment | point | furniture |
+| `recreation.fitness_station` | Vanjska fitness sprava **review** | Fitness | box_equipment | point | recreation |
+| `recreation.playground_unit` | Dječija igračka sprava **review** | Dječija igrališta | box_equipment | point | recreation |
+| `recreation.slide` | Tobogan **review** | Dječija igrališta | box_equipment | point | recreation |
+| `recreation.swing` | Ljuljačka **review** | Dječija igrališta | swing | point | recreation |
+| `recreation.climbing_structure` | Penjalica **review** | Dječija igrališta | box_equipment | point | recreation |
+| `recreation.trampoline` | Ukopani trampolin **review** | Dječija igrališta | cylinder_equipment | point | recreation |
+| `recreation.zip_line` | Zip-line (žičara) **review** | Dječija igrališta | cable_line | path | recreation |
+| `recreation.table_tennis` | Vanjski stol za stoni tenis | Sport | table | point | recreation |
+| `recreation.basketball_hoop` | Košarkaški koš | Sport | sign_post | point | recreation |
+| `recreation.chess_table` | Vanjski šahovski sto | Sport | table | point | recreation |
+| `recreation.football_goal` | Gol za mali fudbal | Sport | box_equipment | point | recreation |
+| `recreation.platform` | Rekreativna platforma | Sport | slab | polygon | recreation |
+| `recreation.safety_zone` | Sigurnosna zona igrališta **review** | Dječija igrališta | zone | polygon | anno_clearance |
+
+## Eko tehnologije (13)
+
+| Type id | Name | Subcategory | Builder | Geometry | Layer |
+|---|---|---|---|---|---|
+| `sustainability.solar_array` | Solarna elektrana na tlu | Solarna energija | solar_array | point | sustainability |
+| `sustainability.inverter` | Invertor **review** | Solarna energija | box_equipment | point | sustainability |
+| `sustainability.battery_cabinet` | Ormar baterijskog spremnika **review** | Skladištenje | box_equipment | point | sustainability |
+| `sustainability.ev_charger_pedestal` | Stanica za punjenje električnih vozila (stub) | Punjenje električnih vozila | box_equipment | point | parking |
+| `sustainability.ev_charger_wallbox` | Punjač za električna vozila (zidni) | Punjenje električnih vozila | box_equipment | point | parking |
+| `sustainability.heat_pump` | Toplotna pumpa (vanjska jedinica) **review** | Tehničke jedinice | box_equipment | point | sustainability |
+| `sustainability.outdoor_unit` | Vanjska tehnička jedinica **review** | Tehničke jedinice | box_equipment | point | sustainability |
+| `sustainability.wind_turbine` | Vjetroturbina s vertikalnom osom | Vjetar | vawt | point | sustainability |
+| `sustainability.rainwater_harvesting` | Rezervoar za prikupljanje kišnice | Voda | tank | point | sustainability |
+| `sustainability.greywater_unit` | Uređaj za prečišćavanje sive vode **review** | Voda | box_equipment | point | sustainability |
+| `sustainability.compost_station` | Kompostište | Otpad | box_equipment | point | sustainability |
+| `sustainability.energy_cabinet` | Ormar za praćenje energije | Tehničke jedinice | box_equipment | point | sustainability |
+| `sustainability.suds_crate` | Retencijski modul održive odvodnje | Voda | tank | point | drainage |
+
+## Vanjski klimatski sistemi (12)
+
+| Type id | Name | Subcategory | Builder | Geometry | Layer |
+|---|---|---|---|---|---|
+| `climate.misting_line` | Linija sistema za raspršivanje vode | Hlađenje | pipe | path | climate |
+| `climate.infrared_heater` | Infracrveni grijač (montažni) **review** | Grijanje | box_equipment | point | climate |
+| `climate.patio_heater` | Samostojeći grijač terase **review** | Grijanje | cylinder_equipment | point | climate |
+| `climate.misting_post` | Stub za raspršivanje vode (misting) | Hlađenje | cylinder_equipment | point | climate |
+| `climate.heated_zone` | Grijana zona terase | Grijanje | zone | polygon | climate |
+| `climate.cooling_unit` | Vanjska rashladna jedinica **review** | Hlađenje | box_equipment | point | climate |
+| `climate.evaporative_cooler` | Evaporativni rashladni uređaj **review** | Hlađenje | box_equipment | point | climate |
+| `climate.shade_sail` | Jedro za sjenu | Zasjena | sail | polygon | climate |
+| `climate.awning` | Pomična tenda | Zasjena | box_equipment | point | climate |
+| `climate.wind_screen` | Zaštita od vjetra | Zasjena | fence | path | climate |
+| `climate.ventilation_unit` | Vanjska ventilacijska oprema **review** | Ventilacija | box_equipment | point | climate |
+| `climate.comfort_zone` | Zona opreme toplotnog komfora | Zone | zone | polygon | climate |
+
+## Dekorativni elementi (11)
+
+| Type id | Name | Subcategory | Builder | Geometry | Layer |
+|---|---|---|---|---|---|
+| `decorative.sculpture` | Skulptura (zamjenski ili vlastiti model) | Umjetnost | box_equipment | point | decorative |
+| `decorative.public_art` | Javna umjetnička instalacija | Umjetnost | box_equipment | point | decorative |
+| `decorative.decorative_wall` | Dekorativni zid | Zidovi i paravani | wall | path | decorative |
+| `decorative.mural` | Mural (oslikana površina) | Umjetnost | wall | path | decorative |
+| `decorative.feature_planter` | Akcentna žardinjera | Žardinjere | planter | polygon | decorative |
+| `decorative.boulder` | Dekorativni kamen / gromada | Kamen | boulder | point | decorative |
+| `decorative.focal_point` | Fokusna tačka pejzaža | Umjetnost | cylinder_equipment | point | decorative |
+| `decorative.light_installation` | Dekorativna svjetlosna instalacija | Svjetlosna umjetnost | box_equipment | point | decorative |
+| `decorative.entrance_monument` | Ulazno obilježje | Obilježja | box_equipment | point | decorative |
+| `decorative.screen` | Dekorativni paravan | Zidovi i paravani | fence | path | decorative |
+| `decorative.signage_structure` | Nosiva konstrukcija natpisa | Obilježja | sign_post | point | decorative |
+
+## Informativni i sigurnosni sistemi (17)
+
+| Type id | Name | Subcategory | Builder | Geometry | Layer |
+|---|---|---|---|---|---|
+| `info.site_board` | Informativna tabla lokacije | Informacije | sign_post | point | information |
+| `info.site_map` | Plan lokacije (stalak s kartom) | Informacije | sign_post | point | information |
+| `info.qr_panel` | Informativni panel s QR kodom | Informacije | sign_post | point | information |
+| `info.directional_sign` | Putokaz | Orijentacija | sign_post | point | information |
+| `info.wayfinding_sign` | Orijentacijski znak (monolit) | Orijentacija | box_equipment | point | information |
+| `info.building_sign` | Oznaka objekta | Orijentacija | box_equipment | point | information |
+| `info.accessibility_sign` | Oznaka pristupačnosti | Orijentacija | sign_post | point | information |
+| `info.fire_info_point` | Informativno mjesto zaštite od požara | Sigurnost | sign_post | point | information |
+| `info.digital_kiosk` | Digitalni kiosk | Informacije | box_equipment | point | information |
+| `info.cctv_camera` | Video nadzorna kamera (na stubu) | Sigurnosni sistemi | pole_mounted | point | information |
+| `info.security_cabinet` | Ormar sigurnosne opreme | Sigurnosni sistemi | box_equipment | point | information |
+| `info.access_reader` | Čitač kontrole pristupa (stub) | Sigurnosni sistemi | box_equipment | point | information |
+| `info.intercom` | Interfon (stub) | Komunikacije | box_equipment | point | information |
+| `info.speaker` | Vanjski zvučnik / ozvučenje (stub) | Komunikacije | pole_mounted | point | information |
+| `info.wifi_ap` | Wi-Fi pristupna tačka (stub) | Komunikacije | pole_mounted | point | information |
+| `info.emergency_call_point` | Mjesto za hitni poziv | Sigurnost | box_equipment | point | information |
+| `info.cable_route` | Trasa komunikacijskog kabla | Komunikacije | pipe | path | information |
 
 ## Builders
 

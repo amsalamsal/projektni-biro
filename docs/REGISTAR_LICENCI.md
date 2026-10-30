@@ -1,6 +1,6 @@
 # Registar 3D modela, tekstura i licenci
 
-Stanje: verzija 0.2.0.
+Stanje: biblioteka 3D modela (253 modela, 37 tekstura).
 
 ## Vanjski sadržaj
 
@@ -9,15 +9,22 @@ strane za koji bi trebala licenca.
 
 | Vrsta | Izvor | Licenca | Napomena |
 |---|---|---|---|
-| 3D modeli elemenata | generišu se parametarski u kodu (`core/builders/*.rb`) | dio projekta | šematski ili standardni prikaz, nije proizvod proizvođača |
+| 3D modeli elemenata (biblioteka, 253) | vlastiti proceduralni generatori u kodu (`core/models/*.rb`), izvezeni u `Assets/<Kategorija>/<ID>/model.dae` alatom `tools/assets/build_library.rb` | dio projekta | realističan izgled i stvarne dimenzije iz parametara; nisu modeli konkretnog proizvođača |
+| Generički parametarski prikazi | `core/builders/*.rb` | dio projekta | koriste se samo za zone, konture i oznake (nisu fizički objekti) |
+| Teksture materijala (37) | vlastite proceduralne slike, `tools/assets/make_textures.py` → `pb_site_design_pro/textures/*.jpg` | dio projekta | bešavne, 512 × 512 px, stvarna veličina pločice u `materials.json` (`textureSize`) |
+| Slike pregleda modela | vlastiti render (`tools/assets/render_previews.js`, three.js samo kao alat za razvoj, ne isporučuje se) | dio projekta | `preview.jpg` u folderu modela |
 | 2D simboli (AutoCAD) | generišu se u kodu (`SiteDesignPro.Core/Symbols`) | dio projekta | – |
-| Materijali | boje i parametri u `shared/catalog/materials.json` | dio projekta | bez tekstura (slike) |
+| Materijali | boje, teksture i parametri u `shared/catalog/materials.json` | dio projekta | – |
 | Ikone | `shared/icons/*.svg`, nacrtane za projekat | dio projekta | rasterizovane alatom `tools/icons` |
 
-## Pravila za buduće modele (faza realističnih modela)
+Svaki model ima `asset.json` s poljima: ID, naziv, kategorija i podkategorija, dimenzije, tačka umetanja, jedinice,
+materijali, **izvor** (`source`), **licenca** (`license`) i status. Alat za razvoj three.js (MIT licenca) koristi se
+samo za izradu slika pregleda i provjeru COLLADA datoteka na računaru programera i nije dio instalacije.
 
-Realistični modeli (stabla, mobilijar, rasvjeta proizvođača…) uvodit će se preko **dodjele komponenti** u SketchUpu
-(*Biblioteka i postavke... → vrsti dodijeliti .skp*). Već danas korisnik može vrsti dodijeliti vlastiti `.skp`.
+## Pravila za vanjske modele
+
+Modeli konkretnih proizvođača (npr. određena klupa ili svjetiljka) uvode se preko **dodjele komponenti** u SketchUpu
+(*Biblioteka i postavke... → vrsti dodijeliti .skp*); korisnik vrsti dodjeljuje vlastiti `.skp`.
 
 Prije uključivanja bilo kojeg modela u paket za svaki model se upisuje:
 
