@@ -119,9 +119,137 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
         }
 
+        /// <summary>Polyline by points: Enter ends, [Zatvori] closes, [Poništi] removes the last point.</summary>
+        private static ObjectId DrawPolyline(CommandContext ctx, bool closeArea)
+        {
+            var pts = new List<Point3d>();
+            bool closed = false;
+            Point3d? first = ctx.Point("Prva tačka");
+            if (first == null)
+            {
+                return ObjectId.Null;
+            }
+
+            pts.Add(first.Value);
+            while (true)
+            {
+                var o = new PromptPointOptions(pts.Count >= 2 ? "\nSljedeća tačka [Zatvori/Poništi] <kraj>" : "\nSljedeća tačka [Poništi] <kraj>")
+                {
+                    AllowNone = true,
+                    UseBasePoint = true,
+                    BasePoint = pts[pts.Count - 1].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()),
+                };
+                if (pts.Count >= 2)
+                {
+                    o.Keywords.Add("Close", "Zatvori", "Zatvori");
+                }
+
+                o.Keywords.Add("Undo", "Poništi", "Poništi");
+                PromptPointResult r = ctx.Ed.GetPoint(o);
+                if (r.Status == PromptStatus.Keyword && r.StringResult == "Close")
+                {
+                    closed = true;
+                    break;
+                }
+
+                if (r.Status == PromptStatus.Keyword && r.StringResult == "Undo")
+                {
+                    if (pts.Count > 1)
+                    {
+                        pts.RemoveAt(pts.Count - 1);
+                        ctx.Ed.Regen();
+                        for (int i = 1; i < pts.Count; i++)
+                        {
+                            ctx.Ed.DrawVector(pts[i - 1].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()), pts[i].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()), 1, false);
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (r.Status == PromptStatus.None)
+                {
+                    break;
+                }
+
+                if (r.Status != PromptStatus.OK)
+                {
+                    ctx.Ed.Regen();
+                    throw new CommandCancelled();
+                }
+
+                Point3d p = r.Value.TransformBy(ctx.Ed.CurrentUserCoordinateSystem);
+                ctx.Ed.DrawVector(o.BasePoint, r.Value, 1, false);
+                pts.Add(p);
+            }
+
+            ctx.Ed.Regen();
+            int needed = closeArea ? 3 : 2;
+            if (pts.Count < needed)
+            {
+                ctx.Write(closeArea ? "Za površinu su potrebne najmanje 3 tačke." : "Za trasu su potrebne najmanje 2 tačke.");
+                return ObjectId.Null;
+            }
+
+            return AddPolyline(ctx, pts, closed || closeArea);
+        }
+
+        private static ObjectId DrawRectangle(CommandContext ctx)
+        {
+            Point3d? a = ctx.Point("Prvi ugao pravougaonika");
+            if (a == null)
+            {
+                return ObjectId.Null;
+            }
+
+            PromptPointResult r = ctx.Ed.GetCorner(new PromptCornerOptions("\nSuprotni ugao", a.Value.TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse())));
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            // corners in UCS so the rectangle follows the current UCS like RECTANG
+            Matrix3d ucs = ctx.Ed.CurrentUserCoordinateSystem;
+            Point3d p1 = a.Value.TransformBy(ucs.Inverse());
+            Point3d p3 = r.Value;
+            var pts = new List<Point3d>
+            {
+                p1.TransformBy(ucs),
+                new Point3d(p3.X, p1.Y, p1.Z).TransformBy(ucs),
+                new Point3d(p3.X, p3.Y, p1.Z).TransformBy(ucs),
+                new Point3d(p1.X, p3.Y, p1.Z).TransformBy(ucs),
+            };
+            if (pts[0].DistanceTo(pts[2]) < 1e-9)
+            {
+                return ObjectId.Null;
+            }
+
+            return AddPolyline(ctx, pts, true);
+        }
+
+        private static ObjectId AddPolyline(CommandContext ctx, List<Point3d> pts, bool closed)
+        {
+            var pl = new Polyline();
+            pl.SetDatabaseDefaults();
+            Vector3d normal = Vector3d.ZAxis;
+            Matrix3d toPlane = Matrix3d.WorldToPlane(new Plane(Point3d.Origin, normal));
+            for (int i = 0; i < pts.Count; i++)
+            {
+                Point3d q = pts[i].TransformBy(toPlane);
+                pl.AddVertexAt(i, new Point2d(q.X, q.Y), 0, 0, 0);
+            }
+
+            pl.Elevation = pts[0].Z;
+            pl.Closed = closed;
+            BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
+            ObjectId id = ms.AppendEntity(pl);
+            ctx.Tr.AddNewlyCreatedDBObject(pl, true);
+            return id;
+        }
+
         /// <summary>
-        /// Native drawing runs between transactions: the user draws with PLINE or RECTANG (snaps, polar
-        /// tracking, arcs), then the new object is converted in a separate transaction.
+        /// Interactive drawing: the user draws a polyline or rectangle with our own prompts (snaps and polar tracking
+        /// work), picks inside a boundary or selects curves; the result is converted in a separate transaction.
         /// </summary>
         private static void DrawInteractive(ElementType type)
         {
@@ -161,22 +289,17 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             if (method == "Polyline" || method == "Rectangle")
             {
-                Editor ed = AcApp.DocumentManager.MdiActiveDocument.Editor;
-                ObjectId before = Autodesk.AutoCAD.Internal.Utils.EntLast();
-                ed.Command(method == "Rectangle" ? "_.RECTANG" : "_.PLINE");
-                while ((Convert.ToInt32(AcApp.GetSystemVariable("CMDACTIVE"), CultureInfo.InvariantCulture) & 1) == 1)
+                // Drawn with our own prompts (no nested PLINE/RECTANG): Editor.Command inside a command fails with
+                // eInvalidInput on some AutoCAD versions and setups.
+                ObjectId drawn = ObjectId.Null;
+                CommandContext.Run("SDPDRAW", ctx => drawn = method == "Rectangle" ? DrawRectangle(ctx) : DrawPolyline(ctx, type.Geometry == GeometryKind.Polygon));
+                if (drawn.IsNull)
                 {
-                    ed.Command(Editor.PauseToken);
-                }
-
-                ObjectId last = Autodesk.AutoCAD.Internal.Utils.EntLast();
-                if (last.IsNull || last == before)
-                {
-                    ed.WriteMessage("\nNišta nije nacrtano.");
+                    AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nNišta nije nacrtano.");
                     return;
                 }
 
-                picked.Add(last);
+                picked.Add(drawn);
             }
 
             if (picked.Count > 0)
