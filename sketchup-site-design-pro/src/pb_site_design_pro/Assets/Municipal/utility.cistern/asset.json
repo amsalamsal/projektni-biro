@@ -1,0 +1,51 @@
+{
+  "assetId": "utility.cistern",
+  "name": "Podzemna cisterna",
+  "nameEn": "Underground cistern",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Rezervoari",
+  "geometry": "point",
+  "builder": "tank",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Podzemne cisterne",
+      "objectEn": "Underground cisterns"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.cistern v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 4.0,
+    "y": 2.5,
+    "z": 2.808,
+    "zMin": -2.8
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "steel_dark"
+  ],
+  "polygons": 504,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "assetId": "decorative.feature_planter",
+  "name": "Akcentna žardinjera",
+  "nameEn": "Feature planter",
+  "folder": "Decorative",
+  "category": "Dekorativni elementi",
+  "subcategory": "Žardinjere",
+  "geometry": "polygon",
+  "builder": "planter",
+  "specObjects": [
+    {
+      "category": "Dekorativni elementi",
+      "object": "Dekorativne konstrukcije",
+      "objectEn": "Decorative structures"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models decorative.feature_planter v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/soil.jpg",
+      "../../../textures/foliage.jpg",
+      "../../../textures/foliage_dark.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 3.0,
+    "y": 2.0,
+    "z": 1.366,
+    "zMin": 0.0
+  },
+  "materials": [
+    "flower_violet",
+    "flower_white",
+    "foliage",
+    "foliage_dark",
+    "grass_blade",
+    "soil",
+    "steel_dark"
+  ],
+  "polygons": 37021,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

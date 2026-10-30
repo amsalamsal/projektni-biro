@@ -1,0 +1,56 @@
+{
+  "assetId": "landscape.flower_bed",
+  "name": "Cvjetna gredica",
+  "nameEn": "Flower bed",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Gredice",
+  "geometry": "polygon",
+  "builder": "planting_area",
+  "specObjects": [
+    {
+      "category": "Zelenilo i sadnja",
+      "object": "Cvjetne gredice",
+      "objectEn": "Flower beds"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.flower_bed v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/mulch.jpg",
+      "../../../textures/foliage.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 3.076,
+    "y": 2.071,
+    "z": 0.7,
+    "zMin": -0.3
+  },
+  "materials": [
+    "flower_pink",
+    "flower_red",
+    "flower_violet",
+    "flower_white",
+    "flower_yellow",
+    "foliage",
+    "mulch"
+  ],
+  "polygons": 26406,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

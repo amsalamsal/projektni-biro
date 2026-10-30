@@ -1,0 +1,58 @@
+{
+  "assetId": "water.retention_basin",
+  "name": "Retencijski / detencijski bazen",
+  "nameEn": "Retention / detention basin",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Kišnica",
+  "geometry": "polygon",
+  "builder": "basin",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Sistemi zadržavanja kišnice",
+      "objectEn": "Rainwater retention systems"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.retention_basin v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/grass.jpg",
+      "../../../textures/water.jpg",
+      "../../../textures/stone_wall.jpg",
+      "../../../textures/concrete.jpg",
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 4.0,
+    "y": 3.3,
+    "z": 1.107,
+    "zMin": -1.0
+  },
+  "materials": [
+    "concrete",
+    "concrete_precast",
+    "grass",
+    "grass_blade",
+    "stone_wall",
+    "water"
+  ],
+  "polygons": 1120,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

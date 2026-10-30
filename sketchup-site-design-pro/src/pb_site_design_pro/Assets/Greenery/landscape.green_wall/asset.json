@@ -1,0 +1,61 @@
+{
+  "assetId": "landscape.green_wall",
+  "name": "Zeleni zid",
+  "nameEn": "Green wall",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Vertikalno ozelenjavanje",
+  "geometry": "path",
+  "builder": "wall",
+  "specObjects": [
+    {
+      "category": "Zelenilo i sadnja",
+      "object": "Zeleni zidovi",
+      "objectEn": "Green walls"
+    },
+    {
+      "category": "Dekorativni elementi",
+      "object": "Zeleni zidovi",
+      "objectEn": "Green walls"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.green_wall v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/foliage.jpg",
+      "../../../textures/planting_flowers.jpg",
+      "../../../textures/foliage_light.jpg",
+      "../../../textures/foliage_dark.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.646,
+    "y": 1.942,
+    "z": 3.0,
+    "zMin": 0.0
+  },
+  "materials": [
+    "foliage",
+    "foliage_dark",
+    "foliage_light",
+    "planting_flowers",
+    "steel_dark"
+  ],
+  "polygons": 10670,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

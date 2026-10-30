@@ -1,0 +1,50 @@
+{
+  "assetId": "wall.vehicle_gate",
+  "name": "Kolna kapija (dvokrilna)",
+  "nameEn": "Vehicle gate (double swing)",
+  "folder": "Fences_Walls",
+  "category": "Ograde i zidovi",
+  "subcategory": "Kapije",
+  "geometry": "point",
+  "builder": "gate",
+  "specObjects": [
+    {
+      "category": "Ograde i zidovi",
+      "object": "Sistemi ograđivanja",
+      "objectEn": "Boundary systems"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models wall.vehicle_gate v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 4.22,
+    "y": 0.125,
+    "z": 2.27,
+    "zMin": -0.4
+  },
+  "materials": [
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 290,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

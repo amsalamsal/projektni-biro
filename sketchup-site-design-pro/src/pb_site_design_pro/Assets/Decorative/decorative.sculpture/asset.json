@@ -1,0 +1,51 @@
+{
+  "assetId": "decorative.sculpture",
+  "name": "Skulptura (zamjenski ili vlastiti model)",
+  "nameEn": "Sculpture (placeholder or custom asset)",
+  "folder": "Decorative",
+  "category": "Dekorativni elementi",
+  "subcategory": "Umjetnost",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Dekorativni elementi",
+      "object": "Skulpture",
+      "objectEn": "Sculptures"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models decorative.sculpture v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg",
+      "../../../textures/stone_wall.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.813,
+    "y": 0.8,
+    "z": 2.042,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "stone_wall"
+  ],
+  "polygons": 2246,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

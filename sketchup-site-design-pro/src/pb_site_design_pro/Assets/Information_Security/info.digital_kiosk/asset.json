@@ -1,0 +1,52 @@
+{
+  "assetId": "info.digital_kiosk",
+  "name": "Digitalni kiosk",
+  "nameEn": "Digital kiosk",
+  "folder": "Information_Security",
+  "category": "Informativni i sigurnosni sistemi",
+  "subcategory": "Informacije",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Informativni i sigurnosni sistemi",
+      "object": "Informativni kiosci",
+      "objectEn": "Information kiosks"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models info.digital_kiosk v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.8,
+    "y": 0.72,
+    "z": 1.94,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "screen_display",
+    "stainless",
+    "steel_dark"
+  ],
+  "polygons": 32,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

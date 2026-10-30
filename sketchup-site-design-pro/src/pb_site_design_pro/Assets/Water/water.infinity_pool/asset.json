@@ -1,0 +1,53 @@
+{
+  "assetId": "water.infinity_pool",
+  "name": "Infinity bazen (preljevni rub)",
+  "nameEn": "Infinity pool",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Bazeni",
+  "geometry": "polygon",
+  "builder": "pool",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Bazeni, uključujući infinity bazen",
+      "objectEn": "Swimming pools, including infinity pools"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.infinity_pool v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/pool_finish.jpg",
+      "../../../textures/water.jpg",
+      "../../../textures/concrete_slab.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 8.5,
+    "y": 4.95,
+    "z": 1.75,
+    "zMin": -1.75
+  },
+  "materials": [
+    "concrete_slab",
+    "pool_finish",
+    "water"
+  ],
+  "polygons": 54,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

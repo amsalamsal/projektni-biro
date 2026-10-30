@@ -1,0 +1,51 @@
+{
+  "assetId": "info.site_map",
+  "name": "Plan lokacije (stalak s kartom)",
+  "nameEn": "Site map stand",
+  "folder": "Information_Security",
+  "category": "Informativni i sigurnosni sistemi",
+  "subcategory": "Informacije",
+  "geometry": "point",
+  "builder": "sign_post",
+  "specObjects": [
+    {
+      "category": "Informativni i sigurnosni sistemi",
+      "object": "Planovi lokacije",
+      "objectEn": "Site maps"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models info.site_map v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.04,
+    "y": 0.475,
+    "z": 1.292,
+    "zMin": 0.0
+  },
+  "materials": [
+    "flower_white",
+    "marking_green",
+    "steel_dark"
+  ],
+  "polygons": 42,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

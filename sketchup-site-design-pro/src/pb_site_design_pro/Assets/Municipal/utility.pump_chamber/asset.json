@@ -1,0 +1,52 @@
+{
+  "assetId": "utility.pump_chamber",
+  "name": "Pumpno okno",
+  "nameEn": "Pump chamber",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Okna",
+  "geometry": "point",
+  "builder": "chamber",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Podzemna komunalna infrastruktura",
+      "objectEn": "Underground service infrastructure"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.pump_chamber v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.74,
+    "y": 1.74,
+    "z": 3.158,
+    "zMin": -3.15
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 3306,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

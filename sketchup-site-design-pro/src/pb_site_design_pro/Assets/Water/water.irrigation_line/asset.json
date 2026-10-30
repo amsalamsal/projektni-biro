@@ -1,0 +1,45 @@
+{
+  "assetId": "water.irrigation_line",
+  "name": "Linija navodnjavanja",
+  "nameEn": "Irrigation line",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Navodnjavanje i snabdijevanje",
+  "geometry": "path",
+  "builder": "pipe",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "parametric",
+    "generator": "Builder pipe"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.506,
+    "y": 1.523,
+    "z": 0.025,
+    "zMin": -0.313
+  },
+  "materials": [
+    "plastic_dark"
+  ],
+  "polygons": 50,
+  "source": "Parametarska površina/trasa u stvarnim dimenzijama, s materijalom i teksturom (Vanjsko uređenje PRO)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

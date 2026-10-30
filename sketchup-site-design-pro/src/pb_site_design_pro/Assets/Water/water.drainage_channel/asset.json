@@ -1,0 +1,51 @@
+{
+  "assetId": "water.drainage_channel",
+  "name": "Linijski drenažni kanal",
+  "nameEn": "Linear drainage channel",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Površinska odvodnja",
+  "geometry": "path",
+  "builder": "channel",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Drenažni kanali",
+      "objectEn": "Drainage channels"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.drainage_channel v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.539,
+    "y": 1.639,
+    "z": 0.25,
+    "zMin": -0.25
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "grate_steel"
+  ],
+  "polygons": 1702,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

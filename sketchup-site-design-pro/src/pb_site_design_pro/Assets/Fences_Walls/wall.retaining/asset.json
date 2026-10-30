@@ -1,0 +1,51 @@
+{
+  "assetId": "wall.retaining",
+  "name": "Potporni zid",
+  "nameEn": "Retaining wall",
+  "folder": "Fences_Walls",
+  "category": "Ograde i zidovi",
+  "subcategory": "Potporne konstrukcije",
+  "geometry": "path",
+  "builder": "wall",
+  "specObjects": [
+    {
+      "category": "Ograde i zidovi",
+      "object": "Potporni zidovi",
+      "objectEn": "Retaining walls"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models wall.retaining v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg",
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.809,
+    "y": 2.614,
+    "z": 1.9,
+    "zMin": -0.4
+  },
+  "materials": [
+    "concrete",
+    "concrete_precast"
+  ],
+  "polygons": 30,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

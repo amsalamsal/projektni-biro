@@ -1,0 +1,1992 @@
+{
+  "categories": [
+    {
+      "category": "Infrastruktura i površine",
+      "folder": "Infrastructure",
+      "objects": [
+        {
+          "name": "Betonsko popločanje",
+          "nameEn": "Concrete paving",
+          "assets": [
+            {
+              "assetId": "surface.concrete_paving",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Prirodni kamen",
+          "nameEn": "Natural stone",
+          "assets": [
+            {
+              "assetId": "surface.natural_stone",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Betonske ploče",
+          "nameEn": "Concrete slabs",
+          "assets": [
+            {
+              "assetId": "surface.concrete_slabs",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Gumene sigurnosne podloge",
+          "nameEn": "Rubber safety surfaces",
+          "assets": [
+            {
+              "assetId": "surface.rubber_safety",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Taktilno popločanje",
+          "nameEn": "Tactile paving",
+          "assets": [
+            {
+              "assetId": "surface.tactile_paving",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Šljunak i dekorativni agregat",
+          "nameEn": "Gravel and decorative aggregate",
+          "assets": [
+            {
+              "assetId": "surface.gravel",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Asfalt",
+          "nameEn": "Asphalt",
+          "assets": [
+            {
+              "assetId": "surface.asphalt",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vodopropusno popločanje",
+          "nameEn": "Permeable paving",
+          "assets": [
+            {
+              "assetId": "surface.permeable_paving",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "surface.grass_grid",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Ivičnjaci",
+          "nameEn": "Kerbs",
+          "assets": [
+            {
+              "assetId": "edge.kerb",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "edge.edging",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Prelazi površina",
+          "nameEn": "Surface transitions",
+          "assets": [
+            {
+              "assetId": "edge.flush_kerb",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "edge.surface_joint",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Materijali ispune i podloge",
+          "nameEn": "Fill and substrate materials",
+          "assets": [
+            {
+              "assetId": "surface.sand",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "surface.mulch",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Saobraćaj i mobilnost",
+      "folder": "Traffic",
+      "objects": [
+        {
+          "name": "Stanice za punjenje električnih vozila",
+          "nameEn": "EV charging stations",
+          "assets": [
+            {
+              "assetId": "sustainability.ev_charger_pedestal",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.ev_charger_wallbox",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "road.parking_bay_ev",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Usporivači (ležeći policajci)",
+          "nameEn": "Speed humps",
+          "assets": [
+            {
+              "assetId": "road.speed_hump",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Saobraćajni znakovi",
+          "nameEn": "Traffic signs",
+          "assets": [
+            {
+              "assetId": "road.traffic_sign",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Stubići",
+          "nameEn": "Bollards",
+          "assets": [
+            {
+              "assetId": "road.bollard",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "road.removable_bollard",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Barijere za vozila",
+          "nameEn": "Vehicle barriers",
+          "assets": [
+            {
+              "assetId": "road.vehicle_barrier",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Parking oprema",
+          "nameEn": "Parking equipment",
+          "assets": [
+            {
+              "assetId": "road.parking_meter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "road.wheel_stop",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "road.parking_bay",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Pješački prelazi",
+          "nameEn": "Pedestrian crossings",
+          "assets": [
+            {
+              "assetId": "road.pedestrian_crossing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "road.raised_crossing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Parking za osobe s invaliditetom",
+          "nameEn": "Accessible parking features",
+          "assets": [
+            {
+              "assetId": "road.parking_bay_accessible",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "info.accessibility_sign",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Elementi smirivanja saobraćaja",
+          "nameEn": "Traffic-calming elements",
+          "assets": [
+            {
+              "assetId": "road.raised_crossing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "road.speed_hump",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Biciklistička infrastruktura",
+      "folder": "Bicycle",
+      "objects": [
+        {
+          "name": "Biciklističke staze",
+          "nameEn": "Bicycle paths",
+          "assets": [
+            {
+              "assetId": "cycling.bike_path",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "cycling.shared_path",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "cycling.bike_lane",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Stalci za bicikle",
+          "nameEn": "Bicycle racks",
+          "assets": [
+            {
+              "assetId": "cycling.bike_stand",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "cycling.bike_rack",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Nadstrešnice za bicikle",
+          "nameEn": "Bicycle parking shelters",
+          "assets": [
+            {
+              "assetId": "cycling.bike_shelter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Bike box",
+          "nameEn": "Bike boxes",
+          "assets": [
+            {
+              "assetId": "cycling.bike_box",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Stanice javnih bicikala",
+          "nameEn": "Bike-sharing stations",
+          "assets": [
+            {
+              "assetId": "cycling.share_station",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Stanice za popravak bicikala",
+          "nameEn": "Bicycle repair stations",
+          "assets": [
+            {
+              "assetId": "cycling.repair_station",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Pumpe za bicikle",
+          "nameEn": "Bicycle pumps",
+          "assets": [
+            {
+              "assetId": "cycling.pump",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Servisni stalci za bicikle",
+          "nameEn": "Bicycle service stands",
+          "assets": [
+            {
+              "assetId": "cycling.service_stand",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "folder": "Water",
+      "objects": [
+        {
+          "name": "Bazeni, uključujući infinity bazen",
+          "nameEn": "Swimming pools, including infinity pools",
+          "assets": [
+            {
+              "assetId": "water.swimming_pool",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.infinity_pool",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Kaskade",
+          "nameEn": "Cascades",
+          "assets": [
+            {
+              "assetId": "water.cascade_wall",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Fontane",
+          "nameEn": "Fountains",
+          "assets": [
+            {
+              "assetId": "water.fountain",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.water_jet",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Dekorativni vodeni elementi",
+          "nameEn": "Decorative water features",
+          "assets": [
+            {
+              "assetId": "water.decorative_pond",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.reflecting_pool",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Drenažni kanali",
+          "nameEn": "Drainage channels",
+          "assets": [
+            {
+              "assetId": "water.drainage_channel",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.slot_drain",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.overflow_channel",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Sistemi zadržavanja kišnice",
+          "nameEn": "Rainwater retention systems",
+          "assets": [
+            {
+              "assetId": "water.retention_basin",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.infiltration_crates",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.rain_garden",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.bioswale",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vodopropusni kolovozni sistemi",
+          "nameEn": "Permeable road systems",
+          "assets": [
+            {
+              "assetId": "surface.permeable_paving",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "surface.grass_grid",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Elementi prikupljanja kišnice",
+          "nameEn": "Rainwater collection elements",
+          "assets": [
+            {
+              "assetId": "water.rainwater_tank",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.rainwater_collector",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "water.surface_inlet",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Revizioni i pristupni elementi",
+          "nameEn": "Inspection and access elements",
+          "assets": [
+            {
+              "assetId": "water.inspection_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Zelenilo i sadnja",
+      "folder": "Greenery",
+      "objects": [
+        {
+          "name": "Pojedinačna stabla",
+          "nameEn": "Individual trees",
+          "assets": [
+            {
+              "assetId": "landscape.tree_deciduous",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.tree_evergreen",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.tree_fruit",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.tree_columnar",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.tree_existing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Grmlje",
+          "nameEn": "Shrubs",
+          "assets": [
+            {
+              "assetId": "landscape.shrub",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Žive ograde",
+          "nameEn": "Hedges",
+          "assets": [
+            {
+              "assetId": "landscape.hedge",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Ukrasne trave",
+          "nameEn": "Ornamental grasses",
+          "assets": [
+            {
+              "assetId": "landscape.ornamental_grasses",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Cvjetne gredice",
+          "nameEn": "Flower beds",
+          "assets": [
+            {
+              "assetId": "landscape.flower_bed",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Ružičnjaci",
+          "nameEn": "Rose gardens",
+          "assets": [
+            {
+              "assetId": "landscape.rose_garden",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Voćnjaci",
+          "nameEn": "Orchards",
+          "assets": [
+            {
+              "assetId": "landscape.orchard_tree",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Zeleni krovovi",
+          "nameEn": "Green roofs",
+          "assets": [
+            {
+              "assetId": "landscape.green_roof",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Krovni vrtovi",
+          "nameEn": "Roof gardens",
+          "assets": [
+            {
+              "assetId": "landscape.raised_planter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.green_roof",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Zeleni zidovi",
+          "nameEn": "Green walls",
+          "assets": [
+            {
+              "assetId": "landscape.green_wall",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.vertical_garden",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.climber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Grupe sadnje",
+          "nameEn": "Planting groups",
+          "assets": [
+            {
+              "assetId": "landscape.planting_group",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Sezonsko zelenilo",
+          "nameEn": "Seasonal vegetation",
+          "assets": [
+            {
+              "assetId": "landscape.seasonal_planter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "landscape.perennials",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Pokrivači tla",
+          "nameEn": "Ground covers",
+          "assets": [
+            {
+              "assetId": "landscape.ground_cover",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Komunalna infrastruktura",
+      "folder": "Municipal",
+      "objects": [
+        {
+          "name": "Podzemni kontejneri 3 m³ i 5 m³",
+          "nameEn": "Underground waste containers 3 m³ and 5 m³",
+          "assets": [
+            {
+              "assetId": "utility.waste_container_ug_3m3",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.waste_container_ug_5m3",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Reciklažna ostrva",
+          "nameEn": "Recycling islands",
+          "assets": [
+            {
+              "assetId": "utility.recycling_island",
+              "status": "Not started",
+              "statusBs": "Nije započeto"
+            },
+            {
+              "assetId": "utility.waste_container_semi",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.waste_container_above",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Not started"
+        },
+        {
+          "name": "Podzemne cisterne",
+          "nameEn": "Underground cisterns",
+          "assets": [
+            {
+              "assetId": "utility.cistern",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.water_tank",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Septičke jame",
+          "nameEn": "Septic tanks",
+          "assets": [
+            {
+              "assetId": "utility.septic_tank",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Kablovski kanali",
+          "nameEn": "Cable trenches",
+          "assets": [
+            {
+              "assetId": "utility.trench",
+              "status": "Not started",
+              "statusBs": "Nije započeto"
+            },
+            {
+              "assetId": "utility.cable_duct",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Not started"
+        },
+        {
+          "name": "Šahtovi",
+          "nameEn": "Manholes",
+          "assets": [
+            {
+              "assetId": "utility.manhole",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Poklopci komunalnih okana",
+          "nameEn": "Utility access covers",
+          "assets": [
+            {
+              "assetId": "utility.electrical_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.telecom_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.water_meter_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.valve_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Podzemna komunalna infrastruktura",
+          "nameEn": "Underground service infrastructure",
+          "assets": [
+            {
+              "assetId": "utility.service_corridor",
+              "status": "Not started",
+              "statusBs": "Nije započeto"
+            },
+            {
+              "assetId": "utility.water_pipe",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.service_connection",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.pump_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "utility.equipment_enclosure",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Not started"
+        },
+        {
+          "name": "Revizione komore",
+          "nameEn": "Inspection chambers",
+          "assets": [
+            {
+              "assetId": "water.inspection_chamber",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Rasvjeta",
+      "folder": "Lighting",
+      "objects": [
+        {
+          "name": "Solarne svjetiljke",
+          "nameEn": "Solar lights",
+          "assets": [
+            {
+              "assetId": "lighting.solar_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Pametne svjetiljke sa senzorom pokreta",
+          "nameEn": "Smart motion-sensor lights",
+          "assets": [
+            {
+              "assetId": "lighting.smart_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Rasvjetni stubići",
+          "nameEn": "Bollard lights",
+          "assets": [
+            {
+              "assetId": "lighting.bollard_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Svjetiljke za staze",
+          "nameEn": "Pathway lights",
+          "assets": [
+            {
+              "assetId": "lighting.path_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "lighting.pedestrian_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Podvodna rasvjeta",
+          "nameEn": "Underwater lighting",
+          "assets": [
+            {
+              "assetId": "lighting.underwater_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Fasadna rasvjeta",
+          "nameEn": "Facade lighting",
+          "assets": [
+            {
+              "assetId": "lighting.facade_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Dekorativna rasvjeta",
+          "nameEn": "Decorative lighting",
+          "assets": [
+            {
+              "assetId": "lighting.garden_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "lighting.led_strip",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "lighting.pergola_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Rasvjeta površina",
+          "nameEn": "Area lighting",
+          "assets": [
+            {
+              "assetId": "lighting.area_floodlight",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "lighting.street_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Zidne svjetiljke",
+          "nameEn": "Wall-mounted luminaires",
+          "assets": [
+            {
+              "assetId": "lighting.wall_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "lighting.step_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Ograde i zidovi",
+      "folder": "Fences_Walls",
+      "objects": [
+        {
+          "name": "Gabionski zidovi",
+          "nameEn": "Gabion walls",
+          "assets": [
+            {
+              "assetId": "wall.gabion",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Staklene ograde",
+          "nameEn": "Glass fences",
+          "assets": [
+            {
+              "assetId": "wall.glass_railing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Metalne ograde",
+          "nameEn": "Metal fences",
+          "assets": [
+            {
+              "assetId": "wall.metal_fence",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.mesh_fence",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Drvene ograde",
+          "nameEn": "Wooden fences",
+          "assets": [
+            {
+              "assetId": "wall.timber_fence",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Dekorativne ograde",
+          "nameEn": "Decorative fences",
+          "assets": [
+            {
+              "assetId": "wall.decorative_fence",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Potporni zidovi",
+          "nameEn": "Retaining walls",
+          "assets": [
+            {
+              "assetId": "wall.retaining",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vrtni zidovi",
+          "nameEn": "Garden walls",
+          "assets": [
+            {
+              "assetId": "wall.stone",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.concrete",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.planter_wall",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Automatske kapije",
+          "nameEn": "Automatic gates",
+          "assets": [
+            {
+              "assetId": "wall.sliding_gate",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.access_barrier",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Pješačke kapije",
+          "nameEn": "Pedestrian gates",
+          "assets": [
+            {
+              "assetId": "wall.pedestrian_gate",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Sistemi ograđivanja",
+          "nameEn": "Boundary systems",
+          "assets": [
+            {
+              "assetId": "wall.mesh_fence",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.vehicle_gate",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.swing_gate",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "wall.safety_railing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Nadstrešnice i zasjena",
+      "folder": "Canopies",
+      "objects": [
+        {
+          "name": "Bioklimatske pergole",
+          "nameEn": "Bioclimatic pergolas",
+          "assets": [
+            {
+              "assetId": "structure.bioclimatic_pergola",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "structure.pergola",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Solarne nadstrešnice",
+          "nameEn": "Solar canopies",
+          "assets": [
+            {
+              "assetId": "structure.solar_canopy",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Solarni krovovi",
+          "nameEn": "Solar roofs",
+          "assets": [
+            {
+              "assetId": "structure.solar_canopy",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.solar_array",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Membranske konstrukcije",
+          "nameEn": "Tensile structures",
+          "assets": [
+            {
+              "assetId": "structure.tensile_membrane",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vanjska skloništa",
+          "nameEn": "Outdoor shelters",
+          "assets": [
+            {
+              "assetId": "structure.seating_shelter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "structure.bus_shelter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "structure.gazebo",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "structure.pavilion",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Nadstrešnice za bicikle",
+          "nameEn": "Bicycle shelters",
+          "assets": [
+            {
+              "assetId": "cycling.bike_shelter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Nadstrešnice za parking",
+          "nameEn": "Parking canopies",
+          "assets": [
+            {
+              "assetId": "structure.carport",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Jedra za sjenu",
+          "nameEn": "Shade sails",
+          "assets": [
+            {
+              "assetId": "climate.shade_sail",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Mobilijar i rekreacija",
+      "folder": "Furniture_Recreation",
+      "objects": [
+        {
+          "name": "Klupe",
+          "nameEn": "Benches",
+          "assets": [
+            {
+              "assetId": "furniture.bench",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "furniture.bench_backless",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "furniture.accessible_bench",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Stolovi",
+          "nameEn": "Tables",
+          "assets": [
+            {
+              "assetId": "furniture.dining_table",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Korpe za otpatke",
+          "nameEn": "Waste bins",
+          "assets": [
+            {
+              "assetId": "furniture.waste_bin",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vanjske fitness sprave",
+          "nameEn": "Outdoor fitness equipment",
+          "assets": [
+            {
+              "assetId": "recreation.fitness_station",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Igrališta",
+          "nameEn": "Playgrounds",
+          "assets": [
+            {
+              "assetId": "recreation.playground_unit",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "recreation.swing",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "recreation.climbing_structure",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Tobogani",
+          "nameEn": "Slides",
+          "assets": [
+            {
+              "assetId": "recreation.slide",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Trampolini",
+          "nameEn": "Trampolines",
+          "assets": [
+            {
+              "assetId": "recreation.trampoline",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Zip-line",
+          "nameEn": "Zip lines",
+          "assets": [
+            {
+              "assetId": "recreation.zip_line",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Piknik mobilijar",
+          "nameEn": "Picnic furniture",
+          "assets": [
+            {
+              "assetId": "furniture.picnic_table",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vanjsko sjedenje",
+          "nameEn": "Outdoor seating",
+          "assets": [
+            {
+              "assetId": "furniture.chair",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "furniture.lounger",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Sportska i rekreativna oprema",
+          "nameEn": "Sports and recreation equipment",
+          "assets": [
+            {
+              "assetId": "recreation.basketball_hoop",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "recreation.table_tennis",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "recreation.chess_table",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "recreation.football_goal",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Eko tehnologije",
+      "folder": "Eco_Technologies",
+      "objects": [
+        {
+          "name": "Solarni paneli",
+          "nameEn": "Solar panels",
+          "assets": [
+            {
+              "assetId": "sustainability.solar_array",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Toplotne pumpe",
+          "nameEn": "Heat pumps",
+          "assets": [
+            {
+              "assetId": "sustainability.heat_pump",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.outdoor_unit",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vjetroturbine s vertikalnom osom",
+          "nameEn": "Vertical-axis wind turbines",
+          "assets": [
+            {
+              "assetId": "sustainability.wind_turbine",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Kućišta energetske opreme",
+          "nameEn": "Energy equipment enclosures",
+          "assets": [
+            {
+              "assetId": "sustainability.energy_cabinet",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.battery_cabinet",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.inverter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Održiva infrastruktura lokacije",
+          "nameEn": "Sustainable site infrastructure",
+          "assets": [
+            {
+              "assetId": "sustainability.rainwater_harvesting",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.greywater_unit",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.compost_station",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "sustainability.suds_crate",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Vanjski klimatski sistemi",
+      "folder": "Outdoor_Climate",
+      "objects": [
+        {
+          "name": "Sistemi za raspršivanje vode",
+          "nameEn": "Misting systems",
+          "assets": [
+            {
+              "assetId": "climate.misting_post",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "climate.misting_line",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Grijane terase",
+          "nameEn": "Heated terrace systems",
+          "assets": [
+            {
+              "assetId": "climate.heated_zone",
+              "status": "Not started",
+              "statusBs": "Nije započeto"
+            },
+            {
+              "assetId": "climate.patio_heater",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Not started"
+        },
+        {
+          "name": "Infracrveni grijači",
+          "nameEn": "Infrared heaters",
+          "assets": [
+            {
+              "assetId": "climate.infrared_heater",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vanjski rashladni elementi",
+          "nameEn": "Outdoor cooling elements",
+          "assets": [
+            {
+              "assetId": "climate.evaporative_cooler",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "climate.cooling_unit",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vanjska klimatska oprema",
+          "nameEn": "Outdoor climate equipment",
+          "assets": [
+            {
+              "assetId": "climate.ventilation_unit",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "climate.awning",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "climate.wind_screen",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Dekorativni elementi",
+      "folder": "Decorative",
+      "objects": [
+        {
+          "name": "Skulpture",
+          "nameEn": "Sculptures",
+          "assets": [
+            {
+              "assetId": "decorative.sculpture",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Zeleni zidovi",
+          "nameEn": "Green walls",
+          "assets": [
+            {
+              "assetId": "landscape.green_wall",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Murali",
+          "nameEn": "Murals",
+          "assets": [
+            {
+              "assetId": "decorative.mural",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Dekorativni paravani",
+          "nameEn": "Decorative screens",
+          "assets": [
+            {
+              "assetId": "decorative.screen",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Akcentna rasvjeta",
+          "nameEn": "Feature lighting",
+          "assets": [
+            {
+              "assetId": "lighting.feature_light",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "decorative.light_installation",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Umjetnički elementi pejzaža",
+          "nameEn": "Artistic landscape elements",
+          "assets": [
+            {
+              "assetId": "decorative.public_art",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "decorative.boulder",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "decorative.focal_point",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Dekorativne konstrukcije",
+          "nameEn": "Decorative structures",
+          "assets": [
+            {
+              "assetId": "decorative.entrance_monument",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "decorative.decorative_wall",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "decorative.signage_structure",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            },
+            {
+              "assetId": "decorative.feature_planter",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    },
+    {
+      "category": "Informativni i sigurnosni sistemi",
+      "folder": "Information_Security",
+      "objects": [
+        {
+          "name": "QR informativni paneli",
+          "nameEn": "QR information panels",
+          "assets": [
+            {
+              "assetId": "info.qr_panel",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Informativni kiosci",
+          "nameEn": "Information kiosks",
+          "assets": [
+            {
+              "assetId": "info.digital_kiosk",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "CCTV kamere",
+          "nameEn": "CCTV cameras",
+          "assets": [
+            {
+              "assetId": "info.cctv_camera",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Vanjski audio sistemi",
+          "nameEn": "Outdoor audio systems",
+          "assets": [
+            {
+              "assetId": "info.speaker",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Znakovi za orijentaciju",
+          "nameEn": "Wayfinding signs",
+          "assets": [
+            {
+              "assetId": "info.wayfinding_sign",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Putokazi",
+          "nameEn": "Directional signage",
+          "assets": [
+            {
+              "assetId": "info.directional_sign",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Planovi lokacije",
+          "nameEn": "Site maps",
+          "assets": [
+            {
+              "assetId": "info.site_map",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        },
+        {
+          "name": "Informativne table",
+          "nameEn": "Information boards",
+          "assets": [
+            {
+              "assetId": "info.site_board",
+              "status": "Imported into library",
+              "statusBs": "Uvezeno u biblioteku"
+            }
+          ],
+          "status": "Imported into library"
+        }
+      ]
+    }
+  ]
+}

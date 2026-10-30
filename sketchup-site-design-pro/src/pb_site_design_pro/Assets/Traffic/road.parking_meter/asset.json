@@ -1,0 +1,55 @@
+{
+  "assetId": "road.parking_meter",
+  "name": "Parking automat",
+  "nameEn": "Parking pay station",
+  "folder": "Traffic",
+  "category": "Saobraćaj i parking",
+  "subcategory": "Parking oprema",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Saobraćaj i mobilnost",
+      "object": "Parking oprema",
+      "objectEn": "Parking equipment"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models road.parking_meter v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg",
+      "../../../textures/solar_pv.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.53,
+    "y": 0.43,
+    "z": 1.809,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "screen_display",
+    "solar_pv",
+    "stainless",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 97,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

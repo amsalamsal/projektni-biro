@@ -1,0 +1,52 @@
+{
+  "assetId": "water.bioswale",
+  "name": "Bio-kanal (zatravljeni jarak)",
+  "nameEn": "Bioswale",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Kišnica",
+  "geometry": "polygon",
+  "builder": "basin",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Sistemi zadržavanja kišnice",
+      "objectEn": "Rainwater retention systems"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.bioswale v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/meadow.jpg",
+      "../../../textures/stone_wall.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 4.0,
+    "y": 3.0,
+    "z": 0.534,
+    "zMin": -0.405
+  },
+  "materials": [
+    "grass_blade",
+    "meadow",
+    "stone_wall"
+  ],
+  "polygons": 3130,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

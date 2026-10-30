@@ -1,0 +1,50 @@
+{
+  "assetId": "sustainability.suds_crate",
+  "name": "Retencijski modul održive odvodnje",
+  "nameEn": "SuDS attenuation unit",
+  "folder": "Eco_Technologies",
+  "category": "Eko tehnologije",
+  "subcategory": "Voda",
+  "geometry": "point",
+  "builder": "tank",
+  "specObjects": [
+    {
+      "category": "Eko tehnologije",
+      "object": "Održiva infrastruktura lokacije",
+      "objectEn": "Sustainable site infrastructure"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models sustainability.suds_crate v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/gravel.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 5.0,
+    "y": 2.6,
+    "z": 0.89,
+    "zMin": -1.4
+  },
+  "materials": [
+    "gravel",
+    "hdpe"
+  ],
+  "polygons": 998,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

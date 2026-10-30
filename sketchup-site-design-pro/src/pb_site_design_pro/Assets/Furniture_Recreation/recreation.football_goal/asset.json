@@ -1,0 +1,51 @@
+{
+  "assetId": "recreation.football_goal",
+  "name": "Gol za mali fudbal",
+  "nameEn": "Small-sided football goal",
+  "folder": "Furniture_Recreation",
+  "category": "Urbani mobilijar i rekreacija",
+  "subcategory": "Sport",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Mobilijar i rekreacija",
+      "object": "Sportska i rekreativna oprema",
+      "objectEn": "Sports and recreation equipment"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models recreation.football_goal v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 3.08,
+    "y": 1.065,
+    "z": 2.0,
+    "zMin": 0.0
+  },
+  "materials": [
+    "line_paint_white",
+    "rope",
+    "steel_galv"
+  ],
+  "polygons": 346,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

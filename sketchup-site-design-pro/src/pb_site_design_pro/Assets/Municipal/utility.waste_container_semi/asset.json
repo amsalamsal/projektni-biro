@@ -1,0 +1,50 @@
+{
+  "assetId": "utility.waste_container_semi",
+  "name": "Polupodzemni kontejner za otpad",
+  "nameEn": "Semi-underground waste container",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Otpad",
+  "geometry": "point",
+  "builder": "underground_container",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Reciklažna ostrva",
+      "objectEn": "Recycling islands"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.waste_container_semi v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/timber.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.849,
+    "y": 1.849,
+    "z": 2.84,
+    "zMin": -1.5
+  },
+  "materials": [
+    "steel_dark",
+    "timber"
+  ],
+  "polygons": 430,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

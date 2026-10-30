@@ -83,11 +83,14 @@ window.renderAsset = async (data) => {
       if (!fs.existsSync(meshFile)) continue;
       const data = JSON.parse(fs.readFileSync(meshFile, 'utf8'));
       for (const m of Object.values(data)) {
-        const tf = m.t && path.join(fdir, id, m.t);
-        if (tf && fs.existsSync(tf)) m.img = 'data:image/jpeg;base64,' + fs.readFileSync(tf).toString('base64');
+        const tf = m.t && path.join(fdir, id, path.basename(m.t));
+        const shared = m.t && path.join(__dirname, '..', '..', 'sketchup-site-design-pro', 'src', 'pb_site_design_pro', 'textures', m.t);
+        const file = [tf, shared].find((f) => f && fs.existsSync(f));
+        if (file) m.img = 'data:image/jpeg;base64,' + fs.readFileSync(file).toString('base64');
       }
       await page.evaluate((d) => window.renderAsset(d), data);
-      await page.locator('#c').screenshot({ path: path.join(fdir, id, 'preview.png') });
+      const jpg = process.env.SDP_PREVIEW === 'preview.jpg';
+      await page.locator('#c').screenshot(jpg ? { path: path.join(fdir, id, 'preview.jpg'), type: 'jpeg', quality: 86 } : { path: path.join(fdir, id, 'preview.png') });
       n++;
     }
   }

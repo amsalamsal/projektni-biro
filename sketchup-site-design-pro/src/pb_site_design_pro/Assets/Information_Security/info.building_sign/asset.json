@@ -1,0 +1,48 @@
+{
+  "assetId": "info.building_sign",
+  "name": "Oznaka objekta",
+  "nameEn": "Building identification sign",
+  "folder": "Information_Security",
+  "category": "Informativni i sigurnosni sistemi",
+  "subcategory": "Orijentacija",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models info.building_sign v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.7,
+    "y": 0.3,
+    "z": 2.0,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "plastic_blue",
+    "sign_plate",
+    "steel_dark"
+  ],
+  "polygons": 24,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

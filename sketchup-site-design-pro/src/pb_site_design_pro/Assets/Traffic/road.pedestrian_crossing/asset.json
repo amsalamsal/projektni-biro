@@ -1,0 +1,49 @@
+{
+  "assetId": "road.pedestrian_crossing",
+  "name": "Pješački prelaz (zebra)",
+  "nameEn": "Pedestrian crossing (striped)",
+  "folder": "Traffic",
+  "category": "Saobraćaj i parking",
+  "subcategory": "Oznake",
+  "geometry": "polygon",
+  "builder": "stripes",
+  "specObjects": [
+    {
+      "category": "Saobraćaj i mobilnost",
+      "object": "Pješački prelazi",
+      "objectEn": "Pedestrian crossings"
+    }
+  ],
+  "model": {
+    "kind": "parametric",
+    "generator": "Builder stripes"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 4.0,
+    "y": 2.5,
+    "z": 0.003,
+    "zMin": 0.0
+  },
+  "materials": [
+    "line_paint_white"
+  ],
+  "polygons": 18,
+  "source": "Parametarska površina/trasa u stvarnim dimenzijama, s materijalom i teksturom (Vanjsko uređenje PRO)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

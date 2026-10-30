@@ -1,0 +1,52 @@
+{
+  "assetId": "landscape.ornamental_grasses",
+  "name": "Ukrasne trave",
+  "nameEn": "Ornamental grasses",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Gredice",
+  "geometry": "polygon",
+  "builder": "planting_area",
+  "specObjects": [
+    {
+      "category": "Zelenilo i sadnja",
+      "object": "Ukrasne trave",
+      "objectEn": "Ornamental grasses"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.ornamental_grasses v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/mulch.jpg",
+      "../../../textures/meadow.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 3.0,
+    "y": 2.011,
+    "z": 1.174,
+    "zMin": -0.3
+  },
+  "materials": [
+    "grass_blade",
+    "meadow",
+    "mulch"
+  ],
+  "polygons": 2781,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

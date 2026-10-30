@@ -1,0 +1,51 @@
+{
+  "assetId": "lighting.pergola_light",
+  "name": "Svjetiljka pergole",
+  "nameEn": "Pergola light",
+  "folder": "Lighting",
+  "category": "Rasvjeta",
+  "subcategory": "Dekorativno",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Rasvjeta",
+      "object": "Dekorativna rasvjeta",
+      "objectEn": "Decorative lighting"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models lighting.pergola_light v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.6,
+    "y": 0.06,
+    "z": 0.604,
+    "zMin": 2.496
+  },
+  "materials": [
+    "aluminium",
+    "luminaire",
+    "steel_dark"
+  ],
+  "polygons": 26,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

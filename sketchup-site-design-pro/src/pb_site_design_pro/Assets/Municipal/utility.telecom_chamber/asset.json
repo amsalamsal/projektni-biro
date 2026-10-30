@@ -1,0 +1,51 @@
+{
+  "assetId": "utility.telecom_chamber",
+  "name": "Telekomunikacijsko okno",
+  "nameEn": "Telecommunications chamber",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Okna",
+  "geometry": "point",
+  "builder": "chamber",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Poklopci komunalnih okana",
+      "objectEn": "Utility access covers"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.telecom_chamber v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.84,
+    "y": 0.84,
+    "z": 0.954,
+    "zMin": -0.95
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "steel_galv"
+  ],
+  "polygons": 382,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

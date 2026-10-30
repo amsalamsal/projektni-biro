@@ -1,0 +1,61 @@
+{
+  "assetId": "landscape.green_roof",
+  "name": "Zeleni krov",
+  "nameEn": "Green roof",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Vertikalno ozelenjavanje",
+  "geometry": "polygon",
+  "builder": "slab",
+  "specObjects": [
+    {
+      "category": "Zelenilo i sadnja",
+      "object": "Zeleni krovovi",
+      "objectEn": "Green roofs"
+    },
+    {
+      "category": "Zelenilo i sadnja",
+      "object": "Krovni vrtovi",
+      "objectEn": "Roof gardens"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.green_roof v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/soil.jpg",
+      "../../../textures/sedum.jpg",
+      "../../../textures/foliage_light.jpg",
+      "../../../textures/foliage.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 4.0,
+    "y": 3.0,
+    "z": 0.238,
+    "zMin": -0.12
+  },
+  "materials": [
+    "flower_pink",
+    "foliage",
+    "foliage_light",
+    "sedum",
+    "soil"
+  ],
+  "polygons": 47926,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

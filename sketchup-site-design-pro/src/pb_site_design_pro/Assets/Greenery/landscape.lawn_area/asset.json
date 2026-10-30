@@ -1,0 +1,45 @@
+{
+  "assetId": "landscape.lawn_area",
+  "name": "Površina travnjaka",
+  "nameEn": "Lawn area",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Travnjaci i livade",
+  "geometry": "polygon",
+  "builder": "planting_area",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.lawn_area v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/grass.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 3.0,
+    "y": 2.0,
+    "z": 0.15,
+    "zMin": -0.15
+  },
+  "materials": [
+    "grass"
+  ],
+  "polygons": 12,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

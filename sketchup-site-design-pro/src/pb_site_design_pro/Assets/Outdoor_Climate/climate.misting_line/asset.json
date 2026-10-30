@@ -1,0 +1,50 @@
+{
+  "assetId": "climate.misting_line",
+  "name": "Linija sistema za raspršivanje vode",
+  "nameEn": "Misting system line",
+  "folder": "Outdoor_Climate",
+  "category": "Vanjski klimatski sistemi",
+  "subcategory": "Hlađenje",
+  "geometry": "path",
+  "builder": "pipe",
+  "specObjects": [
+    {
+      "category": "Vanjski klimatski sistemi",
+      "object": "Sistemi za raspršivanje vode",
+      "objectEn": "Misting systems"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models climate.misting_line v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.503,
+    "y": 1.511,
+    "z": 0.037,
+    "zMin": 2.569
+  },
+  "materials": [
+    "stainless",
+    "steel_galv"
+  ],
+  "polygons": 146,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

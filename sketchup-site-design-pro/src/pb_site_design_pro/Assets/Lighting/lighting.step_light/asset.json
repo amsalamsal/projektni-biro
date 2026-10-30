@@ -1,0 +1,51 @@
+{
+  "assetId": "lighting.step_light",
+  "name": "Svjetiljka za stepenice",
+  "nameEn": "Step light",
+  "folder": "Lighting",
+  "category": "Rasvjeta",
+  "subcategory": "Zidna montaža",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Rasvjeta",
+      "object": "Zidne svjetiljke",
+      "objectEn": "Wall-mounted luminaires"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models lighting.step_light v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.17,
+    "y": 0.059,
+    "z": 0.09,
+    "zMin": 0.195
+  },
+  "materials": [
+    "luminaire",
+    "plastic_dark",
+    "stainless"
+  ],
+  "polygons": 36,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

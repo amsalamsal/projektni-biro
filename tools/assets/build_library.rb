@@ -132,6 +132,10 @@ def colour(key)
 end
 
 TEXTURES = File.join(ROOT, 'sketchup-site-design-pro/src/pb_site_design_pro/textures')
+# SDP_SHARED_TEXTURES=1: the library lives in the extension (<ext>/Assets/<Folder>/<id>/), so models reference the
+# extension's textures folder instead of carrying their own copies.
+SHARED_TEXTURES = ENV['SDP_SHARED_TEXTURES'] == '1'
+PREVIEW = ENV['SDP_PREVIEW'] || 'preview.png'
 
 # Bundled texture of a material: [file name, tile size in metres] or nil.
 def texture(key)
@@ -159,86 +163,147 @@ def fmt(v)
   format('%.5f', v).sub(/\.?0+$/, '')
 end
 
-# COLLADA 1.4.1, one <geometry> per material, polygons as <polylist> (holes as <polygons>/<ph>).
-def write_dae(path, asset_id, polys_by_mat)
-  geoms = []
-  effects = []
-  images = []
-  used_textures = []
-  mats = []
-  nodes = []
-  polys_by_mat.each_with_index do |(mat, polys), gi|
+# Local polygons of a canvas node grouped by material plus its component instances: [{ mat => polys }, [[key, origin, rot, mat]]].
+def local_parts(node, mat = nil, polys = Hash.new { |h, k| h[k] = [] }, insts = [])
+  node.children.each do |c|
+    m = c.material || mat
+    case c.kind
+    when :mesh then c.polygons.each { |pl| polys[m.to_s] << pl }
+    when :instance then insts << [c.key, c.origin, c.rotation, m]
+    when :group then local_parts(c, m, polys, insts)
+    end
+  end
+  [polys, insts]
+end
+
+# COLLADA 1.4.1 writer. Repeated parts (component instances of the generator) become <library_nodes> referenced
+# by <instance_node>, so SketchUp imports them as components; meshes are one <geometry> per material with
+# <polylist> / <polygons> (holes) and planar UVs for textured materials.
+class DaeWriter
+  def initialize(asset_id)
+    @asset_id = asset_id
+    @geoms = []
+    @effects = {}
+    @images = []
+    @mats = {}
+    @lib_nodes = {}
+    @used_textures = []
+    @gi = 0
+  end
+
+  attr_reader :used_textures
+
+  def material_id(mat)
+    mid = "m_#{mat.gsub(/[^A-Za-z0-9_]/, '_')}"
+    return mid if @mats.key?(mid)
+
+    tex = texture(mat)
+    r, g, b, a = colour(mat)
+    if tex
+      @images << %(<image id="#{mid}-img" name="#{tex[0]}"><init_from>#{SHARED_TEXTURES ? "../../../textures/#{tex[0]}" : tex[0]}</init_from></image>)
+      @used_textures << tex[0]
+      params = %(<newparam sid="#{mid}-surface"><surface type="2D"><init_from>#{mid}-img</init_from></surface></newparam><newparam sid="#{mid}-sampler"><sampler2D><source>#{mid}-surface</source></sampler2D></newparam>)
+      diffuse = %(<texture texture="#{mid}-sampler" texcoord="UVSET0"/>)
+    else
+      params = ''
+      diffuse = %(<color>#{fmt(r)} #{fmt(g)} #{fmt(b)} 1</color>)
+    end
+    @effects[mid] = %(<effect id="#{mid}-fx"><profile_COMMON>#{params}<technique sid="common"><lambert><diffuse>#{diffuse}</diffuse>#{a < 1 ? "<transparency><float>#{fmt(a)}</float></transparency>" : ''}</lambert></technique></profile_COMMON></effect>)
+    @mats[mid] = %(<material id="#{mid}" name="#{mat}"><instance_effect url="##{mid}-fx"/></material>)
+    mid
+  end
+
+  # <geometry> for one material's polygons; returns the <instance_geometry> element.
+  def geometry(mat, polys)
+    gid = "g#{@gi += 1}"
+    mid = material_id(mat)
+    tex = texture(mat)
     verts = []
     index = {}
-    vid = lambda do |p|
-      key = p.map { |v| v.round(6) }
-      index[key] ||= (verts << key; verts.length - 1)
-    end
-    tex = texture(mat)
+    vid = ->(p) { key = p.map { |v| v.to_f.round(6) }; index[key] ||= (verts << key; verts.length - 1) }
     uvs = []
     uindex = {}
     uid = ->(t) { uindex[t] ||= (uvs << t; uvs.length - 1) }
-    # with a texture every corner is "vertex uv" (offset 0 and 1), else just the vertex
-    ring = lambda do |pts, all_pts|
+    corners = lambda do |pts, uv|
       next pts.map(&vid) unless tex
 
-      pts.map(&vid).zip(planar_uv(all_pts, tex[1]).first(pts.length).map(&uid)).flatten
+      pts.map(&vid).zip(uv.map(&uid)).flatten
     end
-    simple = polys.reject { |p| p.is_a?(Hash) }.map { |p| ring.call(p, p) }
-    holed = polys.select { |p| p.is_a?(Hash) }.map do |p|
-      outer_uv = tex ? planar_uv(p[:outer] + p[:holes].flatten(1), tex[1]) : nil
-      hole_rings = []
-      offset = p[:outer].length
-      p[:holes].each do |h|
-        hole_rings << (tex ? h.map(&vid).zip(outer_uv[offset, h.length].map(&uid)).flatten : h.map(&vid))
-        offset += h.length
+    simple = []
+    holed = []
+    polys.each do |p|
+      if p.is_a?(Hash)
+        all = p[:outer] + p[:holes].flatten(1)
+        uv = tex ? planar_uv(all, tex[1]) : []
+        off = p[:outer].length
+        hs = p[:holes].map { |h| r = corners.call(h, uv[off, h.length] || []); off += h.length; r }
+        holed << [corners.call(p[:outer], uv.first(p[:outer].length)), hs]
+      else
+        simple << corners.call(p, tex ? planar_uv(p, tex[1]) : [])
       end
-      [tex ? p[:outer].map(&vid).zip(outer_uv.first(p[:outer].length).map(&uid)).flatten : p[:outer].map(&vid), hole_rings]
     end
-    gid = "g#{gi}"
-    mid = "m_#{mat.gsub(/[^A-Za-z0-9_]/, '_')}"
-    inputs = %(<input semantic="VERTEX" source="##{gid}-v" offset="0"/>) + (tex ? %(<input semantic="TEXCOORD" source="##{gid}-uv" offset="1" set="0"/>) : '')
     stride = tex ? 2 : 1
+    inputs = %(<input semantic="VERTEX" source="##{gid}-v" offset="0"/>) + (tex ? %(<input semantic="TEXCOORD" source="##{gid}-uv" offset="1" set="0"/>) : '')
     prims = []
-    unless simple.empty?
-      prims << %(<polylist material="#{mid}" count="#{simple.length}">#{inputs}<vcount>#{simple.map { |r| r.length / stride }.join(' ')}</vcount><p>#{simple.flatten.join(' ')}</p></polylist>)
-    end
+    prims << %(<polylist material="#{mid}" count="#{simple.length}">#{inputs}<vcount>#{simple.map { |r| r.length / stride }.join(' ')}</vcount><p>#{simple.flatten.join(' ')}</p></polylist>) unless simple.empty?
     unless holed.empty?
       body = holed.map { |o, hs| "<ph><p>#{o.join(' ')}</p>#{hs.map { |h| "<h>#{h.join(' ')}</h>" }.join}</ph>" }.join
       prims << %(<polygons material="#{mid}" count="#{holed.length}">#{inputs}#{body}</polygons>)
     end
     uv_src = tex ? %(<source id="#{gid}-uv"><float_array id="#{gid}-uva" count="#{uvs.length * 2}">#{uvs.flatten.map { |v| fmt(v) }.join(' ')}</float_array><technique_common><accessor source="##{gid}-uva" count="#{uvs.length}" stride="2"><param name="S" type="float"/><param name="T" type="float"/></accessor></technique_common></source>) : ''
-    geoms << %(<geometry id="#{gid}"><mesh><source id="#{gid}-p"><float_array id="#{gid}-pa" count="#{verts.length * 3}">#{verts.flatten.map { |v| fmt(v) }.join(' ')}</float_array><technique_common><accessor source="##{gid}-pa" count="#{verts.length}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>#{uv_src}<vertices id="#{gid}-v"><input semantic="POSITION" source="##{gid}-p"/></vertices>#{prims.join}</mesh></geometry>)
-    r, g, b, a = colour(mat)
-    if tex
-      images << %(<image id="#{mid}-img" name="#{tex[0]}"><init_from>#{tex[0]}</init_from></image>)
-      used_textures << tex[0]
-    end
-    diffuse = if tex
-                %(<texture texture="#{mid}-sampler" texcoord="UVSET0"/>)
-              else
-                %(<color>#{fmt(r)} #{fmt(g)} #{fmt(b)} 1</color>)
-              end
-    params = tex ? %(<newparam sid="#{mid}-surface"><surface type="2D"><init_from>#{mid}-img</init_from></surface></newparam><newparam sid="#{mid}-sampler"><sampler2D><source>#{mid}-surface</source></sampler2D></newparam>) : ''
-    effects << %(<effect id="#{mid}-fx"><profile_COMMON>#{params}<technique sid="common"><lambert><diffuse>#{diffuse}</diffuse>#{a < 1 ? "<transparency><float>#{fmt(a)}</float></transparency>" : ''}</lambert></technique></profile_COMMON></effect>)
-    mats << %(<material id="#{mid}" name="#{mat}"><instance_effect url="##{mid}-fx"/></material>)
+    @geoms << %(<geometry id="#{gid}" name="#{mat}"><mesh><source id="#{gid}-p"><float_array id="#{gid}-pa" count="#{verts.length * 3}">#{verts.flatten.map { |v| fmt(v) }.join(' ')}</float_array><technique_common><accessor source="##{gid}-pa" count="#{verts.length}" stride="3"><param name="X" type="float"/><param name="Y" type="float"/><param name="Z" type="float"/></accessor></technique_common></source>#{uv_src}<vertices id="#{gid}-v"><input semantic="POSITION" source="##{gid}-p"/></vertices>#{prims.join}</mesh></geometry>)
     bind = tex ? %(<bind_vertex_input semantic="UVSET0" input_semantic="TEXCOORD" input_set="0"/>) : ''
-    nodes << %(<node id="n#{gi}" name="#{mat}"><instance_geometry url="##{gid}"><bind_material><technique_common><instance_material symbol="#{mid}" target="##{mid}">#{bind}</instance_material></technique_common></bind_material></instance_geometry></node>)
+    %(<instance_geometry url="##{gid}"><bind_material><technique_common><instance_material symbol="#{mid}" target="##{mid}">#{bind}</instance_material></technique_common></bind_material></instance_geometry>)
   end
-  File.write(path, <<~DAE)
-    <?xml version="1.0" encoding="utf-8"?>
-    <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-    <asset><contributor><authoring_tool>Vanjsko uređenje PRO #{ProjektniBiro::SiteDesignPro::VERSION}</authoring_tool></contributor><created>2026-01-01T00:00:00Z</created><modified>2026-01-01T00:00:00Z</modified><unit name="meter" meter="1"/><up_axis>Z_UP</up_axis></asset>
-    <library_images>#{images.join}</library_images>
-    <library_effects>#{effects.join}</library_effects>
-    <library_materials>#{mats.join}</library_materials>
-    <library_geometries>#{geoms.join}</library_geometries>
-    <library_visual_scenes><visual_scene id="scene" name="#{asset_id}"><node id="root" name="#{asset_id}">#{nodes.join}</node></visual_scene></library_visual_scenes>
-    <scene><instance_visual_scene url="#scene"/></scene>
-    </COLLADA>
-  DAE
-  used_textures.each { |f| FileUtils.cp(File.join(TEXTURES, f), File.join(File.dirname(path), f)) }
-  used_textures
+
+  # Content (instance_geometry + child nodes) of a canvas node; definitions go to <library_nodes> once.
+  def content(canvas, node, mat = nil)
+    polys, insts = local_parts(node, mat)
+    xml = polys.map { |m, ps| geometry(m, ps) }.join
+    insts.each_with_index do |(key, origin, rot, m), i|
+      did = definition(canvas, key, m)
+      c = Math.cos(rot)
+      s = Math.sin(rot)
+      matrix = [c, -s, 0, origin[0], s, c, 0, origin[1], 0, 0, 1, origin[2], 0, 0, 0, 1].map { |v| fmt(v) }.join(' ')
+      xml << %(<node id="#{did}-i#{@gi}-#{i}" name="#{xml_escape(key.split('|').last)}"><matrix sid="transform">#{matrix}</matrix><instance_node url="##{did}"/></node>)
+    end
+    xml
+  end
+
+  def definition(canvas, key, mat)
+    id_key = [key, mat]
+    return @lib_nodes[id_key][0] if @lib_nodes.key?(id_key)
+
+    did = "c#{@lib_nodes.length + 1}"
+    @lib_nodes[id_key] = [did, nil]
+    body = content(canvas, canvas.definitions.fetch(key), mat)
+    @lib_nodes[id_key] = [did, %(<node id="#{did}" name="#{xml_escape(key.split('|').last)}">#{body}</node>)]
+    did
+  end
+
+  def write(path, canvas)
+    root = content(canvas, canvas.root)
+    File.write(path, <<~DAE)
+      <?xml version="1.0" encoding="utf-8"?>
+      <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+      <asset><contributor><authoring_tool>Vanjsko uređenje PRO #{ProjektniBiro::SiteDesignPro::VERSION}</authoring_tool></contributor><created>2026-01-01T00:00:00Z</created><modified>2026-01-01T00:00:00Z</modified><unit name="meter" meter="1"/><up_axis>Z_UP</up_axis></asset>
+      <library_images>#{@images.join}</library_images>
+      <library_effects>#{@effects.values.join}</library_effects>
+      <library_materials>#{@mats.values.join}</library_materials>
+      <library_geometries>#{@geoms.join}</library_geometries>
+      <library_nodes>#{@lib_nodes.values.map(&:last).join}</library_nodes>
+      <library_visual_scenes><visual_scene id="scene" name="#{@asset_id}"><node id="root" name="#{@asset_id}">#{root}</node></visual_scene></library_visual_scenes>
+      <scene><instance_visual_scene url="#scene"/></scene>
+      </COLLADA>
+    DAE
+    @used_textures.uniq!
+    @used_textures.each { |f| FileUtils.cp(File.join(TEXTURES, f), File.join(File.dirname(path), f)) } unless SHARED_TEXTURES
+    @used_textures
+  end
+end
+
+def xml_escape(s)
+  s.to_s.gsub('&', '&amp;').gsub('<', '&lt;').gsub('>', '&gt;').gsub('"', '&quot;')
 end
 
 # Triangle mesh for the preview renderer: { mat => { c: rgba, p: [[outer, holes], ...] } }.
@@ -272,7 +337,7 @@ TYPES.each do |t|
   polys = flatten(canvas)
   dir = File.join(OUT, folder, t['id'])
   FileUtils.mkdir_p(dir)
-  textures = write_dae(File.join(dir, 'model.dae'), t['id'], polys)
+  textures = DaeWriter.new(t['id']).write(File.join(dir, 'model.dae'), canvas)
   write_mesh_json(File.join(dir, 'mesh.json'), polys)
   min, max = bbox(polys) || [[0, 0, 0], [0, 0, 0]]
   real = !model && PARAMETRIC_REAL.include?(t['builder'])
@@ -289,7 +354,7 @@ TYPES.each do |t|
                elsif real then { 'kind' => 'parametric', 'generator' => "Builder #{t['builder']}" }
                else { 'kind' => 'generic', 'generator' => "Builder #{t['builder']}" }
                end,
-    'files' => { 'model' => 'model.dae', 'preview' => 'preview.png', 'textures' => textures },
+    'files' => { 'model' => 'model.dae', 'preview' => PREVIEW, 'textures' => SHARED_TEXTURES ? textures.map { |f| "../../../textures/#{f}" } : textures },
     'units' => 'm', 'insertionPoint' => element.kind == 'point' ? 'tačka umetanja = podnožje objekta, +X = smjer elementa' : 'uzorak u lokalnim koordinatama (0,0,0)',
     'dimensions' => { 'x' => (max[0] - min[0]).round(3), 'y' => (max[1] - min[1]).round(3), 'z' => (max[2] - min[2]).round(3), 'zMin' => min[2].round(3) },
     'materials' => polys.keys.sort, 'polygons' => polys.values.sum(&:length),

@@ -1,0 +1,57 @@
+{
+  "assetId": "water.decorative_pond",
+  "name": "Ukrasno jezerce",
+  "nameEn": "Decorative pond",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Jezerca i vodeni elementi",
+  "geometry": "polygon",
+  "builder": "pool",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Dekorativni vodeni elementi",
+      "objectEn": "Decorative water features"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.decorative_pond v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/water.jpg",
+      "../../../textures/stone_wall.jpg",
+      "../../../textures/foliage_light.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 8.727,
+    "y": 4.724,
+    "z": 1.746,
+    "zMin": -0.9
+  },
+  "materials": [
+    "flower_pink",
+    "flower_white",
+    "foliage_light",
+    "grass_blade",
+    "pond_liner",
+    "stone_wall",
+    "water"
+  ],
+  "polygons": 5399,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

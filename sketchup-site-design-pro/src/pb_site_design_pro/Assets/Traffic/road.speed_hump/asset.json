@@ -1,0 +1,55 @@
+{
+  "assetId": "road.speed_hump",
+  "name": "Usporivač brzine (ležeći policajac)",
+  "nameEn": "Speed hump",
+  "folder": "Traffic",
+  "category": "Saobraćaj i parking",
+  "subcategory": "Smirivanje saobraćaja",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Saobraćaj i mobilnost",
+      "object": "Usporivači (ležeći policajci)",
+      "objectEn": "Speed humps"
+    },
+    {
+      "category": "Saobraćaj i mobilnost",
+      "object": "Elementi smirivanja saobraćaja",
+      "objectEn": "Traffic-calming elements"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models road.speed_hump v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/asphalt.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 3.5,
+    "y": 3.7,
+    "z": 0.074,
+    "zMin": 0.0
+  },
+  "materials": [
+    "asphalt",
+    "line_paint_white"
+  ],
+  "polygons": 43,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

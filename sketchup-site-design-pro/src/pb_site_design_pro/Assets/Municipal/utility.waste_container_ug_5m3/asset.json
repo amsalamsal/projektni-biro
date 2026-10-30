@@ -1,0 +1,51 @@
+{
+  "assetId": "utility.waste_container_ug_5m3",
+  "name": "Podzemni kontejner za otpad 5 m³",
+  "nameEn": "Underground waste container 5 m³",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Otpad",
+  "geometry": "point",
+  "builder": "underground_container",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Podzemni kontejneri 3 m³ i 5 m³",
+      "objectEn": "Underground waste containers 3 m³ and 5 m³"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.waste_container_ug_5m3 v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 2.3,
+    "y": 2.3,
+    "z": 3.4,
+    "zMin": -2.4
+  },
+  "materials": [
+    "concrete_precast",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 412,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "assetId": "wall.timber_fence",
+  "name": "Drvena ograda",
+  "nameEn": "Timber fence",
+  "folder": "Fences_Walls",
+  "category": "Ograde i zidovi",
+  "subcategory": "Ograde",
+  "geometry": "path",
+  "builder": "fence",
+  "specObjects": [
+    {
+      "category": "Ograde i zidovi",
+      "object": "Drvene ograde",
+      "objectEn": "Wooden fences"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models wall.timber_fence v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/timber.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.65,
+    "y": 1.65,
+    "z": 1.91,
+    "zMin": 0.0
+  },
+  "materials": [
+    "timber"
+  ],
+  "polygons": 406,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "assetId": "decorative.mural",
+  "name": "Mural (oslikana površina)",
+  "nameEn": "Mural (mapped surface)",
+  "folder": "Decorative",
+  "category": "Dekorativni elementi",
+  "subcategory": "Umjetnost",
+  "geometry": "path",
+  "builder": "wall",
+  "specObjects": [
+    {
+      "category": "Dekorativni elementi",
+      "object": "Murali",
+      "objectEn": "Murals"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models decorative.mural v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/foliage.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.503,
+    "y": 1.514,
+    "z": 2.5,
+    "zMin": 0.0
+  },
+  "materials": [
+    "flower_pink",
+    "flower_red",
+    "flower_violet",
+    "flower_yellow",
+    "foliage",
+    "plastic_blue",
+    "render_white"
+  ],
+  "polygons": 70,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

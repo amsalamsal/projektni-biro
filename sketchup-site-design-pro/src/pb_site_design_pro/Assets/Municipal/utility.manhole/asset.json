@@ -1,0 +1,52 @@
+{
+  "assetId": "utility.manhole",
+  "name": "Šaht",
+  "nameEn": "Manhole",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Okna",
+  "geometry": "point",
+  "builder": "chamber",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Šahtovi",
+      "objectEn": "Manholes"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models utility.manhole v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.24,
+    "y": 1.24,
+    "z": 2.658,
+    "zMin": -2.65
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 2686,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

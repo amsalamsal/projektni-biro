@@ -1,0 +1,51 @@
+{
+  "assetId": "edge.flush_kerb",
+  "name": "Upušteni ivičnjak / prelaz površina",
+  "nameEn": "Flush kerb / transition edge",
+  "folder": "Infrastructure",
+  "category": "Parter i popločanje",
+  "subcategory": "Ivice i prelazi",
+  "geometry": "path",
+  "builder": "wall",
+  "specObjects": [
+    {
+      "category": "Infrastruktura i površine",
+      "object": "Prelazi površina",
+      "objectEn": "Surface transitions"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models edge.flush_kerb v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg",
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.567,
+    "y": 1.741,
+    "z": 0.35,
+    "zMin": -0.35
+  },
+  "materials": [
+    "concrete",
+    "concrete_precast"
+  ],
+  "polygons": 24,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

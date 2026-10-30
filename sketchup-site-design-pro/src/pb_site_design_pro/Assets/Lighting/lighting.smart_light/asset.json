@@ -1,0 +1,51 @@
+{
+  "assetId": "lighting.smart_light",
+  "name": "Pametna svjetiljka (sa senzorom pokreta)",
+  "nameEn": "Smart light (with sensor)",
+  "folder": "Lighting",
+  "category": "Rasvjeta",
+  "subcategory": "Stubovi",
+  "geometry": "point",
+  "builder": "pole_mounted",
+  "specObjects": [
+    {
+      "category": "Rasvjeta",
+      "object": "Pametne svjetiljke sa senzorom pokreta",
+      "objectEn": "Smart motion-sensor lights"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models lighting.smart_light v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.326,
+    "y": 0.252,
+    "z": 6.0,
+    "zMin": 0.0
+  },
+  "materials": [
+    "luminaire",
+    "plastic_dark",
+    "steel_dark"
+  ],
+  "polygons": 634,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "assetId": "climate.ventilation_unit",
+  "name": "Vanjska ventilacijska oprema",
+  "nameEn": "Outdoor ventilation equipment",
+  "folder": "Outdoor_Climate",
+  "category": "Vanjski klimatski sistemi",
+  "subcategory": "Ventilacija",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Vanjski klimatski sistemi",
+      "object": "Vanjska klimatska oprema",
+      "objectEn": "Outdoor climate equipment"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models climate.ventilation_unit v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.22,
+    "y": 0.9,
+    "z": 1.02,
+    "zMin": 0.0
+  },
+  "materials": [
+    "rubber_black",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 1068,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "assetId": "water.inspection_chamber",
+  "name": "Reviziono okno odvodnje",
+  "nameEn": "Drainage inspection chamber",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Podzemna odvodnja",
+  "geometry": "point",
+  "builder": "chamber",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Revizioni i pristupni elementi",
+      "objectEn": "Inspection and access elements"
+    },
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Revizione komore",
+      "objectEn": "Inspection chambers"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.inspection_chamber v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.24,
+    "y": 1.24,
+    "z": 1.658,
+    "zMin": -1.65
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 1756,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "assetId": "recreation.trampoline",
+  "name": "Ukopani trampolin",
+  "nameEn": "In-ground trampoline",
+  "folder": "Furniture_Recreation",
+  "category": "Urbani mobilijar i rekreacija",
+  "subcategory": "Dječija igrališta",
+  "geometry": "point",
+  "builder": "cylinder_equipment",
+  "specObjects": [
+    {
+      "category": "Mobilijar i rekreacija",
+      "object": "Trampolini",
+      "objectEn": "Trampolines"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models recreation.trampoline v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/gravel.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 3.0,
+    "y": 3.0,
+    "z": 0.93,
+    "zMin": -0.9
+  },
+  "materials": [
+    "gravel",
+    "plastic_blue",
+    "rubber_black",
+    "steel_galv"
+  ],
+  "polygons": 564,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

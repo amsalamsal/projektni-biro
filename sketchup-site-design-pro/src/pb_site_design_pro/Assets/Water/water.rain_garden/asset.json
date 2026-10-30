@@ -1,0 +1,57 @@
+{
+  "assetId": "water.rain_garden",
+  "name": "Kišni vrt",
+  "nameEn": "Rain garden",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Kišnica",
+  "geometry": "polygon",
+  "builder": "basin",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Sistemi zadržavanja kišnice",
+      "objectEn": "Rainwater retention systems"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.rain_garden v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/planting_mixed.jpg",
+      "../../../textures/stone_wall.jpg",
+      "../../../textures/foliage.jpg",
+      "../../../textures/foliage_dark.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 4.0,
+    "y": 3.0,
+    "z": 0.822,
+    "zMin": -0.397
+  },
+  "materials": [
+    "flower_violet",
+    "foliage",
+    "foliage_dark",
+    "grass_blade",
+    "planting_mixed",
+    "stone_wall"
+  ],
+  "polygons": 9895,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

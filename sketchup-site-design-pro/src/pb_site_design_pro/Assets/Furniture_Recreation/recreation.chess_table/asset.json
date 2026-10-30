@@ -1,0 +1,52 @@
+{
+  "assetId": "recreation.chess_table",
+  "name": "Vanjski šahovski sto",
+  "nameEn": "Outdoor chess table",
+  "folder": "Furniture_Recreation",
+  "category": "Urbani mobilijar i rekreacija",
+  "subcategory": "Sport",
+  "geometry": "point",
+  "builder": "table",
+  "specObjects": [
+    {
+      "category": "Mobilijar i rekreacija",
+      "object": "Sportska i rekreativna oprema",
+      "objectEn": "Sports and recreation equipment"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models recreation.chess_table v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg",
+      "../../../textures/stone_wall.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.8,
+    "y": 2.04,
+    "z": 0.754,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "steel_dark",
+    "stone_wall"
+  ],
+  "polygons": 776,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

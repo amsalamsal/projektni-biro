@@ -1,0 +1,47 @@
+{
+  "assetId": "cycling.bike_locker",
+  "name": "Ormarić za bicikl",
+  "nameEn": "Bicycle locker",
+  "folder": "Bicycle",
+  "category": "Biciklistička infrastruktura",
+  "subcategory": "Parking",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models cycling.bike_locker v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 2.0,
+    "y": 0.83,
+    "z": 1.3,
+    "zMin": 0.0
+  },
+  "materials": [
+    "sign_plate",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 38,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

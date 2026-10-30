@@ -1,0 +1,47 @@
+{
+  "assetId": "lighting.control_cabinet",
+  "name": "Ormar upravljanja rasvjetom",
+  "nameEn": "Lighting control cabinet",
+  "folder": "Lighting",
+  "category": "Rasvjeta",
+  "subcategory": "Upravljanje",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models lighting.control_cabinet v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.86,
+    "y": 0.36,
+    "z": 1.225,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 66,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "assetId": "info.qr_panel",
+  "name": "Informativni panel s QR kodom",
+  "nameEn": "QR-code information panel",
+  "folder": "Information_Security",
+  "category": "Informativni i sigurnosni sistemi",
+  "subcategory": "Informacije",
+  "geometry": "point",
+  "builder": "sign_post",
+  "specObjects": [
+    {
+      "category": "Informativni i sigurnosni sistemi",
+      "object": "QR informativni paneli",
+      "objectEn": "QR information panels"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models info.qr_panel v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.3,
+    "y": 0.102,
+    "z": 1.47,
+    "zMin": -0.05
+  },
+  "materials": [
+    "plastic_dark",
+    "sign_plate",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 68,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

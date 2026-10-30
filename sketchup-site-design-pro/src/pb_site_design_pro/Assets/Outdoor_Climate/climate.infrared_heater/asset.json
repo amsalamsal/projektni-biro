@@ -1,0 +1,50 @@
+{
+  "assetId": "climate.infrared_heater",
+  "name": "Infracrveni grijač (montažni)",
+  "nameEn": "Infrared heater (mounted)",
+  "folder": "Outdoor_Climate",
+  "category": "Vanjski klimatski sistemi",
+  "subcategory": "Grijanje",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Vanjski klimatski sistemi",
+      "object": "Infracrveni grijači",
+      "objectEn": "Infrared heaters"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models climate.infrared_heater v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.5,
+    "y": 0.18,
+    "z": 0.104,
+    "zMin": 2.496
+  },
+  "materials": [
+    "flower_red",
+    "steel_dark"
+  ],
+  "polygons": 24,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

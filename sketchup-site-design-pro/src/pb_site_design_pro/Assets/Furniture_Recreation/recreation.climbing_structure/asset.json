@@ -1,0 +1,52 @@
+{
+  "assetId": "recreation.climbing_structure",
+  "name": "Penjalica",
+  "nameEn": "Climbing structure",
+  "folder": "Furniture_Recreation",
+  "category": "Urbani mobilijar i rekreacija",
+  "subcategory": "Dječija igrališta",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Mobilijar i rekreacija",
+      "object": "Igrališta",
+      "objectEn": "Playgrounds"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models recreation.climbing_structure v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/timber.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 3.15,
+    "y": 3.003,
+    "z": 2.7,
+    "zMin": 0.0
+  },
+  "materials": [
+    "rope",
+    "steel_dark",
+    "steel_galv",
+    "timber"
+  ],
+  "polygons": 822,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

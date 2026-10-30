@@ -1,0 +1,50 @@
+{
+  "assetId": "water.infiltration_crates",
+  "name": "Infiltracijski / retencijski blokovi",
+  "nameEn": "Infiltration / attenuation crates",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Kišnica",
+  "geometry": "point",
+  "builder": "tank",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Sistemi zadržavanja kišnice",
+      "objectEn": "Rainwater retention systems"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.infiltration_crates v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/gravel.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 6.2,
+    "y": 2.6,
+    "z": 0.75,
+    "zMin": -1.36
+  },
+  "materials": [
+    "gravel",
+    "hdpe"
+  ],
+  "polygons": 1246,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

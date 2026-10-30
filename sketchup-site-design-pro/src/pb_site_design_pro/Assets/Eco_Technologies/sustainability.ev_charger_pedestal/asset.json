@@ -1,0 +1,54 @@
+{
+  "assetId": "sustainability.ev_charger_pedestal",
+  "name": "Stanica za punjenje električnih vozila (stub)",
+  "nameEn": "EV charging station (pedestal)",
+  "folder": "Eco_Technologies",
+  "category": "Eko tehnologije",
+  "subcategory": "Punjenje električnih vozila",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+    {
+      "category": "Saobraćaj i mobilnost",
+      "object": "Stanice za punjenje električnih vozila",
+      "objectEn": "EV charging stations"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models sustainability.ev_charger_pedestal v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.669,
+    "y": 0.464,
+    "z": 1.55,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "marking_green",
+    "plastic_dark",
+    "rubber_black",
+    "screen_display",
+    "steel_dark"
+  ],
+  "polygons": 657,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

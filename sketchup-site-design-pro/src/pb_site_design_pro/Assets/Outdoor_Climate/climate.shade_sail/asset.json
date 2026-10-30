@@ -1,0 +1,52 @@
+{
+  "assetId": "climate.shade_sail",
+  "name": "Jedro za sjenu",
+  "nameEn": "Shade sail",
+  "folder": "Outdoor_Climate",
+  "category": "Vanjski klimatski sistemi",
+  "subcategory": "Zasjena",
+  "geometry": "polygon",
+  "builder": "sail",
+  "specObjects": [
+    {
+      "category": "Nadstrešnice i zasjena",
+      "object": "Jedra za sjenu",
+      "objectEn": "Shade sails"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models climate.shade_sail v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 5.6,
+    "y": 4.6,
+    "z": 4.5,
+    "zMin": -0.8
+  },
+  "materials": [
+    "concrete",
+    "fabric",
+    "stainless",
+    "steel_galv"
+  ],
+  "polygons": 672,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

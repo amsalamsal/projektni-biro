@@ -1,0 +1,56 @@
+{
+  "assetId": "cycling.bike_shelter",
+  "name": "Natkriveni parking za bicikle",
+  "nameEn": "Covered bicycle shelter",
+  "folder": "Bicycle",
+  "category": "Biciklistička infrastruktura",
+  "subcategory": "Parking",
+  "geometry": "point",
+  "builder": "shelter",
+  "specObjects": [
+    {
+      "category": "Biciklistička infrastruktura",
+      "object": "Nadstrešnice za bicikle",
+      "objectEn": "Bicycle parking shelters"
+    },
+    {
+      "category": "Nadstrešnice i zasjena",
+      "object": "Nadstrešnice za bicikle",
+      "objectEn": "Bicycle shelters"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models cycling.bike_shelter v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 5.2,
+    "y": 2.461,
+    "z": 2.28,
+    "zMin": 0.0
+  },
+  "materials": [
+    "glass",
+    "steel_dark",
+    "steel_galv"
+  ],
+  "polygons": 1634,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "assetId": "structure.retractable_shade",
+  "name": "Pergola s pomičnom tendom",
+  "nameEn": "Pergola with retractable shade",
+  "folder": "Canopies",
+  "category": "Nadstrešnice i zasjena",
+  "subcategory": "Pergole",
+  "geometry": "polygon",
+  "builder": "pergola",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models structure.retractable_shade v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 5.1,
+    "y": 4.1,
+    "z": 3.01,
+    "zMin": 0.0
+  },
+  "materials": [
+    "aluminium",
+    "fabric"
+  ],
+  "polygons": 102,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

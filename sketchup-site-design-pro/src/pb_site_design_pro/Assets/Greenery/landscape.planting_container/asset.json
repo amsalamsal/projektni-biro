@@ -1,0 +1,49 @@
+{
+  "assetId": "landscape.planting_container",
+  "name": "Velika posuda za sadnju",
+  "nameEn": "Large planting container",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Žardinjere",
+  "geometry": "point",
+  "builder": "cylinder_equipment",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.planting_container v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg",
+      "../../../textures/soil.jpg",
+      "../../../textures/foliage.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.0,
+    "y": 1.0,
+    "z": 1.61,
+    "zMin": 0.0
+  },
+  "materials": [
+    "concrete",
+    "foliage",
+    "soil"
+  ],
+  "polygons": 3842,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

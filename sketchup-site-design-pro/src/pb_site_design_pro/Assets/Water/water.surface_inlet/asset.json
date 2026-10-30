@@ -1,0 +1,51 @@
+{
+  "assetId": "water.surface_inlet",
+  "name": "Slivnik / rešetka slivnika",
+  "nameEn": "Surface inlet / gully grate",
+  "folder": "Water",
+  "category": "Voda i odvodnja",
+  "subcategory": "Površinska odvodnja",
+  "geometry": "point",
+  "builder": "chamber",
+  "specObjects": [
+    {
+      "category": "Vodeni elementi i upravljanje vodom",
+      "object": "Elementi prikupljanja kišnice",
+      "objectEn": "Rainwater collection elements"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models water.surface_inlet v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete_precast.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 0.81,
+    "y": 0.61,
+    "z": 1.0,
+    "zMin": -1.0
+  },
+  "materials": [
+    "cast_iron",
+    "concrete_precast",
+    "hdpe"
+  ],
+  "polygons": 124,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

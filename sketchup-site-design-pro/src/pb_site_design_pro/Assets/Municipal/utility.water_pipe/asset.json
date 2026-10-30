@@ -1,0 +1,49 @@
+{
+  "assetId": "utility.water_pipe",
+  "name": "Vodovodna cijev",
+  "nameEn": "Water supply pipe",
+  "folder": "Municipal",
+  "category": "Komunalna infrastruktura",
+  "subcategory": "Trase",
+  "geometry": "path",
+  "builder": "pipe",
+  "specObjects": [
+    {
+      "category": "Komunalna infrastruktura",
+      "object": "Podzemna komunalna infrastruktura",
+      "objectEn": "Underground service infrastructure"
+    }
+  ],
+  "model": {
+    "kind": "parametric",
+    "generator": "Builder pipe"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.516,
+    "y": 1.559,
+    "z": 0.063,
+    "zMin": -1.232
+  },
+  "materials": [
+    "plastic_dark"
+  ],
+  "polygons": 50,
+  "source": "Parametarska površina/trasa u stvarnim dimenzijama, s materijalom i teksturom (Vanjsko uređenje PRO)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

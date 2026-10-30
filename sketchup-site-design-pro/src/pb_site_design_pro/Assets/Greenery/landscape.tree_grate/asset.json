@@ -1,0 +1,47 @@
+{
+  "assetId": "landscape.tree_grate",
+  "name": "Rešetka oko stabla",
+  "nameEn": "Tree pit grate",
+  "folder": "Greenery",
+  "category": "Zelenilo",
+  "subcategory": "Zaštita stabala",
+  "geometry": "point",
+  "builder": "box_equipment",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models landscape.tree_grate v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/mulch.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 1.28,
+    "y": 1.28,
+    "z": 0.124,
+    "zMin": -0.12
+  },
+  "materials": [
+    "cast_iron",
+    "mulch",
+    "steel_dark"
+  ],
+  "polygons": 178,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

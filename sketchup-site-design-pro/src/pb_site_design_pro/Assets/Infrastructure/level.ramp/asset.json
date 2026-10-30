@@ -1,0 +1,46 @@
+{
+  "assetId": "level.ramp",
+  "name": "Rampa",
+  "nameEn": "Ramp",
+  "folder": "Infrastructure",
+  "category": "Parter i popločanje",
+  "subcategory": "Visinske razlike",
+  "geometry": "polygon",
+  "builder": "ramp",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models level.ramp v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/concrete.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 3.0,
+    "y": 2.6,
+    "z": 1.421,
+    "zMin": -0.2
+  },
+  "materials": [
+    "concrete",
+    "stainless"
+  ],
+  "polygons": 806,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

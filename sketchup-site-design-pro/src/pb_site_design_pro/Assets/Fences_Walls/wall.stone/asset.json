@@ -1,0 +1,51 @@
+{
+  "assetId": "wall.stone",
+  "name": "Kameni zid",
+  "nameEn": "Stone wall",
+  "folder": "Fences_Walls",
+  "category": "Ograde i zidovi",
+  "subcategory": "Zidovi",
+  "geometry": "path",
+  "builder": "wall",
+  "specObjects": [
+    {
+      "category": "Ograde i zidovi",
+      "object": "Vrtni zidovi",
+      "objectEn": "Garden walls"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models wall.stone v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/stone_wall.jpg",
+      "../../../textures/natural_stone.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.623,
+    "y": 1.946,
+    "z": 1.2,
+    "zMin": 0.0
+  },
+  "materials": [
+    "natural_stone",
+    "stone_wall"
+  ],
+  "polygons": 20,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

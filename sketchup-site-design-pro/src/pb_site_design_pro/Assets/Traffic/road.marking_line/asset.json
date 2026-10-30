@@ -1,0 +1,45 @@
+{
+  "assetId": "road.marking_line",
+  "name": "Linija horizontalne signalizacije",
+  "nameEn": "Road marking line",
+  "folder": "Traffic",
+  "category": "Saobraćaj i parking",
+  "subcategory": "Oznake",
+  "geometry": "path",
+  "builder": "linear_slab",
+  "specObjects": [
+
+  ],
+  "model": {
+    "kind": "parametric",
+    "generator": "Builder linear_slab"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 12.0,
+    "y": 0.12,
+    "z": 0.003,
+    "zMin": 0.0
+  },
+  "materials": [
+    "line_paint_white"
+  ],
+  "polygons": 6,
+  "source": "Parametarska površina/trasa u stvarnim dimenzijama, s materijalom i teksturom (Vanjsko uređenje PRO)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

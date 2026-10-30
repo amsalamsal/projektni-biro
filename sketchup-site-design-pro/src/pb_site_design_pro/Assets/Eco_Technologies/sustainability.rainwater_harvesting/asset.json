@@ -1,0 +1,51 @@
+{
+  "assetId": "sustainability.rainwater_harvesting",
+  "name": "Rezervoar za prikupljanje kišnice",
+  "nameEn": "Rainwater harvesting tank",
+  "folder": "Eco_Technologies",
+  "category": "Eko tehnologije",
+  "subcategory": "Voda",
+  "geometry": "point",
+  "builder": "tank",
+  "specObjects": [
+    {
+      "category": "Eko tehnologije",
+      "object": "Održiva infrastruktura lokacije",
+      "objectEn": "Sustainable site infrastructure"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models sustainability.rainwater_harvesting v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "tačka umetanja = podnožje objekta, +X = smjer elementa",
+  "dimensions": {
+    "x": 3.0,
+    "y": 2.04,
+    "z": 2.308,
+    "zMin": -2.3
+  },
+  "materials": [
+    "cast_iron",
+    "hdpe",
+    "steel_dark"
+  ],
+  "polygons": 540,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}

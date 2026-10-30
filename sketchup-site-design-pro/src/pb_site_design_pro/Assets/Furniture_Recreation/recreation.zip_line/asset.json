@@ -1,0 +1,54 @@
+{
+  "assetId": "recreation.zip_line",
+  "name": "Zip-line (žičara)",
+  "nameEn": "Zip-line installation",
+  "folder": "Furniture_Recreation",
+  "category": "Urbani mobilijar i rekreacija",
+  "subcategory": "Dječija igrališta",
+  "geometry": "path",
+  "builder": "cable_line",
+  "specObjects": [
+    {
+      "category": "Mobilijar i rekreacija",
+      "object": "Zip-line",
+      "objectEn": "Zip lines"
+    }
+  ],
+  "model": {
+    "kind": "custom",
+    "generator": "Models recreation.zip_line v1"
+  },
+  "files": {
+    "model": "model.dae",
+    "preview": "preview.jpg",
+    "textures": [
+      "../../../textures/timber_deck.jpg",
+      "../../../textures/timber.jpg"
+    ]
+  },
+  "units": "m",
+  "insertionPoint": "uzorak u lokalnim koordinatama (0,0,0)",
+  "dimensions": {
+    "x": 6.7,
+    "y": 2.162,
+    "z": 3.0,
+    "zMin": 0.0
+  },
+  "materials": [
+    "rope",
+    "rubber_black",
+    "steel_galv",
+    "timber",
+    "timber_deck"
+  ],
+  "polygons": 128,
+  "source": "Vlastiti proceduralni model Vanjsko uređenje PRO (SketchUp Ruby API generator)",
+  "license": "Dio projekta Vanjsko uređenje PRO; bez materijala trećih strana",
+  "sketchup": "SketchUp 2022+: generiše se u proširenju; model.dae se uvozi i ručno (File > Import)",
+  "status": "Imported into library",
+  "statusBs": "Uvezeno u biblioteku",
+  "testedInSketchUp": false,
+  "problems": [
+
+  ]
+}
