@@ -58,6 +58,14 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void MapLayers() => CommandContext.Run("SDPMAPIRANJE", ctx =>
         {
             SortedDictionary<string, int> usage = SourceReader.LayerUsage(ctx.Db, ctx.Tr);
+
+            // the extension's own output layers are not input; keep one only if it was mapped before
+            LayerMapping? previous = ctx.Settings.LayerMapping;
+            foreach (string own in ctx.Catalog.Layers.Select(l => l.Name).Where(n => usage.ContainsKey(n) && (previous == null || previous.RolesOf(n).Count == 0)).ToList())
+            {
+                usage.Remove(own);
+            }
+
             using (var dlg = new LayerMappingDialog(usage, ctx.Settings.LayerMapping))
             {
                 if (AcApp.ShowModalDialog(dlg) != System.Windows.Forms.DialogResult.OK)
