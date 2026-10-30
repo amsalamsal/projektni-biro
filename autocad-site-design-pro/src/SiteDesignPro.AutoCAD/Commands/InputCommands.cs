@@ -88,7 +88,9 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Write("Slojevi nisu mapirani; provjera će prijaviti sve obavezne uloge kao nedostajuće. Mapiranje: SDPMAPIRANJE.");
             }
 
-            List<SourceObject> all = SourceReader.Read(ctx.Db, ctx.Tr);
+            // layers of this extension's own standard (elements, annotations, tables, terrain) are output, not input
+            var own = new HashSet<string>(ctx.Catalog.Layers.Select(l => l.Name), StringComparer.OrdinalIgnoreCase);
+            List<SourceObject> all = SourceReader.Read(ctx.Db, ctx.Tr, layer => !own.Contains(layer));
             var input = new InputSettings
             {
                 DrawingUnit = ctx.Settings.Unit,

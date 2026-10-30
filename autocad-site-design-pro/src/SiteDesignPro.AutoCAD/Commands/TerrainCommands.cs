@@ -262,7 +262,8 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             if (answer != "Da")
             {
-                throw new CommandCancelled();
+                ctx.Write("Kote nisu primijenjene; crtež nije izmijenjen.");
+                return;
             }
 
             int applied = 0;
