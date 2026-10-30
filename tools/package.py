@@ -31,6 +31,7 @@ def zip_dir(src: pathlib.Path, target: pathlib.Path, prefix: str = "") -> None:
 
 USER_DOCS = [
     ("index", "UPUTSTVO.md", "Uputstvo"),
+    ("prvi-projekat", "PRVI_PROJEKAT.md", "Prvi projekat (za početnike)"),
     ("prirucnik", "PRIRUCNIK.md", "Priručnik (sve opcije)"),
     ("instalacija", "INSTALACIJA.md", "Instalacija i oporavak"),
     ("kompatibilnost", "KOMPATIBILNOST.md", "Kompatibilnost"),
