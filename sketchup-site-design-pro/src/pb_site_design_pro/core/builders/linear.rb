@@ -118,7 +118,7 @@ module ProjektniBiro
           end
         end
 
-        # Panel infill between two posts. Solid/glass: one plate; mesh/bars: rails plus infill.
+        # Panel infill between two posts. Solid/glass: one plate; mesh/bars/boards/slats: rails plus infill.
         def panel_parts(c, corner, xv, yv, h, style, material)
           if %w[solid glass].include?(style) || @ctx.conceptual?
             c.mesh(Mesh.block(corner, xv, yv, [0.0, 0.0, h]), material: material, name: 'Panel')
@@ -143,6 +143,43 @@ module ProjektniBiro
               base = Mesh.add3(Mesh.add3(inner, Mesh.scale3(unit, at)), ym)
               c.mesh(Mesh.block(base, Mesh.scale3(unit, bar), Mesh.scale3(yv, 0.5), [0.0, 0.0, ih]), material: material, name: 'Šipka')
             end
+          elsif style == 'boards'
+            # vertical boards 12 cm wide with 1 cm gaps on two horizontal rails
+            length = Mesh.len3(xv)
+            unit = Mesh.scale3(xv, 1.0 / length)
+            count = [(length / 0.13).floor, 1].max
+            board = (length / count) - 0.01
+            count.times do |i|
+              # boards in front of the rails (no coplanar faces)
+              base = Mesh.add3(Mesh.add3(corner, Mesh.scale3(unit, (i * length / count) + 0.005)), yv)
+              c.mesh(Mesh.block(base, Mesh.scale3(unit, board), Mesh.scale3(yv, 0.8), [0.0, 0.0, h]), material: material, name: 'Daska')
+            end
+          elsif style == 'slats'
+            # horizontal slats 9 cm high with 3 cm gaps
+            count = [(ih / 0.12).floor, 1].max
+            pitch = ih / count
+            count.times do |i|
+              base = Mesh.add3(inner, [0.0, 0.0, (i * pitch) + 0.015])
+              c.mesh(Mesh.block(Mesh.add3(base, Mesh.scale3(yv, 0.2)), xv, Mesh.scale3(yv, 0.6), [0.0, 0.0, pitch - 0.03]), material: material, name: 'Lamela')
+            end
+          elsif @ctx.presentation? || @ctx.lod == 'standard'
+            # welded mesh 50 x 200 mm: vertical wires on one plane, horizontal wires on the next
+            length = Mesh.len3(xv)
+            unit = Mesh.scale3(xv, 1.0 / length)
+            wire = 0.005
+            pitch = @ctx.presentation? ? 0.05 : 0.1
+            polys = []
+            nv = [(length / pitch).floor, 1].max
+            nv.times do |i|
+              base = Mesh.add3(Mesh.add3(inner, Mesh.scale3(unit, (i + 0.5) * length / nv)), Mesh.scale3(yv, 0.5))
+              polys.concat(Mesh.block(base, Mesh.scale3(unit, wire), Mesh.scale3(yv, 0.12), [0.0, 0.0, ih]))
+            end
+            nh = [(ih / 0.2).round, 1].max
+            (1...nh).each do |j|
+              base = Mesh.add3(Mesh.add3(inner, [0.0, 0.0, j * ih / nh]), Mesh.scale3(yv, 0.38))
+              polys.concat(Mesh.block(base, xv, Mesh.scale3(yv, 0.12), [0.0, 0.0, wire]))
+            end
+            c.mesh(polys, material: material, name: 'Mrežna ispuna')
           else
             ym = Mesh.scale3(yv, 0.4)
             c.mesh(Mesh.block(Mesh.add3(inner, ym), xv, Mesh.scale3(yv, 0.2), [0.0, 0.0, ih]), material: material, name: 'Mrežna ispuna')

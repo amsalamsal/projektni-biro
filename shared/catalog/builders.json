@@ -72,7 +72,7 @@
         { "key": "postSize", "label": "Dimenzija stupca", "type": "length", "default": 0.06, "min": 0.01, "max": 1, "group": "Dimenzije", "labelEn": "Post size", "groupEn": "Dimensions" },
         { "key": "panelThickness", "label": "Debljina panela", "type": "length", "default": 0.04, "min": 0.002, "max": 0.5, "group": "Dimenzije", "labelEn": "Panel thickness", "groupEn": "Dimensions" },
         { "key": "groundClearance", "label": "Razmak panela od tla", "type": "length", "default": 0.05, "min": 0, "max": 2, "group": "Dimenzije", "labelEn": "Panel ground clearance", "groupEn": "Dimensions" },
-        { "key": "panelStyle", "label": "Izgled panela", "type": "enum", "default": "mesh", "options": ["mesh", "bars", "solid", "glass"], "group": "Izgled", "labelEn": "Panel style", "groupEn": "Appearance" },
+        { "key": "panelStyle", "label": "Izgled panela", "type": "enum", "default": "mesh", "options": ["mesh", "bars", "boards", "slats", "solid", "glass"], "group": "Izgled", "labelEn": "Panel style", "groupEn": "Appearance" },
         { "key": "postMaterial", "label": "Materijal stupca", "type": "material", "default": "steel_galv", "group": "Izgled", "labelEn": "Post material", "groupEn": "Appearance" },
         { "key": "panelMaterial", "label": "Materijal panela", "type": "material", "default": "steel_galv", "group": "Izgled", "labelEn": "Panel material", "groupEn": "Appearance" },
         { "key": "foundationDepth", "label": "Dubina temelja stupca (0 = bez temelja)", "type": "length", "default": 0, "min": 0, "max": 3, "group": "Temelj", "labelEn": "Post foundation depth (0 = none)", "groupEn": "Foundation" }

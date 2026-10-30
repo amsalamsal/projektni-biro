@@ -2870,6 +2870,16 @@
       ]
     },
     {
+      "key": "render_white",
+      "name": "Fasadna žbuka, svijetla",
+      "color": [
+        234,
+        230,
+        221
+      ],
+      "nameEn": "Render, light"
+    },
+    {
       "key": "brick",
       "name": "Opeka",
       "color": [

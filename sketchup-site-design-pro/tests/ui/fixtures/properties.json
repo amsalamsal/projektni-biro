@@ -291,6 +291,10 @@
       "name": "Kamena zidarija"
     },
     {
+      "key": "render_white",
+      "name": "Fasadna žbuka, svijetla"
+    },
+    {
       "key": "brick",
       "name": "Opeka"
     },

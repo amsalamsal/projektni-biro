@@ -42,6 +42,7 @@ require File.join(__dir__, 'version')
   models/equipment
   models/structures
   models/information
+  models/linear
   element_builder
   change_set
   terrain

@@ -51,6 +51,7 @@
     { "key": "concrete_precast", "name": "Montažni beton", "color": [150, 150, 146], "nameEn": "Precast concrete", "texture": "concrete_precast.jpg", "textureSize": [1.0, 1.0] },
     { "key": "concrete_slab", "name": "Betonske ploče", "color": [196, 194, 188], "nameEn": "Concrete slabs", "texture": "concrete_slab.jpg", "textureSize": [1.2, 1.2] },
     { "key": "stone_wall", "name": "Kamena zidarija", "color": [162, 150, 132], "nameEn": "Stone masonry", "texture": "stone_wall.jpg", "textureSize": [1.2, 1.2] },
+    { "key": "render_white", "name": "Fasadna žbuka, svijetla", "color": [234, 230, 221], "nameEn": "Render, light" },
     { "key": "brick", "name": "Opeka", "color": [160, 92, 70], "nameEn": "Brick", "texture": "brick.jpg", "textureSize": [1.0, 1.0] },
     { "key": "gabion", "name": "Gabion", "color": [140, 132, 118], "nameEn": "Gabion", "texture": "gabion.jpg", "textureSize": [1.0, 1.0] },
     { "key": "steel_galv", "name": "Pocinčani čelik", "color": [168, 172, 176], "nameEn": "Galvanised steel" },
