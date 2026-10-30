@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Windows;
@@ -44,6 +45,7 @@ namespace SiteDesignPro.AutoCAD
                 }
 
                 AcApp.SystemVariableChanged += OnSystemVariableChanged;
+                AcApp.Idle += OnIdle;
                 AcApp.DocumentManager.DocumentCreated += (s, e) => Log.Guard("Priprema crteža", () => Hook(e.Document));
                 foreach (Document doc in AcApp.DocumentManager)
                 {
@@ -75,6 +77,28 @@ namespace SiteDesignPro.AutoCAD
             if (ComponentManager.Ribbon != null)
             {
                 ComponentManager.ItemInitialized -= OnItemInitialized;
+                Log.Guard("Izrada trake", RibbonBuilder.Create);
+            }
+        }
+
+        private static int lastTabCheck;
+
+        /// <summary>
+        /// AutoCAD rebuilds the ribbon whenever it (re)loads menu groups (e.g. MODELDOC/EXPRESS after start-up, MENULOAD, CUI),
+        /// which drops tabs added at run time. The tab is put back when it is missing; checked at most every 2 s.
+        /// </summary>
+        private static void OnIdle(object? sender, EventArgs e)
+        {
+            int now = Environment.TickCount;
+            if (unchecked(now - lastTabCheck) < 2000)
+            {
+                return;
+            }
+
+            lastTabCheck = now;
+            RibbonControl? ribbon = ComponentManager.Ribbon;
+            if (ribbon != null && !ribbon.Tabs.Any(t => t.Id == RibbonBuilder.TabId))
+            {
                 Log.Guard("Izrada trake", RibbonBuilder.Create);
             }
         }
