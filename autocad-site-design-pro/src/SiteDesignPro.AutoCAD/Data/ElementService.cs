@@ -510,18 +510,24 @@ namespace SiteDesignPro.AutoCAD.Data
             hatch.Layer = layers.Ensure("surfaces_pattern");
             ms.AppendEntity(hatch);
             tr.AddNewlyCreatedDBObject(hatch, true);
-            double scale = def.Scale * K * (db.Measurement == MeasurementValue.Metric ? 1.0 : 1.0 / 25.4);
-            hatch.PatternScale = Math.Max(1e-6, scale);
-            hatch.PatternAngle = def.Angle * Math.PI / 180;
+            // The pattern must be set before PatternAngle/PatternScale: AutoCAD 2021 throws eInvalidInput for an angle on a
+            // hatch without a pattern. Setting the pattern again afterwards applies the new scale and angle.
+            string pattern = def.Pattern;
             try
             {
-                hatch.SetHatchPattern(HatchPatternType.PreDefined, def.Pattern);
+                hatch.SetHatchPattern(HatchPatternType.PreDefined, pattern);
             }
             catch (Autodesk.AutoCAD.Runtime.Exception)
             {
                 Log.Warn("Šrafura " + def.Pattern + " nije dostupna; koristi se ANSI31.");
-                hatch.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
+                pattern = "ANSI31";
+                hatch.SetHatchPattern(HatchPatternType.PreDefined, pattern);
             }
+
+            double scale = def.Scale * K * (db.Measurement == MeasurementValue.Metric ? 1.0 : 1.0 / 25.4);
+            hatch.PatternScale = Math.Max(1e-6, scale);
+            hatch.PatternAngle = def.Angle * Math.PI / 180;
+            hatch.SetHatchPattern(HatchPatternType.PreDefined, pattern);
 
             hatch.Associative = true;
             hatch.AppendLoop(HatchLoopTypes.Outermost, new ObjectIdCollection(new[] { boundary.ObjectId }));
