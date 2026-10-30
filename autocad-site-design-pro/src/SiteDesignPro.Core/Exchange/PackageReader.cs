@@ -174,6 +174,7 @@ namespace SiteDesignPro.Core.Exchange
                 pkg.BuildingZeroAbsolute = NullableNumber(elev, "buildingZeroAbsolute");
                 pkg.PackageZeroAbsolute = NullableNumber(elev, "packageZeroAbsolute");
                 pkg.VerticalDatum = elev.TryGetProperty("verticalDatum", out JsonElement vd) && vd.ValueKind == JsonValueKind.String ? vd.GetString() ?? string.Empty : string.Empty;
+                pkg.DrawingZ = elev.TryGetProperty("drawingZ", out JsonElement dz) && dz.ValueKind == JsonValueKind.String ? dz.GetString() ?? string.Empty : string.Empty;
             }
 
             if (m.TryGetProperty("terrain", out JsonElement terrain) && terrain.ValueKind == JsonValueKind.Object)

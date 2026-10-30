@@ -53,8 +53,8 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Write(Bs.T("Projekat: {0} {1} | Jedinice: {2} | Ishodište: {3} | Sjever: {4}° | Mjerilo 1:{5} | Tekst {6} mm | Zona '{7}' | Revizija {8}",
                     s.Name, s.Number, s.DrawingUnit, string.Join("; ", s.Origin.Select(v => CommandContext.F(v))), CommandContext.F(s.TrueNorthDegrees, 4),
                     CommandContext.F(s.Labels.ScaleDenominator, 0), CommandContext.F(s.Labels.TextHeightMm, 2), s.Labels.Zone, s.Revision));
-                string k = ctx.Keyword("Izmjena [Naziv/Broj/Investitor/Lokacija/Autor/Revizija/Jedinice/Ishodiste/Sjever/Sistem/Mjerilo/Tekst/Zona/Numeracija/Izlaz]",
-                    new[] { "Naziv", "Broj", "Investitor", "Lokacija", "Autor", "Revizija", "Jedinice", "Ishodiste", "Sjever", "Sistem", "Mjerilo", "Tekst", "Zona", "Numeracija", "Izlaz" }, "Izlaz");
+                string k = ctx.Keyword("Izmjena [Naziv/Broj/INvestitor/Lokacija/Autor/Revizija/Jedinice/ISHodiste/SJever/Sistem/Mjerilo/Tekst/Zona/NUmeracija/Izlaz]",
+                    new[] { "Naziv", "Broj", "Investitor|INvestitor", "Lokacija", "Autor", "Revizija", "Jedinice", "Ishodiste|ISHodiste", "Sjever|SJever", "Sistem", "Mjerilo", "Tekst", "Zona", "Numeracija|NUmeracija", "Izlaz" }, "Izlaz");
                 switch (k)
                 {
                     case "Naziv": s.Name = ctx.Text("Naziv projekta", s.Name); break;
@@ -92,7 +92,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             LengthUnit? ins = UnitConversion.FromInsUnits((int)ctx.Db.Insunits);
             string current = ins.HasValue ? UnitConversion.Code(ins.Value) : s.DrawingUnit;
-            string k = ctx.Keyword("Jedinica crteža [Milimetri/Centimetri/Metri]", new[] { "Milimetri", "Centimetri", "Metri" },
+            string k = ctx.Keyword("Jedinica crteža [MIlimetri/Centimetri/MEtri]", new[] { "Milimetri|MIlimetri", "Centimetri", "Metri|MEtri" },
                 current == "m" ? "Metri" : current == "cm" ? "Centimetri" : "Milimetri");
             LengthUnit unit = k == "Metri" ? LengthUnit.Meter : k == "Centimetri" ? LengthUnit.Centimeter : LengthUnit.Millimeter;
             if (ctx.ExistingElements().Count > 0 && UnitConversion.Code(unit) != s.DrawingUnit)
@@ -107,7 +107,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPLAYERS", CommandFlags.Modal)]
         public void Layers() => CommandContext.Run("SDPLAYERS", ctx =>
         {
-            string k = ctx.Keyword("Standard slojeva [Napravi/Popravi/Provjeri/Stari]", new[] { "Napravi", "Popravi", "Provjeri", "Stari" }, "Napravi");
+            string k = ctx.Keyword("Standard slojeva [Napravi/POpravi/PRovjeri/Stari]", new[] { "Napravi", "Popravi|POpravi", "Provjeri|PRovjeri", "Stari" }, "Napravi");
             if (k == "Stari")
             {
                 List<(string Old, string New)> legacy = ctx.Svc.Layers.LegacyLayers();

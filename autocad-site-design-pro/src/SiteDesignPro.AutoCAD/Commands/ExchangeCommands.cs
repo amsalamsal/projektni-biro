@@ -279,6 +279,20 @@ namespace SiteDesignPro.AutoCAD.Commands
                 {
                     ctx.Write("  nije uvezeno " + (pe.Element.Label ?? pe.Element.Id) + ": " + ex.Message);
                     failed++;
+                    if (old?.Element != null && replace)
+                    {
+                        // the drawing's element was erased for the replacement: put it back rather than lose it
+                        replaced--;
+                        try
+                        {
+                            ctx.Svc.Create(old.Element);
+                            ctx.Write("    zadržan je postojeći element " + (old.Element.Label ?? old.Element.Id) + ".");
+                        }
+                        catch (System.Exception restoreEx) when (restoreEx is InvalidOperationException || restoreEx is ArgumentException || restoreEx is Autodesk.AutoCAD.Runtime.Exception)
+                        {
+                            ctx.Write("    postojeći element " + (old.Element.Label ?? old.Element.Id) + " nije moguće vratiti (" + restoreEx.Message + "); poništite naredbu s UNDO.");
+                        }
+                    }
                 }
             }
 
@@ -314,7 +328,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            bool force = ctx.Keyword("Elementi izmijenjeni u AutoCAD-u nakon izvoza [Preskoci/Prepisi]", new[] { "Preskoci", "Prepisi" }, "Preskoci") == "Prepisi";
+            bool force = ctx.Keyword("Elementi izmijenjeni u AutoCAD-u nakon izvoza [PREskoci/PREPisi]", new[] { "Preskoci|PREskoci", "Prepisi|PREPisi" }, "Preskoci") == "Prepisi";
             var counts = new Dictionary<ChangeOutcome, int>();
             foreach (ElementChange change in doc.Changes)
             {

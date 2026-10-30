@@ -254,13 +254,14 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// </summary>
         private static void DrawInteractive(ElementType type)
         {
-            string? method = null;
-            var picked = new List<ObjectId>();
+            // One transaction for drawing the boundary and converting it: if the conversion fails, the boundary drawn
+            // (or traced) here is rolled back with it instead of staying behind as a plain polyline.
             CommandContext.Run("SDPDRAW", ctx =>
             {
-                method = type.Geometry == GeometryKind.Polygon
-                    ? ctx.Keyword("Granica [Polilinija/Pravougaonik/Unutar/Odaberi]", new[] { "Polyline|Polilinija", "Rectangle|Pravougaonik", "Pick|Unutar", "Select|Odaberi" }, "Polyline")
+                string method = type.Geometry == GeometryKind.Polygon
+                    ? ctx.Keyword("Granica [POlilinija/PRavougaonik/Unutar/Odaberi]", new[] { "Polyline|POlilinija", "Rectangle|PRavougaonik", "Pick|Unutar", "Select|Odaberi" }, "Polyline")
                     : ctx.Keyword("Trasa [Polilinija/Odaberi]", new[] { "Polyline|Polilinija", "Select|Odaberi" }, "Polyline");
+                var picked = new List<ObjectId>();
                 if (method == "Select")
                 {
                     picked.AddRange(SelectCurves(ctx));
@@ -282,31 +283,25 @@ namespace SiteDesignPro.AutoCAD.Commands
                         ctx.Tr.AddNewlyCreatedDBObject(outer, true);
                     }
                 }
-            });
-            if (method == null)
-            {
-                return;
-            }
-
-            if (method == "Polyline" || method == "Rectangle")
-            {
-                // Drawn with our own prompts (no nested PLINE/RECTANG): Editor.Command inside a command fails with
-                // eInvalidInput on some AutoCAD versions and setups.
-                ObjectId drawn = ObjectId.Null;
-                CommandContext.Run("SDPDRAW", ctx => drawn = method == "Rectangle" ? DrawRectangle(ctx) : DrawPolyline(ctx, type.Geometry == GeometryKind.Polygon));
-                if (drawn.IsNull)
+                else
                 {
-                    AcApp.DocumentManager.MdiActiveDocument.Editor.WriteMessage("\nNišta nije nacrtano.");
-                    return;
+                    // Drawn with our own prompts (no nested PLINE/RECTANG): Editor.Command inside a command fails with
+                    // eInvalidInput on some AutoCAD versions and setups.
+                    ObjectId drawn = method == "Rectangle" ? DrawRectangle(ctx) : DrawPolyline(ctx, type.Geometry == GeometryKind.Polygon);
+                    if (drawn.IsNull)
+                    {
+                        ctx.Write("Ništa nije nacrtano.");
+                        return;
+                    }
+
+                    picked.Add(drawn);
                 }
 
-                picked.Add(drawn);
-            }
-
-            if (picked.Count > 0)
-            {
-                CommandContext.Run("SDPDRAW", ctx => ctx.Write("Napravljeno: " + ConvertCurves(ctx, type, picked) + " × " + type.Name + "."));
-            }
+                if (picked.Count > 0)
+                {
+                    ctx.Write("Napravljeno: " + ConvertCurves(ctx, type, picked) + " × " + type.Name + ".");
+                }
+            });
         }
 
         /// <summary>Converts existing lines, arcs, circles and polylines into managed elements.</summary>

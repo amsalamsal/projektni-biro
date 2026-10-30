@@ -265,6 +265,23 @@ module ProjektniBiro
             report.add(:error, 'SDP-G010', id, "Neispravna geometrija: #{e.message}", 'Ispravite izvorni objekat u AutoCAD-u i ponovo izvezite.', label)
             next
           end
+          if geometry[:kind] == 'polygon' && !arcs?(geometry[:outer])
+            outer = Geometry.dedupe(geometry[:outer][:vertices], true)
+            if outer.length < 3
+              report.add(:error, 'SDP-G005', id, 'Granica ima manje od tri različita tjemena.',
+                         'Nacrtajte površinu kao zatvorenu poliliniju s najmanje tri tjemena u AutoCAD-u i ponovo izvezite.', label)
+              next
+            end
+            if Geometry.signed_area(outer).abs < 1e-9
+              report.add(:error, 'SDP-G006', id, 'Granica ne zatvara površinu.',
+                         'Ponovo nacrtajte granicu u AutoCAD-u; tjemena ne smiju ležati na jednom pravcu.', label)
+              next
+            end
+            if Geometry.self_intersecting?(outer)
+              report.add(:warning, 'SDP-G007', id, 'Granica siječe samu sebe; dio površine možda neće biti izgrađen.',
+                         'Ispravite granicu u AutoCAD-u tako da se stranice ne sijeku, zatim ponovo izvezite.', label)
+            end
+          end
           if type_def && type_def.geometry != geometry[:kind]
             report.add(:error, 'SDP-F012', id, "Vrsta geometrije '#{geometry[:kind]}' ne odgovara definiciji tipa '#{type_def.geometry}'.",
                        'Ponovo izvezite paket.', label)
@@ -321,6 +338,10 @@ module ProjektniBiro
         raise PackageError, 'koordinate moraju biti konačni brojevi' unless a.all? { |v| v.is_a?(Numeric) && v.to_f.finite? }
 
         a.map(&:to_f)
+      end
+
+      def arcs?(ring)
+        (ring[:bulges] || []).any? { |b| b.abs > 1e-12 }
       end
 
       def ring(h)

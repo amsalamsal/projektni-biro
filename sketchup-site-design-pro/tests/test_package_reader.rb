@@ -134,4 +134,33 @@ class TestPackageReader < Minitest::Test
       assert(rep.issues.any? { |i| i.message =~ /CRC|inflate|invalid|incorrect|corrupt/i }, rep.to_text)
     end
   end
+  def polygon_report(vertices)
+    geom = { 'kind' => 'polygon', 'outer' => { 'vertices' => vertices } }
+    pkg, report = PackageReader.read_strings(*package_strings([{ type: 'road.pedestrian_crossing', geometry: geom }]))
+    [pkg, report]
+  end
+
+  def test_polygon_with_one_distinct_point_is_rejected
+    pkg, report = polygon_report([[0.0, 0.0, 0.0]] * 4)
+    assert_empty pkg.elements
+    assert(report.issues.any? { |i| i.code == 'SDP-G005' }, report.to_text)
+  end
+
+  def test_polygon_on_a_line_is_rejected
+    pkg, report = polygon_report([[0.0, 0.0, 0.0], [5.0, 0.0, 0.0], [10.0, 0.0, 0.0]])
+    assert_empty pkg.elements
+    assert(report.issues.any? { |i| i.code == 'SDP-G006' }, report.to_text)
+  end
+
+  def test_self_intersecting_polygon_is_reported
+    pkg, report = polygon_report([[0.0, 0.0, 0.0], [10.0, 10.0, 0.0], [10.0, 0.0, 0.0], [0.0, 4.0, 0.0]])
+    assert_equal 1, pkg.elements.length
+    assert(report.issues.any? { |i| i.code == 'SDP-G007' && i.severity == :warning }, report.to_text)
+  end
+
+  def test_closing_duplicate_vertex_is_accepted
+    pkg, report = polygon_report([[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [10.0, 10.0, 0.0], [0.0, 0.0, 0.0]])
+    assert_equal 1, pkg.elements.length
+    refute(report.issues.any? { |i| i.code.start_with?('SDP-G') }, report.to_text)
+  end
 end

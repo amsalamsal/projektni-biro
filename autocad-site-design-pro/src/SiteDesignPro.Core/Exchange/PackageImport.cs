@@ -58,9 +58,11 @@ namespace SiteDesignPro.Core.Exchange
                     d.VerticalDatum = package.VerticalDatum;
                 }
 
-                // drawing Z is relative when package z = 0 sits at ±0,00 (the writer's relative mode)
+                // the exporter states the mode; older packages without it: drawing Z is relative when package z = 0
+                // sits at ±0,00 (the writer's relative mode)
                 double originZ = At(o, 2);
-                bool relative = package.PackageZeroAbsolute.HasValue && Math.Abs(package.PackageZeroAbsolute.Value - (package.BuildingZeroAbsolute.Value + originZ)) < 1e-6;
+                bool relative = package.DrawingZ == "relative" || (package.DrawingZ != "absolute" &&
+                    package.PackageZeroAbsolute.HasValue && Math.Abs(package.PackageZeroAbsolute.Value - (package.BuildingZeroAbsolute.Value + originZ)) < 1e-6);
                 d.DrawingZ = relative ? DrawingZMode.Relative : DrawingZMode.Absolute;
             }
         }

@@ -93,6 +93,9 @@ namespace SiteDesignPro.Core.Exchange
 
         public string VerticalDatum { get; set; } = string.Empty;
 
+        /// <summary>"absolute" or "relative" as written by the exporter; empty when the package does not say.</summary>
+        public string DrawingZ { get; set; } = string.Empty;
+
         public string Crs { get; set; } = string.Empty;
 
         /// <summary>Terrain surfaces declared in the manifest (id, name, triangle count).</summary>

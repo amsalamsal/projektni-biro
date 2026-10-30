@@ -114,6 +114,27 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(Math.PI / 6, ((PointGeometry)PackageImport.ToDrawingFrame(pkg.Elements[0].Element, target).Geometry).Rotation, 9);
         }
 
+        [Theory]
+        [InlineData(Core.Elevation.DrawingZMode.Absolute, 520.15)]
+        [InlineData(Core.Elevation.DrawingZMode.Relative, 520.15)]
+        [InlineData(Core.Elevation.DrawingZMode.Absolute, 0.0)]
+        [InlineData(Core.Elevation.DrawingZMode.Relative, 0.0)]
+        public void Import_KeepsDrawingZMode(Core.Elevation.DrawingZMode mode, double buildingZero)
+        {
+            string path = Path.Combine(TestSupport.TempDir(), "import-z.sdpkg");
+            ProjectSettings settings = MillimetreSettings();
+            settings.Origin = new[] { 6550000000.0, 4860000000.0, 0.0 };
+            settings.Elevations.BuildingZeroAbsolute = buildingZero;
+            settings.Elevations.DrawingZ = mode;
+            PackageWriter.Write(path, settings, DrawingElements(), TestSupport.Catalog);
+            SitePackage pkg = PackageReader.Read(path).Package!;
+
+            var target = new ProjectSettings { DrawingUnit = "m" };
+            PackageImport.AdoptProjectFrame(pkg, target);
+            Assert.Equal(mode, target.Elevations.DrawingZ);
+            Assert.Equal(buildingZero, target.Elevations.BuildingZeroAbsolute);
+        }
+
         private static List<Vec3> Vertices(ElementGeometry g) => g switch
         {
             PointGeometry p => new List<Vec3> { p.Position },

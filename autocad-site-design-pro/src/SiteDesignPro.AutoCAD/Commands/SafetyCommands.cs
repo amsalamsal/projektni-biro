@@ -73,10 +73,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                 List<BackupInfo> backups = string.IsNullOrEmpty(file) || !File.Exists(file) ? new List<BackupInfo>() : new BackupManager(policy).List(file);
                 ListBackups(ed, file, policy, 10);
 
-                var o = new PromptKeywordOptions("\nOporavak [Otvori/Folder/Oznaci/Izlaz]");
+                var o = new PromptKeywordOptions("\nOporavak [Otvori/Folder/OZnaci/Izlaz]");
                 foreach (string k in new[] { "Otvori", "Folder", "Oznaci", "Izlaz" })
                 {
-                    o.Keywords.Add(k);
+                    string local = k == "Oznaci" ? "OZnaci" : k;
+                    o.Keywords.Add(k, local, local);
                 }
 
                 o.Keywords.Default = "Izlaz";

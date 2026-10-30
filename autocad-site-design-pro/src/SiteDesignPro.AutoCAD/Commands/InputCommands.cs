@@ -229,7 +229,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ProjectedCrs? crs = CrsRegistry.Find(g.Crs);
                 ctx.Write(Bs.T("Koordinatni sistem: {0} | kontrolnih tačaka: {1} | transformacija: {2}", string.IsNullOrEmpty(g.Crs) ? "nije naveden" : g.Crs + (crs != null ? " – " + crs.Name : " (nije u registru)"),
                     g.ControlPoints.Count, Describe(g.Transform)));
-                string k = ctx.Keyword("Georeferenciranje [Sistem/Dodaj/Lista/Obrisi/Izracunaj/Ponisti/Izlaz]", new[] { "Sistem", "Dodaj", "Lista", "Obrisi", "Izracunaj", "Ponisti", "Izlaz" }, "Izlaz");
+                string k = ctx.Keyword("Georeferenciranje [Sistem/Dodaj/Lista/Obrisi/IZRacunaj/Ponisti/Izlaz]", new[] { "Sistem", "Dodaj", "Lista", "Obrisi", "Izracunaj|IZRacunaj", "Ponisti", "Izlaz" }, "Izlaz");
                 switch (k)
                 {
                     case "Sistem":

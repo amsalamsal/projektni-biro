@@ -1,0 +1,47 @@
+name: Izgradnja i testovi
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Alati za testove
+        run: |
+          gem install minitest parser --no-document
+          pip install jsonschema
+
+      - name: Izgradnja, testovi i paketi
+        run: bash tools/build_and_test.sh
+
+      - name: AutoCAD paket
+        uses: actions/upload-artifact@v4
+        with:
+          name: SiteDesignPro.bundle
+          path: dist/SiteDesignPro.bundle/
+
+      - name: SketchUp paket
+        uses: actions/upload-artifact@v4
+        with:
+          name: pb_site_design_pro.rbz
+          path: dist/pb_site_design_pro.rbz
