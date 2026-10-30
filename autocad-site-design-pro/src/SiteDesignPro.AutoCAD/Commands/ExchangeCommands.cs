@@ -198,6 +198,104 @@ namespace SiteDesignPro.AutoCAD.Commands
             Log.Info("Izvezeno " + result.ElementCount + " elemenata u " + result.Path);
         });
 
+        /// <summary>
+        /// Brings a package (.sdpkg) into the drawing as editable elements – e.g. a package converted from another DWG.
+        /// In a drawing without elements the package's unit, origin and datum are taken over, so coordinates match the source.
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPUVOZPAKETA", CommandFlags.Modal)]
+        public void ImportPackage() => CommandContext.RunMajor("SDPUVOZPAKETA", "Uvoz paketa u crtež", ctx =>
+        {
+            var o = new PromptOpenFileOptions("\nPaket Vanjsko uređenje PRO") { Filter = "Paket Vanjsko uređenje PRO (*.sdpkg)|*.sdpkg", DialogCaption = "Uvoz paketa u crtež" };
+            PromptFileNameResult r = ctx.Ed.GetFileNameForOpen(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            PackageReadResult read = PackageReader.Read(r.StringResult);
+            if (read.Package == null)
+            {
+                Print(ctx, read.Report, 10);
+                return;
+            }
+
+            SitePackage pkg = read.Package;
+            List<ManagedElement> existing = ctx.Svc.ReadAll();
+            bool adopt = existing.Count == 0;
+            if (!adopt && pkg.ProjectId != ctx.Settings.ProjectId &&
+                ctx.Keyword("Crtež već sadrži elemente drugog projekta. Dodati elemente paketa u postojeći koordinatni okvir crteža? [Da/Ne]", new[] { "Da", "Ne" }, "Ne") == "Ne")
+            {
+                return;
+            }
+
+            if (adopt)
+            {
+                PackageImport.AdoptProjectFrame(pkg, ctx.Settings);
+                LengthUnit unit = ctx.Settings.Unit;
+                LengthUnit? ins = UnitConversion.FromInsUnits((int)ctx.Db.Insunits);
+                if (!ins.HasValue || (ins.Value != unit && ctx.Keyword("INSUNITS crteža (" + (ins.HasValue ? UnitConversion.Code(ins.Value) : "-") + ") razlikuje se od jedinice paketa (" + UnitConversion.Code(unit) + "). Postaviti INSUNITS na " + UnitConversion.Code(unit) + "? [Da/Ne]", new[] { "Da", "Ne" }, "Da") == "Da"))
+                {
+                    ctx.Db.Insunits = (UnitsValue)UnitConversion.ToInsUnits(unit);
+                }
+            }
+
+            var byId = existing.Where(m => !m.IsCopy).GroupBy(m => m.Record.Id).ToDictionary(g => g.Key, g => g.First());
+            bool replace = pkg.Elements.Any(e => byId.ContainsKey(e.Element.Id)) &&
+                ctx.Keyword("Neki elementi paketa već postoje u crtežu [Preskoci/Zamijeni]", new[] { "Preskoci", "Zamijeni" }, "Preskoci") == "Zamijeni";
+            ctx.Svc.Layers.EnsureAll(false);
+            int created = 0, replaced = 0, skipped = 0, failed = 0;
+            foreach (PackageElement pe in pkg.Elements)
+            {
+                if (ctx.Catalog.FindType(pe.Element.TypeId) == null)
+                {
+                    ctx.Write("  preskočeno " + (pe.Element.Label ?? pe.Element.Id) + ": nepoznat tip '" + pe.Element.TypeId + "'");
+                    failed++;
+                    continue;
+                }
+
+                if (byId.TryGetValue(pe.Element.Id, out ManagedElement? old))
+                {
+                    if (!replace)
+                    {
+                        skipped++;
+                        continue;
+                    }
+
+                    foreach ((ObjectId auxId, string _) in ctx.Svc.Aux(old.Record.Id).ToList())
+                    {
+                        ctx.Tr.GetObject(auxId, OpenMode.ForWrite).Erase();
+                    }
+
+                    ctx.Tr.GetObject(old.ObjectId, OpenMode.ForWrite).Erase();
+                    replaced++;
+                }
+
+                try
+                {
+                    ctx.Svc.Create(PackageImport.ToDrawingFrame(pe.Element, ctx.Settings));
+                    created++;
+                }
+                catch (System.Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is Autodesk.AutoCAD.Runtime.Exception)
+                {
+                    ctx.Write("  nije uvezeno " + (pe.Element.Label ?? pe.Element.Id) + ": " + ex.Message);
+                    failed++;
+                }
+            }
+
+            ctx.SaveSettings();
+            ctx.Write(Core.Text.Bs.T("Uvoz paketa {0}: kreirano {1} elemenata (zamijenjeno {2}, preskočeno postojećih {3}, neuspjelo {4}).",
+                Path.GetFileName(r.StringResult), created, replaced, skipped, failed));
+            if (adopt)
+            {
+                ctx.Write(Core.Text.Bs.T("Preuzeto iz paketa: jedinica {0}, ishodište E {1} N {2}{3}.", ctx.Settings.DrawingUnit,
+                    CommandContext.F(ctx.Settings.OriginMeters.X, 2), CommandContext.F(ctx.Settings.OriginMeters.Y, 2),
+                    ctx.Settings.Elevations.BuildingZeroAbsolute.HasValue ? ", ±0,00 = " + CommandContext.F(ctx.Settings.Elevations.BuildingZeroAbsolute.Value, 2) + " m n.v." : string.Empty));
+            }
+
+            ctx.Write("Dalje: ZOOM Extents, SDPEDIT za izmjene, SDPVALIDATE, SDPEXPORT.");
+            Log.Info("Uvezen paket " + r.StringResult + ": " + created + " elemenata");
+        });
+
         /// <summary>Applies a SketchUp change file (parameter edits, moved/rotated point elements).</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPAPPLYCHANGES", CommandFlags.Modal)]
         public void ApplyChanges() => CommandContext.RunMajor("SDPAPPLYCHANGES", "Primjena izmjena iz SketchUp-a", ctx =>

@@ -98,7 +98,7 @@ Ploče se redaju s lijeva na desno ovim redom:
 | **Rasvjeta** | **Pregled**, liste: Stubovi, Niska rasvjeta, Zidna montaža, Dekorativno, Upravljanje; Svjetiljke duž puta, Pokrivenost | svjetiljke |
 | **Urbani mobilijar** | **Pregled**, liste: Sjedenje, Stolovi, Korpe i kante, Dječija igrališta, Sport, Pergole, Nadstrešnice, Informacije …; Raspored duž staze | klupe, igrališta, pergole, table |
 | **3D modeli** | **Uredi element**, Zone sigurnosti, Odabir, Korisnički katalozi | izmjena nacrtanih elemenata |
-| **SketchUp razmjena** | **Izvoz paketa**, Primijeni izmjene, Provjera prije izvoza | prenos u SketchUp i nazad |
+| **SketchUp razmjena** | **Izvoz paketa**, Primijeni izmjene, Uvoz paketa, Provjera prije izvoza | prenos u SketchUp i nazad; uvoz gotovog paketa u crtež |
 | **Količinski obračun** | **Tabele**, Izvoz CSV, Količine | količine |
 | **Nacrti i oznake** | **Oznaka**, Numeracija, Legenda, Sastavnica, Razmjernik, Presjek, Detalj, Rasterske ose, Oblak revizije | crtanje nacrta |
 | **Provjera projekta** | **Provjeri projekat**, Provjera crteža, Revizija | kontrola |

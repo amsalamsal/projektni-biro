@@ -196,6 +196,7 @@ Svaki od ovih panela ima i:
 |---|---|
 | Izvoz paketa | `SDPEXPORT` |
 | Primijeni izmjene | `SDPAPPLYCHANGES` |
+| Uvoz paketa | `SDPUVOZPAKETA` |
 | Provjera prije izvoza | `SDPVALIDATE` |
 
 **Količinski obračun**
@@ -785,6 +786,22 @@ Ispisuje prvih 40 nalaza; svi su u paleti (*Provjera*), gdje dvostruki klik vodi
 | neispravno | vrijednost nije dozvoljena |
 
 Na kraju ponovo pokrenite `SDPEXPORT`, da SketchUp dobije usklađeno stanje.
+
+#### SDPUVOZPAKETA – uvoz paketa u crtež
+Učitava paket `.sdpkg` u crtež kao **uredive elemente**: polilinije, simbole i šrafure s podacima elementa. To je isto
+kao da su nacrtani naredbama programa. Koristi se kad je paket napravljen izvan ovog crteža, npr. pretvoren iz
+drugog DWG-a ili izvezen iz drugog crteža.
+1. Odaberite `.sdpkg`.
+2. **Crtež bez elemenata:** preuzimaju se jedinica crteža, ishodište, identitet projekta i nulta kota ±0,00 iz
+   paketa. Elementi tako dobijaju iste koordinate kao u izvornom crtežu. Ako se INSUNITS razlikuje, program pita da
+   li da ga postavi.
+3. **Crtež koji već ima elemente:** elementi se dodaju u koordinatni okvir tog crteža. Ako je paket drugog projekta,
+   program prvo pita.
+4. *Neki elementi paketa već postoje u crtežu [Preskoci/Zamijeni]*: postojeći element (isti identifikator) ostaje
+   ili se zamjenjuje verzijom iz paketa.
+
+**Rezultat:** *Uvoz paketa …: kreirano N elemenata (zamijenjeno, preskočeno, neuspjelo)*. Zatim: ZOOM Extents,
+`SDPEDIT`, `SDPVALIDATE`, `SDPEXPORT`.
 
 ### 6.8 Sigurnost i pomoć
 `SDPKOPIJA`, `SDPKOPIJEPOSTAVKE`, `SDPOPORAVAK` – v. [poglavlje 10](#10-sigurnosne-kopije-i-oporavak).

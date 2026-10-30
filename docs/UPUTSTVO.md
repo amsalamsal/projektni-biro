@@ -109,6 +109,7 @@ imaju padajuće liste svih vrsta elemenata po podkategorijama i dugme *Pregled*,
   * `SDP-E011` – dodijeljena kota bez datuma;
   * `SDP-E012` – objekat pomjeren nakon dodjele kote.
 * `SDPEXPORT` – zapisuje paket `.sdpkg` (shema 1.1.0) s elementima, kotama, georeferencom i terenom (`terrain.json`).
+* `SDPUVOZPAKETA` – učitava gotov paket `.sdpkg` u crtež kao uredive elemente (u prazan crtež s jedinicom, ishodištem i kotom ±0,00 iz paketa).
 * `SDPAPPLYCHANGES` – primjena izmjena iz SketchUpa s pregledom. Elementi koje ste u međuvremenu mijenjali u
   AutoCAD-u preskaču se ako ne odaberete prepisivanje.
 

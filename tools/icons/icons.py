@@ -53,6 +53,7 @@ ICONS = {
     "revcloud": ("tool", '<path d="M8 22a3 3 0 0 1-2-5 3 3 0 0 1 3-5 4 4 0 0 1 7-3 4 4 0 0 1 7 2 3 3 0 0 1 3 5 3 3 0 0 1-2 5 3 3 0 0 1-5 1 4 4 0 0 1-6 0 3 3 0 0 1-5 0z" fill="none" stroke="A"/>'),
     "schedule": ("tool", '<rect x="4" y="5" width="24" height="22" rx="1.5" fill="none" stroke="S"/><path d="M4 11h24M4 17h24M4 22h24M13 5v22" stroke="S"/><rect x="4" y="5" width="24" height="6" fill="A" fill-opacity=".45"/>'),
     "csv": ("tool", '<path d="M8 4h11l6 6v18H8z" fill="none" stroke="S"/><text x="16.5" y="22" font-size="7.5" font-family="Arial" font-weight="700" text-anchor="middle" fill="A" stroke="none">CSV</text>'),
+    "import": ("tool", '<path d="M16 4v14M10.5 12.5L16 18l5.5-5.5" fill="none" stroke="A"/><rect x="4" y="16" width="24" height="11" rx="1.5" fill="A" fill-opacity=".2" stroke="S"/>'),
     "export": ("tool", '<rect x="4" y="12" width="15" height="15" fill="A" fill-opacity=".25" stroke="S"/><path d="M14 17L27 4M19 4h8v8" fill="none" stroke="A"/>'),
     "apply": ("tool", '<path d="M27 6L14 19M14 11v8h8" fill="none" stroke="A"/><rect x="4" y="12" width="15" height="15" fill="none" stroke="S"/>'),
     "edit": ("tool", '<path d="M6 26l2-7 13-13 5 5-13 13z" fill="A" fill-opacity=".3" stroke="S"/><path d="M18 9l5 5" stroke="S"/>'),

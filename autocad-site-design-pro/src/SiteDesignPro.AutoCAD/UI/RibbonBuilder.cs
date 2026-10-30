@@ -115,6 +115,7 @@ namespace SiteDesignPro.AutoCAD.UI
             tab.Panels.Add(Panel("SketchUp razmjena",
                 Large("Izvoz paketa", "SDPEXPORT", "export", "Provjera i zapis .sdpkg paketa za SketchUp (elementi, kote, georeferenca, teren)."),
                 Stack(Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Pregled i primjena izmjena iz SketchUpa (parametri, pomjereni elementi)."),
+                      Small("Uvoz paketa", "SDPUVOZPAKETA", "import", "Učitava .sdpkg paket u crtež kao uredive elemente (npr. paket pretvoren iz drugog DWG-a)."),
                       Small("Provjera prije izvoza", "SDPVALIDATE", "validate", "Sve provjere prije izvoza."))));
 
             tab.Panels.Add(Panel("Količinski obračun",

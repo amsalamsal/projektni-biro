@@ -79,6 +79,50 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void Import_IntoEmptyDrawing_RestoresUnitOriginDatumAndDrawingGeometry()
+        {
+            string path = Path.Combine(TestSupport.TempDir(), "import.sdpkg");
+            ProjectSettings settings = MillimetreSettings();
+            settings.Elevations.BuildingZeroAbsolute = 520.15;
+            settings.Elevations.VerticalDatum = "test";
+            settings.Elevations.DrawingZ = Core.Elevation.DrawingZMode.Relative;
+            List<SiteElement> source = DrawingElements();
+            PackageWriter.Write(path, settings, source, TestSupport.Catalog);
+            SitePackage pkg = PackageReader.Read(path).Package!;
+
+            var target = new ProjectSettings { DrawingUnit = "m" };
+            PackageImport.AdoptProjectFrame(pkg, target);
+            Assert.Equal("mm", target.DrawingUnit);
+            Assert.Equal(settings.Origin, target.Origin);
+            Assert.Equal(settings.ProjectId, target.ProjectId);
+            Assert.Equal(520.15, target.Elevations.BuildingZeroAbsolute);
+            Assert.Equal(Core.Elevation.DrawingZMode.Relative, target.Elevations.DrawingZ);
+
+            for (int i = 0; i < source.Count; i++)
+            {
+                SiteElement back = PackageImport.ToDrawingFrame(pkg.Elements[i].Element, target);
+                Assert.Equal(source[i].Id, back.Id);
+                Assert.Equal(source[i].Label, back.Label);
+                List<Vec3> a = Vertices(source[i].Geometry), b = Vertices(back.Geometry);
+                Assert.Equal(a.Count, b.Count);
+                for (int j = 0; j < a.Count; j++)
+                {
+                    Assert.True((a[j] - b[j]).Length < 1e-3, $"{source[i].TypeId} vrh {j}: {a[j]} != {b[j]}");
+                }
+            }
+
+            Assert.Equal(Math.PI / 6, ((PointGeometry)PackageImport.ToDrawingFrame(pkg.Elements[0].Element, target).Geometry).Rotation, 9);
+        }
+
+        private static List<Vec3> Vertices(ElementGeometry g) => g switch
+        {
+            PointGeometry p => new List<Vec3> { p.Position },
+            PathGeometry p => p.Ring.Vertices.ToList(),
+            PolygonGeometry p => p.Outer.Vertices.Concat(p.Holes.SelectMany(h => h.Vertices)).ToList(),
+            _ => new List<Vec3>(),
+        };
+
+        [Fact]
         public void ContentHash_IsStableAndSensitive()
         {
             SiteElement e = DrawingElements()[0];
