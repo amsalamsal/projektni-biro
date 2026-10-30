@@ -6,6 +6,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 step() { printf '\n=== %s ===\n' "$1"; }
 
+step "AutoCAD command registration"
+python3 tools/check_commands.py
+
 step "C# build (Core, CLI, AutoCAD adapter for AutoCAD 2025/2026 and 2027)"
 dotnet build -c Release autocad-site-design-pro/src/SiteDesignPro.Cli
 dotnet build -c Release autocad-site-design-pro/src/SiteDesignPro.AutoCAD
