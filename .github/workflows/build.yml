@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -45,3 +48,18 @@ jobs:
         with:
           name: pb_site_design_pro.rbz
           path: dist/pb_site_design_pro.rbz
+
+      - name: Gotovi paketi na grani builds/<grana>
+        if: github.event_name != 'pull_request'
+        run: |
+          set -e
+          out=$(mktemp -d)
+          cp -r dist/SiteDesignPro.bundle dist/pb_site_design_pro.rbz "$out"/
+          cd "$out"
+          printf 'Izgradnja %s (%s), %s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$(date -u +%FT%TZ)" > IZGRADNJA.txt
+          git init -q -b builds
+          git config user.name github-actions
+          git config user.email github-actions@users.noreply.github.com
+          git add -A
+          git commit -q -m "Izgradnja $GITHUB_SHA"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" builds:"builds/$GITHUB_REF_NAME"
