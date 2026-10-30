@@ -290,6 +290,29 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void Backup_OfDrawingHeldOpenForWriting_IsMadeAndVerified()
+        {
+            string d = TempDir();
+            try
+            {
+                string src = Path.Combine(d, "Otvoren.dwg");
+                File.WriteAllText(src, "sadrzaj crteza");
+
+                // AutoCAD keeps the open drawing open for read/write and lets others only read it
+                using (new FileStream(src, FileMode.Open, FileAccess.ReadWrite, FileShare.Read))
+                {
+                    string? backup = new BackupManager(new BackupPolicy()).BackupFile(src, "Uvoz paketa");
+                    Assert.NotNull(backup);
+                    Assert.Equal("sadrzaj crteza", File.ReadAllText(backup!));
+                }
+            }
+            finally
+            {
+                Directory.Delete(d, true);
+            }
+        }
+
+        [Fact]
         public void DisabledBackups_DoNothing_MissingSourceThrows()
         {
             var mgr = new BackupManager(new BackupPolicy { Enabled = false });

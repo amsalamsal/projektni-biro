@@ -159,10 +159,24 @@ namespace SiteDesignPro.Core.Safety
             Prune(sourcePath);
         }
 
+        /// <summary>
+        /// Reads a file that another program may hold open for writing (AutoCAD keeps the open DWG locked that way).
+        /// File.ReadAllBytes asks for exclusive write access and fails with a sharing violation.
+        /// </summary>
+        private static byte[] ReadShared(string path)
+        {
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
+            using (var ms = new MemoryStream())
+            {
+                fs.CopyTo(ms);
+                return ms.ToArray();
+            }
+        }
+
         private static void Verify(string a, string b)
         {
-            byte[] ha = Compat.Sha256(File.ReadAllBytes(a));
-            byte[] hb = Compat.Sha256(File.ReadAllBytes(b));
+            byte[] ha = Compat.Sha256(ReadShared(a));
+            byte[] hb = Compat.Sha256(ReadShared(b));
             if (!ha.SequenceEqual(hb))
             {
                 File.Delete(b);
