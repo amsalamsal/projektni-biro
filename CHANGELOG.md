@@ -10,6 +10,11 @@
 * SketchUp: površine bez tri različita tjemena ili bez površine odbijaju se jasnom porukom (SDP-G005/G006),
   a granica koja siječe samu sebe javlja upozorenje (SDP-G007).
 
+* Kartica trake se vraća kad je AutoCAD ukloni pri ponovnom učitavanju menija.
+* Sigurnosna kopija sačuvanog (otvorenog) crteža više se ne prijavljuje kao neuspjela.
+* Provjera ulaznog DWG-a i mapiranje slojeva ne ubrajaju slojeve samog dodatka.
+* `SDPZOOM`/`SDPSETPARAM` na pogrešnom handleu, `SDPEDIT` s više tipova, `SDPKOTEIZOZNAKA` na „Ne“.
+
 ### Dodano
 * GitHub Actions: izgradnja i testovi pri svakom slanju; gotovi paketi na grani `builds/<grana>`.
 

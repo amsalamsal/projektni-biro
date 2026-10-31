@@ -76,6 +76,33 @@ Nakon ispravke (izgradnja na GitHub Actions, instalirana u `%AppData%\Autodesk\A
 Napomene: AutoCAD se tokom testa dva puta zatvorio bez zapisa u dnevniku dodatka; u isto vrijeme se pojavio AMD-ov
 prozor za prijavu greške grafičkog drajvera. SketchUp 2026 nije testiran (veza s računarom prekinuta).
 
+## Test svih naredbi i opcija u AutoCAD-u 2021 (drugi računar, 31.10.2026.)
+
+Svježa instalacija na drugom računaru (NVIDIA). Naredbe pokretane AutoCAD skriptama (`.scr`) s odgovorima na
+svaki upit; rezultat čitan iz dnevnika komandne linije (LOGFILEON) i dnevnika dodatka.
+
+| Šta | Rezultat |
+|---|---|
+| Svih 263 tipa elemenata iz kataloga (155 tačkastih `SDPPLACE`, 48 trasa i 60 površina `SDPDRAW`) | 263 napravljeno, 0 grešaka; `SDPAUDIT`, `SDPVALIDATE` (0 grešaka), `SDPLABEL`, `SDPQUANTITIES`, `SDPEXPORT` (paket ispravan prema shemi) |
+| Primjer + sve opcije: `SDPLAYERS` (Napravi/Popravi/Provjeri/Stari), `SDPNUMBER` (Nedostajuce/Sve), oznake, `SDPSPOTLEVEL` (IzTacke/Unos), `SDPSLOPE` (IzTacaka/Unos), `SDPTITLEBLOCK` A0–A4, `SDPSCHEDULE` (Sve/T1), `SDPSCHEDULECSV` | sve radi |
+| `SDPDRAW` (Pravougaonik, Polilinija sa Zatvori/Ponisti, Odaberi), `SDPPATHARRAY` (Uklopi/Fiksni, Poravnaj/Fiksna), `SDPGRID` (Da/Ne), `SDPPARKING` (90°, 60°), `SDPCONVERT`, `SDPSELECT` (svih 6 načina), `SDPEDIT` (parametar, svojstvo, različiti tipovi) | sve radi |
+| `SDPGEOREF` (Sistem, Dodaj, Lista, Izracunaj, Obrisi), `SDPKML`, `SDPEXPORT`/`SDPUVOZPAKETA` (659 elemenata, Zamijeni), `SDPKOTA` (Relativna/Apsolutna/Parter), `SDPTEREN`, `SDPANALIZATERENA`, `SDPPROFIL`, `SDPAPPLYCHANGES`, `SDPNEW`, `SDPDATUM`, `SDPSETTINGS`, `SDPKOPIJA`, `SDPOPORAVAK`, `SDPMAPIRANJE`, `SDPBROWSECAT`, `SDPPOMOC`, `SDPCATALOGFOLDER` | sve radi |
+
+Pronađeno i ispravljeno (ponovo provjereno u AutoCAD-u):
+
+| Greška | Ispravka |
+|---|---|
+| kartica trake nestajala kad AutoCAD nakon učitavanja dodatka učita MODELDOC/EXPRESS menije | kartica se vraća kad nedostaje |
+| sigurnosna kopija sačuvanog crteža uvijek „nije napravljena“ (provjera kopije čitala otvoreni DWG bez dijeljenog pristupa) | čitanje s `FileShare.ReadWrite`; test |
+| `SDPPROVJERADWG` i `SDPMAPIRANJE` brojali vlastite slojeve dodatka (`VU-…`) kao ulazni crtež (398 umjesto 161 objekta) | slojevi dodatka se ne smatraju ulazom |
+| `SDPZOOM`/`SDPSETPARAM`: `FormatException` na tekstu koji nije handle | poruka „nije pronađen“ |
+| `SDPEDIT` s više tipova: naziv prvog tipa za sve elemente, „P1...P0“ | „Različiti tipovi (n)“, nude se Oznaka/Svojstvo |
+| `SDPKOTEIZOZNAKA` na „Ne“ ispisivala `*Prekinuto*` | „Kote nisu primijenjene“ |
+
+Otvoreno: `SDPDRAW` > Unutar nije našao granicu u dva pokušaja (skript i ručni klik); AutoCAD-ov `-BOUNDARY` za poređenje
+nije stigao da se izvrši. Elementi nacrtani na Z = 0 u projektu s apsolutnim kotama dobijaju upozorenje
+„Visina -520 m“ (ponašanje po dizajnu, za odluku).
+
 ## Nije testirano
 
 * učitavanje i rad dodatka u AutoCAD-u 2020–2027;
