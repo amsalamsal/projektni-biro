@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – Izvještaj testiranja</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}</style></head><body><nav><a href="index.html">Uputstvo</a><a href="prvi-projekat.html">Prvi projekat (za početnike)</a><a href="prirucnik.html">Priručnik (sve opcije)</a><a href="instalacija.html">Instalacija i oporavak</a><a href="kompatibilnost.html">Kompatibilnost</a><a href="ogranicenja.html">Ograničenja</a><a href="testiranje.html">Izvještaj testiranja</a><a href="licence.html">Registar licenci</a></nav><h1 id="izvještaj-testiranja">Izvještaj testiranja</h1>
+<p>Datum: 30.10.2026. Verzija: 0.2.0 s bibliotekom 3D modela, nakon cjelovitog pregleda.</p>
+<p>Okruženje:</p>
+<ul>
+<li>Linux kontejner;
+</li>
+<li>.NET SDK 8.0.132 i 10.0.113;
+</li>
+<li>Ruby 3.3.6;
+</li>
+<li>Python 3;
+</li>
+<li>Chromium (Playwright).
+</li></ul>
+<p>Naredba: <code>tools/build_and_test.sh</code>, izlazni kod 0.</p>
+<p>Ovdje su upisani <strong>samo stvarno dobijeni rezultati</strong>. Ništa nije pokrenuto u AutoCAD-u ni u SketchUpu.</p>
+<h2 id="sažetak">Sažetak</h2>
+<table><thead><tr><th>Oblast</th><th>Šta je pokrenuto</th><th>Rezultat</th></tr></thead><tbody><tr><td>C# build – zajednička biblioteka</td><td><code>SiteDesignPro.Core</code> za net47 i net8.0</td><td>0 grešaka</td></tr><tr><td>C# build – AutoCAD dodatak</td><td>net47 (R23, 2020), net48 (R24, 2021–2024), net8.0-windows (R25, 2025–2026), net10.0-windows (R26, 2027), protiv NuGet referentnih biblioteka AutoCAD.NET</td><td>0 grešaka, 0 upozorenja u dodatku</td></tr><tr><td>C# testovi (xUnit, net8.0)</td><td>147 testnih slučajeva</td><td>147 prošlo</td></tr><tr><td>Primjer paketa</td><td>ponovo generisan i provjeren prema JSON shemama (manifest, geometrija, teren, izmjene)</td><td>ispravno</td></tr><tr><td>Ruby testovi (minitest)</td><td>104 testa, 6467 provjera</td><td>104 prošlo</td></tr><tr><td>Ruby 2.7 sintaksa</td><td>svaki <code>.rb</code> proširenja parsiran s <code>parser --27</code> (SketchUp 2022–2023)</td><td>sve ispravno</td></tr><tr><td>HTML dijalozi</td><td>41 provjera u Chromiumu nad generisanim podacima (uvoz, izvještaj, svojstva, biblioteka i postavke, biblioteka 3D modela)</td><td>41 prošlo</td></tr><tr><td>Biblioteka 3D modela</td><td>253 modela: zatvorena tijela na 3 nivoa detalja, potpunost prema katalogu i specifikaciji (122 objekta, 14 kategorija), ispravan COLLADA i postojeće teksture</td><td>sve prošlo</td></tr><tr><td>Parametri modela</td><td><code>tools/assets/check_params.rb</code>: svaki od 1402 parametra svih 253 modela promijenjen, model ponovo izgrađen; parametar bez efekta je greška (osim pregledanog spiska opisnih)</td><td>1402 provjereno, 0 bez efekta</td></tr><tr><td>Registracija AutoCAD naredbi</td><td><code>tools/check_commands.py</code>: svaka klasa s naredbama registrovana u <code>Plugin.cs</code></td><td>58 naredbi, 8 klasa</td></tr><tr><td>Cijelo SketchUp proširenje</td><td><code>test_ui_smoke.rb</code>: <code>main.rb</code> učitan kao u SketchUpu, svaka stavka menija i svaki poziv svakog dijaloga, alat za umetanje za svih 253 modela</td><td>prošlo</td></tr><tr><td>COLLADA nezavisnim čitačem</td><td><code>tools/assets/check_dae.js</code>: svaki <code>model.dae</code> učitan three.js ColladaLoaderom u Chromiumu, dimenzije upoređene s <code>asset.json</code></td><td>253 provjereno, 0 neusklađeno</td></tr><tr><td>Pakovanje</td><td><code>.bundle</code> (R23, R24, R25, R26), <code>.bundle.zip</code>, <code>.rbz</code></td><td>napravljeno, nije instalirano</td></tr></tbody></table>
+<p>Napomena: net47 build zajedničke biblioteke je kompajliran, ali testovi nisu pokrenuti pod .NET Frameworkom (u kontejneru nema Mono/.NET Framework okruženja). Testovi rade pod .NET 8.</p>
+<h2 id="greške-pronađene-pregledom-i-ispravljene">Greške pronađene pregledom i ispravljene</h2>
+<table><thead><tr><th>Gdje</th><th>Greška</th><th>Kako je otkrivena</th></tr></thead><tbody><tr><td>AutoCAD 2021, SDPDRAW</td><td>naredba je pokretala <code>PLINE</code>/<code>RECTANG</code> iz koda → <code>eInvalidInput</code> i prozor greške</td><td>prijava korisnika</td></tr><tr><td>AutoCAD</td><td>15 naredbi (SDPPOMOC, SDPMAPIRANJE, SDPTEREN, SDPDATUM, SDPOPORAVAK …) „Unknown command": klase nisu bile registrovane</td><td>prijava korisnika; sada provjera pri izgradnji</td></tr><tr><td>AutoCAD</td><td><code>CommandContext</code> je hvatao samo neke vrste grešaka; ostale su rušile naredbu</td><td>pregled koda</td></tr><tr><td>AutoCAD</td><td>5 naredbi i rukovaoci događajima palete, trake i dijaloga mapiranja bez zaštite od grešaka</td><td>pregled koda</td></tr><tr><td>AutoCAD</td><td>katalog iz instalacije se tražio u pogrešnom folderu (koristila se kopija iz DLL-a)</td><td>pregled putanja</td></tr><tr><td>AutoCAD</td><td>ključne riječi mogle su se ispisati dvaput u komandnoj liniji; „Poništi" s kvačicom</td><td>pregled koda</td></tr><tr><td>SketchUp</td><td>umetanje modela unutar grupe/komponente u uređivanju bilo je pomaknuto</td><td>pregled koda</td></tr><tr><td>Modeli</td><td>visinski pomak (58 modela), materijal (35), dimenzije (40) i niz posebnih parametara nisu mijenjali model</td><td>nova provjera parametara</td></tr></tbody></table>
+<h2 id="test-u-autocad-u-2021-stvarni-program-30102026">Test u AutoCAD-u 2021 (stvarni program, 30.10.2026.)</h2>
+<p>Prvi test u stvarnom AutoCAD-u 2021 (R24, .NET Framework 4.8) na korisnikovom računaru.</p>
+<p>Pronađeno u verziji 0.2.0 i ispravljeno:</p>
+<table><thead><tr><th>Greška</th><th>Posljedica</th><th>Ispravka</th></tr></thead><tbody><tr><td><code>Hatch.PatternAngle</code> postavljan prije <code>SetHatchPattern</code> → <code>eInvalidInput</code></td><td>nijedan od 22 tipa površina sa šrafurom nije se mogao napraviti; <code>SDPSAMPLE</code> i <code>SDPDRAW</code> (npr. asfalt) uvijek padaju</td><td>uzorak se postavlja prvi, zatim razmjer i ugao</td></tr><tr><td><code>SDPDRAW</code> crta granicu u jednoj, a pretvara u drugoj transakciji</td><td>pri grešci ostaje obična polilinija, iako poruka kaže „izmjene su poništene"</td><td>crtanje i pretvaranje u istoj transakciji</td></tr><tr><td>ključne riječi s istim početnim slovom (<code>Polilinija/Pravougaonik</code> i još 6 upita)</td><td>„P" uvijek bira prvu opciju</td><td>različite skraćenice (<code>POlilinija/PRavougaonik</code> …)</td></tr></tbody></table>
+<p>Nakon ispravke (izgradnja na GitHub Actions, instalirana u <code>%AppData%\Autodesk\ApplicationPlugins</code>):</p>
+<table><thead><tr><th>Naredba</th><th>Rezultat</th></tr></thead><tbody><tr><td><code>SDPABOUT</code></td><td>verzija 0.2.0, katalog 263 tipa</td></tr><tr><td><code>SDPSAMPLE</code> (Oba)</td><td>139 elemenata i 161 objekat izvornog crteža, šrafure prikazane</td></tr><tr><td><code>SDPDRAW</code> asfalt, opcija <code>PR</code></td><td>pravougaonik, 1 × Asfaltna površina sa šrafurom</td></tr><tr><td><code>SDPPLACE</code> klupa</td><td>postavljena</td></tr><tr><td><code>SDPEXPORT</code></td><td>140 elemenata izvezeno</td></tr><tr><td><code>SDPUVOZPAKETA</code> u prazan crtež</td><td>140 kreirano, 0 neuspjelo; preuzeti jedinica mm, ishodište i ±0,00 = 520,15</td></tr><tr><td><code>SDPUVOZPAKETA</code> ponovo, <em>Zamijeni</em></td><td>140 zamijenjeno, 0 neuspjelo</td></tr><tr><td><code>SDPVALIDATE</code></td><td>0 grešaka; 2 upozorenja za testni asfalt nacrtan na Z = 0 u projektu s apsolutnim kotama</td></tr></tbody></table>
+<p>Napomene: AutoCAD se tokom testa dva puta zatvorio bez zapisa u dnevniku dodatka; u isto vrijeme se pojavio AMD-ov prozor za prijavu greške grafičkog drajvera. SketchUp 2026 nije testiran (veza s računarom prekinuta).</p>
+<h2 id="test-svih-naredbi-i-opcija-u-autocad-u-2021-drugi-računar-31102026">Test svih naredbi i opcija u AutoCAD-u 2021 (drugi računar, 31.10.2026.)</h2>
+<p>Svježa instalacija na drugom računaru (NVIDIA). Naredbe pokretane AutoCAD skriptama (<code>.scr</code>) s odgovorima na svaki upit; rezultat čitan iz dnevnika komandne linije (LOGFILEON) i dnevnika dodatka.</p>
+<table><thead><tr><th>Šta</th><th>Rezultat</th></tr></thead><tbody><tr><td>Svih 263 tipa elemenata iz kataloga (155 tačkastih <code>SDPPLACE</code>, 48 trasa i 60 površina <code>SDPDRAW</code>)</td><td>263 napravljeno, 0 grešaka; <code>SDPAUDIT</code>, <code>SDPVALIDATE</code> (0 grešaka), <code>SDPLABEL</code>, <code>SDPQUANTITIES</code>, <code>SDPEXPORT</code> (paket ispravan prema shemi)</td></tr><tr><td>Primjer + sve opcije: <code>SDPLAYERS</code> (Napravi/Popravi/Provjeri/Stari), <code>SDPNUMBER</code> (Nedostajuce/Sve), oznake, <code>SDPSPOTLEVEL</code> (IzTacke/Unos), <code>SDPSLOPE</code> (IzTacaka/Unos), <code>SDPTITLEBLOCK</code> A0–A4, <code>SDPSCHEDULE</code> (Sve/T1), <code>SDPSCHEDULECSV</code></td><td>sve radi</td></tr><tr><td><code>SDPDRAW</code> (Pravougaonik, Polilinija sa Zatvori/Ponisti, Odaberi), <code>SDPPATHARRAY</code> (Uklopi/Fiksni, Poravnaj/Fiksna), <code>SDPGRID</code> (Da/Ne), <code>SDPPARKING</code> (90°, 60°), <code>SDPCONVERT</code>, <code>SDPSELECT</code> (svih 6 načina), <code>SDPEDIT</code> (parametar, svojstvo, različiti tipovi)</td><td>sve radi</td></tr><tr><td><code>SDPGEOREF</code> (Sistem, Dodaj, Lista, Izracunaj, Obrisi), <code>SDPKML</code>, <code>SDPEXPORT</code>/<code>SDPUVOZPAKETA</code> (659 elemenata, Zamijeni), <code>SDPKOTA</code> (Relativna/Apsolutna/Parter), <code>SDPTEREN</code>, <code>SDPANALIZATERENA</code>, <code>SDPPROFIL</code>, <code>SDPAPPLYCHANGES</code>, <code>SDPNEW</code>, <code>SDPDATUM</code>, <code>SDPSETTINGS</code>, <code>SDPKOPIJA</code>, <code>SDPOPORAVAK</code>, <code>SDPMAPIRANJE</code>, <code>SDPBROWSECAT</code>, <code>SDPPOMOC</code>, <code>SDPCATALOGFOLDER</code></td><td>sve radi</td></tr></tbody></table>
+<p>Pronađeno i ispravljeno (ponovo provjereno u AutoCAD-u):</p>
+<table><thead><tr><th>Greška</th><th>Ispravka</th></tr></thead><tbody><tr><td>kartica trake nestajala kad AutoCAD nakon učitavanja dodatka učita MODELDOC/EXPRESS menije</td><td>kartica se vraća kad nedostaje</td></tr><tr><td>sigurnosna kopija sačuvanog crteža uvijek „nije napravljena“ (provjera kopije čitala otvoreni DWG bez dijeljenog pristupa)</td><td>čitanje s <code>FileShare.ReadWrite</code>; test</td></tr><tr><td><code>SDPPROVJERADWG</code> i <code>SDPMAPIRANJE</code> brojali vlastite slojeve dodatka (<code>VU-…</code>) kao ulazni crtež (398 umjesto 161 objekta)</td><td>slojevi dodatka se ne smatraju ulazom</td></tr><tr><td><code>SDPZOOM</code>/<code>SDPSETPARAM</code>: <code>FormatException</code> na tekstu koji nije handle</td><td>poruka „nije pronađen“</td></tr><tr><td><code>SDPEDIT</code> s više tipova: naziv prvog tipa za sve elemente, „P1...P0“</td><td>„Različiti tipovi (n)“, nude se Oznaka/Svojstvo</td></tr><tr><td><code>SDPKOTEIZOZNAKA</code> na „Ne“ ispisivala <code>*Prekinuto*</code></td><td>„Kote nisu primijenjene“</td></tr></tbody></table>
+<p>Otvoreno: <code>SDPDRAW</code> &gt; Unutar nije našao granicu u dva pokušaja (skript i ručni klik); AutoCAD-ov <code>-BOUNDARY</code> za poređenje nije stigao da se izvrši. Elementi nacrtani na Z = 0 u projektu s apsolutnim kotama dobijaju upozorenje „Visina -520 m“ (ponašanje po dizajnu, za odluku).</p>
+<h2 id="nije-testirano">Nije testirano</h2>
+<ul>
+<li>učitavanje i rad dodatka u AutoCAD-u 2020–2027;
+</li>
+<li>rad proširenja u SketchUpu 2022+ (testirano samo protiv lažnog API-ja);
+</li>
+<li>umetanje, rotacija, zamjena i izgled modela biblioteke u stvarnom SketchUpu (nijedan model nema status <em>Testirano u SketchUpu</em>);
+</li>
+<li>uvoz <code>model.dae</code> naredbom SketchUpa <em>File &gt; Import</em> (provjereno samo nezavisnim COLLADA čitačem);
+</li>
+<li>instalacija <code>.bundle</code> i <code>.rbz</code> paketa;
+</li>
+<li>WinForms dijalog mapiranja slojeva, traka (ribbon), paleta i pregledi (jig) u AutoCAD-u;
+</li>
+<li>sigurnosne kopije stvarnih DWG/SKP datoteka (testirano na običnim datotekama);
+</li>
+<li>stvarni DWG crteži korisnika (testirano na sintetičkom primjeru izvornog crteža).
+</li></ul>
+<h2 id="c-testovi-po-klasama">C# testovi po klasama</h2>
+<table><thead><tr><th>Klasa</th><th>[Fact]/[Theory]</th><th>Pokriva</th></tr></thead><tbody><tr><td>AcceptanceWorkflowTests</td><td>9</td><td>tok rada na primjeru izvornog crteža: mapiranje, provjera, oznake → kote samo za svoje objekte, teren iz geodetskih slojeva, teren iz oznaka bez datuma, KML koordinate, čuvanje postavki, nadogradnja postavki v1 bez izmišljanja kota</td></tr><tr><td>SiteChecksTests</td><td>3</td><td>primjer prolazi; pomjeren objekat, saobraćajnica iznad partera i element izvan parcele se prijavljuju; kota bez datuma</td></tr><tr><td>ElevationDatumTests</td><td>5</td><td>novi datum nema kotu i odbija pretvaranje, apsolutno = datum + relativno, parter prati ±0,00 osim ako je zadano drugačije, spuštanje saobraćajnica zadaje korisnik, formatiranje, čuvanje dodjele u svojstvima</td></tr><tr><td>ElevationLabelTests</td><td>5</td><td>relativne i apsolutne oznake, mala vrijednost bez predznaka je nejasna i ne pogađa se, par apsolutno/relativno, tekst bez broja</td></tr><tr><td>ElevationAssignerTests</td><td>5</td><td>najmanja kontura, pokazna linija ima prednost, apsolutna oznaka bez datuma se ne pretvara, nesaglasne oznake se blokiraju, jednake konture su nejasne</td></tr><tr><td>GeoreferenceTests</td><td>4</td><td>jedna tačka bez rotacije se odbija, jedna tačka sa zadanom rotacijom, tri tačke (rotacija, pomak, odstupanja), mm crtež prema metrima → problem razmjere</td></tr><tr><td>ProjectionTests</td><td>3</td><td>projekcija → WGS84 u skladu s PROJ referentnim vrijednostima, povratna transformacija TM, KML sa zatvorenim prstenom i napomenom o tačnosti</td></tr><tr><td>TerrainTests</td><td>11</td><td>nedovoljno podataka, ravan, preciznost projektovanih koordinata, prelomnica kao ivica, nasumične tačke i ograničenja, granica, depresije i ravni dijelovi, konfliktne duple tačke, tačne kubature, profil, JSON</td></tr><tr><td>InputValidatorTests</td><td>7</td><td>šifre SDP-I…: potpun crtež bez grešaka, nedostajući slojevi i kote (ništa se ne izmišlja), otvorene/skoro zatvorene/samopresijecajuće/duple granice, oznaka objekta traži poseban postupak, objekat izvan parcele i sumnja na jedinice, problemi oznaka, nejasne uloge slojeva</td></tr><tr><td>LayerMappingTests</td><td>3</td><td>zamjenski znakovi i nazivi bez obzira na velika/mala slova, prijedlog po nazivima (samo prijedlog), predlošci</td></tr><tr><td>SafetyTests</td><td>5</td><td>atomski zapis bez privremenih datoteka, kopije s vremenom i provjerom uz čuvanje najnovije, isključene kopije, dnevnik prekinutih operacija s oštećenim redom, sažimanje dnevnika</td></tr><tr><td>BosnianFormatTests</td><td>3</td><td>decimalni zarez, unos sa zarezom i tačkom, grupisanje hiljada i množina</td></tr><tr><td>UnitsTests, GeometryTests, CatalogTests, ExchangeTests, ChangeSetTests, ValidationTests, QuantityAndScheduleTests, LayoutAndLabelTests, SymbolTests</td><td>4, 9, 5, 9, 3, 12, 4, 7, 3</td><td>testovi iz verzije 0.1 (jedinice, geometrija, katalog, paket, izmjene, provjere, količine, raspored, simboli), prilagođeni bosanskim nazivima</td></tr></tbody></table>
+<h2 id="ruby-testovi-po-datotekama">Ruby testovi po datotekama</h2>
+<table><thead><tr><th>Datoteka</th><th>Testova</th><th>Pokriva</th></tr></thead><tbody><tr><td>test_builders.rb</td><td>26</td><td>svi graditelji i modeli, svaka vrsta na svakom nivou detalja daje zatvorena tijela</td></tr><tr><td>test_geometry.rb</td><td>8</td><td>jedinice, lukovi, offset, stacionaže, mreže</td></tr><tr><td>test_package_reader.rb</td><td>10</td><td>zip i folder, verzije sheme, neispravni i nesigurni paketi</td></tr><tr><td>test_change_planner.rb</td><td>7</td><td>prvi uvoz, ponovni uvoz, konflikti, pravila brisanja</td></tr><tr><td>test_sample_and_changes.rb</td><td>8</td><td>primjer na svim nivoima, izmjene prema AutoCAD-u</td></tr><tr><td>test_sketchup_adapter.rb</td><td>12</td><td>uvoz u lažni SketchUp API: organizacija, ažuriranje, konflikti, vraćanje pri grešci</td></tr><tr><td>test_safety_and_terrain.rb</td><td>9</td><td>kopije i dnevnik, čitanje terena, gradnja terena, ažuriranje terena bez dupliranja</td></tr><tr><td>test_ui_smoke.rb</td><td>8</td><td>cijelo proširenje učitano kao u SketchUpu (lažni UI): meni, traka, ikone, sve naredbe, svi dijalozi i njihovi pozivi (imena usklađena sa stranicama), uvoz/ponovni uvoz, svojstva, biblioteka modela, alat za umetanje (rotacija, uređivanje unutar grupe), zamjena</td></tr><tr><td>test_asset_library.rb</td><td>16</td><td>biblioteka modela: 14 kategorija, model i pregled za svaki tip, pokrivenost specifikacije, COLLADA i teksture, zatvorena tijela za svaki model, umetanje, zamjena i uvoz DAE (lažni API)</td></tr></tbody></table>
+<h2 id="postupak-ručnog-prihvatnog-testa-u-host-aplikacijama">Postupak ručnog prihvatnog testa (u host aplikacijama)</h2>
+<p>Prihvatni test još <strong>nije izveden</strong>. Izvesti ga za svaku verziju iz <a href="kompatibilnost.html">matrice kompatibilnosti</a> i rezultat upisati ovdje.</p>
+<p>AutoCAD:</p>
+<ol>
+<li>Instalirati paket (<a href="instalacija.html">Instalacija</a>). <code>SDPABOUT</code>; kartica <em>VANJSKO UREĐENJE PRO</em> ima 16 panela.
+</li>
+<li>Novi crtež, <code>SDPSAMPLE</code> → <em>Izvorni</em>. Zatim <code>SDPMAPIRANJE</code> (<em>Prijedlog prema nazivima</em>, provjera) i <code>SDPPROVJERADWG</code>. Očekuje se: 1 parcela, 9.600,00 m², 2 objekta, 5 upotrebljivih oznaka, bez grešaka.
+</li>
+<li><code>SDPDATUM</code>: ±0,00 = 520,15, spuštanje saobraćajnica 0,15 m. Zatim <code>SDPKOTEIZOZNAKA</code>: pregled veza, potvrda; saobraćajnica dobija -0,15.
+</li>
+<li><code>SDPPREUZMI</code>, <code>SDPTEREN</code>, <code>SDPPROFIL</code>, <code>SDPANALIZATERENA</code>.
+</li>
+<li><code>SDPGEOREF</code> s dvije kontrolne tačke, zatim <code>SDPKML</code>; otvoriti KML u Google Earthu.
+</li>
+<li><code>SDPSAMPLE</code> → <em>Elementi</em>, <code>SDPVALIDATE</code>, <code>SDPSCHEDULE</code>, <code>SDPEXPORT</code>.
+</li>
+<li>Prekinuti AutoCAD tokom <code>SDPTEREN</code> (Task Manager), ponovo pokrenuti i provjeriti poruku i <code>SDPOPORAVAK</code>.
+</li></ol>
+<p>SketchUp:</p>
+<ol>
+<li>Instalirati <code>.rbz</code> i <em>Uvoz paketa...</em> izvezenog paketa. Provjeriti pregled, nivoe detalja, oznake <code>VU …</code>, teren i scene.
+</li>
+<li>Promijeniti element u AutoCAD-u, izvesti i <em>Ažuriranje iz paketa</em> → jedna izmjena u pregledu, teren se ne duplira.
+</li>
+<li>Pomjeriti klupu, promijeniti parametar, <em>Izvoz izmjena za AutoCAD...</em>, pa u AutoCAD-u <code>SDPAPPLYCHANGES</code>.
+</li></ol>
+<h3 id="prihvatni-test-biblioteke-3d-modela-sketchup">Prihvatni test biblioteke 3D modela (SketchUp)</h3>
+<p>Za svaki model iz <a href="INVENTAR_MODELA.md">inventara</a>, u SketchUpu 2022 i najnovijoj verziji:</p>
+<ol>
+<li><em>Biblioteka 3D modela...</em> → kategorija → model → <strong>Umetni u model</strong>; klik u model.
+</li>
+<li>Strelicama zarotirati prije klika; provjeriti da crvena linija pokazuje smjer modela.
+</li>
+<li>Promijeniti jedan parametar u obrascu i ponovo umetnuti; provjeriti dimenziju (Tape Measure).
+</li>
+<li>Odabrati umetnuti element → <em>Svojstva elementa</em> → promijeniti parametar → <em>Primijeni</em>.
+</li>
+<li>Odabrati element → drugi model iste vrste → <strong>Zamijeni odabrano</strong>; položaj i rotacija ostaju.
+</li>
+<li>Linijski/površinski modeli: nacrtati liniju/pravougaonik, odabrati ivice/lice → <strong>Umetni u model</strong>.
+</li>
+<li><strong>Uvezi DAE</strong> – model se uvozi s teksturama.
+</li>
+<li>Upisati rezultat (verzija SketchUpa, ID modela, prošlo/nije, napomena). Tek tada model dobija status <em>Testirano u SketchUpu</em>, a nakon odobrenja <em>Završeno</em>.
+</li></ol></body></html>

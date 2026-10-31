@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Autodesk Autoloader manifest. Copy SiteDesignPro.bundle to
+     %APPDATA%\Autodesk\ApplicationPlugins (current user) or %PROGRAMDATA%\Autodesk\ApplicationPlugins (all users). -->
+<ApplicationPackage SchemaVersion="1.0"
+                    AppVersion="0.2.0"
+                    ProductCode="{6F1B2C4E-3A5D-4E7F-9B21-0C8D5A6E7F10}"
+                    UpgradeCode="{9A7C3E21-5B4D-4C6E-8F12-3D4E5F607182}"
+                    Name="Site Design Pro"
+                    Description="Alati za vanjsko uređenje i pejzažnu arhitekturu s razmjenom prema SketchUp-u"
+                    Author="Projektni biro"
+                    AutodeskProduct="AutoCAD"
+                    ProductType="Application"
+                    SupportedLocales="Enu"
+                    HelpFile="./Contents/Docs/index.html">
+  <CompanyDetails Name="Projektni biro" />
+  <Components Description="AutoCAD 2020 (.NET Framework 4.7, API R23.1)">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R23.1" SeriesMax="R23.1" />
+    <ComponentEntry AppName="SiteDesignPro" Version="0.2.0"
+                    ModuleName="./Contents/Win64/R23/SiteDesignPro.AutoCAD.dll"
+                    AppDescription="Vanjsko uređenje PRO za AutoCAD 2020"
+                    LoadOnAutoCADStartup="True" />
+  </Components>
+  <Components Description="AutoCAD 2021, 2022, 2023, 2024 (.NET Framework 4.8, API R24)">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R24.0" SeriesMax="R24.3" />
+    <ComponentEntry AppName="SiteDesignPro" Version="0.2.0"
+                    ModuleName="./Contents/Win64/R24/SiteDesignPro.AutoCAD.dll"
+                    AppDescription="Vanjsko uređenje PRO za AutoCAD 2021-2024"
+                    LoadOnAutoCADStartup="True" />
+  </Components>
+  <Components Description="AutoCAD 2025 and 2026 (.NET 8, API R25)">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R25.0" SeriesMax="R25.1" />
+    <ComponentEntry AppName="SiteDesignPro" Version="0.2.0"
+                    ModuleName="./Contents/Win64/R25/SiteDesignPro.AutoCAD.dll"
+                    AppDescription="Vanjsko uređenje PRO za AutoCAD 2025-2026"
+                    LoadOnAutoCADStartup="True" />
+  </Components>
+  <Components Description="AutoCAD 2027 (.NET 10, API R26)">
+    <RuntimeRequirements OS="Win64" Platform="AutoCAD*" SeriesMin="R26.0" SeriesMax="R26.0" />
+    <ComponentEntry AppName="SiteDesignPro" Version="0.2.0"
+                    ModuleName="./Contents/Win64/R26/SiteDesignPro.AutoCAD.dll"
+                    AppDescription="Vanjsko uređenje PRO za AutoCAD 2027"
+                    LoadOnAutoCADStartup="True" />
+  </Components>
+</ApplicationPackage>

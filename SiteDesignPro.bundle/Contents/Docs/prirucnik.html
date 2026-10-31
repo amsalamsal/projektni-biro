@@ -1,0 +1,1069 @@
+<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – Priručnik (sve opcije)</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}</style></head><body><nav><a href="index.html">Uputstvo</a><a href="prvi-projekat.html">Prvi projekat (za početnike)</a><a href="prirucnik.html">Priručnik (sve opcije)</a><a href="instalacija.html">Instalacija i oporavak</a><a href="kompatibilnost.html">Kompatibilnost</a><a href="ogranicenja.html">Ograničenja</a><a href="testiranje.html">Izvještaj testiranja</a><a href="licence.html">Registar licenci</a></nav><h1 id="priručnik--vanjsko-uređenje-pro">Priručnik – Vanjsko uređenje PRO</h1>
+<p>Kompletan opis svake naredbe, opcije i dijaloga, korak po korak. Kraći pregled toka rada je u <a href="index.html">Uputstvu</a>, a instalacija u <a href="instalacija.html">Instalaciji</a>.</p>
+<blockquote><p><strong>Status:</strong> dodatak se kompajlira i prolazi automatske testove, ali još nije isproban u stvarnom AutoCAD-u i SketchUpu. Ako nešto radi drugačije nego što piše ovdje, javite tačan tekst iz komandne linije – priručnik i program će se uskladiti.</p></blockquote>
+<p>---</p>
+<h2 id="sadržaj">Sadržaj</h2>
+<ol>
+<li><a href="#1-osnove-rada">Osnove rada</a>
+</li>
+<li><a href="#2-prvih-10-minuta--proba-na-primjeru">Prvih 10 minuta – proba na primjeru</a>
+</li>
+<li><a href="#3-tok-rada-na-stvarnom-projektu-kontrolna-lista">Tok rada na stvarnom projektu (kontrolna lista)</a>
+</li>
+<li><a href="#4-traka-vanjsko-uređenje-pro--svako-dugme">Traka VANJSKO UREĐENJE PRO – svako dugme</a>
+</li>
+<li><a href="#5-paleta-biblioteka-svojstva-provjera">Paleta (Biblioteka, Svojstva, Provjera)</a>
+</li>
+<li><a href="#6-naredbe-autocad-a--detaljno">Naredbe AutoCAD-a – detaljno</a>
+</li>
+<li><a href="#7-kote--kako-program-računa">Kote – kako program računa</a>
+</li>
+<li><a href="#8-sketchup--svaka-stavka-menija-i-dijaloga">SketchUp – svaka stavka menija i dijaloga</a>
+</li>
+<li><a href="#9-razmjena-autocad--sketchup--pravila">Razmjena AutoCAD ↔ SketchUp – pravila</a>
+</li>
+<li><a href="#10-sigurnosne-kopije-i-oporavak">Sigurnosne kopije i oporavak</a>
+</li>
+<li><a href="#11-šifre-nalaza--šta-znače-i-šta-uraditi">Šifre nalaza – šta znače i šta uraditi</a>
+</li>
+<li><a href="#12-česti-problemi-i-rješenja">Česti problemi i rješenja</a>
+</li>
+<li><a href="#13-pojmovnik">Pojmovnik</a>
+</li></ol>
+<p>---</p>
+<h2 id="1-osnove-rada">1. Osnove rada</h2>
+<h3 id="11-kako-se-pokreće-naredba">1.1 Kako se pokreće naredba</h3>
+<ul>
+<li>klikom na dugme na kartici trake <strong>VANJSKO UREĐENJE PRO</strong>, ili
+</li>
+<li>upisom naziva u komandnu liniju (npr. <code>SDPDATUM</code>) i Enter.
+</li></ul>
+<p>Sve naredbe počinju sa <code>SDP</code>. Spisak svih je u <a href="#6-naredbe-autocad-a--detaljno">poglavlju 6</a>.</p>
+<h3 id="12-kako-se-odgovara-na-pitanja-u-komandnoj-liniji">1.2 Kako se odgovara na pitanja u komandnoj liniji</h3>
+<table><thead><tr><th>Vidite</th><th>Značenje</th><th>Šta uraditi</th></tr></thead><tbody><tr><td><code>Izmjena [Naziv/Broj/Izlaz]</code></td><td>opcije u uglastim zagradama</td><td>kliknite opciju u komandnoj liniji ili upišite njen naziv</td></tr><tr><td><code>&lt;Izlaz&gt;</code> ili <code>&lt;8&gt;</code></td><td>podrazumijevani odgovor</td><td>samo Enter prihvata taj odgovor</td></tr><tr><td><code>[Da/Ne]</code></td><td>potvrda</td><td><code>Da</code> ili <code>Ne</code>; Enter = vrijednost u <code>&lt; &gt;</code></td></tr><tr><td><code>(m)</code>, <code>(cm)</code>, <code>(°)</code></td><td>jedinica unosa</td><td>broj u toj jedinici, bez upisa jedinice</td></tr></tbody></table>
+<ul>
+<li><strong>Opcije u komandnoj liniji nemaju kvačice</strong> (<code>Saobracajnice</code>, <code>Oznaci</code>, <code>Preskoci</code>) jer ih AutoCAD tako zahtijeva. Poruke i dijalozi imaju pravilna slova.
+</li>
+<li><strong>Decimalni broj</strong> možete upisati sa zarezom ili tačkom: <code>518,56</code> i <code>518.56</code> su isto. Hiljade ne odvajajte.
+</li>
+<li><strong>Esc</strong> prekida naredbu. Ništa od te naredbe ne ostaje u crtežu.
+</li>
+<li><strong>UNDO</strong> (Ctrl+Z) poništava cijelu naredbu jednim korakom, i kad je naredba napravila stotine objekata.
+</li></ul>
+<h3 id="13-biranje-tipa-elementa">1.3 Biranje tipa elementa</h3>
+<p>Više naredbi traži <em>Tip elementa (id tipa ili dio naziva, ? za popis)</em>:</p>
+<ul>
+<li>upišite <strong>dio naziva</strong>, npr. <code>klupa</code> – ako odgovara jedan tip, odmah je odabran; ako više, ispisuje se lista;
+</li>
+<li>upišite <strong>id tipa</strong>, npr. <code>furniture.bench</code> – tačan izbor;
+</li>
+<li>upišite **<code>?</code>** – lista svih tipova (prvih 40; suzite pretragu);
+</li>
+<li>naziv se može pisati i na engleskom (<code>bench</code>).
+</li></ul>
+<p>Lakše je birati iz <strong>palete</strong> (<code>SDPBROWSER</code>) ili sa trake – tada se tip ne upisuje.</p>
+<h3 id="14-šta-je-element">1.4 Šta je „element”</h3>
+<p>Element je objekat crteža (polilinija ili blok) kojem je dodatak dodijelio <strong>tip, parametre, oznaku i jedinstveni identifikator</strong>. Elementi su na slojevima <code>VU-…</code>. Obične linije crteža nisu elementi dok ih ne pretvorite (<code>SDPCONVERT</code>, <code>SDPPREUZMI</code>, <code>SDPDRAW</code>).</p>
+<p>Tri vrste geometrije:</p>
+<ul>
+<li><strong>tačkasti</strong> (stablo, klupa, svjetiljka, šaht, parking mjesto) – tačka + rotacija;
+</li>
+<li><strong>linijski / trasa</strong> (staza, ivičnjak, ograda, cijev) – polilinija;
+</li>
+<li><strong>površinski</strong> (popločanje, travnjak, tlocrt objekta, parcela) – zatvorena polilinija.
+</li></ul>
+<h3 id="15-veće-operacije-su-zaštićene">1.5 Veće operacije su zaštićene</h3>
+<p>Naredbe koje mijenjaju mnogo objekata (<code>SDPPREUZMI</code>, <code>SDPKOTEIZOZNAKA</code>, <code>SDPTEREN</code>, <code>SDPAPPLYCHANGES</code>, <code>SDPPATHARRAY</code>, <code>SDPPARKING</code>, <code>SDPGRID</code>, <code>SDPSAMPLE</code>):</p>
+<ol>
+<li>prvo kopiraju <strong>zadnju sačuvanu verziju</strong> crteža u folder <code>_SDP_backup</code> (ako je uključeno, v. <code>SDPKOPIJEPOSTAVKE</code>);
+</li>
+<li>upišu početak u dnevnik oporavka;
+</li>
+<li>sve urade kao <strong>jedan korak UNDO</strong>.
+</li></ol>
+<p><strong>Savjet:</strong> sačuvajte crtež (Ctrl+S) prije veće operacije – kopija sadrži samo sačuvano stanje.</p>
+<p>---</p>
+<h2 id="2-prvih-10-minuta--proba-na-primjeru">2. Prvih 10 minuta – proba na primjeru</h2>
+<ol>
+<li>Novi prazan crtež.
+</li>
+<li><code>SDPSAMPLE</code> → <strong>Oba</strong> → Enter. Nastaju primjer izvornog DWG-a (slojevi KP_GRANICA, OBJEKAT_TLOCRT, KOTE…) i gotov primjer stambenog kompleksa. <code>ZOOM</code> → <code>Extents</code>.
+</li>
+<li><code>SDPPROVJERADWG</code> – izvještaj o ulaznom crtežu (primjer je već mapiran).
+</li>
+<li><code>SDPDATUM</code> – vidite kako je zadana nulta kota primjera (520,15 m n.v.) → <code>Izlaz</code>.
+</li>
+<li><code>SDPKOTEIZOZNAKA</code> – vidite prijedloge i privremene linije od oznaka do objekata → <code>Da</code>.
+</li>
+<li><code>SDPTEREN</code> → <code>Bez</code> → <code>Ne</code> – nastaje mreža terena na sloju <code>VU-TEREN</code>.
+</li>
+<li><code>SDPVALIDATE</code> – provjera; rezultati u paleti.
+</li>
+<li><code>SDPSCHEDULE</code> → <code>Sve</code> → kliknite mjesto – tabele količina.
+</li>
+<li><code>SDPEXPORT</code> – snimite <code>.sdpkg</code>.
+</li>
+<li>U SketchUpu: <em>Extensions → Vanjsko uređenje PRO → Uvoz paketa...</em> → isti <code>.sdpkg</code> → <strong>Uvezi</strong>.
+</li></ol>
+<p>---</p>
+<h2 id="3-tok-rada-na-stvarnom-projektu-kontrolna-lista">3. Tok rada na stvarnom projektu (kontrolna lista)</h2>
+<table><thead><tr><th>#</th><th>Korak</th><th>Naredba</th><th>Na šta paziti</th></tr></thead><tbody><tr><td>1</td><td>Sačuvajte kopiju originalnog DWG-a</td><td>–</td><td>radite na kopiji</td></tr><tr><td>2</td><td>Postavke projekta i <strong>jedinica crteža</strong></td><td><code>SDPNEW</code></td><td>Jedinicu odredite po stvarnoj geometriji, ne po zaglavlju. Parking 5 m dug 500 jedinica = centimetri.</td></tr><tr><td>3</td><td>Pripremite slojeve</td><td>AutoCAD (<code>LAYMCH</code>, <code>JOIN</code>, <code>PEDIT</code>)</td><td>Tlocrti objekata na svom sloju; granice zatvorene polilinije; obrišite duplikate.</td></tr><tr><td>4</td><td>Mapiranje slojeva</td><td><code>SDPMAPIRANJE</code></td><td>Jedna uloga po sloju; provjerite prijedlog.</td></tr><tr><td>5</td><td>Provjera ulaza</td><td><code>SDPPROVJERADWG</code></td><td>Riješite sve <strong>GREŠKE</strong> prije nastavka.</td></tr><tr><td>6</td><td>Nulta kota, parter, saobraćajnice</td><td><code>SDPDATUM</code></td><td>Bez nulte kote apsolutne kote se ne računaju.</td></tr><tr><td>7</td><td>Preuzimanje parcele i objekata</td><td><code>SDPPREUZMI</code></td><td>Izvorni objekti se ne mijenjaju.</td></tr><tr><td>8</td><td>Kote objekata</td><td><code>SDPKOTEIZOZNAKA</code>, <code>SDPKOTA</code></td><td>Nejasne oznake riješite ručno.</td></tr><tr><td>9</td><td>Teren (ako postoji snimak)</td><td><code>SDPTEREN</code>, <code>SDPPROFIL</code>, <code>SDPANALIZATERENA</code></td><td>Bez geodetskog snimka teren se ne gradi.</td></tr><tr><td>10</td><td>Georeferenciranje (po potrebi)</td><td><code>SDPGEOREF</code>, <code>SDPKML</code></td><td>Dvije ili više kontrolnih tačaka.</td></tr><tr><td>11</td><td>Projektovanje</td><td>traka, paleta, <code>SDPPLACE</code>, <code>SDPDRAW</code>, <code>SDPCONVERT</code>, generatori</td><td></td></tr><tr><td>12</td><td>Oznake i nacrti</td><td><code>SDPLABEL</code>, <code>SDPNUMBER</code>, <code>SDPLEGEND</code>, <code>SDPTITLEBLOCK</code>…</td><td></td></tr><tr><td>13</td><td>Provjera</td><td><code>SDPVALIDATE</code></td><td>Pregledajte upozorenja u paleti.</td></tr><tr><td>14</td><td>Količine</td><td><code>SDPSCHEDULE</code>, <code>SDPSCHEDULECSV</code></td><td></td></tr><tr><td>15</td><td>Izvoz u SketchUp</td><td><code>SDPEXPORT</code></td><td></td></tr><tr><td>16</td><td>Izmjene iz SketchUpa (po potrebi)</td><td><code>SDPAPPLYCHANGES</code></td><td>Zatim ponovo <code>SDPEXPORT</code>.</td></tr></tbody></table>
+<p>---</p>
+<h2 id="4-traka-vanjsko-uređenje-pro--svako-dugme">4. Traka VANJSKO UREĐENJE PRO – svako dugme</h2>
+<p>Prelaskom miša preko dugmeta vidi se opis i naziv naredbe.</p>
+<p><strong>Projekt</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Novi projekat</td><td><code>SDPNEW</code></td></tr><tr><td>Postavke</td><td><code>SDPSETTINGS</code></td></tr><tr><td>Slojevi</td><td><code>SDPLAYERS</code></td></tr><tr><td>Biblioteka</td><td><code>SDPBROWSER</code></td></tr><tr><td>Primjer projekta</td><td><code>SDPSAMPLE</code></td></tr></tbody></table>
+<p><strong>Uvoz DWG-a</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Mapiranje slojeva</td><td><code>SDPMAPIRANJE</code></td></tr><tr><td>Provjera crteža</td><td><code>SDPPROVJERADWG</code></td></tr><tr><td>Preuzmi objekte</td><td><code>SDPPREUZMI</code></td></tr><tr><td>Pretvori krive</td><td><code>SDPCONVERT</code></td></tr><tr><td>padajuće liste <em>Lokacija</em> i <em>Objekti i reference</em></td><td><code>SDPDRAW</code> / <code>SDPPLACE</code> za izabrani tip</td></tr></tbody></table>
+<p><strong>Georeferenciranje</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Kontrolne tačke</td><td><code>SDPGEOREF</code></td></tr><tr><td>Izvoz KML</td><td><code>SDPKML</code></td></tr><tr><td>Koordinate</td><td><code>SDPCOORD</code></td></tr><tr><td>Sjever</td><td><code>SDPNORTH</code></td></tr></tbody></table>
+<p><strong>Teren i kote</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Nulta kota</td><td><code>SDPDATUM</code></td></tr><tr><td>Dodijeli kotu</td><td><code>SDPKOTA</code></td></tr><tr><td>Kote iz oznaka</td><td><code>SDPKOTEIZOZNAKA</code></td></tr><tr><td>Visinska kota</td><td><code>SDPSPOTLEVEL</code></td></tr><tr><td>Model terena</td><td><code>SDPTEREN</code></td></tr><tr><td>Profil</td><td><code>SDPPROFIL</code></td></tr><tr><td>Analiza terena</td><td><code>SDPANALIZATERENA</code></td></tr><tr><td>Strelica nagiba</td><td><code>SDPSLOPE</code></td></tr></tbody></table>
+<p><strong>Paneli s elementima</strong></p>
+<table><thead><tr><th>Panel</th><th>Kategorije u padajućim listama</th><th>Dodatni alati</th></tr></thead><tbody><tr><td>Parter i popločanje</td><td>Parter i popločanje, Ograde i zidovi</td><td>Površina (<code>SDPDRAW</code>), Oznake površina (<code>SDPAREALABEL</code>)</td></tr><tr><td>Zelenilo</td><td>Zelenilo</td><td>Drvored (<code>SDPPATHARRAY</code>), Raster sadnje (<code>SDPGRID</code>)</td></tr><tr><td>Saobraćaj i parking</td><td>Saobraćaj i parking, Biciklistička infrastruktura</td><td>Niz parking mjesta (<code>SDPPARKING</code>), Oznake širina (<code>SDPWIDTHLABEL</code>), Stalci duž staze (<code>SDPPATHARRAY</code>)</td></tr><tr><td>Infrastruktura</td><td>Komunalna infrastruktura, Voda i odvodnja, Eko tehnologije, Vanjski klimatski sistemi</td><td>–</td></tr><tr><td>Rasvjeta</td><td>Rasvjeta</td><td>Svjetiljke duž puta (<code>SDPPATHARRAY</code>), Pokrivenost (<code>SDPLIGHTCOVER</code>)</td></tr><tr><td>Urbani mobilijar</td><td>Urbani mobilijar i rekreacija, Nadstrešnice i zasjena, Dekorativni elementi, Informativni i sigurnosni sistemi</td><td>Raspored duž staze (<code>SDPPATHARRAY</code>)</td></tr></tbody></table>
+<p>Svaki od ovih panela ima i:</p>
+<ul>
+<li>veliko dugme <strong>Pregled</strong> – otvara paletu filtriranu na tu kategoriju;
+</li>
+<li><strong>padajuće liste po podkategorijama</strong> – klik na stavku odmah pokreće postavljanje tog tipa (tačkasti → <code>SDPPLACE</code>, ostali → <code>SDPDRAW</code>). Zadnja korištena stavka ostaje na dugmetu.
+</li></ul>
+<p><strong>3D modeli</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Uredi element</td><td><code>SDPEDIT</code></td></tr><tr><td>Zone sigurnosti</td><td><code>SDPCLEARANCE</code></td></tr><tr><td>Odabir</td><td><code>SDPSELECT</code></td></tr><tr><td>Korisnički katalozi</td><td><code>SDPCATALOGFOLDER</code></td></tr></tbody></table>
+<p><strong>SketchUp razmjena</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Izvoz paketa</td><td><code>SDPEXPORT</code></td></tr><tr><td>Primijeni izmjene</td><td><code>SDPAPPLYCHANGES</code></td></tr><tr><td>Uvoz paketa</td><td><code>SDPUVOZPAKETA</code></td></tr><tr><td>Provjera prije izvoza</td><td><code>SDPVALIDATE</code></td></tr></tbody></table>
+<p><strong>Količinski obračun</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Tabele</td><td><code>SDPSCHEDULE</code></td></tr><tr><td>Izvoz CSV</td><td><code>SDPSCHEDULECSV</code></td></tr><tr><td>Količine</td><td><code>SDPQUANTITIES</code></td></tr></tbody></table>
+<p><strong>Nacrti i oznake</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Oznaka</td><td><code>SDPLABEL</code></td></tr><tr><td>Numeracija</td><td><code>SDPNUMBER</code></td></tr><tr><td>Legenda</td><td><code>SDPLEGEND</code></td></tr><tr><td>Sastavnica</td><td><code>SDPTITLEBLOCK</code></td></tr><tr><td>Razmjernik</td><td><code>SDPSCALEBAR</code></td></tr><tr><td>Presjek</td><td><code>SDPSECTION</code></td></tr><tr><td>Detalj</td><td><code>SDPDETAIL</code></td></tr><tr><td>Rasterske ose</td><td><code>SDPGRIDLINES</code></td></tr><tr><td>Oblak revizije</td><td><code>SDPREVCLOUD</code></td></tr></tbody></table>
+<p><strong>Provjera projekta</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Provjeri projekat</td><td><code>SDPVALIDATE</code></td></tr><tr><td>Provjera crteža</td><td><code>SDPPROVJERADWG</code></td></tr><tr><td>Revizija</td><td><code>SDPAUDIT</code></td></tr></tbody></table>
+<p><strong>Postavke i pomoć</strong></p>
+<table><thead><tr><th>Dugme</th><th>Naredba</th></tr></thead><tbody><tr><td>Pomoć</td><td><code>SDPPOMOC</code></td></tr><tr><td>Sigurnosna kopija</td><td><code>SDPKOPIJA</code></td></tr><tr><td>Postavke kopija</td><td><code>SDPKOPIJEPOSTAVKE</code></td></tr><tr><td>Oporavak</td><td><code>SDPOPORAVAK</code></td></tr><tr><td>Učitaj katalog</td><td><code>SDPRELOAD</code></td></tr><tr><td>O programu</td><td><code>SDPABOUT</code></td></tr></tbody></table>
+<p>---</p>
+<h2 id="5-paleta-biblioteka-svojstva-provjera">5. Paleta (Biblioteka, Svojstva, Provjera)</h2>
+<p>Otvara se naredbom <code>SDPBROWSER</code> ili dugmetom <strong>Biblioteka</strong>. Paleta se može usidriti uz rub ekrana kao svaka AutoCAD paleta.</p>
+<h3 id="51-kartica-biblioteka">5.1 Kartica Biblioteka</h3>
+<ul>
+<li><strong>Polje za pretragu</strong> (gore) – filtrira tipove dok kucate (naziv, id, engleski naziv).
+</li>
+<li><strong>Lista kategorija</strong>:
+<ul>
+<li><em>Sve kategorije</em>;
+</li>
+<li><em>Omiljeni</em> – samo tipovi označeni zvjezdicom;
+</li>
+<li><em>Nedavno korišteni</em>;
+</li>
+<li>pojedinačne kategorije.
+</li></ul>
+</li>
+<li><strong>Dvostruki klik ili Enter</strong> na tip – pokreće postavljanje (<code>SDPPLACE</code> za tačkaste, <code>SDPDRAW</code> za ostale).
+</li>
+<li><strong>Desni klik</strong> na tip – dodaje u omiljene ili uklanja iz njih (☆/★). Omiljeni se pamte po korisniku.
+</li></ul>
+<h3 id="52-kartica-svojstva">5.2 Kartica Svojstva</h3>
+<ul>
+<li>Odaberite jedan ili više elemenata u crtežu – kartica prikazuje njihove parametre.
+</li>
+<li>Kad odabrani elementi imaju različite vrijednosti, piše <em>Vrijednosti se razlikuju</em>.
+</li>
+<li>Izmijenite vrijednost i kliknite <strong>Primijeni izmjene</strong> – mijenjaju se svi odabrani elementi. Neispravna vrijednost (izvan raspona) se ne primjenjuje i javlja se poruka.
+</li></ul>
+<h3 id="53-kartica-provjera">5.3 Kartica Provjera</h3>
+<ul>
+<li>Prikazuje rezultat zadnjeg <code>SDPVALIDATE</code> ili <code>SDPPROVJERADWG</code>: ozbiljnost, šifra, element, poruka.
+</li>
+<li><strong>Dvostruki klik na red</strong> – zumira na objekat i odabire ga.
+</li></ul>
+<p>---</p>
+<h2 id="6-naredbe-autocad-a--detaljno">6. Naredbe AutoCAD-a – detaljno</h2>
+<p>Za svaku naredbu: <strong>Šta radi → Koraci (redom kako pita) → Rezultat → Napomene</strong>.</p>
+<h3 id="61-projekat">6.1 Projekat</h3>
+<h4 id="sdpnew--novi-projekat">SDPNEW – novi projekat</h4>
+<p><strong>Šta radi:</strong> zapisuje osnovne podatke projekta u crtež i pravi standardne slojeve <code>VU-…</code>.</p>
+<p><strong>Koraci:</strong></p>
+<ol>
+<li><em>Naziv projekta</em> – tekst.
+</li>
+<li><em>Broj projekta</em> – tekst; <code>-</code> = bez broja.
+</li>
+<li><em>Investitor</em>, <em>Lokacija</em> – tekst; <code>-</code> = prazno.
+</li>
+<li><em>Jedinica crteža [Milimetri/Centimetri/Metri]</em>:
+<ul>
+<li>odaberite jedinicu <strong>u kojoj je geometrija stvarno nacrtana</strong>;
+</li>
+<li>postavlja i AutoCAD varijablu INSUNITS;
+</li>
+<li>ako crtež već ima elemente, promjena jedinice <strong>ne skalira</strong> geometriju (dobićete upozorenje).
+</li></ul>
+</li>
+<li><em>Ishodište projekta &lt;0,0,0&gt;</em>:
+<ul>
+<li>kliknite tačku ili Enter;
+</li>
+<li>ta tačka u SketchUpu postaje 0,0,0;
+</li>
+<li>birajte ugao parcele ili tačku blizu projekta da SketchUp model ne bude daleko od ishodišta.
+</li></ul>
+</li>
+<li><em>Ugao pravog sjevera</em> – stepeni u smjeru kazaljke od +Y ose crteža (0 = sjever je gore).
+</li>
+<li><em>Mjerilo anotacija 1:</em> – npr. 200, 500. Određuje veličinu teksta i simbola oznaka.
+</li></ol>
+<p><strong>Rezultat:</strong> postavke su sačuvane u crtežu i slojevi napravljeni. Visine se <strong>ne</strong> zadaju ovdje: sljedeći korak je <code>SDPDATUM</code>, pa <code>SDPMAPIRANJE</code>.</p>
+<h4 id="sdpsettings--postavke-projekta">SDPSETTINGS – postavke projekta</h4>
+<p>Prikazuje trenutne postavke i nudi izmjenu u petlji dok ne odaberete <strong>Izlaz</strong>:</p>
+<table><thead><tr><th>Opcija</th><th>Šta mijenja</th></tr></thead><tbody><tr><td>Naziv, Broj, Investitor, Lokacija, Autor, Revizija</td><td>tekstualni podaci (idu u sastavnicu i paket)</td></tr><tr><td>Jedinice</td><td>jedinica crteža (kao u <code>SDPNEW</code>)</td></tr><tr><td>Ishodiste</td><td>nova tačka ishodišta</td></tr><tr><td>Sjever</td><td>ugao pravog sjevera</td></tr><tr><td>Sistem</td><td>EPSG kod koordinatnog sistema (npr. <code>EPSG:3908</code>); kontrolne tačke su u <code>SDPGEOREF</code></td></tr><tr><td>Mjerilo</td><td>mjerilo anotacija 1:N</td></tr><tr><td>Tekst</td><td>visina teksta na papiru u mm (npr. 2,5)</td></tr><tr><td>Zona</td><td>oznaka zone u numeraciji (npr. <code>A</code> daje <code>A-T-001</code>); <code>-</code> = bez zone</td></tr><tr><td>Numeracija</td><td>brojevi po <strong>Prefiksu</strong> (svaki prefiks svoj niz: T-001, B-001) ili po <strong>Kategoriji</strong>; broj cifara (3 → 001)</td></tr><tr><td>Izlaz</td><td>čuva i izlazi</td></tr></tbody></table>
+<h4 id="sdplayers--standard-slojeva">SDPLAYERS – standard slojeva</h4>
+<p><strong>Opcije:</strong></p>
+<ul>
+<li><strong>Napravi</strong> – pravi slojeve <code>VU-…</code> koji nedostaju; postojeće ne dira.
+</li>
+<li><strong>Popravi</strong> – pravi nedostajuće i vraća boju, tip linije i debljinu postojećih <code>VU-…</code> slojeva na standard.
+</li>
+<li><strong>Provjeri</strong> – samo ispisuje odstupanja, ništa ne mijenja.
+</li>
+<li><strong>Stari</strong> – preimenuje slojeve verzije 0.1 (engleski nazivi, npr. <code>L-PLNT-TREE</code>) u nove <code>VU-…</code>:
+<ul>
+<li>prikazuje listu i pita <em>Preimenovati navedene slojeve? [Da/Ne]</em> (podrazumijevano <strong>Ne</strong>);
+</li>
+<li>koristite samo ako je te slojeve napravio ovaj dodatak, jer ih Vaš crtež možda koristi po svom standardu.
+</li></ul>
+</li></ul>
+<p>Slojevi ulaznog DWG-a se nikad ne preimenuju.</p>
+<h4 id="sdpaudit--revizija-elemenata">SDPAUDIT – revizija elemenata</h4>
+<p>Pokrenite nakon kopiranja, <code>COPY</code>, <code>MIRROR</code>, ubacivanja iz drugog crteža ili kad provjera javi duple identifikatore.</p>
+<ul>
+<li>kopijama daje <strong>nove identifikatore i nove oznake</strong>;
+</li>
+<li>osvježava prikaz (šrafure, simbole) svih elemenata;
+</li>
+<li>prijavljuje nepoznate tipove (nedostaje korisnički katalog) i probleme geometrije.
+</li></ul>
+<p>Na kraju ispisuje broj kopija, duplikata, nepoznatih tipova i problema geometrije.</p>
+<h4 id="sdpsample--primjer-projekta">SDPSAMPLE – primjer projekta</h4>
+<p><em>Primjer [Elementi/Izvorni/Oba]</em>:</p>
+<ul>
+<li><strong>Elementi</strong> – gotov stambeni kompleks (139 elemenata) za probu provjere, količina i izvoza;
+</li>
+<li><strong>Izvorni</strong> – primjer „sirovog” DWG-a za probu toka rada (mapiranje, provjera, kote, teren);
+</li>
+<li><strong>Oba</strong> – oboje.
+</li></ul>
+<p>Ako crtež već ima elemente, pita da li ipak dodati. Primjer postavlja <strong>svoje</strong> vrijednosti: mm, ishodište, ±0,00 = 520,15 m n.v. To su vrijednosti primjera, a ne podrazumijevane vrijednosti novih projekata. Probajte primjer u praznom crtežu.</p>
+<h4 id="sdpreload-sdpcatalogfolder-sdpabout">SDPRELOAD, SDPCATALOGFOLDER, SDPABOUT</h4>
+<ul>
+<li><code>SDPCATALOGFOLDER</code> – otvara <code>%APPDATA%\SiteDesignPro\catalogs</code>. Tu stavljate vlastite <code>*.json</code> kataloge (tipovi, slojevi, materijali).
+</li>
+<li><code>SDPRELOAD</code> – ponovo učitava katalog s korisničkim katalozima; ispisuje broj tipova i eventualne greške u datotekama.
+</li>
+<li><code>SDPABOUT</code> – verzija, verzija sheme, katalog, putanja dnevnika (log). Ovo pošaljite uz prijavu problema.
+</li></ul>
+<h3 id="62-uvoz-dwg-a">6.2 Uvoz DWG-a</h3>
+<h4 id="sdpmapiranje--mapiranje-slojeva-dijalog">SDPMAPIRANJE – mapiranje slojeva (dijalog)</h4>
+<p><strong>Šta radi:</strong> govori programu šta se nalazi na kojem sloju Vašeg crteža. <strong>Nazivi slojeva se ne mijenjaju.</strong></p>
+<p><strong>Dijalog:</strong></p>
+<ul>
+<li>tabela: <strong>Sloj</strong> | <strong>Objekata</strong> (koliko objekata ima sloj) | <strong>Uloga u projektu</strong> (padajuća lista);
+</li>
+<li>uloge:
+</li></ul>
+<table><thead><tr><th>Uloga</th><th>Šta na tom sloju treba da bude</th></tr></thead><tbody><tr><td>Parcelna granica</td><td>zatvorena polilinija granice parcele</td></tr><tr><td>Tlocrt objekta</td><td>zatvorene polilinije tlocrta (ne oznake)</td></tr><tr><td>Oznaka položaja objekta</td><td>blok ili tekst koji samo označava objekat</td></tr><tr><td>Saobraćajnice</td><td>regulacija / ivice saobraćajnica</td></tr><tr><td>Linija partera</td><td>linija ili kontura partera</td></tr><tr><td>Oznake kota</td><td>tekstovi kota (<code>+0,00</code>, <code>-0,15</code>, <code>KT 520,00</code>, <code>502,90 mns</code>)</td></tr><tr><td>Tačke terena</td><td>tačke ili blokovi s Z visinom (geodetski snimak)</td></tr><tr><td>Izohipse</td><td>polilinije s visinom</td></tr><tr><td>Prelomne linije</td><td>3D polilinije prelomnica</td></tr><tr><td>Postojeća infrastruktura</td><td>postojeći objekti kojima se mogu dodijeliti kote</td></tr><tr><td>Kontrolne tačke</td><td>tačke poznatih koordinata</td></tr></tbody></table>
+<ul>
+<li><strong>Jedan sloj = jedna uloga.</strong> Sloj bez uloge se ne koristi.
+</li>
+<li><strong>Prijedlog prema nazivima</strong> – popunjava samo prazne redove prema uobičajenim nazivima (<code>PARCELA</code>, <code>KOTE</code>, <code>OBJEKAT</code>…). <strong>Uvijek provjerite prijedlog</strong>, jer se može prevariti (npr. „Parcele koje nisu naše” prepozna kao parcelu, ili sloj sa simbolima kota umjesto sloja s tekstom kota).
+</li>
+<li><strong>Dozvoli rad s oznakama objekata</strong> – uključite samo ako crtež nema tlocrte nego samo blokove-oznake. Tada <code>SDPPREUZMI</code> za svaku oznaku traži stvarne dimenzije; program ih ne pretpostavlja.
+</li>
+<li><strong>Sačuvaj predložak...</strong> / <strong>Učitaj predložak...</strong> – mapiranje se čuva kao <code>*.sdpmap.json</code> u <code>%APPDATA%\SiteDesignPro\mappings</code> i koristi za sljedeće crteže istog projektanta ili geodete.
+</li>
+<li><strong>U redu</strong> čuva mapiranje u crtežu; <strong>Otkaži</strong> ne mijenja ništa.
+</li></ul>
+<p><strong>Ako su objekti izmiješani na jednom sloju</strong> (npr. tlocrti i ostale linije na sloju <code>0</code>): prvo ih AutoCAD naredbom <code>LAYMCH</code> ili kroz svojstva prebacite na zaseban sloj, pa taj sloj mapirajte kao <em>Tlocrt objekta</em>.</p>
+<h4 id="sdpprovjeradwg--provjera-ulaznog-crteža">SDPPROVJERADWG – provjera ulaznog crteža</h4>
+<p><strong>Šta radi:</strong> prije bilo kakve izrade provjerava ulazni crtež prema mapiranju. Ništa ne mijenja.</p>
+<p><strong>Ispis:</strong></p>
+<ul>
+<li>broj objekata, parcela, objekata, oznaka objekata, oznaka kota (i koliko ih je upotrebljivo), tačaka terena s visinom;
+</li>
+<li>površina parcele (<code>25.433,66 m²</code>);
+</li>
+<li>napomena o koordinatama (lokalne ili u državnom sistemu);
+</li>
+<li>slojevi bez uloge;
+</li>
+<li>nalazi sa šiframa <code>SDP-I…</code> (<a href="#11-šifre-nalaza--šta-znače-i-šta-uraditi">poglavlje 11</a>) – i u paleti, kartica <em>Provjera</em>.
+</li></ul>
+<p><strong>Na kraju:</strong> <em>Sačuvati izvještaj u tekstualnu datoteku? [Da/Ne]</em> – <code>Da</code> piše <code>&lt;naziv crteža&gt;_provjera_ulaza.txt</code> pored crteža.</p>
+<p><strong>Pravilo:</strong> riješite sve <strong>GREŠKE</strong> prije <code>SDPPREUZMI</code>. Upozorenja pročitajte i odlučite.</p>
+<h4 id="sdppreuzmi--preuzimanje-parcele-i-objekata">SDPPREUZMI – preuzimanje parcele i objekata</h4>
+<p><strong>Šta radi:</strong></p>
+<ul>
+<li>od mapiranih granica parcele pravi elemente <em>Parcelna granica</em>;
+</li>
+<li>od tlocrta objekata pravi elemente <em>Tlocrt objekta</em> (referentni volumen za SketchUp);
+</li>
+<li>izvorni objekti ostaju netaknuti.
+</li></ul>
+<p><strong>Kako radi:</strong></p>
+<ul>
+<li>uzima samo <strong>zatvorene polilinije</strong>; otvorene preskače i javlja;
+</li>
+<li>pamti izvorni objekat, pa ponovno pokretanje <strong>ne pravi duplikate</strong> (<em>već preuzeto ranije: N</em>);
+</li>
+<li>ako je u mapiranju uključen rad s oznakama:
+<ul>
+<li>za svaku oznaku objekta pita <em>Napraviti tlocrt za ovu oznaku? [Da/Preskoci]</em>;
+</li>
+<li>na <code>Da</code> traži <em>Dužinu objekta duž ose bloka (m)</em> i <em>Širinu (m)</em>;
+</li>
+<li>pravi pravougaonik orijentisan po bloku.
+</li></ul>
+</li></ul>
+<p><strong>Rezultat:</strong> <em>Preuzeto: N novih elemenata; već preuzeto ranije: N; preskočeno: N.</em> Jedan UNDO poništava sve.</p>
+<h4 id="sdpconvert--pretvaranje-postojećih-linija-u-elemente">SDPCONVERT – pretvaranje postojećih linija u elemente</h4>
+<ol>
+<li>Odaberite polilinije, linije, lukove ili krugove. Ako ste ih odabrali prije naredbe, koristi se taj odabir.
+</li>
+<li><em>Tip elementa za odabrane objekte</em> – samo linijski i površinski tipovi.
+</li></ol>
+<p><strong>Šta se dešava:</strong></p>
+<ul>
+<li>objekat prelazi na sloj tipa i dobija podatke elementa, oznaku i prikaz (šrafura, širina);
+</li>
+<li>za površinske tipove objekat mora biti zatvoren, inače se preskače uz savjet <em>PEDIT &gt; Close</em> ili opciju <em>Unutar</em> u <code>SDPDRAW</code>;
+</li>
+<li>objekti koji su već elementi se preskaču (koristite <code>SDPEDIT</code>);
+</li>
+<li>geometrijske greške (samopresijecanje i slično) se javljaju odmah.
+</li></ul>
+<h3 id="63-georeferenciranje">6.3 Georeferenciranje</h3>
+<h4 id="sdpgeoref--koordinatni-sistem-i-kontrolne-tačke">SDPGEOREF – koordinatni sistem i kontrolne tačke</h4>
+<p>Prikazuje sistem, broj kontrolnih tačaka i trenutnu transformaciju, pa nudi opcije u petlji:</p>
+<table><thead><tr><th>Opcija</th><th>Šta radi</th></tr></thead><tbody><tr><td><strong>Sistem</strong></td><td>upis EPSG koda; ispisuje podržane (3907/3908/3909 MGI Balkans 5/6/7, 31275–31277, 25833/25834, 32633/32634). Drugi kod se zapisuje, ali KML nije moguć.</td></tr><tr><td><strong>Dodaj</strong></td><td>kliknite tačku u crtežu (npr. ugao objekta), dajte naziv (<code>T1</code>…), upišite <strong>E (y)</strong> i <strong>N (x)</strong> iz geodetske podloge. Isti naziv zamjenjuje staru tačku.</td></tr><tr><td><strong>Lista</strong></td><td>ispis tačaka (crtež → E, N) i odstupanja nakon proračuna</td></tr><tr><td><strong>Obrisi</strong></td><td>brisanje tačke po nazivu</td></tr><tr><td><strong>Izracunaj</strong></td><td>proračun transformacije (v. dolje)</td></tr><tr><td><strong>Ponisti</strong></td><td>vraća na „koordinate crteža = koordinate projekta” (bilježi se u historiji)</td></tr><tr><td><strong>Izlaz</strong></td><td>čuva i izlazi</td></tr></tbody></table>
+<p><strong>Izracunaj:</strong></p>
+<ul>
+<li><strong>1 tačka</strong> – daje samo položaj. Program traži poznatu rotaciju crteža u stepenima.
+</li>
+<li><strong>2 ili više tačaka</strong> – <em>Određivanje mjerila [Kruto/Slicnost]</em>:
+<ul>
+<li><strong>Kruto</strong> (preporučeno): rotacija + pomak, mjerilo 1;
+</li>
+<li><strong>Slicnost</strong>: i mjerilo – kad crtež nije u stvarnoj veličini.
+</li></ul>
+</li>
+<li>Ispis: rotacija, pomak, <strong>srednje odstupanje</strong> i odstupanja dE/dN po tački. Upozorenja (npr. mjerilo jako različito od 1 → vjerovatno pogrešne jedinice) se ispisuju sa <code>!</code>.
+</li>
+<li><em>Primijeniti ovu transformaciju na projekat?</em> – <code>Da</code> zapisuje transformaciju i dodaje zapis u <strong>historiju</strong>. <strong>Geometrija crteža se nikad ne pomjera.</strong>
+</li></ul>
+<p><strong>Savjet:</strong> koristite 3–4 tačke raspoređene po uglovima projekta. Odstupanje veće od nekoliko cm znači pogrešno upisanu tačku ili pogrešno kliknut ugao.</p>
+<h4 id="sdpkml--izvoz-za-google-earth">SDPKML – izvoz za Google Earth</h4>
+<ul>
+<li>Zahtijeva poznat sistem (<code>SDPGEOREF &gt; Sistem</code>).
+</li>
+<li>Izvozi konture parcele, objekata, površina i saobraćajnica kroz transformaciju u WGS84.
+</li>
+<li>Pita gdje da sačuva <code>.kml</code>.
+</li>
+<li><strong>KML služi samo za orijentaciju.</strong> Nije geodetska podloga. Pretvaranje MGI 1901 → WGS84 je približno (nekoliko metara).
+</li>
+<li>Ako transformacija nije zadana i ishodište je 0, javlja da se koordinate crteža koriste direktno: ako je crtež u lokalnim koordinatama, rezultat u Google Earthu će biti na pogrešnom mjestu.
+</li></ul>
+<h4 id="sdpcoord--oznaka-koordinata">SDPCOORD – oznaka koordinata</h4>
+<p>Kliknite tačke jednu za drugom (Enter za kraj). Svaka dobija oznaku <code>Y = … / X = …</code>.</p>
+<h4 id="sdpnorth--strelica-sjevera">SDPNORTH – strelica sjevera</h4>
+<p>Kliknite položaj. Strelica je okrenuta prema <strong>pravom sjeveru</strong> iz postavki, ne prema +Y crteža.</p>
+<h3 id="64-teren-i-kote">6.4 Teren i kote</h3>
+<h4 id="sdpdatum--visinski-sistem-projekta">SDPDATUM – visinski sistem projekta</h4>
+<p>Prikazuje trenutno stanje i probleme (<code>!</code>), pa nudi opcije u petlji:</p>
+<table><thead><tr><th>Opcija</th><th>Šta zadajete</th></tr></thead><tbody><tr><td><strong>NultaKota</strong></td><td>apsolutna nadmorska visina ±0,00 objekta (m n.v.), npr. <code>504,00</code>. Ako su Z koordinate apsolutne, nudi i da ishodište projekta postavi na tu visinu (u SketchUpu je tada ±0,00 = 0).</td></tr><tr><td><strong>Parter</strong></td><td><strong>JednakNultoj</strong> (parter = ±0,00) ili <strong>Razlicit</strong> + kota partera u odnosu na ±0,00 (npr. <code>-0,15</code>)</td></tr><tr><td><strong>Saobracajnice</strong></td><td>koliko su saobraćajnice ispod partera, <strong>u cm</strong> (npr. <code>15</code>). <strong>Enter na praznom = nije podešeno.</strong> Program nema podrazumijevanu vrijednost.</td></tr><tr><td><strong>Datum</strong></td><td>naziv visinskog datuma (npr. <code>Trst 1900</code>) – zapisuje se u izvještaje i paket</td></tr><tr><td><strong>Zkoordinate</strong></td><td>šta Z u crtežu znači: <strong>Apsolutne</strong> (m n.v.) ili <strong>Relativne</strong> (u odnosu na ±0,00)</td></tr><tr><td><strong>Izlaz</strong></td><td>čuva i izlazi</td></tr></tbody></table>
+<p>Primjer i računanje: <a href="#7-kote--kako-program-računa">poglavlje 7</a>.</p>
+<h4 id="sdpkota--kota-jednog-objekta">SDPKOTA – kota jednog objekta</h4>
+<ol>
+<li><em>Odaberite objekat</em> – kota važi <strong>samo za taj objekat</strong>.
+</li>
+<li><em>Način [Relativna/Apsolutna/Parter/Saobracajnica]</em>:
+<ul>
+<li><strong>Relativna</strong> – u odnosu na ±0,00 (npr. <code>+0,25</code>);
+</li>
+<li><strong>Apsolutna</strong> – m n.v. (npr. <code>503,75</code>);
+</li>
+<li><strong>Parter</strong> – u odnosu na parter (+ iznad, − ispod);
+</li>
+<li><strong>Saobracajnica</strong> – spuštanje ispod partera u <strong>cm</strong>. Ponuđena je vrijednost iz <code>SDPDATUM</code>, ako je zadana.
+</li></ul>
+</li>
+<li><strong>Pregled:</strong> objekat se osvijetli i ispisuje se <em>Z staro → novo</em>, relativna i apsolutna kota.
+</li>
+<li><em>Primijeniti kotu na ovaj objekat? [Da/Ne]</em>.
+</li></ol>
+<p><strong>Šta se mijenja:</strong></p>
+<ul>
+<li>elementima kota u podacima + Z geometrije;
+</li>
+<li>običnim objektima Z geometrije i zapis u XData (<code>SITEDESIGNPRO_KOTA</code>).
+</li></ul>
+<p><strong>Napomene:</strong></p>
+<ul>
+<li><strong>3D polilinija</strong> – svi vrhovi dobijaju istu kotu i postojeći nagib se gubi (program upozorava).
+</li>
+<li>Splajn, mreža i solid ne mogu dobiti kotu: <em>Ova vrsta objekta ne može dobiti kotu.</em>
+</li>
+<li>Bez zadane nulte kote naredba za apsolutne vrijednosti javlja da datum nije definisan.
+</li></ul>
+<h4 id="sdpkoteizoznaka--kote-iz-tekstualnih-oznaka">SDPKOTEIZOZNAKA – kote iz tekstualnih oznaka</h4>
+<ol>
+<li>Čita tekstove na slojevima mapiranim kao <em>Oznake kota</em>.
+</li>
+<li>Za svaku oznaku traži <strong>najmanji zatvoreni objekat koji je sadrži</strong> (tlocrt, saobraćajnica, parter, infrastruktura). Kod multileadera ima prednost objekat na koji pokazuje strelica.
+</li>
+<li>Ispisuje listu sa statusom svake oznake:
+</li></ol>
+<table><thead><tr><th>Status</th><th>Značenje</th><th>Šta uraditi</th></tr></thead><tbody><tr><td>Prijedlog</td><td>jasno je kojem objektu pripada</td><td>potvrditi</td></tr><tr><td>Bez objekta</td><td>oznaka nije unutar zatvorenog objekta</td><td><code>SDPKOTA</code> ručno</td></tr><tr><td>Više objekata</td><td>dva jednako moguća objekta</td><td><code>SDPKOTA</code> ručno ili pomjerite oznaku</td></tr><tr><td>Neispravna oznaka</td><td>tekst nije kota ili je nejasan (npr. <code>5,20</code> bez predznaka)</td><td>ispravite tekst</td></tr><tr><td>Konflikt</td><td>dvije oznake istog objekta se ne slažu</td><td>provjerite crtež</td></tr></tbody></table>
+<ol start="4">
+<li><strong>Pregled:</strong> cijan linije od svake oznake do njenog objekta (sloj <code>VU-KOTE-DODJELA</code>).
+</li>
+<li><em>Primijeniti N kota na označene objekte? [Da/Ne]</em> (podrazumijevano <strong>Ne</strong>). Linije pregleda se brišu u oba slučaja.
+</li></ol>
+<p><strong>Prepoznaje oznake:</strong></p>
+<ul>
+<li>relativne: <code>+0,00</code>, <code>-0,15</code>, <code>±0,00</code>, <code>%%p0.00</code>;
+</li>
+<li>apsolutne: <code>KT 520,00</code>, <code>520,15 m n.v.</code>, <code>502,90 mns</code>;
+</li>
+<li>MText s formatiranjem.
+</li></ul>
+<p>Broj veći od 50 bez predznaka smatra se apsolutnim.</p>
+<p><strong>Rezultat:</strong> jedan UNDO poništava cijelu dodjelu.</p>
+<h4 id="sdpspotlevel--oznaka-visinske-kote">SDPSPOTLEVEL – oznaka visinske kote</h4>
+<ul>
+<li>Kliknite tačku (Enter za kraj).
+</li>
+<li><em>Kota [IzTacke/Unos]</em>:
+<ul>
+<li><strong>IzTacke</strong> – koristi Z kliknute tačke;
+</li>
+<li><strong>Unos</strong> – upišite relativnu kotu.
+</li></ul>
+</li>
+<li>Oznaka prikazuje relativnu kotu i, ako je datum zadan, apsolutnu u zagradi: <code>+0,25 (504,25)</code>.
+</li></ul>
+<h4 id="sdpslope--strelica-nagiba">SDPSLOPE – strelica nagiba</h4>
+<ul>
+<li>Kliknite <strong>višu</strong>, pa <strong>nižu</strong> tačku.
+</li>
+<li><em>Nagib [IzTacaka/Unos]</em>:
+<ul>
+<li><strong>IzTacaka</strong> – nagib iz Z razlike;
+</li>
+<li><strong>Unos</strong> – upišite procente.
+</li></ul>
+</li></ul>
+<h4 id="sdpteren--model-terena-tin">SDPTEREN – model terena (TIN)</h4>
+<ol>
+<li><em>Granica terena [Odaberi/Bez/Zadrzi]</em>:
+<ul>
+<li><strong>Odaberi</strong> – zatvorena polilinija koja ograničava teren;
+</li>
+<li><strong>Bez</strong> – bez granice;
+</li>
+<li><strong>Zadrzi</strong> – ostaje prethodna granica.
+</li></ul>
+</li>
+<li><em>Koristiti oznake kota kao visinske tačke terena? [Da/Ne]</em> – <code>Da</code> samo ako su oznake stvarno kote <strong>terena</strong>, a ne ulaza ili saobraćajnica.
+</li>
+<li>Program gradi mrežu trouglova iz mapiranih <strong>tačaka terena</strong> (Z), <strong>izohipsi</strong> i <strong>prelomnih linija</strong>, koje se poštuju kao ivice. Ispisuje napomene i nalaze <code>SDP-T…</code>.
+</li>
+<li>Ako podataka <strong>nema dovoljno</strong>, ništa se ne crta i piše zašto, npr.:
+<ul>
+<li>manje od 3 tačke;
+</li>
+<li>sve tačke na jednoj liniji;
+</li>
+<li>sve na istoj visini (često Z = 0 u 2D crtežu).
+</li></ul>
+</li></ol>
+<p><strong>Rezultat:</strong></p>
+<ul>
+<li>mreža na sloju <code>VU-TEREN</code> (PolyFaceMesh, više komada za velike terene);
+</li>
+<li>krugovi „Najniža tačka” na <code>VU-TEREN-ANALIZA</code>;
+</li>
+<li>teren se izvozi u SketchUp (<code>SDPEXPORT</code>).
+</li></ul>
+<p>Ponovno pokretanje <strong>zamjenjuje</strong> stari teren.</p>
+<h4 id="sdpprofil--profil-terena">SDPPROFIL – profil terena</h4>
+<ol>
+<li>Teren mora postojati (<code>SDPTEREN</code>).
+</li>
+<li>Odaberite liniju ili poliliniju trase.
+</li>
+<li><em>Nadvišenje</em> – npr. <code>5</code> crta visine 5 puta naglašeno.
+</li>
+<li>Kliknite tačku umetanja.
+</li></ol>
+<p><strong>Rezultat:</strong> linija terena, bazna linija, vertikale sa stacionažama i kotama, naslov s baznom kotom.</p>
+<h4 id="sdpanalizaterena--provjera-terena">SDPANALIZATERENA – provjera terena</h4>
+<p>Ispisuje:</p>
+<ul>
+<li>raspon nagiba;
+</li>
+<li>ravne dijelove (zadržavanje vode) i strme dijelove, prema pravilima projekta;
+</li>
+<li>lokalne najniže tačke – označava ih na <code>VU-TEREN-ANALIZA</code>.
+</li></ul>
+<p><strong>Ovo nije hidraulički proračun</strong> – samo provjera geometrije.</p>
+<h3 id="65-projektovanje">6.5 Projektovanje</h3>
+<h4 id="sdpplace--postavljanje-tačkastog-elementa">SDPPLACE – postavljanje tačkastog elementa</h4>
+<ol>
+<li>Tip (v. <a href="#13-biranje-tipa-elementa">1.3</a>). Ako izaberete linijski ili površinski tip, automatski se prelazi na <code>SDPDRAW</code>.
+</li>
+<li><strong>Simbol prati miš</strong> – kliknite tačku umetanja. Rade OSNAP, ORTHO i POLAR.
+</li>
+<li><em>Rotacija &lt;0°&gt;</em> – upišite ugao ili kliknite drugu tačku smjera. Enter = ista rotacija kao prethodni.
+</li>
+<li>Ponavlja se dok ne pritisnete <strong>Enter</strong>: možete postaviti mnogo stabala zaredom.
+</li></ol>
+<p><strong>Rezultat:</strong> <em>Postavljeno: N × Listopadno drvo.</em> Svaki element dobija sljedeću oznaku (T-001, T-002…).</p>
+<h4 id="sdpdraw--crtanje-trase-ili-površine">SDPDRAW – crtanje trase ili površine</h4>
+<ol>
+<li>Tip (samo linijski i površinski).
+</li>
+<li>Za površinu – <em>Granica [Polilinija/Pravougaonik/Unutar/Odaberi]</em>; za trasu – <em>Trasa [Polilinija/Odaberi]</em>:
+<ul>
+<li><strong>Polilinija</strong> – klikajte tačke (snapovi i polarno praćenje rade); <em>Zatvori</em> zatvara liniju, <em>Ponisti</em> briše zadnju tačku, Enter završava. Za površinu se linija uvijek zatvara. Za trasu s <strong>lukovima</strong> nacrtajte običan <code>PLINE</code> s lukovima, pa izaberite <strong>Odaberi</strong>;
+</li>
+<li><strong>Pravougaonik</strong> – prvi ugao, pa suprotni ugao (prati trenutni UCS);
+</li>
+<li><strong>Unutar</strong> – klikajte <strong>unutar</strong> zatvorenih površina, a program sam nalazi granicu (kao šrafura); Enter za kraj;
+</li>
+<li><strong>Odaberi</strong> – odaberite postojeće krive.
+</li></ul>
+</li>
+<li>Nacrtani ili odabrani objekat postaje element (kao <code>SDPCONVERT</code>).
+</li></ol>
+<h4 id="sdpedit--izmjena-elemenata">SDPEDIT – izmjena elemenata</h4>
+<ol>
+<li>Odaberite elemente (može i prije naredbe).
+</li>
+<li>Ispis svih parametara s brojevima <strong>P1, P2…</strong> i trenutnim vrijednostima (više vrijednosti: <code>a | b | ...</code>).
+</li>
+<li><em>Parametar za izmjenu [P1...Pn/Oznaka/Svojstvo/Izlaz]</em>:
+<ul>
+<li><strong>P1…Pn</strong> – unos nove vrijednosti, zavisno od vrste parametra:
+<ul>
+<li>broj ili dužina u jedinici parametra;
+</li>
+<li><code>Da/Ne</code>;
+</li>
+<li><strong>lista opcija:</strong> ispisuje se <code>1 = …, 2 = …</code>, upišite redni broj;
+</li>
+<li><strong>materijal:</strong> ključ materijala; <code>?</code> ispisuje sve materijale;
+</li></ul>
+</li>
+<li><strong>Oznaka</strong> – nova oznaka (samo za jedan element; za više koristite <code>SDPNUMBER</code>);
+</li>
+<li><strong>Svojstvo</strong> – opisni podatak, npr. <code>botanicalName</code>, <code>manufacturer</code>, <code>notes</code>. Vrijednost <code>-</code> briše svojstvo.
+</li>
+<li><strong>Izlaz</strong>.
+</li></ul>
+</li>
+<li>Izmjena se odmah primjenjuje i prikaz se osvježava. Vrijednost izvan dozvoljenog raspona se odbija s porukom.
+</li></ol>
+<p>Za različite tipove odjednom mijenjaju se samo zajednički parametri.</p>
+<h4 id="sdpsetparam">SDPSETPARAM</h4>
+<p>Pomoćna naredba palete i skripti: handle(ovi) elemenata odvojeni zarezom, naziv parametra, vrijednost. Obično je ne koristite direktno.</p>
+<h4 id="sdpselect--odabir-elemenata">SDPSELECT – odabir elemenata</h4>
+<p><em>Odabir po [Tipu/Kategoriji/Oznaci/Id/Materijalu/Sve]</em>:</p>
+<table><thead><tr><th>Opcija</th><th>Šta odabire</th></tr></thead><tbody><tr><td>Tipu</td><td>sve elemente izabranog tipa</td></tr><tr><td>Kategoriji</td><td>sve elemente kategorije (<code>landscape</code>, <code>furniture</code>…)</td></tr><tr><td>Oznaci</td><td>po oznaci ili prefiksu: <code>T-</code> (sva stabla), <code>T-012</code></td></tr><tr><td>Id</td><td>po identifikatoru ili njegovom početku</td></tr><tr><td>Materijalu</td><td>po ključu materijala (npr. <code>granite_grey</code>)</td></tr><tr><td>Sve</td><td>sve elemente</td></tr></tbody></table>
+<p>Rezultat ostaje odabran za sljedeću naredbu (npr. <code>SDPEDIT</code>, <code>SDPLABEL</code>, <code>ERASE</code>).</p>
+<h4 id="sdpzoom">SDPZOOM</h4>
+<p>Zumira na element po handleu. Koristi je paleta; ručno rijetko.</p>
+<h4 id="sdppatharray--niz-elemenata-duž-trase">SDPPATHARRAY – niz elemenata duž trase</h4>
+<ol>
+<li>Odaberite trasu (polilinija, linija, luk).
+</li>
+<li>Tip tačkastog elementa (stablo, svjetiljka, stubić, stalak).
+</li>
+<li><em>Razmak (m)</em> – npr. <code>8</code>.
+</li>
+<li><em>Način razmaka [Fiksni/Uklopi]</em>:
+<ul>
+<li><strong>Fiksni</strong> – tačno zadani razmak, a ostatak ostaje na kraju;
+</li>
+<li><strong>Uklopi</strong> – razmak se prilagodi da prvi i zadnji budu tačno na početku i kraju.
+</li></ul>
+</li>
+<li><em>Odmak od početka (m)</em>, <em>Odmak od kraja (m)</em> – prazan prostor na krajevima.
+</li>
+<li><em>Bočni odmak lijevo od trase (m)</em> – npr. <code>1,5</code> (negativno = desno). Tako se drvored postavi pored ose staze.
+</li>
+<li><em>Rotacija [Poravnaj/Fiksna]</em>:
+<ul>
+<li><strong>Poravnaj</strong> – svaki element prati smjer trase, uz <em>dodatnu rotaciju</em>;
+</li>
+<li><strong>Fiksna</strong> – svi isti ugao.
+</li></ul>
+</li></ol>
+<p><strong>Rezultat:</strong> <em>Duž trase postavljeno: N × …</em> – jedan UNDO.</p>
+<h4 id="sdpparking--niz-parking-mjesta">SDPPARKING – niz parking mjesta</h4>
+<ol>
+<li><em>Tip parking mjesta</em> – podrazumijevano <code>road.parking_bay</code>; može i za osobe s invaliditetom, s punjačem…
+</li>
+<li>Kliknite <strong>početak</strong> i <strong>kraj ivice prolaza</strong> (ivica uz koju su mjesta).
+</li>
+<li>Kliknite <strong>tačku na strani</strong> gdje su mjesta.
+</li>
+<li><em>Ugao parking mjesta prema prolazu (°)</em> – <code>90</code> okomito, <code>60</code> ili <code>45</code> koso.
+</li></ol>
+<p><strong>Rezultat:</strong></p>
+<ul>
+<li>mjesta širine iz tipa (npr. 2,50 m), numerisana 1, 2, 3… (parametar <em>broj mjesta</em>);
+</li>
+<li>jedan UNDO.
+</li></ul>
+<h4 id="sdpgrid--raster-sadnje-u-površini">SDPGRID – raster sadnje u površini</h4>
+<ol>
+<li>Odaberite <strong>zatvorenu</strong> granicu.
+</li>
+<li>Tip (grm, stablo, trajnica…).
+</li>
+<li><em>Razmak u redu (m)</em>, <em>Razmak redova (m)</em>.
+</li>
+<li><em>Smaknuti raspored (trouglasti) [Da/Ne]</em> – <code>Da</code> je gušći i prirodniji raspored.
+</li>
+<li><em>Udaljenost od granice (m)</em>.
+</li></ol>
+<p>Raster je okrenut po prvoj stranici granice.</p>
+<h4 id="sdpclearance--zone-razmaka">SDPCLEARANCE – zone razmaka</h4>
+<p>Odaberite tačkaste elemente. Crtaju se zone servisa, sigurnosti i podizanja (npr. kontejner, igralište) <strong>iz vrijednosti unesenih u element</strong>. Elementi bez tih vrijednosti se ne crtaju. Sloj: zone za pregled.</p>
+<h4 id="sdplightcover--ilustrativni-domet-rasvjete">SDPLIGHTCOVER – ilustrativni domet rasvjete</h4>
+<ol>
+<li>Odaberite svjetiljke.
+</li>
+<li><em>Ilustrativni radijus kada nije zadan (m)</em>.
+</li></ol>
+<p>Crtaju se krugovi. <strong>Nije fotometrijski proračun</strong>, samo pomoć pri rasporedu.</p>
+<h3 id="66-nacrti-oznake-količine">6.6 Nacrti, oznake, količine</h3>
+<h4 id="sdplabel--oznake-elemenata">SDPLABEL – oznake elemenata</h4>
+<ul>
+<li>Odaberite elemente.
+</li>
+<li>Elementi bez oznake prvo dobiju sljedeći broj.
+</li>
+<li>Postavlja se multileader s oznakom i ključnim podacima.
+</li>
+<li>Oznake se same osvježe nakon prenumeracije.
+</li></ul>
+<h4 id="sdpnumber--numeracija">SDPNUMBER – numeracija</h4>
+<p><em>Numeracija [Nedostajuce/Sve]</em>:</p>
+<ul>
+<li><strong>Nedostajuce</strong> – brojeve dobijaju samo elementi bez oznake;
+</li>
+<li><strong>Sve</strong> – prenumeracija svega, od sjevera prema jugu i od zapada prema istoku.
+</li></ul>
+<p>Prefiksi dolaze iz kataloga (T stabla, B objekti, P površine, PB parking…).</p>
+<h4 id="sdparealabel-sdpwidthlabel">SDPAREALABEL, SDPWIDTHLABEL</h4>
+<ul>
+<li><code>SDPAREALABEL</code> – oznaka površinskih elemenata: šifra, tip, površina u m².
+</li>
+<li><code>SDPWIDTHLABEL</code> – oznaka širine staza, saobraćajnica i zidova.
+</li></ul>
+<h4 id="sdplegend">SDPLEGEND</h4>
+<p>Kliknite gornji lijevi ugao. Legenda sadrži <strong>samo tipove koji postoje u crtežu</strong>.</p>
+<h4 id="sdptitleblock--okvir-i-sastavnica">SDPTITLEBLOCK – okvir i sastavnica</h4>
+<ol>
+<li>Donji lijevi ugao lista.
+</li>
+<li><em>Format lista [A0/A1/A2/A3/A4]</em>.
+</li>
+<li><em>Naziv crteža</em>, <em>Broj lista</em> (npr. <code>VU-100</code>).
+</li></ol>
+<p>Okvir je u mjerilu projekta. U sastavnicu idu podaci iz <code>SDPSETTINGS</code> (projekat, investitor, autor, revizija).</p>
+<h4 id="sdpscalebar-sdpsection-sdpdetail-sdpgridlines-sdprevcloud">SDPSCALEBAR, SDPSECTION, SDPDETAIL, SDPGRIDLINES, SDPREVCLOUD</h4>
+<table><thead><tr><th>Naredba</th><th>Koraci</th></tr></thead><tbody><tr><td><code>SDPSCALEBAR</code></td><td>početna tačka, dužina u m, broj podjela</td></tr><tr><td><code>SDPSECTION</code></td><td>početak i kraj linije presjeka, oznaka (<code>A</code>)</td></tr><tr><td><code>SDPDETAIL</code></td><td>položaj, broj detalja, list</td></tr><tr><td><code>SDPGRIDLINES</code></td><td>dva ugla, razmak mreže u m – ose s oznakama</td></tr><tr><td><code>SDPREVCLOUD</code></td><td>dva ugla, napomena revizije (podrazumijevano „A: izmijenjeno”)</td></tr></tbody></table>
+<h4 id="sdpschedule--tabele-količina-u-crtežu">SDPSCHEDULE – tabele količina u crtežu</h4>
+<ol>
+<li>Ispisuje dostupne tabele: <strong>T1, T2…</strong> (drveće i zasadi, popločanje, mobilijar, rasvjeta, odvodnja, otpad, saobraćaj…). Nude se samo tabele za koje u crtežu postoje elementi.
+</li>
+<li><em>Tabela [T1...Tn/Sve]</em>.
+</li>
+<li>Kliknite gornji lijevi ugao.
+</li></ol>
+<p>Više tabela se slaže jedna ispod druge. Svaka ima red <strong>Ukupno</strong>.</p>
+<h4 id="sdpschedulecsv--tabele-za-excel">SDPSCHEDULECSV – tabele za Excel</h4>
+<ul>
+<li>Pita za naziv datoteke.
+</li>
+<li>Zapisuje <strong>jednu CSV datoteku po tabeli</strong> (<code>naziv-trees.csv</code>…) sa separatorom <code>;</code> i decimalnim zarezom, pa se direktno otvara u Excelu s bosanskim postavkama.
+</li>
+<li>Uz svaki CSV ide i JSON.
+</li>
+<li>Kolona <em>ID elemenata</em> povezuje redove s objektima crteža.
+</li></ul>
+<h4 id="sdpquantities--brze-količine">SDPQUANTITIES – brze količine</h4>
+<p>Ispis po tipu u komandnoj liniji: komadi, dužine, površine, zapremine.</p>
+<ul>
+<li><strong>Izmjereno</strong> iz geometrije: bez znaka.
+</li>
+<li><strong>Izračunato</strong> iz parametara: npr. površina iz širine × dužine.
+</li>
+<li><strong>Procjena:</strong> označena <code>~</code>.
+</li></ul>
+<p>Nedostajuće dimenzije se ne izmišljaju.</p>
+<h3 id="67-provjera-i-razmjena">6.7 Provjera i razmjena</h3>
+<h4 id="sdpvalidate--provjera-projekta">SDPVALIDATE – provjera projekta</h4>
+<p>Provjerava sve elemente:</p>
+<ul>
+<li>geometriju (<code>SDP-G</code>) i parametre (<code>SDP-P</code>);
+</li>
+<li>podatke (<code>SDP-D</code>) i jedinice (<code>SDP-U</code>);
+</li>
+<li>kolizije, preklapanja i razmake (<code>SDP-C</code>);
+</li>
+<li>kote (<code>SDP-E</code>) i stavke za stručni pregled (<code>SDP-R</code>).
+</li></ul>
+<p>Ispisuje prvih 40 nalaza; svi su u paleti (<em>Provjera</em>), gdje dvostruki klik vodi do objekta.</p>
+<p><strong>To su upozorenja softvera, a ne potvrda usklađenosti s propisima.</strong></p>
+<h4 id="sdpexport--izvoz-paketa-za-sketchup">SDPEXPORT – izvoz paketa za SketchUp</h4>
+<ol>
+<li>Prvo provjera. Ako ima <strong>grešaka</strong>, pita <em>Ipak izvesti? [Da/Ne]</em> (podrazumijevano Ne). Elementi s greškom mogu biti preskočeni.
+</li>
+<li>Izbor datoteke <code>.sdpkg</code>; nudi zadnju korištenu putanju.
+</li>
+<li>Elementima izmijenjenim od zadnjeg izvoza <strong>povećava reviziju</strong>, pa SketchUp zna šta je novo.
+</li>
+<li>Ako je teren uključen (<code>SDPTEREN</code>), dodaje i teren.
+</li></ol>
+<p><strong>Rezultat:</strong> <em>Izvezeno elemenata: N i teren → putanja</em>. Preskočeni elementi se navode pojedinačno.</p>
+<h4 id="sdpapplychanges--izmjene-iz-sketchupa">SDPAPPLYCHANGES – izmjene iz SketchUpa</h4>
+<ol>
+<li>Odaberite datoteku izmjena (<code>.json</code>) iz SketchUpa (<em>Izvoz izmjena za AutoCAD...</em>).
+</li>
+<li>Ako pripada drugom projektu – pita da li nastaviti.
+</li>
+<li><em>Elementi izmijenjeni u AutoCAD-u nakon izvoza [Preskoci/Prepisi]</em>:
+<ul>
+<li><strong>Preskoci</strong> (preporučeno) – Vaše novije AutoCAD izmjene ostaju; takvi elementi se javljaju kao <em>konflikt</em>;
+</li>
+<li><strong>Prepisi</strong> – SketchUp verzija ima prednost.
+</li></ul>
+</li>
+<li>Ishodi:
+</li></ol>
+<table><thead><tr><th>Ishod</th><th>Značenje</th></tr></thead><tbody><tr><td>primijenjeno</td><td>izmjena je unesena</td></tr><tr><td>bez promjene</td><td>vrijednost je ista</td></tr><tr><td>konflikt</td><td>element je u međuvremenu mijenjan u AutoCAD-u</td></tr><tr><td>nedostaje</td><td>element je obrisan u AutoCAD-u</td></tr><tr><td>neispravno</td><td>vrijednost nije dozvoljena</td></tr></tbody></table>
+<p>Na kraju ponovo pokrenite <code>SDPEXPORT</code>, da SketchUp dobije usklađeno stanje.</p>
+<h4 id="sdpuvozpaketa--uvoz-paketa-u-crtež">SDPUVOZPAKETA – uvoz paketa u crtež</h4>
+<p>Učitava paket <code>.sdpkg</code> u crtež kao <strong>uredive elemente</strong>: polilinije, simbole i šrafure s podacima elementa. To je isto kao da su nacrtani naredbama programa. Koristi se kad je paket napravljen izvan ovog crteža, npr. pretvoren iz drugog DWG-a ili izvezen iz drugog crteža.</p>
+<ol>
+<li>Odaberite <code>.sdpkg</code>.
+</li>
+<li><strong>Crtež bez elemenata:</strong> preuzimaju se jedinica crteža, ishodište, identitet projekta i nulta kota ±0,00 iz paketa. Elementi tako dobijaju iste koordinate kao u izvornom crtežu. Ako se INSUNITS razlikuje, program pita da li da ga postavi.
+</li>
+<li><strong>Crtež koji već ima elemente:</strong> elementi se dodaju u koordinatni okvir tog crteža. Ako je paket drugog projekta, program prvo pita.
+</li>
+<li><em>Neki elementi paketa već postoje u crtežu [Preskoci/Zamijeni]</em>: postojeći element (isti identifikator) ostaje ili se zamjenjuje verzijom iz paketa.
+</li></ol>
+<p><strong>Rezultat:</strong> <em>Uvoz paketa …: kreirano N elemenata (zamijenjeno, preskočeno, neuspjelo)</em>. Zatim: ZOOM Extents, <code>SDPEDIT</code>, <code>SDPVALIDATE</code>, <code>SDPEXPORT</code>.</p>
+<h3 id="68-sigurnost-i-pomoć">6.8 Sigurnost i pomoć</h3>
+<p><code>SDPKOPIJA</code>, <code>SDPKOPIJEPOSTAVKE</code>, <code>SDPOPORAVAK</code> – v. <a href="#10-sigurnosne-kopije-i-oporavak">poglavlje 10</a>. <code>SDPPOMOC</code> – otvara ovu dokumentaciju u pregledniku.</p>
+<p>---</p>
+<h2 id="7-kote--kako-program-računa">7. Kote – kako program računa</h2>
+<ul>
+<li><strong>Nulta kota (±0,00)</strong> – apsolutna visina poda prizemlja, npr. <strong>504,00 m n.v.</strong>
+</li>
+<li><strong>Apsolutna kota</strong> = nulta kota + relativna kota.
+</li>
+<li><strong>Parter</strong> – podrazumijevano jednak ±0,00. Može biti drugačiji (npr. −0,15).
+</li>
+<li><strong>Saobraćajnica</strong> = parter − spuštanje. Spuštanje zadaje korisnik (npr. 15 cm); program ga <strong>ne pretpostavlja</strong>.
+</li></ul>
+<p>Primjer (±0,00 = 504,00; parter = ±0,00; saobraćajnice 15 cm ispod partera):</p>
+<table><thead><tr><th>Objekat</th><th>Zadano</th><th>Relativno</th><th>Apsolutno</th></tr></thead><tbody><tr><td>Objekat</td><td>Relativna 0</td><td>±0,00</td><td>504,00</td></tr><tr><td>Terasa</td><td>Parter +0,05</td><td>+0,05</td><td>504,05</td></tr><tr><td>Saobraćajnica</td><td>Saobracajnica 15 cm</td><td>−0,15</td><td>503,85</td></tr><tr><td>Ulaz u garažu</td><td>Relativna −1,10</td><td>−1,10</td><td>502,90</td></tr></tbody></table>
+<p><strong>Z koordinate u crtežu</strong> (<code>SDPDATUM &gt; Zkoordinate</code>):</p>
+<ul>
+<li><strong>Relativne</strong> – Z = 0 znači ±0,00 (uobičajeno za situacije crtane u 2D);
+</li>
+<li><strong>Apsolutne</strong> – Z = 504 znači 504 m n.v. (uobičajeno za geodetske podloge).
+</li></ul>
+<p><strong>Provjera oznaka:</strong> kad su na istom mjestu apsolutna i relativna oznaka (npr. <code>502,90 mns</code> i <code>-1,10</code>), njihova razlika mora biti jednaka nultoj koti. Ako nije, to je greška u crtežu ili u nultoj koti.</p>
+<p><strong>Šta program nikad ne radi:</strong></p>
+<ul>
+<li>ne izmišlja kotu koje nema;
+</li>
+<li>ne dodjeljuje kotu cijelom području;
+</li>
+<li>ne pogađa nejasnu oznaku;
+</li>
+<li>ne koristi 15 cm ili 518,56 kao podrazumijevanu vrijednost.
+</li></ul>
+<p>---</p>
+<h2 id="8-sketchup--svaka-stavka-menija-i-dijaloga">8. SketchUp – svaka stavka menija i dijaloga</h2>
+<p>Meni <strong>Extensions → Vanjsko uređenje PRO</strong>, traka alata <em>Vanjsko uređenje PRO</em>, i desni klik na element.</p>
+<h3 id="81-uvoz-paketa">8.1 Uvoz paketa...</h3>
+<ol>
+<li>Izbor datoteke: <code>.sdpkg</code> ili <code>manifest.json</code> iz raspakovanog paketa.
+</li>
+<li><strong>Dijalog uvoza</strong>:
+<ul>
+<li><strong>Nivo detalja</strong>:
+<ul>
+<li><em>Šematski prikaz (lagano)</em> – jednostavni volumeni, brzo, za velike projekte;
+</li>
+<li><em>Standardni kvalitet</em> – preporučeno;
+</li>
+<li><em>Visoki kvalitet (detaljno)</em> – više detalja, sporije;
+</li></ul>
+</li>
+<li><strong>Lokalno izmijenjeni elementi</strong>:
+<ul>
+<li><em>Zadrži izmjene iz SketchUp-a, prijavi konflikt</em> (preporučeno);
+</li>
+<li><em>Prepiši verzijom iz AutoCAD-a</em>;
+</li></ul>
+</li>
+<li><strong>Elementi obrisani u AutoCAD-u</strong>:
+<ul>
+<li><em>Premjesti na skrivenu oznaku „Obrisano u izvoru”</em> (preporučeno – ništa se ne gubi);
+</li>
+<li><em>Obriši iz modela</em>;
+</li>
+<li><em>Zadrži nepromijenjeno</em>;
+</li></ul>
+</li>
+<li>☑ <strong>Izradi scene za pregled</strong> – scene VU 01–10;
+</li>
+<li>☑ <strong>Sigurnosna kopija prije uvoza</strong> – samo ako je model sačuvan;
+</li>
+<li>kartica <strong>Planirane izmjene</strong> – tabela svake izmjene (novo, izmijenjeno, obrisano, konflikt…) s filterom <em>Sve izmjene</em>;
+</li>
+<li>kartica <strong>Provjera</strong> – nalazi iz paketa;
+</li>
+<li>kartica <strong>Paket i visine</strong> – podaci paketa: projekat, jedinice, nulta kota, visinski datum, koordinatni sistem, teren.
+</li></ul>
+</li>
+<li><strong>Uvezi</strong> – gradi model; <strong>Zatvori</strong> – ništa ne mijenja.
+</li>
+<li>Nakon uvoza: izvještaj (broj novih, ažuriranih, grupa, komponenti, trajanje). <strong>Sačuvaj izvještaj...</strong> zapisuje ga kao tekst.
+</li></ol>
+<p>Cijeli uvoz je jedna operacija <strong>Edit → Undo</strong>.</p>
+<h3 id="82-ažuriranje-iz-paketa">8.2 Ažuriranje iz paketa</h3>
+<p>Ponovo čita <strong>zadnji uvezeni paket</strong> (isti put) i prikazuje isti dijalog s planiranim izmjenama. Koristite nakon novog <code>SDPEXPORT</code> u AutoCAD-u. Nepromijenjeni elementi se ne diraju. Teren se ažurira, a ne duplira.</p>
+<h3 id="83-svojstva-elementa">8.3 Svojstva elementa</h3>
+<p>Odaberite jedan element (ili desni klik → <em>Vanjsko uređenje PRO → Svojstva elementa</em>).</p>
+<ul>
+<li><strong>Element</strong> – oznaka, tip, kategorija, revizija, vrijeme uvoza.
+</li>
+<li><strong>Parametri</strong> – po grupama, sa jedinicama. Izmjena + <strong>Primijeni</strong> ponovo gradi element. <strong>Poništi izmjene</strong> vraća prikazane vrijednosti.
+</li>
+<li><strong>Svojstva</strong> – opisni podaci iz AutoCAD-a (botanički naziv, proizvođač…). Ovdje se samo čitaju.
+</li>
+<li><strong>Odaberi isti tip</strong> – odabire sve elemente tog tipa.
+</li></ul>
+<p>Izmjene ostaju u SketchUpu dok ih ne pošaljete u AutoCAD (8.4).</p>
+<h3 id="84-izvoz-izmjena-za-autocad">8.4 Izvoz izmjena za AutoCAD...</h3>
+<p>Zapisuje datoteku izmjena (<code>sdp-izmjene.json</code>) sa:</p>
+<ul>
+<li>izmijenjenim parametrima;
+</li>
+<li>pomjerenim ili zarotiranim <strong>tačkastim</strong> elementima.
+</li></ul>
+<p>Promjene oblika staza i površina se <strong>ne prenose</strong>; javljaju se kao neprenosive. U AutoCAD-u: <code>SDPAPPLYCHANGES</code>.</p>
+<h3 id="85-izrada-scena-za-pregled">8.5 Izrada scena za pregled</h3>
+<table><thead><tr><th>Scena</th><th>Sadržaj</th></tr></thead><tbody><tr><td>VU 01 Situacija</td><td>pogled odozgo, bez zona i podzemnog</td></tr><tr><td>VU 02 3D pregled</td><td>aksonometrija</td></tr><tr><td>VU 03 Pješačke površine</td><td>staze, površine, mobilijar, objekti</td></tr><tr><td>VU 04 Saobraćajnice i parking</td><td>saobraćaj i površine</td></tr><tr><td>VU 05 Zelenilo i teren</td><td>zelenilo, teren, voda</td></tr><tr><td>VU 06 Rasvjeta</td><td>rasvjeta i površine</td></tr><tr><td>VU 07 Voda i odvodnja</td><td>teren, voda, odvodnja</td></tr><tr><td>VU 08 Podzemne instalacije</td><td>pogled odozdo, X-ray</td></tr><tr><td>VU 09 Pregled materijala</td><td>sve osim zona</td></tr><tr><td>VU 10 Prezentacija</td><td>perspektiva bez pomoćnih slojeva</td></tr></tbody></table>
+<p>Ponovno pokretanje osvježava postojeće scene.</p>
+<h3 id="86-prikaz-podzemnog">8.6 Prikaz podzemnog</h3>
+<p>Uključuje ili isključuje: skriva površine i prikazuje ukopane instalacije (šahtovi, cijevi, podzemni kontejneri) u X-ray prikazu.</p>
+<h3 id="87-biblioteka-3d-modela">8.7 Biblioteka 3D modela...</h3>
+<p>Lokalna biblioteka realističnih 3D modela za svaki objekt iz kataloga (253 modela u 14 kategorija). Radi bez interneta; datoteke su u folderu proširenja <code>pb_site_design_pro/Assets/&lt;Kategorija&gt;/&lt;ID modela&gt;/</code>.</p>
+<p><strong>Prozor:</strong></p>
+<ul>
+<li><strong>lijevo</strong> – 14 kategorija (Infrastruktura i površine, Saobraćaj i mobilnost, Biciklistička infrastruktura, Vodeni elementi, Zelenilo i sadnja, Komunalna infrastruktura, Rasvjeta, Ograde i zidovi, Nadstrešnice i zasjena, Mobilijar i rekreacija, Eko tehnologije, Vanjski klimatski sistemi, Dekorativni elementi, Informativni i sigurnosni sistemi) s brojem modela;
+</li>
+<li><strong>sredina</strong> – podkategorije (dugmad iznad), pretraga po nazivu ili ID-u (traži kroz sve kategorije), ☑ *U ovom modelu* i mreža pregleda (slike);
+</li>
+<li><strong>desno</strong> – odabrani model: velika slika, kategorija/podkategorija, vrsta (tačkasti, linijski, površinski), dimenzije uzorka, <strong>veza s AutoCAD-om</strong> (ID modela = tip elementa koji nosi svaki AutoCAD element), vrsta modela, status, <strong>izvor i licenca</strong>, materijali, broj u modelu i obrazac <strong>parametara</strong> (dužina, visina, materijal…).
+</li></ul>
+<p><strong>Dugmad:</strong></p>
+<ul>
+<li><strong>Umetni u model</strong>
+<ul>
+<li><em>tačkasti</em> model (klupa, stub, kontejner…): pokazivač postaje alat za umetanje. Klik = umetni (ponavlja se dok ne pritisnete Esc), <strong>strelice lijevo/desno</strong> = rotacija ±15°, ili upišite ugao u stepenima pa Enter. Plavi okvir pokazuje tlocrt, crvena linija smjer (+X) modela.
+</li>
+<li><em>linijski</em> model (zid, ograda, živica, kanal…): ako su u modelu odabrane <strong>ivice</strong> koje čine jednu liniju, model se izrađuje duž njih; inače klik umeće uzorak zadane dužine.
+</li>
+<li><em>površinski</em> model (bazen, pergola, popločanje, gredica…): ako je odabrano <strong>lice</strong>, model dobija njegovu konturu (s otvorima); inače klik umeće pravougaonik zadane širine i dubine.
+</li></ul>
+</li>
+<li><strong>Zamijeni odabrano</strong> – zamjenjuje odabrane elemente ovim modelom na istom mjestu, s istom rotacijom i oznakom. Radi za elemente umetnute iz biblioteke i za obične komponente/grupe. Elemente iz AutoCAD paketa <strong>ne mijenja</strong> (tip se mijenja u AutoCAD-u, ili tipu dodijelite komponentu u <em>Biblioteka i postavke</em>) – to se navodi u poruci.
+</li>
+<li><strong>Uvezi DAE</strong> – uvozi <code>model.dae</code> SketchUpovim uvozom (kao nezavisnu komponentu, bez parametara).
+</li>
+<li><strong>Otvori folder</strong> – otvara folder modela (<code>model.dae</code>, <code>asset.json</code>, <code>preview.jpg</code>).
+</li>
+<li><strong>Odaberi</strong> (u redu <em>U ovom modelu</em>) – odabire sve elemente tog tipa.
+</li></ul>
+<p><strong>Važno:</strong></p>
+<ul>
+<li>Umetnuti model nosi tip, parametre i geometriju kao uvezeni element, pa ga mijenjate u <strong>Svojstva elementa</strong>.
+</li>
+<li>Elementi iz biblioteke nisu dio AutoCAD projekta i <strong>ne šalju se</strong> naredbom <em>Izvoz izmjena za AutoCAD</em>.
+</li>
+<li>Nivo detalja umetanja je onaj iz <em>Biblioteka i postavke → Postavke</em>.
+</li>
+<li>Ponovljeni dijelovi (biljke u gredici, stubovi ograde) su komponente, pa model ostaje malen.
+</li>
+<li>Ako datoteka modela nedostaje, to se piše u dnu prozora i dugme <em>Umetni</em> je onemogućeno – model se nikad ne zamjenjuje drugim.
+</li></ul>
+<h3 id="88-biblioteka-i-postavke">8.8 Biblioteka i postavke...</h3>
+<ul>
+<li><strong>Tipovi elemenata</strong>:
+<ul>
+<li>pretraga;
+</li>
+<li>filter: <em>Sve kategorije</em> / <em>U ovom modelu</em> / <em>Omiljeni</em> (☆ klik);
+</li>
+<li>kolone: tip, generator, broj u modelu, 3D prikaz;
+</li>
+<li><strong>Dodijeli komponentu...</strong> – odaberite svoj <code>.skp</code> (npr. pravi model klupe proizvođača). Svi elementi tog tipa se prikazuju tom komponentom.
+</li>
+<li><strong>Ukloni</strong> – vraća parametarski model.
+</li>
+<li><strong>Odaberi</strong> – odabire elemente tog tipa u modelu.
+</li></ul>
+</li>
+<li><strong>Materijali</strong> – ključ, naziv, boja, neprozirnost materijala iz kataloga.
+</li>
+<li><strong>Postavke</strong>:
+<ul>
+<li>podrazumijevani nivo detalja i pravila ažuriranja;
+</li>
+<li>☑ <em>Izradi scene za pregled nakon uvoza</em>;
+</li>
+<li>☑ <em>Postavi sjever za sunce iz paketa</em>;
+</li>
+<li>sigurnosne kopije: uključeno, broj kopija po modelu, najveća starost u danima (0 = bez ograničenja);
+</li>
+<li><strong>Sačuvaj postavke</strong>.
+</li></ul>
+</li></ul>
+<h3 id="89-izvještaj-posljednjeg-uvoza-otvori-dnevnik-log-o-programu">8.9 Izvještaj posljednjeg uvoza, Otvori dnevnik (log), O programu</h3>
+<ul>
+<li>izvještaj ponovo prikazuje zadnji uvoz;
+</li>
+<li>dnevnik (<code>site_design_pro.log</code>) – pošaljite ga uz prijavu problema;
+</li>
+<li><em>O programu</em> – verzija.
+</li></ul>
+<h3 id="810-sigurnosne-kopije-i-oporavak">8.10 Sigurnosne kopije i oporavak...</h3>
+<p>Lista prekinutih operacija (npr. SketchUp se srušio tokom uvoza) i sigurnosnih kopija modela.</p>
+<h3 id="811-organizacija-modela">8.11 Organizacija modela</h3>
+<ul>
+<li>Korijenska grupa projekta → grupa po modelskoj grupi (oznake/tagovi <code>VU Objekti</code>, <code>VU Zelenilo</code>, <code>VU Parter</code>…) → elementi.
+</li>
+<li>Ponovljeni elementi (stabla, parking) su <strong>komponente</strong>: jedna definicija, mnogo instanci, mala datoteka.
+</li>
+<li>Podaci elementa su u rječniku atributa <code>SiteDesignPro</code>.
+</li></ul>
+<p>---</p>
+<h2 id="9-razmjena-autocad--sketchup--pravila">9. Razmjena AutoCAD ↔ SketchUp – pravila</h2>
+<ol>
+<li><strong>AutoCAD je glavni izvor tlocrta.</strong> Položaj staza, površina i objekata mijenjajte u AutoCAD-u, pa izvezite.
+</li>
+<li><strong>SketchUp gradi 3D</strong> iz parametara. Visine, debljine, krošnje i materijali dolaze iz parametara elementa.
+</li>
+<li><strong>Natrag u AutoCAD</strong> idu samo parametri i pomjeranje ili rotacija tačkastih elemenata.
+</li>
+<li><strong>Ništa se ne gubi tiho:</strong>
+<ul>
+<li>lokalne izmjene u SketchUpu se zadržavaju i prijavljuju kao konflikt;
+</li>
+<li>obrisano u AutoCAD-u se skriva, a ne briše (osim ako odaberete brisanje).
+</li></ul>
+</li>
+<li><strong>Kopiranje elemenata u SketchUpu</strong> pravi „odvojene kopije”. One više ne prate AutoCAD.
+</li></ol>
+<p>---</p>
+<h2 id="10-sigurnosne-kopije-i-oporavak">10. Sigurnosne kopije i oporavak</h2>
+<p><strong>AutoCAD</strong></p>
+<ul>
+<li><code>SDPKOPIJA</code> – odmah pravi provjerenu kopiju zadnje <strong>sačuvane</strong> verzije crteža i ispisuje listu kopija.
+</li>
+<li><code>SDPKOPIJEPOSTAVKE</code>:
+<ul>
+<li><em>Automatska sigurnosna kopija prije većih operacija [Ukljuceno/Iskljuceno]</em>;
+</li>
+<li><em>Broj kopija po crtežu</em> – najnovija se nikad ne briše;
+</li>
+<li><em>Najveća starost kopija u danima</em> – 0 = bez ograničenja.
+</li></ul>
+</li>
+<li><code>SDPOPORAVAK</code> – lista prekinutih operacija i kopija, pa <em>Oporavak [Otvori/Folder/Oznaci/Izlaz]</em>:
+<ul>
+<li><strong>Otvori</strong> – broj kopije s liste (1 = najnovija). Kopija se otvara <strong>kao novi crtež</strong>; trenutni crtež se nikad ne prepisuje.
+</li>
+<li><strong>Folder</strong> – otvara folder <code>_SDP_backup</code>.
+</li>
+<li><strong>Oznaci</strong> – prekinute operacije označava kao pregledane, pa se poruka pri pokretanju više ne pojavljuje.
+</li></ul>
+</li>
+<li>Pri pokretanju AutoCAD-a dodatak javlja ako je neka operacija prekinuta (npr. nestanak struje).
+</li></ul>
+<p><strong>Gdje su kopije:</strong> folder <code>_SDP_backup</code> pored crteža, imena oblika <code>crtez_20261029-153012_&lt;operacija&gt;.dwg</code>. Svaka kopija se provjerava (SHA-256) odmah nakon pisanja.</p>
+<p><strong>SketchUp:</strong> isto, kroz <em>Sigurnosne kopije i oporavak...</em> i postavke u <em>Biblioteka i postavke → Postavke</em>.</p>
+<p>---</p>
+<h2 id="11-šifre-nalaza--šta-znače-i-šta-uraditi">11. Šifre nalaza – šta znače i šta uraditi</h2>
+<p>Ozbiljnost:</p>
+<ul>
+<li><strong>GREŠKA</strong> – mora se riješiti;
+</li>
+<li><strong>UPOZORENJE</strong> – pogledajte;
+</li>
+<li><strong>ZA STRUČNI PREGLED</strong> – provjera stručnjaka;
+</li>
+<li><strong>INFORMACIJA</strong>.
+</li></ul>
+<h3 id="ulazni-dwg-sdpprovjeradwg">Ulazni DWG (<code>SDPPROVJERADWG</code>)</h3>
+<table><thead><tr><th>Šifra</th><th>Značenje</th><th>Šta uraditi</th></tr></thead><tbody><tr><td>SDP-I001</td><td>mapirani sloj ne postoji ili je prazan</td><td>ispravite mapiranje</td></tr><tr><td>SDP-I002</td><td>sloj ima više uloga</td><td>jedan sloj – jedna uloga</td></tr><tr><td>SDP-I003</td><td>granica nacrtana pojedinačnim linijama</td><td><code>JOIN</code> / <code>PEDIT</code> u zatvorenu poliliniju</td></tr><tr><td>SDP-I004</td><td>granica siječe samu sebe</td><td>ispravite tjemena</td></tr><tr><td>SDP-I005</td><td>početak = kraj, ali nije „Closed”</td><td>uključite Closed (program je tretira kao zatvorenu)</td></tr><tr><td>SDP-I006, I007</td><td>granica nije zatvorena (razmak krajeva)</td><td>zatvorite – program ne spaja sam</td></tr><tr><td>SDP-I008</td><td>duplikat geometrije</td><td>obrišite duplikat</td></tr><tr><td>SDP-I010, I011</td><td>nema parcelne granice</td><td>mapirajte sloj parcele</td></tr><tr><td>SDP-I012, I013</td><td>površina parcele nevjerovatna</td><td>provjerite jedinice crteža</td></tr><tr><td>SDP-I020</td><td>nema tlocrta ni oznake objekta</td><td>mapirajte tlocrte</td></tr><tr><td>SDP-I021</td><td>samo oznake objekata, bez tlocrta</td><td>dimenzije se unose ručno (<code>SDPPREUZMI</code>)</td></tr><tr><td>SDP-I022</td><td>objekat izlazi izvan parcele</td><td>provjerite položaj</td></tr><tr><td>SDP-I030</td><td>nema saobraćajnica</td><td>mapirajte ako postoje</td></tr><tr><td>SDP-I031</td><td>nema linije partera</td><td>preporuka: poseban sloj partera</td></tr><tr><td>SDP-I040, I041</td><td>oznaka kote nečitljiva ili nejasna</td><td>ispravite tekst</td></tr><tr><td>SDP-I042</td><td>oznaka nije u skladu s nultom kotom</td><td>provjerite ±0,00 ili tekst</td></tr><tr><td>SDP-I043</td><td>dvije oznake na istom mjestu se razlikuju</td><td>provjerite crtež</td></tr><tr><td>SDP-I044, I045</td><td>tačke ili izohipse nemaju Z (sve 0)</td><td>podloga je 2D – potreban 3D snimak</td></tr><tr><td>SDP-I046</td><td>nema nikakvih podataka o visinama</td><td>dodajte kote ili snimak</td></tr><tr><td>SDP-I047</td><td>nulta kota nije definisana</td><td><code>SDPDATUM</code></td></tr><tr><td>SDP-I050</td><td>objekat nije u ravni XY</td><td><code>FLATTEN</code> ili precrtajte</td></tr><tr><td>SDP-I060</td><td>koordinatni sistem nije naveden / lokalne koordinate</td><td><code>SDPGEOREF</code></td></tr></tbody></table>
+<h3 id="geometrija-parametri-podaci-jedinice">Geometrija, parametri, podaci, jedinice</h3>
+<table><thead><tr><th>Šifra</th><th>Značenje</th></tr></thead><tbody><tr><td>SDP-G001–G012</td><td>neispravna geometrija: nula dužina ili površina, dupla tjemena, &lt; 3 tjemena, samopresijecanje (G007), otvor izvan granice (G008), aproksimacija pravougaonikom (G009), visina izvan raspona (G012 – često pogrešne jedinice)</td></tr><tr><td>SDP-G020</td><td>objekat nije polilinija u ravni XY</td></tr><tr><td>SDP-G021</td><td>simbol bloka skaliran ili preslikan – dimenzije mijenjajte kroz <code>SDPEDIT</code></td></tr><tr><td>SDP-P001–P008</td><td>parametar nedostaje, izvan raspona, pogrešne vrste, nepoznat materijal</td></tr><tr><td>SDP-P010–P019</td><td>logičke greške parametara (npr. naslon niži od sjedišta, voda dublja od bazena)</td></tr><tr><td>SDP-D001–D003</td><td>neispravan ili dupli identifikator (kopija – <code>SDPAUDIT</code>), nepoznat tip</td></tr><tr><td>SDP-D010</td><td>ista oznaka na više elemenata – <code>SDPNUMBER</code></td></tr><tr><td>SDP-U001, U002</td><td>INSUNITS se razlikuje od jedinice projekta ili nije postavljen – <code>SDPSETTINGS &gt; Jedinice</code></td></tr></tbody></table>
+<h3 id="kolizije-lokacija-kote">Kolizije, lokacija, kote</h3>
+<table><thead><tr><th>Šifra</th><th>Značenje</th></tr></thead><tbody><tr><td>SDP-C001</td><td>moguća kolizija tačkastih elemenata (npr. dva parking mjesta jedno preko drugog)</td></tr><tr><td>SDP-C002</td><td>element unutar zadanog razmaka drugog elementa</td></tr><tr><td>SDP-C003</td><td>površine se preklapaju</td></tr><tr><td>SDP-C004</td><td>površina preklapa tlocrt objekta</td></tr><tr><td>SDP-C005</td><td>krošnja u zrelosti dopire do objekta ili elementa</td></tr><tr><td>SDP-C010</td><td>širina manja od zadane potrebne</td></tr><tr><td>SDP-C011</td><td>nagib rampe veći od zadanog najvećeg</td></tr><tr><td>SDP-C020</td><td>element izlazi izvan parcelne granice</td></tr><tr><td>SDP-E000</td><td>problem visinskog sistema projekta</td></tr><tr><td>SDP-E010</td><td>saobraćajnica iznad partera</td></tr><tr><td>SDP-E011</td><td>kota dodijeljena, a nulta kota više nije definisana</td></tr><tr><td>SDP-E012</td><td>objekat pomjeren po visini nakon dodjele kote</td></tr><tr><td>SDP-R001</td><td>podatak za stručni pregled nije unesen (npr. botanički naziv) – zadane vrijednosti su orijentacione</td></tr></tbody></table>
+<h3 id="teren">Teren</h3>
+<table><thead><tr><th>Šifra</th><th>Značenje</th></tr></thead><tbody><tr><td>SDP-T001</td><td>tačke bez visine se ne koriste</td></tr><tr><td>SDP-T002</td><td>manje od 3 upotrebljive tačke</td></tr><tr><td>SDP-T003</td><td>sve tačke na jednom pravcu</td></tr><tr><td>SDP-T004</td><td>sve tačke na istoj visini (često Z = 0)</td></tr><tr><td>SDP-T005</td><td>podaci pokrivaju mali dio granice – ostalo je nepouzdano</td></tr><tr><td>SDP-T010</td><td>dvije tačke na istom mjestu s različitim visinama</td></tr><tr><td>SDP-T011</td><td>prelomne linije ili izohipse se sijeku</td></tr><tr><td>SDP-T012</td><td>prelomnica nije ugrađena u mrežu</td></tr><tr><td>SDP-T020</td><td>ravni dijelovi – moguće zadržavanje vode</td></tr><tr><td>SDP-T021</td><td>strmi dijelovi</td></tr><tr><td>SDP-T022</td><td>trouglovi ravno na jednoj izohipsi – dodajte kote vrhova ili dna</td></tr><tr><td>SDP-T023</td><td>lokalna najniža tačka – voda nema odvod</td></tr><tr><td>SDP-T024</td><td>rijetki podaci – teren je interpoliran</td></tr></tbody></table>
+<h3 id="paket-razmjene-sketchup">Paket razmjene (SketchUp)</h3>
+<table><thead><tr><th>Šifra</th><th>Značenje</th></tr></thead><tbody><tr><td>SDP-F001</td><td>paket se ne može pročitati (oštećen, nije paket)</td></tr><tr><td>SDP-F002</td><td>paket je noviji od programa – nadogradite proširenje</td></tr><tr><td>SDP-F010–F014</td><td>neispravni ili nepotpuni zapisi geometrije</td></tr><tr><td>SDP-F020–F022</td><td>problem s datotekom modela (komponente) u paketu</td></tr><tr><td>SDP-F030</td><td>paket navodi teren, ali datoteka terena nedostaje</td></tr><tr><td>SDP-B001</td><td>model nije sačuvan, pa sigurnosna kopija nije napravljena (uvoz se poništava s Undo)</td></tr></tbody></table>
+<p>---</p>
+<h2 id="12-česti-problemi-i-rješenja">12. Česti problemi i rješenja</h2>
+<p><strong>Kartica VANJSKO UREĐENJE PRO se ne pojavljuje.</strong></p>
+<ul>
+<li>Pokrenite <code>SDPABOUT</code>. Ako je naredba nepoznata, dodatak nije učitan.
+</li>
+<li>Provjerite instalaciju (<code>INSTALIRAJ.bat</code>) i <em>Trusted Locations</em>.
+</li>
+<li>Pokrenite ponovo AutoCAD.
+</li></ul>
+<p><strong>Površine i dužine su 100 ili 1000 puta pogrešne.</strong> Jedinica crteža nije dobra. <code>SDPSETTINGS &gt; Jedinice</code> – odaberite jedinicu u kojoj je stvarno crtano. Provjera: poznata dužina (parking 5 m) mora imati 5000 jedinica u mm, 500 u cm, 5 u m.</p>
+<p>**<code>SDPPREUZMI</code> preskače parcelu ili objekte.** Polilinije nisu zatvorene. <code>SDPPROVJERADWG</code> pokazuje koje (SDP-I006/I007). Zatvorite ih s <code>PEDIT → Close</code> ili <code>JOIN</code>.</p>
+<p>**<code>SDPKOTEIZOZNAKA</code> kaže „Bez objekta” za sve oznake.** Oznake nisu unutar zatvorenih kontura mapiranih objekata (npr. stoje na ivici ceste). Kote dodijelite ručno (<code>SDPKOTA</code>) ili zatvorite konture saobraćajnica i partera i mapirajte ih.</p>
+<p><strong>Teren se ne pravi.</strong> Pogledajte poruke <code>SDP-T002/T003/T004</code>. Najčešće crtež nema geodetski snimak s Z visinama. Oznake kota ulaza i saobraćajnica nisu teren.</p>
+<p><strong>Mnogo SDP-C020 (izvan parcele).</strong> Uobičajeno za stabla i elemente u javnoj površini uz ulicu. Provjerite da li je to namjerno ili je pogrešna granica.</p>
+<p><strong>SDP-C001 kod parking mjesta.</strong> U DWG-u su blokovi mjesta postavljeni jedan preko drugog, npr. invalidsko preko običnog ili dva na istom mjestu. Obrišite višak.</p>
+<p><strong>Nakon kopiranja elemenata provjera javlja duple identifikatore (SDP-D002).</strong> Pokrenite <code>SDPAUDIT</code>.</p>
+<p><strong>SketchUp: paket se uvozi, ali modeli su daleko od ishodišta.</strong> Postavite ishodište projekta blizu parcele (<code>SDPSETTINGS &gt; Ishodiste</code>) i ponovo izvezite.</p>
+<p><strong>SketchUp: promijenio sam stazu, a izmjena nije otišla u AutoCAD.</strong> Oblik staza i površina se mijenja samo u AutoCAD-u (<a href="#9-razmjena-autocad--sketchup--pravila">poglavlje 9</a>).</p>
+<p><strong>Šta poslati uz prijavu problema:</strong></p>
+<ul>
+<li>ispis <code>SDPABOUT</code>;
+</li>
+<li>tekst iz komandne linije;
+</li>
+<li>dnevnik iz <code>%LOCALAPPDATA%\SiteDesignPro\logs\</code>;
+</li>
+<li>po mogućnosti, crtež.
+</li></ul>
+<p>---</p>
+<h2 id="13-pojmovnik">13. Pojmovnik</h2>
+<table><thead><tr><th>Pojam</th><th>Značenje</th></tr></thead><tbody><tr><td>Element</td><td>objekat crteža s tipom, parametrima i oznakom koji dodatak prati</td></tr><tr><td>Tip elementa</td><td>definicija iz kataloga (npr. <code>landscape.tree_deciduous</code>) – određuje sloj, simbol, parametre i 3D model</td></tr><tr><td>Parametar</td><td>mjera ili izbor elementa (visina, širina, materijal)</td></tr><tr><td>Svojstvo</td><td>opisni podatak (botanički naziv, proizvođač, napomena)</td></tr><tr><td>Oznaka</td><td>broj elementa u crtežu (T-001)</td></tr><tr><td>Mapiranje</td><td>veza sloj ulaznog crteža → uloga (parcela, objekti, kote…)</td></tr><tr><td>±0,00 / nulta kota</td><td>apsolutna visina poda prizemlja objekta</td></tr><tr><td>Parter</td><td>uređena površina oko objekta</td></tr><tr><td>m n.v. / mns</td><td>metara nadmorske visine</td></tr><tr><td>TIN</td><td>mreža trouglova terena</td></tr><tr><td>Prelomna linija</td><td>linija nagle promjene nagiba (ivica, nasip) koju teren poštuje</td></tr><tr><td>Ishodište projekta</td><td>tačka crteža koja u SketchUpu postaje 0,0,0</td></tr><tr><td>Paket (.sdpkg)</td><td>datoteka razmjene AutoCAD → SketchUp</td></tr><tr><td>Nivo detalja (LOD)</td><td>šematski / standardni / visoki kvalitet 3D modela</td></tr><tr><td>Komponenta</td><td>SketchUp definicija koju dijeli više istih elemenata</td></tr><tr><td>Revizija</td><td>brojač izmjena elementa između izvoza</td></tr><tr><td>EPSG</td><td>međunarodna šifra koordinatnog sistema (npr. 3908)</td></tr></tbody></table></body></html>

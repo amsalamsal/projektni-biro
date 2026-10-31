@@ -1,0 +1,376 @@
+<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – Prvi projekat (za početnike)</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}</style></head><body><nav><a href="index.html">Uputstvo</a><a href="prvi-projekat.html">Prvi projekat (za početnike)</a><a href="prirucnik.html">Priručnik (sve opcije)</a><a href="instalacija.html">Instalacija i oporavak</a><a href="kompatibilnost.html">Kompatibilnost</a><a href="ogranicenja.html">Ograničenja</a><a href="testiranje.html">Izvještaj testiranja</a><a href="licence.html">Registar licenci</a></nav><h1 id="prvi-projekat--uputstvo-za-početnike">Prvi projekat – uputstvo za početnike</h1>
+<p>Ovo uputstvo vodi korak po korak od praznog računara do gotovog 3D modela vanjskog uređenja u SketchUpu. Pisano je za osobu koja <strong>nikad nije koristila</strong> Vanjsko uređenje PRO. Svaki korak kaže <strong>gdje kliknete na traci</strong> (ribbonu), <strong>šta program pita</strong> i <strong>šta odgovarate</strong>. Naziv naredbe je naveden u zagradi – ko voli kucati, može ga upisati u komandnu liniju umjesto klika. Detalji svake naredbe su u <a href="prirucnik.html">Priručniku</a>.</p>
+<p>---</p>
+<h2 id="sadržaj">Sadržaj</h2>
+<ol>
+<li><a href="#1-šta-program-radi-2-minute-čitanja">Šta program radi (2 minute čitanja)</a>
+</li>
+<li><a href="#2-prije-početka--provjera-instalacije">Prije početka – provjera instalacije</a>
+</li>
+<li><a href="#3-osnove-koje-trebate-znati">Osnove koje trebate znati</a>
+<ul>
+<li><a href="#mapa-trake--gdje-je-šta">Mapa trake – gdje je šta</a>
+</li></ul>
+</li>
+<li><a href="#4-vježba-probni-projekat-za-15-minuta">Vježba: probni projekat za 15 minuta</a>
+</li>
+<li><a href="#5-pravi-projekat-iz-vašeg-dwg-a--korak-po-korak">Pravi projekat iz vašeg DWG-a – korak po korak</a>
+</li>
+<li><a href="#6-prenos-u-sketchup-i-3d-model">Prenos u SketchUp i 3D model</a>
+</li>
+<li><a href="#7-izmjene-šta-kad-se-projekat-promijeni">Izmjene: šta kad se projekat promijeni</a>
+</li>
+<li><a href="#8-najčešće-greške-početnika">Najčešće greške početnika</a>
+</li>
+<li><a href="#9-kontrolna-lista-za-odštampati">Kontrolna lista za odštampati</a>
+</li></ol>
+<p>---</p>
+<h2 id="1-šta-program-radi-2-minute-čitanja">1. Šta program radi (2 minute čitanja)</h2>
+<p>Vanjsko uređenje PRO ima dva dijela:</p>
+<ul>
+<li><strong>AutoCAD dio</strong> – u svom crtežu situacije crtate vanjsko uređenje (staze, parking, zelenilo, rasvjetu, klupe, ograde …). Svaki nacrtani objekat je <strong>element</strong> koji zna šta je (npr. „klupa s naslonom", dužine 1,8 m). Program pravi oznake, tabele količina i provjerava projekat.
+</li>
+<li><strong>SketchUp dio</strong> – iz AutoCAD-a izvezete jednu datoteku (**paket <code>.sdpkg</code>**), a SketchUp od nje automatski napravi <strong>3D model</strong>: realistične klupe, stabla, svjetiljke, popločanja s teksturom, bazene …
+</li></ul>
+<p>Tok rada je uvijek isti:</p>
+<pre>Vaš DWG  →  AutoCAD: pripremi i projektuj  →  SDPEXPORT (.sdpkg)  →  SketchUp: Uvoz paketa  →  3D model</pre>
+<p>Važno pravilo programa: <strong>ništa se ne izmišlja.</strong> Ako podatak nedostaje (npr. kota objekta), program to kaže i čeka da ga vi unesete – ne pogađa.</p>
+<p>---</p>
+<h2 id="2-prije-početka--provjera-instalacije">2. Prije početka – provjera instalacije</h2>
+<h3 id="autocad">AutoCAD</h3>
+<ol>
+<li>Pokrenite AutoCAD (2020–2027).
+</li>
+<li>Na traci (ribbon) gore treba postojati kartica <strong>VANJSKO UREĐENJE PRO</strong>.
+</li>
+<li>U komandnoj liniji (dolje) treba pisati: <em>„Vanjsko uređenje PRO … je učitano"</em>.
+</li></ol>
+<p>Ako kartice nema: zatvorite AutoCAD i ponovo pokrenite <code>INSTALIRAJ.bat</code> iz instalacionog paketa. Ako je kartica tu, ali je ne vidite, kucajte <code>RIBBON</code> i Enter.</p>
+<h3 id="sketchup">SketchUp</h3>
+<ol>
+<li>Pokrenite SketchUp (2022 ili noviji).
+</li>
+<li>Meni <strong>Extensions</strong> (Proširenja) → treba postojati <strong>Vanjsko uređenje PRO</strong>.
+</li>
+<li>Traka s alatima: meni <strong>View → Toolbars…</strong> → označite <strong>Vanjsko uređenje PRO</strong> → <strong>Close</strong>.
+</li></ol>
+<p>Ako proširenja nema: <strong>Extensions → Extension Manager → Install Extension</strong> → odaberite <code>pb_site_design_pro.rbz</code>.</p>
+<p>---</p>
+<h2 id="3-osnove-koje-trebate-znati">3. Osnove koje trebate znati</h2>
+<h3 id="kako-se-pokreće-naredba">Kako se pokreće naredba</h3>
+<p>Najlakše je <strong>klikom na traci (ribbonu)</strong>:</p>
+<ol>
+<li>Gore u AutoCAD-u kliknite karticu <strong>VANJSKO UREĐENJE PRO</strong>.
+</li>
+<li>Kartica je podijeljena na <strong>ploče</strong> (Projekt, Uvoz DWG-a, Teren i kote …). Naziv ploče piše <strong>ispod</strong> dugmadi.
+</li>
+<li>Kliknite dugme. Veliko dugme je glavna radnja ploče, mala dugmad pored njega su dodatne radnje.
+</li></ol>
+<p>Isto se može uraditi i:</p>
+<ul>
+<li>kucanjem naziva naredbe u komandnu liniju (npr. <code>SDPNEW</code> pa <strong>Enter</strong>) – naziv je u ovom uputstvu u zagradi;
+</li>
+<li>iz <strong>palete</strong> (dugme <strong>Biblioteka</strong> na ploči <em>Projekt</em>) – dvoklik na element.
+</li></ul>
+<p>Ako ne vidite cijelu traku (mali ekran), ploče se skupe u ikone – kliknite ploču i otvori se.</p>
+<h3 id="mapa-trake--gdje-je-šta">Mapa trake – gdje je šta</h3>
+<p>Ploče se redaju s lijeva na desno ovim redom:</p>
+<table><thead><tr><th>Ploča</th><th>Dugmad (veliko dugme podebljano)</th><th>Za šta služi</th></tr></thead><tbody><tr><td><strong>Projekt</strong></td><td><strong>Novi projekat</strong>, Postavke, Slojevi, Biblioteka, Primjer projekta</td><td>početak projekta, postavke, paleta</td></tr><tr><td><strong>Uvoz DWG-a</strong></td><td><strong>Mapiranje slojeva</strong>, Provjera crteža, Preuzmi objekte, Pretvori krive</td><td>priprema vašeg postojećeg crteža</td></tr><tr><td><strong>Georeferenciranje</strong></td><td><strong>Kontrolne tačke</strong>, Izvoz KML, Koordinate, Sjever</td><td>koordinate i sjever</td></tr><tr><td><strong>Teren i kote</strong></td><td><strong>Nulta kota</strong>, Dodijeli kotu, Kote iz oznaka, Visinska kota, Model terena, Profil, Analiza terena, Strelica nagiba</td><td>visine i teren</td></tr><tr><td><strong>Parter i popločanje</strong></td><td><strong>Pregled</strong>, padajuće liste: Popločanje, Rastresiti materijali, Zelene površine, Podovi i terase, Ivice i prelazi, Visinske razlike, Ograde, Zidovi, Kapije …; Površina, Oznake površina</td><td>popločanja, ivičnjaci, stepenice, ograde, zidovi</td></tr><tr><td><strong>Zelenilo</strong></td><td><strong>Pregled</strong>, liste: Drveće, Grmlje i žive ograde, Gredice, Travnjaci i livade, Vertikalno ozelenjavanje, Žardinjere, Zaštita stabala, Navodnjavanje; Drvored, Raster sadnje</td><td>sve biljke</td></tr><tr><td><strong>Saobraćaj i parking</strong></td><td><strong>Pregled</strong>, liste: Saobraćajnice, Parking, Oznake, Smirivanje saobraćaja, Barijere, Staze i trake …; Niz parking mjesta, Oznake širina, Stalci duž staze</td><td>ceste, parking, biciklističke staze</td></tr><tr><td><strong>Infrastruktura</strong></td><td><strong>Pregled</strong>, liste: Otpad, Rezervoari, Okna, Bazeni, Površinska odvodnja, Kišnica, Solarna energija, Punjenje električnih vozila, Grijanje, Zasjena …</td><td>instalacije, voda, energija, klima</td></tr><tr><td><strong>Rasvjeta</strong></td><td><strong>Pregled</strong>, liste: Stubovi, Niska rasvjeta, Zidna montaža, Dekorativno, Upravljanje; Svjetiljke duž puta, Pokrivenost</td><td>svjetiljke</td></tr><tr><td><strong>Urbani mobilijar</strong></td><td><strong>Pregled</strong>, liste: Sjedenje, Stolovi, Korpe i kante, Dječija igrališta, Sport, Pergole, Nadstrešnice, Informacije …; Raspored duž staze</td><td>klupe, igrališta, pergole, table</td></tr><tr><td><strong>3D modeli</strong></td><td><strong>Uredi element</strong>, Zone sigurnosti, Odabir, Korisnički katalozi</td><td>izmjena nacrtanih elemenata</td></tr><tr><td><strong>SketchUp razmjena</strong></td><td><strong>Izvoz paketa</strong>, Primijeni izmjene, Uvoz paketa, Provjera prije izvoza</td><td>prenos u SketchUp i nazad; uvoz gotovog paketa u crtež</td></tr><tr><td><strong>Količinski obračun</strong></td><td><strong>Tabele</strong>, Izvoz CSV, Količine</td><td>količine</td></tr><tr><td><strong>Nacrti i oznake</strong></td><td><strong>Oznaka</strong>, Numeracija, Legenda, Sastavnica, Razmjernik, Presjek, Detalj, Rasterske ose, Oblak revizije</td><td>crtanje nacrta</td></tr><tr><td><strong>Provjera projekta</strong></td><td><strong>Provjeri projekat</strong>, Provjera crteža, Revizija</td><td>kontrola</td></tr><tr><td><strong>Postavke i pomoć</strong></td><td><strong>Pomoć</strong>, Sigurnosna kopija, Postavke kopija, Oporavak, Učitaj katalog, O programu</td><td>pomoć i sigurnost</td></tr></tbody></table>
+<h4 id="padajuće-liste-na-pločama-s-elementima">Padajuće liste na pločama s elementima</h4>
+<p>Na pločama <em>Parter i popločanje</em>, <em>Zelenilo</em>, <em>Saobraćaj i parking</em>, <em>Infrastruktura</em>, <em>Rasvjeta</em> i <em>Urbani mobilijar</em> svaka grupa (npr. <strong>Drveće</strong>) je <strong>padajuća lista</strong>:</p>
+<ol>
+<li>kliknite <strong>malu strelicu ▾</strong> desno od naziva grupe – otvori se spisak (npr. Listopadno drvo, Zimzeleno drvo, Voćka …);
+</li>
+<li>kliknite element u spisku – odmah počinje postavljanje ili crtanje tog elementa;
+</li>
+<li>dugme grupe poslije pamti zadnji izabrani element – sljedeći put je dovoljan klik na sam naziv.
+</li></ol>
+<p>Ako ploča ima više grupa nego što stane, kliknite <strong>naziv ploče</strong> (traka ispod dugmadi, sa strelicom ▼) – otvori se ostatak ploče. Kliknite pribadaču 📌 da ostane otvoren.</p>
+<p><strong>Pregled</strong> (veliko dugme na tim pločama) otvara paletu sa svim elementima te kategorije i sličicama.</p>
+<h3 id="kako-se-odgovara-na-pitanja">Kako se odgovara na pitanja</h3>
+<p>Program postavlja pitanja u <strong>komandnoj liniji</strong> (dolje na ekranu). Primjer:</p>
+<pre>Jedinica crteža [Milimetri/Centimetri/Metri] &lt;Milimetri&gt;:</pre>
+<ul>
+<li>riječi u <strong>uglastim zagradama</strong> su izbori – kucajte prvo slovo (npr. <code>C</code> za Centimetri) i Enter, ili kliknite na riječ mišem;
+</li>
+<li>vrijednost u <strong>&lt; &gt;</strong> je zadana – samo <strong>Enter</strong> je prihvata;
+</li>
+<li>brojevi se kucaju s <strong>zarezom ili tačkom</strong> (<code>1,8</code> i <code>1.8</code> su isto);
+</li>
+<li><strong>Esc</strong> prekida naredbu, a ništa nije promijenjeno.
+</li></ul>
+<h3 id="jedan-undo-poništava-cijelu-naredbu">Jedan UNDO poništava cijelu naredbu</h3>
+<p>Ako napravite nešto pogrešno, kucajte <code>U</code> (ili Ctrl+Z) – poništava se cijela posljednja naredba.</p>
+<h3 id="gdje-su-poruke-i-greške">Gdje su poruke i greške</h3>
+<p>Sve poruke su u komandnoj liniji. Ako nešto ne uspije, piše <em>„Vanjsko uređenje PRO – greška: …"</em>. Detalji greške su u dnevniku (<code>%LOCALAPPDATA%\SiteDesignPro\logs</code>). Pomoć u svakom trenutku: <code>SDPPOMOC</code>.</p>
+<p>---</p>
+<h2 id="4-vježba-probni-projekat-za-15-minuta">4. Vježba: probni projekat za 15 minuta</h2>
+<p>Prije vašeg pravog projekta prođite ovu vježbu. Program ima ugrađen primjer, pa ne morate ništa crtati.</p>
+<table><thead><tr><th>#</th><th>Kliknite (kartica VANJSKO UREĐENJE PRO)</th><th>Program pita / radi</th><th>Vi odgovarate</th></tr></thead><tbody><tr><td>1</td><td>AutoCAD: <strong>New</strong> (novi crtež)</td><td>šablon <code>acadiso.dwt</code></td><td>Open</td></tr><tr><td>2</td><td>ploča <strong>Projekt</strong> → <strong>Primjer projekta</strong> (<code>SDPSAMPLE</code>)</td><td><em>Primjer [Elementi/Izvorni/Oba]</em></td><td>kliknite <strong>Oba</strong></td></tr><tr><td>3</td><td>kotačić miša dvoklik (ili <code>ZOOM</code> → <code>E</code>)</td><td>prikaz cijelog crteža</td><td>–</td></tr><tr><td>4</td><td>ploča <strong>Uvoz DWG-a</strong> → <strong>Provjera crteža</strong> (<code>SDPPROVJERADWG</code>)</td><td>izvještaj ulaznog crteža; <em>Sačuvati izvještaj …? [Da/Ne]</em></td><td><strong>Ne</strong></td></tr><tr><td>5</td><td>ploča <strong>Teren i kote</strong> → <strong>Nulta kota</strong> (<code>SDPDATUM</code>)</td><td>prikaže ±0,00 = 520,15 m n.v.; <em>Izmjena [NultaKota/…/Izlaz]</em></td><td>Enter (Izlaz)</td></tr><tr><td>6</td><td>ploča <strong>Teren i kote</strong> → <strong>Kote iz oznaka</strong> (<code>SDPKOTEIZOZNAKA</code>)</td><td>prijedlozi kota; <em>Primijeniti … kota …? [Da/Ne]</em></td><td><strong>Da</strong></td></tr><tr><td>7</td><td>ploča <strong>Teren i kote</strong> → <strong>Model terena</strong> (<code>SDPTEREN</code>)</td><td><em>Granica terena [Odaberi/Bez/Zadrzi]</em></td><td><strong>Bez</strong></td></tr><tr><td></td><td></td><td><em>Koristiti oznake kota kao visinske tačke terena? [Da/Ne]</em></td><td><strong>Ne</strong></td></tr><tr><td>8</td><td>ploča <strong>Provjera projekta</strong> → <strong>Provjeri projekat</strong> (<code>SDPVALIDATE</code>)</td><td>rezultati u paleti, kartica <strong>Provjera</strong></td><td>–</td></tr><tr><td>9</td><td>ploča <strong>Količinski obračun</strong> → <strong>Tabele</strong> (<code>SDPSCHEDULE</code>)</td><td><em>Tabela [T1…/Sve]</em> → <em>Tačka umetanja tabele</em></td><td><strong>Sve</strong>, pa klik desno od crteža</td></tr><tr><td>10</td><td>ploča <strong>SketchUp razmjena</strong> → <strong>Izvoz paketa</strong> (<code>SDPEXPORT</code>)</td><td>prozor za snimanje paketa</td><td>snimite <code>vjezba.sdpkg</code> na Desktop</td></tr><tr><td>11</td><td>SketchUp: meni <strong>Extensions → Vanjsko uređenje PRO → Uvoz paketa…</strong></td><td>prozor s pregledom</td><td>odaberite <code>vjezba.sdpkg</code> → <strong>Uvezi</strong></td></tr></tbody></table>
+<p>Izbore u komandnoj liniji (npr. <strong>Oba</strong>, <strong>Da</strong>, <strong>Bez</strong>) možete kliknuti mišem direktno u komandnoj liniji ili upisati prvo slovo i Enter.</p>
+<p>Nakon 11. koraka u SketchUpu imate 3D stambeni kompleks sa stazama, parkingom, zelenilom, rasvjetom i terenom. Pogledajte scene (kartice gore: <em>VU 01 Situacija</em>, <em>VU 02 3D pregled</em>, <em>VU 05 Zelenilo i teren</em> …).</p>
+<p>---</p>
+<h2 id="5-pravi-projekat-iz-vašeg-dwg-a--korak-po-korak">5. Pravi projekat iz vašeg DWG-a – korak po korak</h2>
+<h3 id="korak-0--kopija-crteža">Korak 0 – Kopija crteža</h3>
+<p>Nikad ne radite na originalu. U Windowsu kopirajte DWG (npr. <code>Situacija.dwg</code> → <code>Situacija_VU.dwg</code>) i otvorite kopiju. Program ionako pravi sigurnosnu kopiju prije velikih operacija, ali kopija je najsigurnija.</p>
+<h3 id="korak-1--saznajte-u-kojoj-je-jedinici-crtež">Korak 1 – Saznajte u kojoj je jedinici crtež</h3>
+<p>Ovo je <strong>najvažniji korak</strong> – pogrešna jedinica znači da će klupa biti 1000 puta veća ili manja.</p>
+<ol>
+<li>Kartica <strong>Home</strong> → ploča <strong>Utilities</strong> → <strong>Measure → Distance</strong> (ili kucajte <code>DIST</code>) i izmjerite nešto čiju stvarnu veličinu znate (npr. parking mjesto 5 m ili širinu ceste).
+</li>
+<li>Rezultat:
+<ul>
+<li>oko <code>5</code> → crtež je u <strong>metrima</strong>;
+</li>
+<li>oko <code>500</code> → u <strong>centimetrima</strong>;
+</li>
+<li>oko <code>5000</code> → u <strong>milimetrima</strong>.
+</li></ul>
+</li></ol>
+<p>Ne vjerujte postavci jedinica u AutoCAD-u (<code>UNITS</code>) – vjerujte izmjerenoj geometriji.</p>
+<h3 id="korak-2--novi-projekat">Korak 2 – Novi projekat</h3>
+<p>Kliknite: ploča <strong>Projekt</strong> → veliko dugme <strong>Novi projekat</strong> (<code>SDPNEW</code>). Program redom pita u komandnoj liniji:</p>
+<table><thead><tr><th>Pitanje</th><th>Šta upisati</th></tr></thead><tbody><tr><td><em>Naziv projekta</em></td><td>npr. <code>Stambeni objekat Ilidža</code></td></tr><tr><td><em>Broj projekta</em></td><td>broj iz vašeg ureda ili Enter</td></tr><tr><td><em>Investitor</em></td><td>naziv investitora ili Enter</td></tr><tr><td><em>Lokacija</em></td><td>npr. <code>Ilidža, k.č. 1234/5</code></td></tr><tr><td><em>Jedinica crteža [Milimetri/Centimetri/Metri]</em></td><td>ono što ste izmjerili u koraku 1</td></tr><tr><td><em>Ishodište projekta (u SketchUp-u postaje 0,0,0) &lt;0,0,0&gt;</em></td><td>kliknite tačku <strong>u sredini parcele</strong> (npr. ugao objekta). Ne ostavljajte 0,0,0 ako je crtež u državnim koordinatama – SketchUp ne voli udaljene koordinate.</td></tr><tr><td><em>Ugao pravog sjevera …</em></td><td>ako je sjever gore na crtežu: <code>0</code></td></tr><tr><td><em>Mjerilo anotacija 1:</em></td><td>npr. <code>250</code> ili <code>500</code> – veličina oznaka i teksta</td></tr></tbody></table>
+<p>Program napravi standardne slojeve <strong>VU-…</strong> i ispiše: <em>„Visine nisu zadane: definišite nultu kotu objekta (SDPDATUM), zatim mapirajte slojeve ulaznog crteža (SDPMAPIRANJE)."</em> – to je normalno, to su sljedeći koraci.</p>
+<p>Kasnije sve ovo mijenjate klikom: ploča <strong>Projekt</strong> → <strong>Postavke</strong> (<code>SDPSETTINGS</code>).</p>
+<h3 id="korak-3--recite-programu-šta-je-na-kojem-sloju">Korak 3 – Recite programu šta je na kojem sloju</h3>
+<p>Vaš crtež ima svoje slojeve (npr. <code>KP_GRANICA</code>, <code>OBJEKAT</code>, <code>KOTE</code>). Program mora znati šta koji sloj predstavlja.</p>
+<ol>
+<li>Kliknite: ploča <strong>Uvoz DWG-a</strong> → veliko dugme <strong>Mapiranje slojeva</strong> (<code>SDPMAPIRANJE</code>). Otvara se prozor s tabelom: <strong>Sloj | Objekata | Uloga u projektu</strong>.
+</li>
+<li>Kliknite <strong>Prijedlog prema nazivima</strong> – program predloži uloge prema nazivima slojeva.
+</li>
+<li>Pregledajte svaki red i u koloni <strong>Uloga u projektu</strong> odaberite ispravnu ulogu:
+</li></ol>
+<table><thead><tr><th>Uloga</th><th>Šta je to</th><th>Obavezno?</th></tr></thead><tbody><tr><td><strong>Parcelna granica</strong></td><td>zatvorena polilinija granice parcele</td><td>da</td></tr><tr><td><strong>Tlocrt objekta</strong></td><td>zatvorene polilinije tlocrta zgrada</td><td>da</td></tr><tr><td><strong>Oznake kota</strong></td><td>tekstovi s kotama (+0,25; KT 518,81)</td><td>da</td></tr><tr><td>Oznaka položaja objekta</td><td>blok koji samo označava objekat (nije tlocrt)</td><td>ne</td></tr><tr><td>Saobraćajnice</td><td>ivice i osovine cesta</td><td>ne</td></tr><tr><td>Linija partera</td><td>granica partera</td><td>ne</td></tr><tr><td>Tačke terena</td><td>geodetske tačke s visinom</td><td>za teren</td></tr><tr><td>Izohipse</td><td>izohipse s visinom</td><td>za teren</td></tr><tr><td>Prelomne linije</td><td>3D linije loma terena</td><td>ne</td></tr><tr><td>Postojeća infrastruktura</td><td>vodovi, šahtovi, stubovi</td><td>ne</td></tr><tr><td>Kontrolne (geodetske) tačke</td><td>tačke s poznatim koordinatama</td><td>za georeferenciranje</td></tr></tbody></table>
+<ol start="4">
+<li>Slojeve koji nisu bitni (šrafure, tekstovi naslova …) ostavite <strong>bez uloge</strong>.
+</li>
+<li>Kliknite <strong>U redu</strong>. Ako ovo radite za više projekata istog geodete, kliknite <strong>Sačuvaj predložak…</strong> i sljedeći put <strong>Učitaj predložak…</strong>.
+</li></ol>
+<p>Nazivi vaših slojeva se <strong>ne mijenjaju</strong>.</p>
+<h3 id="korak-4--provjera-crteža">Korak 4 – Provjera crteža</h3>
+<p>Kliknite: ploča <strong>Uvoz DWG-a</strong> → <strong>Provjera crteža</strong> (<code>SDPPROVJERADWG</code>). Program pregleda mapirane slojeve i ispiše izvještaj: broj objekata, površinu parcele, probleme. Svaki problem ima šifru (npr. <code>SDP-I…</code>) i preporuku šta uraditi.</p>
+<p>Najčešći problemi i rješenja:</p>
+<table><thead><tr><th>Problem</th><th>Rješenje u AutoCAD-u</th></tr></thead><tbody><tr><td>granica nije zatvorena</td><td><code>PEDIT</code> → odaberite liniju → <code>Close</code> (ili <code>JOIN</code> za više komada)</td></tr><tr><td>skoro zatvorena (mali razmak)</td><td><code>PEDIT</code> → <code>Close</code></td></tr><tr><td>duple linije</td><td><code>OVERKILL</code></td></tr><tr><td>objekat izvan parcele</td><td>provjerite da li je pravi sloj mapiran</td></tr><tr><td>sumnja na jedinice</td><td>vratite se na korak 1</td></tr></tbody></table>
+<p>Ispravite sve <strong>GREŠKE</strong> i ponovo kliknite <strong>Provjera crteža</strong> dok ih ne bude. Upozorenja pročitajte, ali ne moraju se sva rješavati.</p>
+<h3 id="korak-5--nulta-kota-000">Korak 5 – Nulta kota (±0,00)</h3>
+<p>Da bi program znao visine, mora znati koliko je <strong>±0,00</strong> objekta u metrima nadmorske visine.</p>
+<p>Kliknite: ploča <strong>Teren i kote</strong> → veliko dugme <strong>Nulta kota</strong> (<code>SDPDATUM</code>). U komandnoj liniji piše <em>Izmjena [NultaKota/Parter/Saobracajnice/Datum/Zkoordinate/Izlaz]</em> – kliknite izbor mišem u komandnoj liniji:</p>
+<ol>
+<li><strong>NultaKota</strong> → upišite nultu kotu iz projekta, npr. <code>520,15</code> → Enter.
+</li>
+<li>Program pita <em>„Postaviti visinu ishodišta projekta na nultu kotu (u SketchUp-u je tada ±0,00 = 0)? [Da/Ne]"</em> → <strong>Da</strong>.
+</li>
+<li><strong>Parter</strong> → <em>Glavni parter [JednakNultoj/Razlicit]</em> → najčešće <strong>JednakNultoj</strong>; ako parter nije na ±0,00, <strong>Razlicit</strong> i upišite kotu partera.
+</li>
+<li><strong>Saobracajnice</strong> → koliko su saobraćajnice niže od partera <strong>u centimetrima</strong> (npr. <code>15</code>), ili Enter ako ne znate.
+</li>
+<li><strong>Zkoordinate</strong> → <em>Z koordinate crteža su [Apsolutne/Relativne]</em> – ako tačke terena imaju visine kao 520,30 → <strong>Apsolutne</strong>; ako su oko 0 → <strong>Relativne</strong>.
+</li>
+<li><strong>Izlaz</strong> (ili Enter).
+</li></ol>
+<p>Nultu kotu dobijate od arhitekte objekta ili iz glavnog projekta. Ako je ne znate, <strong>ne izmišljajte</strong> – program radi i bez nje, ali neće računati apsolutne kote.</p>
+<h3 id="korak-6--preuzmite-parcelu-i-objekte">Korak 6 – Preuzmite parcelu i objekte</h3>
+<p>Kliknite: ploča <strong>Uvoz DWG-a</strong> → <strong>Preuzmi objekte</strong> (<code>SDPPREUZMI</code>). Program od mapiranih granica i tlocrta napravi <strong>elemente</strong> (parcela, objekti). Vaše originalne linije ostaju netaknute.</p>
+<p>Ako na sloju „Oznaka položaja objekta" postoje blokovi, za svaki pita <em>„Napraviti tlocrt za ovu oznaku? [Da/Preskoci]"</em> – za <strong>Da</strong> upišete stvarnu dužinu i širinu objekta u metrima.</p>
+<h3 id="korak-7--kote-objekata">Korak 7 – Kote objekata</h3>
+<p><strong>Automatski iz tekstova:</strong> ploča <strong>Teren i kote</strong> → <strong>Kote iz oznaka</strong> (<code>SDPKOTEIZOZNAKA</code>). Program pronađe tekstove kota i predloži koji pripada kojem objektu (privremene linije to pokazuju). Pregledajte listu i na <em>„Primijeniti … kota na označene objekte? [Da/Ne]"</em> kliknite <strong>Da</strong>. Nejasne oznake program ne dodjeljuje – njih uradite ručno.</p>
+<p><strong>Ručno za jedan objekat:</strong> ploča <strong>Teren i kote</strong> → <strong>Dodijeli kotu</strong> (<code>SDPKOTA</code>) → kliknite objekat u crtežu → <em>Način zadavanja kote [Relativna/Apsolutna/Parter/Saobracajnica]</em>:</p>
+<ul>
+<li><strong>Relativna</strong> – upisujete u odnosu na ±0,00 (npr. <code>-0,15</code>);
+</li>
+<li><strong>Apsolutna</strong> – upisujete m n.v. (npr. <code>519,95</code>);
+</li>
+<li><strong>Parter</strong> – objekat dobija kotu partera;
+</li>
+<li><strong>Saobracajnica</strong> – objekat dobija kotu saobraćajnica.
+</li></ul>
+<p>Program prikaže staru i novu kotu i pita <em>„Primijeniti kotu na ovaj objekat? [Da/Ne]"</em>.</p>
+<h3 id="korak-8--teren-ako-imate-geodetski-snimak">Korak 8 – Teren (ako imate geodetski snimak)</h3>
+<p>Ako ste mapirali tačke terena ili izohipse:</p>
+<ol>
+<li>Kliknite: ploča <strong>Teren i kote</strong> → <strong>Model terena</strong> (<code>SDPTEREN</code>).
+</li>
+<li><em>Granica terena [Odaberi/Bez/Zadrzi]</em> → <strong>Odaberi</strong> i kliknite parcelu (ili <strong>Bez</strong> za cijeli snimak).
+</li>
+<li><em>Koristiti oznake kota kao visinske tačke terena? [Da/Ne]</em> → <strong>Da</strong> ako su kote na terenu, inače <strong>Ne</strong>.
+</li></ol>
+<p>Teren se nacrta na sloju <code>VU-TEREN</code>. Ako podataka nema dovoljno, program to kaže i <strong>ništa ne izmišlja</strong>. Na istoj ploči: <strong>Profil</strong> (<code>SDPPROFIL</code>) i <strong>Analiza terena</strong> (<code>SDPANALIZATERENA</code>) – ravni dijelovi i lokalna udubljenja.</p>
+<p>Bez geodetskog snimka preskočite ovaj korak – SketchUp model će biti na ravnoj podlozi.</p>
+<h3 id="korak-9--projektovanje-vanjskog-uređenja">Korak 9 – Projektovanje vanjskog uređenja</h3>
+<p>Sad crtate ono što projektujete. Sve je na pločama s elementima: <strong>Parter i popločanje</strong>, <strong>Zelenilo</strong>, <strong>Saobraćaj i parking</strong>, <strong>Infrastruktura</strong>, <strong>Rasvjeta</strong>, <strong>Urbani mobilijar</strong>.</p>
+<h4 id="primjer-1--stablo-tačkasti-element">Primjer 1 – stablo (tačkasti element)</h4>
+<ol>
+<li>Ploča <strong>Zelenilo</strong> → strelica ▾ pored <strong>Drveće</strong> → kliknite <strong>Listopadno drvo</strong>.
+</li>
+<li>Komandna linija: <em>Tačka umetanja [Enter za kraj]</em> – kliknite u crtežu gdje stablo stoji. Možete kliknuti više puta – svaki klik je jedno stablo.
+</li>
+<li><em>Rotacija</em> – kliknite smjer ili Enter.
+</li>
+<li><strong>Enter</strong> kad završite.
+</li></ol>
+<p>Isto za sve „tačkaste" stvari: klupe (<em>Urbani mobilijar → Sjedenje</em>), svjetiljke (<em>Rasvjeta → Stubovi</em>), kante (<em>Urbani mobilijar → Korpe i kante</em>), stubiće (<em>Saobraćaj i parking → Barijere</em>), okna (<em>Infrastruktura → Okna</em>) …</p>
+<h4 id="primjer-2--popločanje-površina">Primjer 2 – popločanje (površina)</h4>
+<ol>
+<li>Ploča <strong>Parter i popločanje</strong> → strelica ▾ pored <strong>Popločanje</strong> → <strong>Betonsko popločanje</strong>.
+</li>
+<li>Komandna linija: <em>Granica [Polilinija/Pravougaonik/Unutar/Odaberi]</em> – kliknite jedan izbor:
+<ul>
+<li><strong>Unutar</strong> – najlakše: kliknite <strong>unutar</strong> već nacrtane zatvorene površine (kao šrafura); Enter za kraj;
+</li>
+<li><strong>Polilinija</strong> – klikajte tačke granice; u komandnoj liniji <strong>Zatvori</strong> zatvara, <strong>Ponisti</strong> briše zadnju tačku, Enter završava;
+</li>
+<li><strong>Pravougaonik</strong> – prvi ugao, pa suprotni ugao;
+</li>
+<li><strong>Odaberi</strong> – kliknite postojeće linije granice.
+</li></ul>
+</li></ol>
+<p>Isto za travnjake (<em>Zelenilo → Travnjaci i livade</em>), gredice (<em>Zelenilo → Gredice</em>), parking površinu, bazen (<em>Infrastruktura → Bazeni</em>), pergolu (<em>Urbani mobilijar → Pergole</em>) …</p>
+<h4 id="primjer-3--ograda-ivičnjak-staza-linija">Primjer 3 – ograda, ivičnjak, staza (linija)</h4>
+<ol>
+<li>Ploča <strong>Parter i popločanje</strong> → ▾ <strong>Ograde</strong> → <strong>Ograda od zavarene mreže</strong> (ili ▾ <strong>Ivice i prelazi</strong> → <strong>Ivičnjak</strong>; staze su na ploči <strong>Saobraćaj i parking</strong> → ▾ <strong>Staze i trake</strong>).
+</li>
+<li><em>Trasa [Polilinija/Odaberi]</em> → <strong>Polilinija</strong> i klikajte tačke, ili <strong>Odaberi</strong> i kliknite postojeću liniju.
+</li></ol>
+<h4 id="brzi-generatori-mala-dugmad-na-pločama">Brzi generatori (mala dugmad na pločama)</h4>
+<table><thead><tr><th>Dugme</th><th>Ploča</th><th>Šta radi</th></tr></thead><tbody><tr><td><strong>Drvored</strong></td><td>Zelenilo</td><td>stabla duž linije na zadanom razmaku</td></tr><tr><td><strong>Raster sadnje</strong></td><td>Zelenilo</td><td>stabla/grmlje u rasteru unutar površine</td></tr><tr><td><strong>Niz parking mjesta</strong></td><td>Saobraćaj i parking</td><td>niz parking mjesta uz rub</td></tr><tr><td><strong>Svjetiljke duž puta</strong></td><td>Rasvjeta</td><td>svjetiljke duž staze ili ceste</td></tr><tr><td><strong>Raspored duž staze</strong></td><td>Urbani mobilijar</td><td>klupe ili kante duž staze</td></tr><tr><td><strong>Pretvori krive</strong></td><td>Uvoz DWG-a</td><td>postojeće linije pretvara u elemente (npr. sve linije ograde odjednom)</td></tr></tbody></table>
+<h4 id="paleta-lakše-traženje">Paleta (lakše traženje)</h4>
+<p>Ploča <strong>Projekt</strong> → <strong>Biblioteka</strong> (<code>SDPBROWSER</code>) otvara paletu. Kartica <strong>Biblioteka</strong>: pretraga gore, kategorije, sličice; <strong>dvoklik</strong> na element pokreće postavljanje. Desni klik = omiljeni.</p>
+<h4 id="izmjena-nacrtanog-elementa">Izmjena nacrtanog elementa</h4>
+<ul>
+<li>Kliknite element u crtežu → u paleti, kartica <strong>Svojstva</strong>, promijenite vrijednost (dužina, visina, materijal …) → <strong>Primijeni izmjene</strong>; ili
+</li>
+<li>ploča <strong>3D modeli</strong> → <strong>Uredi element</strong> (<code>SDPEDIT</code>).
+</li></ul>
+<p>Svi elementi istog tipa: ploča <strong>3D modeli</strong> → <strong>Odabir</strong> (<code>SDPSELECT</code>).</p>
+<h3 id="korak-10--oznake-numeracija-legenda-za-nacrte">Korak 10 – Oznake, numeracija, legenda: za nacrte</h3>
+<p>Sve na ploči <strong>Nacrti i oznake</strong> (osim gdje piše drugačije):</p>
+<table><thead><tr><th>Dugme</th><th>Šta radi</th></tr></thead><tbody><tr><td><strong>Numeracija</strong></td><td>numeriše elemente (npr. S-01, S-02 za stabla)</td></tr><tr><td><strong>Oznaka</strong></td><td>oznake uz elemente (broj i podaci)</td></tr><tr><td><strong>Legenda</strong></td><td>legenda tipova elemenata</td></tr><tr><td><strong>Sastavnica</strong></td><td>okvir lista i sastavnica</td></tr><tr><td><strong>Razmjernik</strong>, <strong>Presjek</strong>, <strong>Detalj</strong>, <strong>Rasterske ose</strong>, <strong>Oblak revizije</strong></td><td>elementi nacrta</td></tr><tr><td>ploča <em>Parter i popločanje</em> → <strong>Oznake površina</strong></td><td>površine u m²</td></tr><tr><td>ploča <em>Saobraćaj i parking</em> → <strong>Oznake širina</strong></td><td>širine staza i cesta</td></tr><tr><td>ploča <em>Teren i kote</em> → <strong>Visinska kota</strong>, <strong>Strelica nagiba</strong></td><td>kote i nagibi</td></tr><tr><td>ploča <em>Georeferenciranje</em> → <strong>Sjever</strong>, <strong>Koordinate</strong></td><td>sjever i koordinate</td></tr></tbody></table>
+<h3 id="korak-11--provjera-projekta">Korak 11 – Provjera projekta</h3>
+<p>Kliknite: ploča <strong>Provjera projekta</strong> → <strong>Provjeri projekat</strong> (<code>SDPVALIDATE</code>). Rezultati su u paleti, kartica <strong>Provjera</strong>: <strong>greške</strong> (crveno), <strong>upozorenja</strong> (narandžasto) i stavke <strong>za stručni pregled</strong> (ljubičasto – vrijednosti koje treba potvrditi prema propisima). Dvoklik na red zumira na element.</p>
+<h3 id="korak-12--tabele-količina">Korak 12 – Tabele količina</h3>
+<p>Ploča <strong>Količinski obračun</strong> → <strong>Tabele</strong> (<code>SDPSCHEDULE</code>) → u komandnoj liniji <strong>Sve</strong> → kliknite gdje da se postave tabele (površine, dužine, komadi po tipu). Za Excel: ista ploča → <strong>Izvoz CSV</strong>.</p>
+<h3 id="korak-13--izvoz-za-sketchup">Korak 13 – Izvoz za SketchUp</h3>
+<ol>
+<li>Snimite crtež (Ctrl+S).
+</li>
+<li>Kliknite: ploča <strong>SketchUp razmjena</strong> → <strong>Izvoz paketa</strong> (<code>SDPEXPORT</code>).
+</li>
+<li>Ako postoje greške, program pita <em>„Ipak izvesti? [Da/Ne]"</em> – bolje <strong>Ne</strong>, ispravite greške (korak 11), pa ponovo.
+</li>
+<li>Otvara se prozor – snimite paket, najbolje <strong>pored DWG-a</strong> s istim imenom (npr. <code>Situacija_VU.sdpkg</code>).
+</li></ol>
+<p>Na kraju piše <em>„Izvezeno elemenata: …"</em>.</p>
+<p>---</p>
+<h2 id="6-prenos-u-sketchup-i-3d-model">6. Prenos u SketchUp i 3D model</h2>
+<h3 id="uvoz-paketa">Uvoz paketa</h3>
+<ol>
+<li>Otvorite SketchUp → novi model (šablon <strong>Architectural – Meters</strong> ili bilo koji metrički).
+</li>
+<li><strong>Extensions → Vanjsko uređenje PRO → Uvoz paketa…</strong> (ili prvo dugme na traci).
+</li>
+<li>Odaberite <code>.sdpkg</code> datoteku.
+</li>
+<li>Otvara se <strong>pregled prije uvoza</strong>:
+<ul>
+<li>kartice pokazuju koliko će se elemenata <strong>napraviti</strong>, <strong>ažurirati</strong>, <strong>obrisati</strong>;
+</li>
+<li><strong>Nivo detalja</strong>: <em>Šematski prikaz</em> (brzo, jednostavno), <em>Standardni kvalitet</em> (preporučeno), *Visoki kvalitet* (za prezentacije – sporije, više poligona);
+</li>
+<li>☑ <em>Izradi scene za pregled</em> – preporučeno;
+</li>
+<li>☑ <em>Sigurnosna kopija prije uvoza</em> – preporučeno.
+</li></ul>
+</li>
+<li>Kliknite <strong>Uvezi</strong>. Na kraju se pokaže <strong>izvještaj uvoza</strong>.
+</li></ol>
+<p>Rezultat: realistični 3D modeli svih elemenata, organizovani u grupe i oznake (tagove): <code>VU Zelenilo</code>, <code>VU Rasvjeta</code>, <code>VU Parter</code> … Teren je ispod.</p>
+<h3 id="pregled-modela">Pregled modela</h3>
+<ul>
+<li>Scene gore (kartice): <em>VU 01 Situacija</em>, <em>VU 02 3D pregled</em>, <em>VU 05 Zelenilo i teren</em>, <em>VU 06 Rasvjeta</em>, <em>VU 08 Podzemne instalacije</em>, <em>VU 10 Prezentacija</em> …
+</li>
+<li><strong>Prikaz podzemnog</strong> (dugme) – sakrije površine i pokaže instalacije ispod terena.
+</li>
+<li>Sjene: <strong>View → Shadows</strong> – sjever je postavljen iz projekta.
+</li></ul>
+<h3 id="dodavanje-modela-direktno-u-sketchupu-biblioteka-3d-modela">Dodavanje modela direktno u SketchUpu: Biblioteka 3D modela</h3>
+<p>Za dodatne objekte (npr. još jednu klupu za vizualizaciju):</p>
+<ol>
+<li><strong>Extensions → Vanjsko uređenje PRO → Biblioteka 3D modela…</strong>
+</li>
+<li>Lijevo kategorija (14 kategorija), sredina pregledi, desno detalji i parametri.
+</li>
+<li>Odaberite model, po želji promijenite parametre → <strong>Umetni u model</strong> → kliknite u model.
+<ul>
+<li>strelice <strong>lijevo/desno</strong> okreću model za 15° prije klika;
+</li>
+<li>ili upišite ugao i Enter;
+</li>
+<li><strong>Esc</strong> završava.
+</li></ul>
+</li>
+<li>Za ogradu, zid, živicu: prvo nacrtajte liniju <strong>Line</strong> alatom i odaberite je, pa <strong>Umetni u model</strong> – model se napravi duž linije. Za bazen, popločanje, gredicu: nacrtajte pravougaonik i odaberite <strong>lice</strong>.
+</li>
+<li><strong>Zamijeni odabrano</strong> – zamijeni odabrani model drugim (npr. klupu drugom klupom) na istom mjestu.
+</li></ol>
+<p>Napomena: modeli dodani u SketchUpu ne vraćaju se u AutoCAD – za projekat ih dodajte u AutoCAD-u.</p>
+<h3 id="izmjena-elementa-u-sketchupu">Izmjena elementa u SketchUpu</h3>
+<p>Odaberite element → desni klik → <strong>Vanjsko uređenje PRO → Svojstva elementa</strong> → promijenite parametar → <strong>Primijeni</strong>. Element se ponovo izgradi.</p>
+<p>---</p>
+<h2 id="7-izmjene-šta-kad-se-projekat-promijeni">7. Izmjene: šta kad se projekat promijeni</h2>
+<h3 id="izmjena-u-autocad-u-najčešće">Izmjena u AutoCAD-u (najčešće)</h3>
+<ol>
+<li>Promijenite projekat u AutoCAD-u.
+</li>
+<li>Ploča <strong>SketchUp razmjena</strong> → <strong>Izvoz paketa</strong> → snimite preko istog <code>.sdpkg</code>.
+</li>
+<li>U SketchUpu: <strong>Extensions → Vanjsko uređenje PRO → Ažuriranje iz paketa</strong> (ili drugo dugme na traci alata). Pregled pokazuje šta je novo, izmijenjeno i obrisano.
+</li>
+<li><strong>Uvezi</strong>. Program mijenja samo izmijenjene elemente; vaše kamere, materijali i dodaci u SketchUpu ostaju.
+</li></ol>
+<p>Ako ste neki element mijenjali u SketchUpu, a i u AutoCAD-u, program to prijavi kao <strong>konflikt</strong> i po zadanim postavkama zadrži SketchUp verziju.</p>
+<h3 id="izmjena-u-sketchupu-prenos-nazad-u-autocad">Izmjena u SketchUpu, prenos nazad u AutoCAD</h3>
+<ol>
+<li>U SketchUpu mijenjajte parametre (Svojstva elementa) ili pomjerite/zarotirajte stabla, klupe i slično.
+</li>
+<li><strong>Izvoz izmjena za AutoCAD…</strong> → snimite <code>sdp-izmjene.json</code>.
+</li>
+<li>U AutoCAD-u: ploča <strong>SketchUp razmjena</strong> → <strong>Primijeni izmjene</strong> (<code>SDPAPPLYCHANGES</code>) → odaberite tu datoteku → pregledajte → primijenite.
+</li>
+<li>Zatim ponovo <strong>Izvoz paketa</strong>.
+</li></ol>
+<p>---</p>
+<h2 id="8-najčešće-greške-početnika">8. Najčešće greške početnika</h2>
+<table><thead><tr><th>Simptom</th><th>Uzrok</th><th>Rješenje</th></tr></thead><tbody><tr><td>Klupa je ogromna ili sitna</td><td>pogrešna jedinica crteža</td><td>ploča <strong>Projekt</strong> → <strong>Postavke</strong> → <strong>Jedinice</strong> (korak 1)</td></tr><tr><td>SketchUp model je kilometrima od ishodišta</td><td>ishodište ostavljeno na 0,0,0 u državnim koordinatama</td><td><strong>Projekt → Postavke → Ishodiste</strong> → tačka na parceli, pa ponovo <strong>Izvoz paketa</strong> i uvoz</td></tr><tr><td><code>SDPPROVJERADWG</code> kaže da nema parcele</td><td>sloj granice nije mapiran ili linija nije zatvorena</td><td><strong>Uvoz DWG-a → Mapiranje slojeva</strong>; <code>PEDIT</code> → <code>Close</code></td></tr><tr><td>Kote se ne računaju</td><td>nije zadana nulta kota</td><td><strong>Teren i kote → Nulta kota → NultaKota</strong></td></tr><tr><td>Teren se ne pravi</td><td>nema tačaka/izohipsi s visinom</td><td>mapirajte slojeve snimka; bez snimka teren ne postoji</td></tr><tr><td>nema kartice VANJSKO UREĐENJE PRO ili <em>Unknown command</em></td><td>dodatak nije učitan ili stara verzija</td><td>ponovo <code>INSTALIRAJ.bat</code>, restart AutoCAD-a; traka skrivena: kucajte <code>RIBBON</code></td></tr><tr><td>U SketchUpu nema trake</td><td>traka isključena</td><td><strong>View → Toolbars…</strong> → Vanjsko uređenje PRO</td></tr><tr><td>Izmjena u AutoCAD-u se ne vidi u SketchUpu</td><td>paket nije ponovo izvezen</td><td><strong>SketchUp razmjena → Izvoz paketa</strong>, pa u SketchUpu <strong>Ažuriranje iz paketa</strong></td></tr><tr><td>Nešto je pošlo krivo</td><td>–</td><td>Ctrl+Z poništava cijelu naredbu; sigurnosne kopije: <strong>Postavke i pomoć → Oporavak</strong></td></tr></tbody></table>
+<p>---</p>
+<h2 id="9-kontrolna-lista-za-odštampati">9. Kontrolna lista za odštampati</h2>
+<pre>PRIPREMA                                   (kartica VANJSKO UREĐENJE PRO)
+[ ] Kopija DWG-a otvorena
+[ ] Jedinica izmjerena (Measure / DIST): mm / cm / m = ________
+[ ] Projekt → Novi projekat        – naziv, jedinica, ishodište na parceli, sjever, mjerilo
+[ ] Uvoz DWG-a → Mapiranje slojeva – parcela, tlocrti objekata, oznake kota (+ teren)
+[ ] Uvoz DWG-a → Provjera crteža   – nema GREŠAKA
+[ ] Teren i kote → Nulta kota      – ±0,00 = ________ m n.v., parter, saobraćajnice
+[ ] Uvoz DWG-a → Preuzmi objekte   – parcela i objekti preuzeti
+[ ] Teren i kote → Kote iz oznaka / Dodijeli kotu
+[ ] Teren i kote → Model terena    – samo ako postoji geodetski snimak
+
+PROJEKTOVANJE
+[ ] Parter i popločanje            – popločanja, ivičnjaci, ograde, zidovi, stepenice
+[ ] Saobraćaj i parking            – ceste, parking, staze
+[ ] Zelenilo                       – stabla, grmlje, gredice, travnjaci
+[ ] Rasvjeta / Urbani mobilijar / Infrastruktura
+[ ] Nacrti i oznake                – Numeracija, Oznaka, Legenda, Sastavnica
+
+KONTROLA I IZVOZ
+[ ] Provjera projekta → Provjeri projekat
+[ ] Količinski obračun → Tabele
+[ ] Ctrl+S, pa SketchUp razmjena → Izvoz paketa → ________.sdpkg
+
+SKETCHUP
+[ ] Extensions → Vanjsko uređenje PRO → Uvoz paketa → Standardni kvalitet → Uvezi
+[ ] Scene i sjene pregledane
+[ ] Za izmjene: Izvoz paketa (AutoCAD) → Ažuriranje iz paketa (SketchUp)</pre>
+<p>---</p>
+<p>Sljedeće čitanje: <a href="prirucnik.html">Priručnik</a> – svako dugme i svaka naredba detaljno; šifre poruka i šta s njima.</p></body></html>
