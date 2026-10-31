@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – Instalacija i oporavak</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}</style></head><body><nav><a href="index.html">Uputstvo</a><a href="prvi-projekat.html">Prvi projekat (za početnike)</a><a href="prirucnik.html">Priručnik (sve opcije)</a><a href="instalacija.html">Instalacija i oporavak</a><a href="kompatibilnost.html">Kompatibilnost</a><a href="ogranicenja.html">Ograničenja</a><a href="testiranje.html">Izvještaj testiranja</a><a href="licence.html">Registar licenci</a></nav><h1 id="instalacija-nadogradnja-i-oporavak">Instalacija, nadogradnja i oporavak</h1>
+<blockquote><p><strong>Važno:</strong> nijedno proširenje još nije instalirano ni pokrenuto u AutoCAD-u ili SketchUpu. Razvojno okruženje nije imalo Windows, AutoCAD ni SketchUp. Koraci ispod slijede dokumentovane mehanizme Autodesk Autoloadera i SketchUp Extension Managera. Ako nešto ne radi, pošaljite ispis iz komandne linije AutoCAD-a ili Ruby konzole i dnevnike navedene ispod.</p></blockquote>
+<h2 id="autocad--automatska-instalacija-preporučeno">AutoCAD – automatska instalacija (preporučeno)</h2>
+<p><strong>Gotov paket:</strong></p>
+<ol>
+<li>Uzmite <code>dist/VanjskoUredjenjePRO-AutoCAD-instalacija.zip</code>, zatvorite AutoCAD i raspakujte <strong>cijeli</strong> zip.
+</li>
+<li>Dvostruki klik na <code>INSTALIRAJ.bat</code>. Skripta:
+<ul>
+<li>u registru pronalazi instalirane verzije AutoCAD-a 2020–2027 (uključujući Civil 3D i Map 3D na istoj osnovi) i ispisuje koje su podržane;
+</li>
+<li>uklanja stare kopije dodatka (da se ne učita dvaput);
+</li>
+<li>kopira <code>SiteDesignPro.bundle</code> u <code>%APPDATA%\Autodesk\ApplicationPlugins</code> i skida Windows blokadu s datoteka;
+</li>
+<li>dodaje folder u pouzdane putanje (<code>TRUSTEDPATHS</code>) svakog profila pronađenih AutoCAD-a.
+</li></ul>
+</li>
+<li><code>INSTALIRAJ_ZA_SVE_KORISNIKE.bat</code> instalira u <code>%ProgramData%</code> (UAC upit). <code>DEINSTALIRAJ.bat</code> uklanja dodatak.
+</li></ol>
+<p><strong>Kompajliranje iz izvornog koda:</strong> u korijenu repozitorija pokrenite <code>IZGRADI_I_INSTALIRAJ.bat</code>.</p>
+<ul>
+<li>Potreban je .NET SDK 8, a za AutoCAD 2027 i .NET SDK 10.
+</li>
+<li>Kompajliraju se samo verzije za pronađene AutoCAD-e. Ako nijedan nije pronađen, kompajliraju se sve.
+</li>
+<li>Sklopljeni paket se zatim instalira kao gore.
+</li></ul>
+<p>Dnevnik instalacije je <code>%TEMP%\VanjskoUredjenjePRO-instalacija.log</code>. Skripte nisu pokrenute na Windowsu tokom razvoja: provjerena je samo sintaksa i logika koja ne zavisi od registra (PowerShell 7 na Linuxu).</p>
+<h2 id="autocad-2020--2027-windows--ručna-instalacija">AutoCAD 2020 – 2027 (Windows) – ručna instalacija</h2>
+<p>Paket <code>SiteDesignPro.bundle</code> sadrži četiri verzije dodatka. Autoloader bira odgovarajuću prema verziji AutoCAD-a:</p>
+<table><thead><tr><th>AutoCAD</th><th>Interna verzija</th><th>Folder u paketu</th><th>.NET</th></tr></thead><tbody><tr><td>2020</td><td>R23.1</td><td><code>Contents\Win64\R23</code></td><td>.NET Framework 4.7</td></tr><tr><td>2021, 2022, 2023, 2024</td><td>R24.0 – R24.3</td><td><code>Contents\Win64\R24</code></td><td>.NET Framework 4.8</td></tr><tr><td>2025, 2026</td><td>R25.0 – R25.1</td><td><code>Contents\Win64\R25</code></td><td>.NET 8</td></tr><tr><td>2027</td><td>R26.0</td><td><code>Contents\Win64\R26</code></td><td>.NET 10</td></tr></tbody></table>
+<ol>
+<li>Izgradite paket (<code>tools/build_and_test.sh</code>) ili uzmite <code>dist/SiteDesignPro.bundle.zip</code>.
+</li>
+<li>Ako je Windows blokirao preuzetu zip datoteku: desni klik → <em>Properties</em> → <em>Unblock</em>, pa tek onda raspakujte.
+</li>
+<li>Raspakujte tako da folder <code>SiteDesignPro.bundle</code> bude u <code>%APPDATA%\Autodesk\ApplicationPlugins\</code> (trenutni korisnik) ili <code>%PROGRAMDATA%\Autodesk\ApplicationPlugins\</code> (svi korisnici).
+</li>
+<li>Pokrenite AutoCAD. Treba se pojaviti kartica trake <strong>VANJSKO UREĐENJE PRO</strong>.
+</li>
+<li>Ako je <code>SECURELOAD</code> 1 ili 2, dodajte folder paketa u <em>Trusted Locations</em> (OPTIONS → Files).
+</li></ol>
+<p>Ručno učitavanje za testiranje: <code>NETLOAD</code> i odaberite DLL iz foldera koji odgovara verziji AutoCAD-a. Za AutoCAD 2020–2024 uz DLL moraju biti i pomoćne biblioteke (<code>System.Text.Json.dll</code> i ostale iz istog foldera).</p>
+<p>Provjera nakon instalacije:</p>
+<ol>
+<li><code>SDPABOUT</code> – ispisuje verziju, verziju sheme, katalog i putanju dnevnika (<code>%LOCALAPPDATA%\SiteDesignPro\logs\site-design-pro-&lt;datum&gt;.log</code>).
+</li>
+<li>U praznom crtežu <code>SDPSAMPLE</code> → <em>Oba</em>: crta primjer izvornog crteža i primjer projekta.
+</li>
+<li><code>SDPPOMOC</code> otvara ovo uputstvo (<code>Contents\Docs\index.html</code>).
+</li></ol>
+<h2 id="sketchup-2022-ili-noviji">SketchUp 2022 ili noviji</h2>
+<ol>
+<li><em>Window → Extension Manager → Install Extension</em> → odaberite <code>dist/pb_site_design_pro.rbz</code>.
+</li>
+<li>Pojavljuju se meni <strong>Extensions → Vanjsko uređenje PRO</strong> i traka alata <em>Vanjsko uređenje PRO</em> (View → Toolbars ako je skrivena).
+</li>
+<li>Provjera: <em>Uvoz paketa...</em> → <code>dist/samples/residential-complex.sdpkg</code>.
+</li></ol>
+<p>Na SketchUpu starijem od 2022 proširenje se učitava, ali prikazuje upozorenje da verzija nije podržana.</p>
+<p>Dnevnik je <code>site_design_pro.log</code> u privremenom folderu SketchUpa (<em>Extensions → Vanjsko uređenje PRO → Otvori dnevnik (log)</em>).</p>
+<h2 id="nadogradnja-s-verzije-01">Nadogradnja s verzije 0.1</h2>
+<ul>
+<li><strong>AutoCAD:</strong> zatvorite AutoCAD, obrišite stari folder <code>SiteDesignPro.bundle</code> i raspakujte novi. Podaci elemenata u crtežima ostaju (XData/Xrecord). Postavke projekta verzije 1 se automatski nadograđuju na verziju 2. Ne izmišljaju se nulta kota ni visinski datum, pa ih nakon nadogradnje zadajte naredbom <code>SDPDATUM</code>.
+</li>
+<li><strong>Slojevi verzije 0.1</strong> imaju engleske nazive (npr. <code>L-PLNT-TREE</code>). Novi standard koristi nazive <code>VU-…</code>. Stari slojevi se <strong>ne preimenuju automatski</strong>, jer isti nazivi mogu biti i slojevi Vašeg izvornog crteža. Ako ih je napravilo ovo proširenje, pokrenite <code>SDPLAYERS</code> → <em>Stari</em>. Naredba prikazuje listu i traži potvrdu.
+</li>
+<li><strong>SketchUp:</strong> u Extension Manageru deinstalirajte staru verziju, ponovo pokrenite SketchUp i instalirajte novi <code>.rbz</code>. Postojeći modeli zadržavaju grupe i atribute. Nove oznake (tagovi) imaju prefiks <code>VU </code>. Stare oznake <code>SDP …</code> ostaju u modelu dok ih ne obrišete ručno.
+</li>
+<li>Paketi sheme 1.0.0 se i dalje čitaju. Novi paketi imaju shemu 1.1.0 (kote, georeferenca, teren).
+</li></ul>
+<h2 id="sigurnosne-kopije-i-oporavak">Sigurnosne kopije i oporavak</h2>
+<ul>
+<li><strong>AutoCAD:</strong> prije svake veće operacije (preuzimanje objekata, kote iz oznaka, teren, primjena izmjena iz SketchUpa, generatori nizova) dodatak kopira <strong>zadnju sačuvanu verziju</strong> crteža u folder <code>_SDP_backup</code> pored crteža i provjerava kopiju (SHA-256). Nesačuvane izmjene nisu u kopiji, pa crtež sačuvajte prije većih operacija. Cijela operacija je jedan korak <code>UNDO</code>.
+<ul>
+<li><code>SDPKOPIJA</code> – ručna kopija odmah.
+</li>
+<li><code>SDPKOPIJEPOSTAVKE</code> – uključivanje, broj kopija po crtežu i najveća starost. Najnovija kopija se nikad ne briše.
+</li>
+<li><code>SDPOPORAVAK</code> – lista prekinutih operacija i kopija. <em>Otvori</em> vraća kopiju kao <strong>novi crtež</strong> (trenutni crtež se nikad ne prepisuje), <em>Folder</em> otvara folder kopija, <em>Oznaci</em> označava prekinute operacije kao pregledane.
+</li>
+<li>Dnevnik operacija: <code>%APPDATA%\SiteDesignPro\autocad-journal.jsonl</code>. Pri pokretanju AutoCAD-a dodatak javlja prekinute operacije.
+</li></ul>
+</li>
+<li><strong>SketchUp:</strong> prije uvoza i ažuriranja sačuvanog modela pravi se kopija (<code>Model#save_copy</code>) u <code>_SDP_backup</code> pored modela. Dnevnik: <code>%APPDATA%\SiteDesignPro\sketchup-journal.jsonl</code>. Meni: <em>Sigurnosne kopije i oporavak...</em>
+</li></ul>
+<h2 id="deinstalacija">Deinstalacija</h2>
+<ul>
+<li><strong>AutoCAD:</strong> obrišite folder <code>SiteDesignPro.bundle</code>. Crteži zadržavaju geometriju. Podaci elemenata ostaju kao XData/Xrecord i AutoCAD ih bez dodatka zanemaruje.
+</li>
+<li><strong>SketchUp:</strong> Extension Manager → <em>Uninstall</em>. Modeli zadržavaju grupe, oznake i atribute.
+</li></ul></body></html>

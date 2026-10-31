@@ -1,0 +1,64 @@
+<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – Ograničenja</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}</style></head><body><nav><a href="index.html">Uputstvo</a><a href="prvi-projekat.html">Prvi projekat (za početnike)</a><a href="prirucnik.html">Priručnik (sve opcije)</a><a href="instalacija.html">Instalacija i oporavak</a><a href="kompatibilnost.html">Kompatibilnost</a><a href="ogranicenja.html">Ograničenja</a><a href="testiranje.html">Izvještaj testiranja</a><a href="licence.html">Registar licenci</a></nav><h1 id="poznata-ograničenja">Poznata ograničenja</h1>
+<h2 id="nije-provjereno-u-host-aplikacijama">Nije provjereno u host aplikacijama</h2>
+<p>Razvojno okruženje nije imalo Windows, AutoCAD ni SketchUp. Zato:</p>
+<ul>
+<li><strong>Dodatak za AutoCAD se kompajlira za sve četiri verzije, ali nikada nije učitan u AutoCAD.</strong> Traka, paleta, dijalozi (WinForms, WPF), pregledi (jig), šrafure, blokovi, tabele, multileaderi, XData kota i sigurnosne kopije DWG-a nisu provjereni u radu.
+</li>
+<li><strong>Proširenje za SketchUp radilo je samo protiv lažnog (fake) SketchUp API-ja u repozitoriju.</strong> Stvarno ponašanje (orijentacija lica, rupe, mekane ivice, <code>HtmlDialog</code>, undo, <code>save_copy</code>, brzina na velikim modelima) nije provjereno.
+</li>
+<li>HTML dijalozi su testirani u Chromiumu, a ne u SketchUpovom CEF-u.
+</li>
+<li>Paketi <code>.bundle</code> i <code>.rbz</code> su napravljeni, ali nisu instalirani.
+</li>
+<li>Nema stvarnog DWG ni SKP testnog crteža. Ulazni tok rada testiran je na sintetičkom primjeru izvornog crteža.
+</li></ul>
+<h2 id="kote-teren-i-georeferenciranje">Kote, teren i georeferenciranje</h2>
+<ul>
+<li>Kota se dodjeljuje elementima projekta i, preko XData, običnim objektima crteža. Mijenjaju se <code>Elevation</code> (LW i 2D polilinije, šrafure) ili Z (blokovi, tačke, linije, krugovi, lukovi).
+<ul>
+<li><strong>3D polilinija se izravnava na zadanu kotu i gubi nagib</strong>; <code>SDPKOTA</code> na to upozorava prije potvrde.
+</li>
+<li>Ostali tipovi objekata (npr. splajn, mreža, solid) ne mogu dobiti kotu i naredba to javlja.
+</li></ul>
+</li>
+<li>Oznake kota se čitaju iz TEXT, MTEXT, multileadera i atributa blokova. Kote iz dimenzija se ne čitaju.
+</li>
+<li>Teren je TIN bez zaglađivanja. Izohipse se dijele na tačke prema postavkama terena.
+<ul>
+<li>Nema automatskog modeliranja usjeka i nasipa oko objekata, ni projektovanog (novog) terena.
+</li>
+<li>Analiza odvodnje prijavljuje samo depresije i nagibe; to nije hidraulički proračun.
+</li></ul>
+</li>
+<li>Transformacija MGI 1901 → WGS84 koristi približne Helmertove parametre (greška nekoliko metara). KML je samo za orijentaciju. Koordinate u crtežu se nikad ne mijenjaju na osnovu KML-a.
+</li>
+<li>Podržani koordinatni sistemi: EPSG:3907–3909, 31275–31277, 25833/25834, 32633/32634. Ostali se mogu upisati, ali se za njih ne računaju geografske koordinate.
+</li></ul>
+<h2 id="funkcionalna-ograničenja">Funkcionalna ograničenja</h2>
+<ul>
+<li>SketchUp → AutoCAD prenosi izmjene parametara te pomjeranje i rotaciju <strong>tačkastih</strong> elemenata. Linije i površine se mijenjaju u AutoCAD-u.
+</li>
+<li>Geometrija mora biti u ravni XY svijeta. Podržani su linije, lukovi, krugovi, lake (LW) i 3D polilinije. Stare 2D polilinije, splajnove i elipse prvo pretvorite u LW poliliniju.
+</li>
+<li>3D modeli su <strong>šematski parametarski prikazi</strong>, a ne proizvodi proizvođača. Realistični modeli su planirani preko dodjele komponenti (pogledajte <a href="licence.html">registar licenci</a>).
+</li>
+<li>Provjere su pomoć pri projektovanju, a <strong>ne provjera usklađenosti s propisima</strong>. Vrijednosti označene za reviziju mora pregledati odgovorni stručnjak. Krugovi pokrivenosti rasvjete su ilustrativni.
+</li>
+<li>Slojevi verzije 0.1 se ne preimenuju automatski (<code>SDPLAYERS</code> → <em>Stari</em>). Oznake <code>SDP …</code> u postojećim SketchUp modelima ostaju.
+</li>
+<li>Jedan projekat po crtežu. SketchUp model može imati više projekata.
+</li>
+<li>Sigurnosna kopija u AutoCAD-u kopira <strong>zadnju sačuvanu</strong> verziju crteža. Nesačuvane izmjene nisu u kopiji. Nedovršena operacija prekinuta padom AutoCAD-a ne može se nastaviti; kopija se otvara kao novi crtež.
+</li>
+<li>Razvojna dokumentacija (arhitektura, build, biblioteka objekata) je ostala na engleskom jeziku.
+</li></ul>
+<h2 id="performanse">Performanse</h2>
+<p>Mjerene su samo za dijelove nezavisne od host aplikacija:</p>
+<ul>
+<li><code>sdp stress</code>;
+</li>
+<li>Ruby graditelji;
+</li>
+<li>triangulacija s nekoliko hiljada tačaka u testovima.
+</li></ul>
+<p>Vrijeme uvoza hiljada elemenata u stvarnom SketchUpu i vrijeme triangulacije velikih geodetskih snimaka u AutoCAD-u nisu poznati.</p></body></html>
