@@ -8,7 +8,7 @@ Vanjsko uređenje PRO ima dva dijela:
 AutoCAD je glavni izvor tlocrta. SketchUp od paketa iz AutoCAD-a gradi 3D model.
 
 **Prvi put koristite program?** Počnite s uputstvom [Prvi projekat](PRVI_PROJEKAT.md) – korak po korak, od
-instalacije do 3D modela.
+instalacije do 3D modela. Samo redoslijed (šta se postavlja prvo, po spisku): [Redoslijed rada](REDOSLIJED_RADA.md).
 
 Ovo je kratki pregled. Svaka naredba, opcija i dijalog detaljno su opisani u [Priručniku](PRIRUCNIK.md).
 
