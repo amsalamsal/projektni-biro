@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using SiteDesignPro.AutoCAD.Data;
 using SiteDesignPro.AutoCAD.Drawing;
+using SiteDesignPro.AutoCAD.Infrastructure;
 using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Exchange;
 using SiteDesignPro.Core.Geometry;
@@ -395,26 +396,43 @@ namespace SiteDesignPro.AutoCAD.Commands
             double f = ctx.Settings.Labels.ScaleDenominator / 1000.0 * ctx.K;
             (string Name, double W, double H) sheet = Sheets[Sheets.Length - 1];
             List<(double X, double Y)> layout = new List<(double X, double Y)>();
+            bool below = false;
             bool fits = false;
             foreach ((string Name, double W, double H) s in Sheets.Where(s => format == "Auto" || s.Name == format))
             {
                 (double uw, double uh) = Usable(s.W, s.H);
-                double columnLimit = Math.Max(leftHeight, (uh * f) - extraTop - extraBottom);
-                (List<(double X, double Y)> pos, double tw, double th) = Columns(tables, columnLimit, gap, h * 3);
-                double totalW = leftWidth + (tables.Count > 0 ? gap + tw : 0);
-                double totalH = Math.Max(leftHeight, th) + extraTop + extraBottom;
                 sheet = s;
-                layout = pos;
-                if (totalW <= uw * f && totalH <= uh * f)
+
+                // a) tables in columns right of the legend
+                double columnLimit = Math.Max(leftHeight, (uh * f) - extraTop - extraBottom);
+                (List<(double X, double Y)> right, double rw, double rh) = Columns(tables, columnLimit, gap, h * 3);
+                if (leftWidth + (tables.Count > 0 ? gap + rw : 0) <= uw * f && Math.Max(leftHeight, rh) + extraTop + extraBottom <= uh * f)
                 {
+                    layout = right;
                     fits = true;
                     break;
                 }
+
+                // b) tables in rows under the plan
+                (List<(double X, double Y)> under, double bw, double bh) = Rows(tables, uw * f, gap, h * 3);
+                if (Math.Max(leftWidth, bw) <= uw * f && leftHeight + extraTop + extraBottom + bh <= uh * f)
+                {
+                    layout = under;
+                    below = true;
+                    fits = true;
+                    break;
+                }
+
+                layout = right;
             }
 
+            Log.Info(Bs.T("Dokumentuj: plan {0}×{1}, lijevo {2}×{3}, {4} tabela, f={5} → {6}{7}", F(plan.Width), F(plan.Height), F(leftWidth), F(leftHeight), tables.Count, F(f), sheet.Name, below ? " (tabele ispod)" : string.Empty));
+            double belowTop = Math.Min(plan.MinY, legend.IsEmpty ? plan.MinY : legend.MinY) - extraBottom;
             for (int i = 0; i < tables.Count; i++)
             {
-                tables[i].Position = new Point3d(leftRight + gap + layout[i].X, plan.MaxY - layout[i].Y, 0);
+                tables[i].Position = below
+                    ? new Point3d(plan.MinX + layout[i].X, belowTop - layout[i].Y, 0)
+                    : new Point3d(leftRight + gap + layout[i].X, plan.MaxY - layout[i].Y, 0);
             }
 
             // north arrow above the plan's right corner, scale bar under the plan
@@ -458,6 +476,8 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Ed.Regen();
         });
 
+        private static string F(double v) => v.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+
         /// <summary>Tables in columns no taller than the limit: offsets from the top-left corner and the total size.</summary>
         private static (List<(double X, double Y)> Positions, double Width, double Height) Columns(List<Table> tables, double limit, double gap, double rowGap)
         {
@@ -479,6 +499,29 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             return (pos, tables.Count > 0 ? x + colW : 0, maxH);
+        }
+
+        /// <summary>Tables left to right in rows no wider than the limit: offsets from the top-left corner and the total size.</summary>
+        private static (List<(double X, double Y)> Positions, double Width, double Height) Rows(List<Table> tables, double limit, double gap, double rowGap)
+        {
+            var pos = new List<(double X, double Y)>();
+            double x = 0, y = 0, rowH = 0, maxW = 0;
+            foreach (Table t in tables)
+            {
+                if (x > 0 && x + t.Width > limit)
+                {
+                    y += rowH + rowGap;
+                    x = 0;
+                    rowH = 0;
+                }
+
+                pos.Add((x, y));
+                rowH = Math.Max(rowH, t.Height);
+                maxW = Math.Max(maxW, x + t.Width);
+                x += t.Width + gap;
+            }
+
+            return (pos, maxW, tables.Count > 0 ? y + rowH : 0);
         }
 
         /// <summary>Paper area (mm) for the drawing: inside the 10 mm border, above the 56 mm title block.</summary>
