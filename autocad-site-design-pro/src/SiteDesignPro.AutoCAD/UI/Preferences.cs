@@ -45,7 +45,8 @@ namespace SiteDesignPro.AutoCAD.UI
         {
             try
             {
-                File.WriteAllText(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
+                // Atomic: an interrupted write (power loss, crash) must not leave a truncated or zero-filled file.
+                Core.Safety.SafeFile.WriteAllTextAtomic(FilePath, JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true }));
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
             {

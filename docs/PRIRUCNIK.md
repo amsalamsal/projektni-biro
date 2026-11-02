@@ -477,7 +477,7 @@ Prikazuje trenutno stanje i probleme (`!`), pa nudi opcije u petlji:
 
 | Opcija | Šta zadajete |
 |---|---|
-| **NultaKota** | apsolutna nadmorska visina ±0,00 objekta (m n.v.), npr. `504,00`. Ako su Z koordinate apsolutne, nudi i da ishodište projekta postavi na tu visinu (u SketchUpu je tada ±0,00 = 0). |
+| **NultaKota** | apsolutna nadmorska visina ±0,00 objekta (m n.v.), npr. `504,00`. Ako je crtež ravan (sve na Z = 0), Z koordinate se automatski tretiraju kao relativne (Z = 0 je ±0,00). Ako crtež ima apsolutne visine, nudi da ishodište projekta postavi na tu visinu (u SketchUpu je tada ±0,00 = 0). |
 | **Parter** | **JednakNultoj** (parter = ±0,00) ili **Razlicit** + kota partera u odnosu na ±0,00 (npr. `-0,15`) |
 | **Saobracajnice** | koliko su saobraćajnice ispod partera, **u cm** (npr. `15`). **Enter na praznom = nije podešeno.** Program nema podrazumijevanu vrijednost. |
 | **Datum** | naziv visinskog datuma (npr. `Trst 1900`) – zapisuje se u izvještaje i paket |

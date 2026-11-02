@@ -76,7 +76,7 @@ dijela B ovdje se **ne rade**; to je urađeno pri pretvaranju.
 | B0 | Windows | Kopirajte DWG i otvorite **kopiju**. | da |
 | B1 | Kucajte `DIST` | Izmjerite nešto poznato (parking 5 m): `5` = m, `500` = cm, `5000` = mm. | **da – prvo** |
 | B2 | **Projekt** → **Novi projekat** (`SDPNEW`) | Naziv, jedinica iz B1, **ishodište = tačka u sredini parcele**, ugao sjevera (`0` ako je sjever gore), mjerilo anotacija (npr. `500`). | **da** |
-| B3 | **Teren i kote** → **Nulta kota** (`SDPDATUM`) | **NultaKota** (npr. `504,00`) → *Postaviti visinu ishodišta…?* **Da** → **Parter** → **Saobracajnice** (cm ispod partera ili Enter) → **Zkoordinate** (Apsolutne ako tačke terena imaju npr. 503,20) → **Izlaz**. | da (ako znate kotu) |
+| B3 | **Teren i kote** → **Nulta kota** (`SDPDATUM`) | **NultaKota** (npr. `504,00`) → (samo ako crtež već ima apsolutne visine: *Postaviti visinu ishodišta…?* **Da**; ravan 2D crtež se sam prebacuje na relativne Z) → **Parter** → **Saobracajnice** (cm ispod partera ili Enter) → **Zkoordinate** (Apsolutne ako tačke terena imaju npr. 503,20) → **Izlaz**. | da (ako znate kotu) |
 | B4 | **Uvoz DWG-a** → **Mapiranje slojeva** (`SDPMAPIRANJE`) | **Prijedlog prema nazivima** → provjerite: *Parcelna granica*, *Tlocrt objekta*, *Oznake kota* (obavezne); teren/izohipse ako imate snimak → **U redu**. | **da** |
 | B5 | **Uvoz DWG-a** → **Provjera crteža** (`SDPPROVJERADWG`) | Popravite sve **GREŠKE** (`PEDIT`→`Close`, `OVERKILL`) i ponavljajte dok ih ne bude. | **da** |
 | B6 | **Uvoz DWG-a** → **Preuzmi objekte** (`SDPPREUZMI`) | Od parcele i tlocrta nastaju elementi. Originalne linije ostaju. | **da** |

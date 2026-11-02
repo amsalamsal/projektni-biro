@@ -24,6 +24,22 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ datum
 
+        /// <summary>True when model space is empty or lies entirely in the plane Z = 0 (a 2D plan).</summary>
+        private static bool DrawingIsFlat(Database db)
+        {
+            try
+            {
+                db.UpdateExt(true);
+                Point3d min = db.Extmin;
+                Point3d max = db.Extmax;
+                return min.X > max.X || (Math.Abs(min.Z) < 1e-6 && Math.Abs(max.Z) < 1e-6);
+            }
+            catch (Autodesk.AutoCAD.Runtime.Exception)
+            {
+                return false;
+            }
+        }
+
         /// <summary>Building zero (±0,00), parterre, road levels, vertical datum and the meaning of drawing Z.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPDATUM", CommandFlags.Modal)]
         public void Datum() => CommandContext.Run("SDPDATUM", ctx =>
@@ -42,7 +58,18 @@ namespace SiteDesignPro.AutoCAD.Commands
                 switch (k)
                 {
                     case "NultaKota":
+                        bool firstZero = !d.BuildingZeroAbsolute.HasValue;
                         d.BuildingZeroAbsolute = InputCommands.NumberText(ctx, "Apsolutna nadmorska visina nulte kote objekta ±0,00 (m n.v.)", d.BuildingZeroAbsolute);
+
+                        // A plan drawn flat (everything at Z = 0) means Z = 0 is ±0,00. Treating such Z as absolute
+                        // would put every element 500+ m below the building zero and flag each one in validation.
+                        if (firstZero && d.DrawingZ == DrawingZMode.Absolute && ctx.Settings.Origin[2] == 0 && DrawingIsFlat(ctx.Db))
+                        {
+                            d.DrawingZ = DrawingZMode.Relative;
+                            ctx.Write(Bs.T("Crtež nema visina (sve je na Z = 0), pa se Z koordinate tretiraju kao relativne: Z = 0 je ±0,00 = {0} m n.v. Za apsolutne kote: SDPDATUM → Zkoordinate.",
+                                Bs.Num(d.BuildingZeroAbsolute.Value, 2)));
+                        }
+
                         if (d.DrawingZ == DrawingZMode.Absolute && ctx.Keyword("Postaviti visinu ishodišta projekta na nultu kotu (u SketchUp-u je tada ±0,00 = 0)? [Da/Ne]", new[] { "Da", "Ne" }, "Da") == "Da")
                         {
                             double[] o = ctx.Settings.Origin;
