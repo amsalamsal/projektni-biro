@@ -594,7 +594,7 @@ namespace SiteDesignPro.AutoCAD.UI
 
     /// <summary>
     /// Validation results grouped by message: errors and warnings first, items for professional review only on
-    /// request. Double-click zooms to the elements of a group; "Odaberi i uredi" opens SDPEDIT for all of them.
+    /// request. Double-click zooms to the elements of a group and selects them (Uredi element then edits them all).
     /// </summary>
     internal sealed class ValidationView : DockPanel
     {
@@ -612,6 +612,7 @@ namespace SiteDesignPro.AutoCAD.UI
             summary.TextWrapping = TextWrapping.Wrap;
             top.Children.Add(summary);
             showReview.Content = SitePalette.Label("Prikaži i stavke za stručni pregled", 11);
+            showReview.ToolTip = "Dvostruki klik na stavku: zumiranje i odabir svih elemenata te stavke.";
             showReview.Click += (s, e) => Log.Guard("Provjera", Render);
             top.Children.Add(showReview);
             SetDock(top, Dock.Top);
@@ -669,14 +670,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 TextBlock res = SitePalette.Label(i.Resolution, 10, true);
                 res.TextWrapping = TextWrapping.Wrap;
                 panel.Children.Add(res);
-                if (groupHandles.Length > 0)
-                {
-                    var edit = new Button { Content = labels.Count > 1 ? "Odaberi svih " + labels.Count + " i uredi" : "Odaberi i uredi", HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 3, 0, 0), Padding = new Thickness(6, 1, 6, 1), FontSize = 11 };
-                    edit.Click += (s, e) => SitePalette.Run("_SDPZOOM " + groupHandles + "\n_SDPEDIT ");
-                    panel.Children.Add(edit);
-                }
-
-                list.Items.Add(new ListBoxItem { Content = panel, Tag = groupHandles, ToolTip = groupHandles.Length > 0 ? "Dvostruki klik: zumiranje na objekte" : null });
+                list.Items.Add(new ListBoxItem { Content = panel, Tag = groupHandles, ToolTip = groupHandles.Length > 0 ? "Dvostruki klik: zumiranje i odabir; zatim Uredi element mijenja sve odabrane" : null });
             }
 
             if (list.Items.Count == 0)
@@ -692,21 +686,42 @@ namespace SiteDesignPro.AutoCAD.UI
     /// </summary>
     internal sealed class FirstStepsView : DockPanel
     {
-        private readonly StackPanel body = new StackPanel { Margin = new Thickness(6) };
+        private readonly ListBox list = new ListBox { BorderThickness = new Thickness(0) };
+        private readonly TextBlock intro = SitePalette.Label("Redoslijed rada. Dvostruki klik na korak ga pokreće; urađeni koraci se sami štikliraju.", 11, true);
 
         public FirstStepsView()
         {
             Background = SitePalette.Back;
-            var refresh = new Button { Content = "Osvježi", Margin = new Thickness(6), Padding = new Thickness(8, 2, 8, 2), HorizontalAlignment = HorizontalAlignment.Right };
-            refresh.Click += (s, e) => Log.Guard("Prvi koraci", Refresh);
-            SetDock(refresh, Dock.Bottom);
-            Children.Add(refresh);
-            Children.Add(new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+            intro.TextWrapping = TextWrapping.Wrap;
+            intro.Margin = new Thickness(6, 6, 6, 4);
+            SetDock(intro, Dock.Top);
+            Children.Add(intro);
+            list.Background = SitePalette.Back;
+            HorizontalContentAlignmentFix(list);
+            Children.Add(list);
+            list.MouseDoubleClick += (s, e) => RunSelected();
+            list.KeyDown += (s, e) =>
+            {
+                if (e.Key == Key.Enter)
+                {
+                    RunSelected();
+                }
+            };
+        }
+
+        private static void HorizontalContentAlignmentFix(ListBox box) => box.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+
+        private void RunSelected()
+        {
+            if (list.SelectedItem is ListBoxItem item && item.Tag is string[] step)
+            {
+                SitePalette.Run(step[0], step[1].Length > 0 ? step[1] : null);
+            }
         }
 
         public void Refresh()
         {
-            body.Children.Clear();
+            list.Items.Clear();
             Document? doc = AcApp.DocumentManager.MdiActiveDocument;
             if (doc == null)
             {
@@ -725,17 +740,13 @@ namespace SiteDesignPro.AutoCAD.UI
                     string cat = m.Type?.Category ?? string.Empty;
                     site |= m.Record.TypeId == "site.boundary";
                     roads |= cat == "roads" || cat == "cycling";
-                    content |= cat == "buildings" || cat == "surfaces" || cat == "landscape" || cat == "furniture" || cat == "lighting" || cat == "recreation";
+                    content |= cat == "buildings" || cat == "furniture" || cat == "structures";
                 }
 
                 sheet = svc.Aux("sheet").Any();
                 tr.Commit();
             }
 
-            TextBlock intro = SitePalette.Label("Redoslijed rada. Kliknite korak da ga pokrenete; urađeni koraci se sami štikliraju.", 11, true);
-            intro.TextWrapping = TextWrapping.Wrap;
-            intro.Margin = new Thickness(0, 0, 0, 8);
-            body.Children.Add(intro);
             Step(1, "Novi projekat", "Naziv, jedinice, mjerilo i nulta kota u jednom prozoru.", "_SDPNEW ", project);
             Step(2, "Nulta kota ±0,00", "Apsolutna visina poda prizemlja (može i kasnije).", "_SDPDATUM ", zero);
             Step(3, "Parcela", "Nacrtajte granicu parcele (pravougaonik ili polilinija).", "_SDPDRAW ", site, "site.boundary");
@@ -748,15 +759,7 @@ namespace SiteDesignPro.AutoCAD.UI
 
         private void Step(int n, string title, string hint, string macro, bool done, string? typeHint = null)
         {
-            var b = new Button
-            {
-                HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                Margin = new Thickness(0, 0, 0, 4),
-                Padding = new Thickness(6, 4, 6, 4),
-                Background = SitePalette.Back,
-                BorderBrush = new SolidColorBrush(done ? Color.FromRgb(0x4E, 0x9A, 0x49) : Color.FromRgb(0x6A, 0x72, 0x7E)),
-            };
-            var row = new DockPanel();
+            var row = new DockPanel { Margin = new Thickness(2, 3, 2, 3) };
             var mark = new TextBlock
             {
                 Text = done ? "✔" : n.ToString(CultureInfo.InvariantCulture),
@@ -774,9 +777,7 @@ namespace SiteDesignPro.AutoCAD.UI
             h.TextWrapping = TextWrapping.Wrap;
             text.Children.Add(h);
             row.Children.Add(text);
-            b.Content = row;
-            b.Click += (s, e) => SitePalette.Run(macro, typeHint);
-            body.Children.Add(b);
+            list.Items.Add(new ListBoxItem { Content = row, Tag = new[] { macro, typeHint ?? string.Empty }, ToolTip = "Dvostruki klik ili Enter: pokreni korak" });
         }
     }
 

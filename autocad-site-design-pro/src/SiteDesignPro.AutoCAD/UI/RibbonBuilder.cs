@@ -24,6 +24,7 @@ namespace SiteDesignPro.AutoCAD.UI
         public void Execute(object? parameter)
         {
             string? macro = (parameter as RibbonCommandItem)?.CommandParameter as string;
+            Log.Info("Traka: " + (macro ?? "(bez naredbe: " + (parameter?.GetType().Name ?? "null") + ")") + ", dokument aktivan: " + (AcApp.DocumentManager.MdiActiveDocument != null));
             if (macro == null)
             {
                 return;

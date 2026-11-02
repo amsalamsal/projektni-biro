@@ -375,34 +375,49 @@ namespace SiteDesignPro.AutoCAD.Commands
                 legend = legend.Include(Extents(ctx, id));
             }
 
-            double x = (legend.IsEmpty ? plan.MaxX : legend.MaxX) + gap;
-            double top = plan.MaxY;
-            double y = top;
-            double columnHeight = Math.Max(plan.Height, legend.IsEmpty ? 0 : legend.Height);
-            double columnWidth = 0;
+            // tables are created first and arranged once the sheet is known
             List<SiteElement> packageFrame = managed.Select(m => PackageWriter.ToPackageFrame(m.Element!, ctx.Settings)).ToList();
             var builder = new ScheduleBuilder(ctx.Catalog);
-            int tables = 0;
+            var tables = new List<Table>();
             foreach (ScheduleDefinition def in builder.Applicable(packageFrame))
             {
                 ScheduleTable table = builder.Build(def, packageFrame, ctx.Settings.Labels.LinearPrecision);
-                ObjectId tid = ScheduleTables.Insert(ctx.Db, ctx.Tr, ctx.Svc, table, new Point3d(x, y, 0), h);
-                var t = (Table)ctx.Tr.GetObject(tid, OpenMode.ForWrite);
-                if (y < top && top - y + t.Height > columnHeight)
-                {
-                    // next column
-                    x += columnWidth + gap;
-                    y = top;
-                    columnWidth = 0;
-                    t.Position = new Point3d(x, y, 0);
-                }
-
-                columnWidth = Math.Max(columnWidth, t.Width);
-                y -= t.Height + (h * 3);
-                tables++;
+                ObjectId tid = ScheduleTables.Insert(ctx.Db, ctx.Tr, ctx.Svc, table, new Point3d(plan.MaxX, plan.MinY, 0), h);
+                tables.Add((Table)ctx.Tr.GetObject(tid, OpenMode.ForWrite));
             }
 
-            // 5. north arrow above the plan's right corner, scale bar under the plan
+            double leftRight = legend.IsEmpty ? plan.MaxX : legend.MaxX;
+            double leftWidth = leftRight - plan.MinX;
+            double leftHeight = Math.Max(plan.Height, legend.IsEmpty ? 0 : legend.Height);
+            double extraTop = h * 10, extraBottom = h * 8;
+
+            // 6. smallest sheet whose drawing area holds the plan, the legend and the tables in columns
+            double f = ctx.Settings.Labels.ScaleDenominator / 1000.0 * ctx.K;
+            (string Name, double W, double H) sheet = Sheets[Sheets.Length - 1];
+            List<(double X, double Y)> layout = new List<(double X, double Y)>();
+            bool fits = false;
+            foreach ((string Name, double W, double H) s in Sheets.Where(s => format == "Auto" || s.Name == format))
+            {
+                (double uw, double uh) = Usable(s.W, s.H);
+                double columnLimit = Math.Max(leftHeight, (uh * f) - extraTop - extraBottom);
+                (List<(double X, double Y)> pos, double tw, double th) = Columns(tables, columnLimit, gap, h * 3);
+                double totalW = leftWidth + (tables.Count > 0 ? gap + tw : 0);
+                double totalH = Math.Max(leftHeight, th) + extraTop + extraBottom;
+                sheet = s;
+                layout = pos;
+                if (totalW <= uw * f && totalH <= uh * f)
+                {
+                    fits = true;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < tables.Count; i++)
+            {
+                tables[i].Position = new Point3d(leftRight + gap + layout[i].X, plan.MaxY - layout[i].Y, 0);
+            }
+
+            // north arrow above the plan's right corner, scale bar under the plan
             ann.NorthArrow(new Point3d(plan.MaxX - (h * 4), plan.MaxY + (h * 7), 0));
             double barLength = NiceLength(plan.Width / ctx.K / 5);
             ann.ScaleBar(new Point3d(plan.MinX, plan.MinY - (h * 5), 0), barLength, 5);
@@ -411,21 +426,6 @@ namespace SiteDesignPro.AutoCAD.Commands
             foreach (ObjectId id in ModelSpaceIds(ctx).Where(i => !before.Contains(i)))
             {
                 content = content.Include(Extents(ctx, id));
-            }
-
-            // 6. smallest sheet that holds everything above the title block
-            double f = ctx.Settings.Labels.ScaleDenominator / 1000.0 * ctx.K;
-            (string Name, double W, double H) sheet = Sheets[Sheets.Length - 1];
-            bool fits = false;
-            foreach ((string Name, double W, double H) s in Sheets.Where(s => format == "Auto" || s.Name == format))
-            {
-                (double uw, double uh) = Usable(s.W, s.H);
-                sheet = s;
-                if (content.Width <= uw * f && content.Height <= uh * f)
-                {
-                    fits = true;
-                    break;
-                }
             }
 
             (double usableW, double usableH) = Usable(sheet.W, sheet.H);
@@ -443,7 +443,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             ctx.Write(Bs.T("List {0} u mjerilu 1:{1}: {2} elemenata označeno, legenda, {3} tabela, sjever, razmjernik i sastavnica.",
-                sheet.Name, CommandContext.F(ctx.Settings.Labels.ScaleDenominator, 0), managed.Count, tables));
+                sheet.Name, CommandContext.F(ctx.Settings.Labels.ScaleDenominator, 0), managed.Count, tables.Count));
             if (renumbered.Count > 0)
             {
                 ctx.Write("Novih brojeva: " + renumbered.Count + ". Ponovno pokretanje zamjenjuje list i oznake bez dupliranja.");
@@ -457,6 +457,29 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             ctx.Ed.Regen();
         });
+
+        /// <summary>Tables in columns no taller than the limit: offsets from the top-left corner and the total size.</summary>
+        private static (List<(double X, double Y)> Positions, double Width, double Height) Columns(List<Table> tables, double limit, double gap, double rowGap)
+        {
+            var pos = new List<(double X, double Y)>();
+            double x = 0, y = 0, colW = 0, maxH = 0;
+            foreach (Table t in tables)
+            {
+                if (y > 0 && y + t.Height > limit)
+                {
+                    x += colW + gap;
+                    y = 0;
+                    colW = 0;
+                }
+
+                pos.Add((x, y));
+                colW = Math.Max(colW, t.Width);
+                y += t.Height + rowGap;
+                maxH = Math.Max(maxH, y - rowGap);
+            }
+
+            return (pos, tables.Count > 0 ? x + colW : 0, maxH);
+        }
 
         /// <summary>Paper area (mm) for the drawing: inside the 10 mm border, above the 56 mm title block.</summary>
         private static (double W, double H) Usable(double w, double h) => (w - 24, h - 20 - 56 - 6);

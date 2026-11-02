@@ -54,6 +54,11 @@ namespace SiteDesignPro.AutoCAD.Commands
         private static void NewProjectFromWindow(CommandContext ctx, ProjectSettings s)
         {
             LengthUnit? ins = UnitConversion.FromInsUnits((int)ctx.Db.Insunits);
+            if (ProjectStore.Read(ctx.Db, ctx.Tr) == null)
+            {
+                s.Name = string.Empty; // no project yet: the default name would be the template's ("acadiso")
+            }
+
             UI.ProjectAnswers? a = UI.ProjectDialog.Ask(s, ins.HasValue ? UnitConversion.Code(ins.Value) : s.DrawingUnit);
             if (a == null)
             {
