@@ -125,8 +125,10 @@ Pronađeno i ispravljeno:
    Provjereno: z = 0 za sve elemente, SDP-G012 nestalo.
 3. `preferences.json` je nakon gašenja računara bio popunjen nulama (dodatak je javio upozorenje i vratio
    zadane postavke). Ispravka: atomski zapis.
-4. Paleta se pri prvom otvaranju pojavljivala kao mali prozor preko dugmadi trake. Ispravka: sidrenje desno
-   (još nije provjereno u AutoCAD-u).
+4. Paleta se pri prvom otvaranju pojavljivala kao mali prozor preko dugmadi trake. Ispravka: jednom po korisniku
+   sidri se desno. Provjereno: paleta se otvara usidrena desno, cijele visine.
+
+Provjereno i: dvostruki klik na stavku u kartici Provjera zumira na element; `SDPSAMPLE` (139 elemenata).
 
 ## Nije testirano
 
