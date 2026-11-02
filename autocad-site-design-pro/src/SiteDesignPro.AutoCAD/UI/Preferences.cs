@@ -20,6 +20,9 @@ namespace SiteDesignPro.AutoCAD.UI
 
         public List<string> Recent { get; set; } = new List<string>();
 
+        /// <summary>Version of the palette's first-show layout already applied (docked right); 0 = never.</summary>
+        public int PaletteLayout { get; set; }
+
         private static string FilePath => Path.Combine(AcadEnv.UserDirectory, "preferences.json");
 
         public static Preferences Current => current ??= Load();
