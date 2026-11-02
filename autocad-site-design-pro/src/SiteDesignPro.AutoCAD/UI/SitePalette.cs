@@ -76,7 +76,23 @@ namespace SiteDesignPro.AutoCAD.UI
         internal static void Run(string macro)
         {
             Document? doc = AcApp.DocumentManager.MdiActiveDocument;
-            doc?.SendStringToExecute(macro, true, false, true);
+            if (doc == null)
+            {
+                return;
+            }
+
+            doc.SendStringToExecute(macro, true, false, true);
+
+            // A click on the ribbon or the palette leaves keyboard focus there, so answers typed at the command's
+            // prompts would not reach the command line. Hand focus back to the drawing, as AutoCAD's own buttons do.
+            try
+            {
+                Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+            }
+            catch (System.Exception)
+            {
+                // Focus is a convenience; the command itself has already been queued.
+            }
         }
 
         internal static Brush Back => Icons.DarkTheme ? new SolidColorBrush(Color.FromRgb(0x3B, 0x44, 0x53)) : new SolidColorBrush(Color.FromRgb(0xF5, 0xF5, 0xF5));

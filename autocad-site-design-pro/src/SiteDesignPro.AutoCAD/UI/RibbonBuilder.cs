@@ -24,10 +24,9 @@ namespace SiteDesignPro.AutoCAD.UI
         public void Execute(object? parameter)
         {
             string? macro = (parameter as RibbonCommandItem)?.CommandParameter as string;
-            Document? doc = AcApp.DocumentManager.MdiActiveDocument;
-            if (macro != null && doc != null)
+            if (macro != null)
             {
-                doc.SendStringToExecute(macro, true, false, true);
+                SitePalette.Run(macro);
             }
         }
     }
