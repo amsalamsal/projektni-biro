@@ -2,6 +2,30 @@
 
 ## Neobjavljeno
 
+### Jednostavnije za korištenje
+* **Ulica** (`SDPULICA`): cijeli profil ulice iz jedne osovine – kolovoz, ivičnjaci, trotoari, biciklističke staze,
+  drvoredi i rasvjeta. Profili Stambena, Sabirna, Bulevar, Pješačka, Prilaz; širina kolovoza se pita.
+* **Kružni tok** (`SDPKRUZNITOK`): prsten, ivičnjaci, srednje ostrvo sa zelenilom, krakovi s razdjelnim ostrvima,
+  pješačkim prelazima, strelicama i saobraćajnim znakovima.
+* **Dokumentuj list** (`SDPDOKUMENTUJ`): jednim klikom oznake, površine, širine, legenda, tabele, sjever, razmjernik
+  i sastavnica na najmanjem listu koji stane (A3–A0); tabele idu desno od legende ili ispod plana.
+  Ponovno pokretanje zamjenjuje list bez dupliranja.
+* **Novi projekat u jednom prozoru** umjesto osam pitanja u komandnoj liniji; na ravnom 2D crtežu nulta kota
+  automatski bira relativne Z.
+* **Izbor tipa sa slikama**: kad naredba treba tip, otvara se lista s pretragom, kategorijama, nedavnim i omiljenim –
+  nema više kucanja id-ova. Dugmad trake i dvoklik u biblioteci odmah predaju odabrani tip.
+* **Širina se pita pri crtanju** staza, puteva, kanala i ivičnjaka (`SDPDRAW`, `SDPCONVERT`); zadnja širina po tipu
+  se pamti.
+* **Decimalni zarez svuda** u komandnoj liniji (npr. `4,5`), uz tačku.
+* **Traka sa 6 panela** (Projekat, Crtanje, Izmjena, Dokumentacija, Provjera i izvoz, Pomoć) i padajući meni
+  **Napredno** za rijetke naredbe; padajući meniji tipova po kategorijama.
+* **Svojstva se mijenjaju odmah** na kartici Svojstva (Enter, izlaz iz polja ili izbor) – bez dugmeta Primijeni.
+* **Oznake se ne preklapaju**: oznaka koja bi pala preko druge pomjera se dijagonalno.
+* **Mirnija provjera**: iste poruke su grupisane (×N), stavke „za stručni pregled“ su skrivene dok se ne uključe,
+  dvoklik zumira na sve elemente grupe.
+* **Prvi koraci** (`SDPPRVIKORACI`, kartica u paleti): 8 koraka od projekta do izvoza koji se sami štikliraju;
+  dvoklik pokreće korak.
+
 ### Ispravljeno
 * AutoCAD 2021: površine sa šrafurom (22 tipa) nisu se mogle napraviti (`eInvalidInput`); `SDPSAMPLE` i `SDPDRAW` su padali.
 * `SDPDRAW`: nakon greške više ne ostaje zaostala polilinija.

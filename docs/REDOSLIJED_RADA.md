@@ -8,6 +8,11 @@ Objašnjenja s primjerima su u [Prvi projekat](PRVI_PROJEKAT.md), sve opcije u [
 > crtanje → provjera → izvoz*. Ako se preskoči korak koji je ranije na spisku, kasniji koraci daju pogrešne
 > mjere ili visine.
 
+> **Najkraći put (novo):** **Prvi koraci** (ploča *Projekat*) otvara spisak od 8 koraka koji se sami štikliraju –
+> dvoklik na korak ga pokreće. **Novi projekat** je jedan prozor. Ulicu cijelog profila crta **Ulica**, raskrsnicu
+> **Kružni tok**, a cijeli list s oznakama, legendom i tabelama pravi **Dokumentuj list**. Kad naredba traži tip,
+> otvara se lista sa slikama i pretragom; širine i brojevi se mogu pisati sa zarezom (`4,5`).
+
 ---
 
 ## Šta mora biti postavljeno prije čega

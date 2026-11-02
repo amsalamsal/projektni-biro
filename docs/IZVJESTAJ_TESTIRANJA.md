@@ -130,6 +130,31 @@ Pronađeno i ispravljeno:
 
 Provjereno i: dvostruki klik na stavku u kartici Provjera zumira na element; `SDPSAMPLE` (139 elemenata).
 
+## Test pojednostavljenja (prvi računar, 2.11.2026.)
+
+Novih 12 olakšica isprobano klikovima, zatim cijeli tok skriptom `testjednostavno.scr` (AutoCAD 2021).
+
+| Korak | Rezultat |
+|---|---|
+| Traka: 6 panela + Napredno | sve naredbe dostupne; klik na *Prvi koraci* otvara paletu |
+| Novi projekat (jedan prozor) | naziv, broj, investitor, jedinica, mjerilo, nulta kota 520,15; na ravnom crtežu relativne Z |
+| Prvi koraci | koraci se sami štikliraju (projekat, nulta kota, parcela, ulice, objekti, list, provjera, izvoz) |
+| Padajući meni tipa na traci → parcela | tip predat bez kucanja id-a |
+| Ulica, profil Sabirna | 1 kolovoz, 2 ivičnjaka, 2 biciklističke staze, 2 razdjelne linije, 2 trake popločanja, 12 svjetiljki, 30 stabala |
+| Ulica, profil Bulevar sa širinom `7,5`; Stambena na postojećoj osovini | ispravni profili, zarez prihvaćen |
+| Kružni tok s 3 i 4 kraka | 27 elemenata, strelice u smjeru suprotnom kazaljci |
+| Izbor tipa: pretraga „tlocrt“ + Enter | prozor s pregledima; tip odabran |
+| Staza kroz traku: pitanje širine `<3,5>`, odgovor `4,5` | širina primijenjena i zapamćena za idući put |
+| Pretvori krive: krug → cesta širine 5 | širina se pita poslije tipa |
+| Kartica Svojstva | izmjena se primjenjuje odmah (Enter / izlaz iz polja) |
+| Dokumentuj list | 97 elemenata označeno, legenda, 9 tabela, sjever, razmjernik i sastavnica na listu **A1** (tabele ispod plana) |
+| Provjera | 0 grešaka, 18 upozorenja grupisano, 38 stavki za stručni pregled skriveno; dvoklik zumira na grupu |
+| Izvoz | 97 elemenata u paket |
+
+Pronađeno i ispravljeno tokom testa: dugmad koraka u paleti trebala su dva klika (sada lista s dvoklikom);
+zadani naziv projekta bio je „acadiso“; *Dokumentuj list* je birao A0 jer su sve tabele išle u jedan red ili jednu
+kolonu – sada slaže kolone po visini lista ili redove ispod plana i bira najmanji list (A1 za ovaj test).
+
 ## Nije testirano
 
 * učitavanje i rad dodatka u AutoCAD-u 2020–2027;
