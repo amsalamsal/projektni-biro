@@ -103,6 +103,31 @@ Otvoreno: `SDPDRAW` > Unutar nije našao granicu u dva pokušaja (skript i ručn
 nije stigao da se izvrši. Elementi nacrtani na Z = 0 u projektu s apsolutnim kotama dobijaju upozorenje
 „Visina -520 m“ (ponašanje po dizajnu, za odluku).
 
+## Test korak po korak kroz izradu projekta (prvi računar, 2.11.2026.)
+
+Rad kao novi korisnik: klikovi na traku i paletu, odgovori u komandnoj liniji, zatim cijeli tok projekta skriptom.
+
+| Korak | Rezultat |
+|---|---|
+| Instalacija najnovijeg builda, `SDPABOUT` | dodatak učitan, katalog 263 tipa |
+| Novi projekat (traka) | 8 pitanja, 41 sloj napravljen |
+| Nulta kota (traka), izbor klikom na ključnu riječ | NultaKota 520, parter −0,15 (decimalni zarez prihvaćen), saobraćajnice 15 cm, datum „Trst 1900“ |
+| Biblioteka: pretraga „parcel“, dvostruki klik, pravougaonik | parcela 120 × 80 m |
+| Cesta iz palete, druga cesta komandom, krug → Pretvori krive (traka) | kružni tok; nejasan naziv („travnjak“) nudi popis id-ova |
+| Skripta `testnaselje2.scr`: 81 element, širine (`SDPEDIT`), drvored, raster voćaka, 14 parking mjesta, oznake, legenda, tabele, okvir A1, provjera, izvoz | 0 grešaka; 9 upozorenja su stvarne kolizije i izlazak ceste iz parcele |
+
+Pronađeno i ispravljeno:
+
+1. Poslije klika na dugme trake (i palete) fokus je ostajao na traci, pa se otkucani odgovori (naziv projekta…)
+   gubili. Ispravka: `SetFocusToDwgView` nakon slanja komande. Provjereno: nakon ispravke se odgovori kucaju odmah.
+2. Na ravnom crtežu NultaKota + „Da“ podizala je ishodište na 520 m: svih 81 elemenata u paketu imalo je
+   z = −520 m i upozorenje SDP-G012. Ispravka: prvi unos nulte kote na ravnom crtežu bira relativne Z.
+   Provjereno: z = 0 za sve elemente, SDP-G012 nestalo.
+3. `preferences.json` je nakon gašenja računara bio popunjen nulama (dodatak je javio upozorenje i vratio
+   zadane postavke). Ispravka: atomski zapis.
+4. Paleta se pri prvom otvaranju pojavljivala kao mali prozor preko dugmadi trake. Ispravka: sidrenje desno
+   (još nije provjereno u AutoCAD-u).
+
 ## Nije testirano
 
 * učitavanje i rad dodatka u AutoCAD-u 2020–2027;

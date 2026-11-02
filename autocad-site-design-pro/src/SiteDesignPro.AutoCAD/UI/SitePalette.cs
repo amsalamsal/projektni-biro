@@ -54,6 +54,14 @@ namespace SiteDesignPro.AutoCAD.UI
             }
 
             set.Visible = true;
+
+            // On first use AutoCAD floats a new palette as a small window in the top-left corner, over the ribbon
+            // buttons. Dock it on the right instead; a size or position the user chose later is kept by AutoCAD.
+            if (set.Dock == DockSides.None && (set.Size.Width < set.MinimumSize.Width || set.Size.Height < set.MinimumSize.Height))
+            {
+                set.Dock = DockSides.Right;
+            }
+
             if (category != null)
             {
                 library!.SetCategory(category);

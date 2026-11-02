@@ -14,6 +14,11 @@
 * Sigurnosna kopija sačuvanog (otvorenog) crteža više se ne prijavljuje kao neuspjela.
 * Provjera ulaznog DWG-a i mapiranje slojeva ne ubrajaju slojeve samog dodatka.
 * `SDPZOOM`/`SDPSETPARAM` na pogrešnom handleu, `SDPEDIT` s više tipova, `SDPKOTEIZOZNAKA` na „Ne“.
+* Nakon klika na dugme trake ili palete odgovori koje korisnik kuca sada stižu u komandnu liniju (fokus se vraća crtežu).
+* `SDPDATUM` → NultaKota na ravnom 2D crtežu (sve na Z = 0) tretira Z kao relativne; ranije je cijeli model u paketu
+  završavao npr. 520 m ispod nulte kote, a provjera je javljala SDP-G012 za svaki element.
+* Korisničke postavke se zapisuju atomski; nestanak struje više ne ostavlja oštećen `preferences.json`.
+* Paleta se pri prvom otvaranju sidri desno umjesto da kao mali prozor prekrije dugmad trake.
 
 ### Dodano
 * GitHub Actions: izgradnja i testovi pri svakom slanju; gotovi paketi na grani `builds/<grana>`.
