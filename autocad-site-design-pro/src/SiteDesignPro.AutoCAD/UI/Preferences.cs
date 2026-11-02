@@ -20,6 +20,12 @@ namespace SiteDesignPro.AutoCAD.UI
 
         public List<string> Recent { get; set; } = new List<string>();
 
+        /// <summary>Last width (m) used per path type, offered as the default the next time.</summary>
+        public Dictionary<string, double> Widths { get; set; } = new Dictionary<string, double>(StringComparer.Ordinal);
+
+        /// <summary>Last answers of the project window (sheet title, scale) and other small defaults.</summary>
+        public Dictionary<string, string> Defaults { get; set; } = new Dictionary<string, string>(StringComparer.Ordinal);
+
         /// <summary>Version of the palette's first-show layout already applied (docked right); 0 = never.</summary>
         public int PaletteLayout { get; set; }
 
@@ -66,6 +72,24 @@ namespace SiteDesignPro.AutoCAD.UI
                 Recent.RemoveRange(12, Recent.Count - 12);
             }
 
+            Save();
+        }
+
+        public double? LastWidth(string typeId) => Widths != null && Widths.TryGetValue(typeId, out double w) && w > 0 ? w : (double?)null;
+
+        public void RememberWidth(string typeId, double width)
+        {
+            Widths ??= new Dictionary<string, double>(StringComparer.Ordinal);
+            Widths[typeId] = width;
+            Save();
+        }
+
+        public string Default(string key, string fallback) => Defaults != null && Defaults.TryGetValue(key, out string? v) && !string.IsNullOrEmpty(v) ? v : fallback;
+
+        public void RememberDefault(string key, string value)
+        {
+            Defaults ??= new Dictionary<string, string>(StringComparer.Ordinal);
+            Defaults[key] = value;
             Save();
         }
 

@@ -24,6 +24,32 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ datum
 
+        /// <summary>
+        /// Sets the building zero. On a flat 2D plan the drawing Z becomes relative (Z = 0 is ±0,00); with absolute Z
+        /// the project origin may be lifted to the zero (asked on the command line, or done directly from the window).
+        /// </summary>
+        internal static void SetBuildingZero(CommandContext ctx, ElevationDatum d, double zero, bool askOrigin)
+        {
+            bool firstZero = !d.BuildingZeroAbsolute.HasValue;
+            d.BuildingZeroAbsolute = zero;
+
+            // A plan drawn flat (everything at Z = 0) means Z = 0 is ±0,00. Treating such Z as absolute
+            // would put every element 500+ m below the building zero and flag each one in validation.
+            if (firstZero && d.DrawingZ == DrawingZMode.Absolute && ctx.Settings.Origin[2] == 0 && DrawingIsFlat(ctx.Db))
+            {
+                d.DrawingZ = DrawingZMode.Relative;
+                ctx.Write(Bs.T("Crtež nema visina (sve je na Z = 0), pa se Z koordinate tretiraju kao relativne: Z = 0 je ±0,00 = {0} m n.v. Za apsolutne kote: SDPDATUM → Zkoordinate.",
+                    Bs.Num(zero, 2)));
+            }
+
+            if (d.DrawingZ == DrawingZMode.Absolute &&
+                (!askOrigin || ctx.Keyword("Postaviti visinu ishodišta projekta na nultu kotu (u SketchUp-u je tada ±0,00 = 0)? [Da/Ne]", new[] { "Da", "Ne" }, "Da") == "Da"))
+            {
+                double[] o = ctx.Settings.Origin;
+                ctx.Settings.Origin = new[] { o[0], o[1], zero * ctx.K };
+            }
+        }
+
         /// <summary>True when model space is empty or lies entirely in the plane Z = 0 (a 2D plan).</summary>
         private static bool DrawingIsFlat(Database db)
         {
@@ -58,24 +84,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 switch (k)
                 {
                     case "NultaKota":
-                        bool firstZero = !d.BuildingZeroAbsolute.HasValue;
-                        d.BuildingZeroAbsolute = InputCommands.NumberText(ctx, "Apsolutna nadmorska visina nulte kote objekta ±0,00 (m n.v.)", d.BuildingZeroAbsolute);
-
-                        // A plan drawn flat (everything at Z = 0) means Z = 0 is ±0,00. Treating such Z as absolute
-                        // would put every element 500+ m below the building zero and flag each one in validation.
-                        if (firstZero && d.DrawingZ == DrawingZMode.Absolute && ctx.Settings.Origin[2] == 0 && DrawingIsFlat(ctx.Db))
-                        {
-                            d.DrawingZ = DrawingZMode.Relative;
-                            ctx.Write(Bs.T("Crtež nema visina (sve je na Z = 0), pa se Z koordinate tretiraju kao relativne: Z = 0 je ±0,00 = {0} m n.v. Za apsolutne kote: SDPDATUM → Zkoordinate.",
-                                Bs.Num(d.BuildingZeroAbsolute.Value, 2)));
-                        }
-
-                        if (d.DrawingZ == DrawingZMode.Absolute && ctx.Keyword("Postaviti visinu ishodišta projekta na nultu kotu (u SketchUp-u je tada ±0,00 = 0)? [Da/Ne]", new[] { "Da", "Ne" }, "Da") == "Da")
-                        {
-                            double[] o = ctx.Settings.Origin;
-                            ctx.Settings.Origin = new[] { o[0], o[1], d.BuildingZeroAbsolute.Value * ctx.K };
-                        }
-
+                        SetBuildingZero(ctx, d, InputCommands.NumberText(ctx, "Apsolutna nadmorska visina nulte kote objekta ±0,00 (m n.v.)", d.BuildingZeroAbsolute), askOrigin: true);
                         break;
                     case "Parter":
                         if (ctx.Keyword("Glavni parter [JednakNultoj/Razlicit]", new[] { "JednakNultoj", "Razlicit" }, d.ParterreEqualsBuildingZero ? "JednakNultoj" : "Razlicit") == "JednakNultoj")

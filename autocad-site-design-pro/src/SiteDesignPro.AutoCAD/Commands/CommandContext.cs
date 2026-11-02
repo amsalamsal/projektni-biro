@@ -214,16 +214,49 @@ namespace SiteDesignPro.AutoCAD.Commands
             return r.StringResult.Length == 0 && defaultValue != null ? defaultValue : r.StringResult;
         }
 
+        /// <summary>
+        /// Number prompt that accepts both the decimal comma (Bosnian) and the decimal point. The default is shown
+        /// with a comma and Enter accepts it.
+        /// </summary>
         public double Number(string message, double defaultValue, bool allowNegative = false, bool allowZero = false)
         {
-            var o = new PromptDoubleOptions("\n" + message) { DefaultValue = defaultValue, UseDefaultValue = true, AllowNegative = allowNegative, AllowZero = allowZero };
-            PromptDoubleResult r = Ed.GetDouble(o);
-            if (r.Status != PromptStatus.OK)
+            for (int attempt = 0; attempt < 6; attempt++)
             {
-                throw new CommandCancelled();
+                var o = new PromptStringOptions("\n" + message + " <" + F(defaultValue, 4) + ">: ") { AllowSpaces = false };
+                PromptResult r = Ed.GetString(o);
+                if (r.Status != PromptStatus.OK)
+                {
+                    throw new CommandCancelled();
+                }
+
+                string text = r.StringResult.Trim();
+                if (text.Length == 0)
+                {
+                    return defaultValue;
+                }
+
+                if (!Core.Text.Bs.TryParse(text, out double v))
+                {
+                    Write("Upišite broj, npr. 2,5 ili 2.5.");
+                    continue;
+                }
+
+                if (v < 0 && !allowNegative)
+                {
+                    Write("Vrijednost ne može biti negativna.");
+                    continue;
+                }
+
+                if (v == 0 && !allowZero)
+                {
+                    Write("Vrijednost mora biti veća od nule.");
+                    continue;
+                }
+
+                return v;
             }
 
-            return r.Value;
+            throw new CommandCancelled();
         }
 
         public int Integer(string message, int defaultValue, int min = 1)
@@ -348,9 +381,72 @@ namespace SiteDesignPro.AutoCAD.Commands
             return result;
         }
 
-        /// <summary>Asks for an element type by id or name fragment, optionally restricted to geometry kinds.</summary>
+        /// <summary>
+        /// Element type preselected by the ribbon or the palette for the next command (instead of typing its id into
+        /// the command line). Consumed by the first <see cref="ChooseType"/> call that accepts its geometry.
+        /// </summary>
+        public static string? TypeHint
+        {
+            get => typeHint != null && (DateTime.UtcNow - typeHintSet).TotalSeconds < 15 ? typeHint : null;
+            set
+            {
+                typeHint = value;
+                typeHintSet = DateTime.UtcNow;
+            }
+        }
+
+        private static string? typeHint;
+        private static DateTime typeHintSet;
+
+        /// <summary>
+        /// True when a person runs the command (dialogs may open); false inside scripts, AutoLISP calls or with
+        /// FILEDIA = 0, where every answer comes from the command line.
+        /// </summary>
+        public static bool Interactive
+        {
+            get
+            {
+                try
+                {
+                    int active = Convert.ToInt32(AcApp.GetSystemVariable("CMDACTIVE"), CultureInfo.InvariantCulture);
+                    int filedia = Convert.ToInt32(AcApp.GetSystemVariable("FILEDIA"), CultureInfo.InvariantCulture);
+                    return (active & (4 | 32)) == 0 && filedia != 0;
+                }
+                catch (System.Exception)
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Asks for an element type: a type preselected by the ribbon or palette, otherwise a searchable list window
+        /// for a person, or an id / name fragment typed in the command line in scripts.
+        /// </summary>
         public ElementType ChooseType(string message, string? argument, params GeometryKind[] kinds)
         {
+            if (argument == null && TypeHint != null)
+            {
+                ElementType? hinted = Catalog.FindType(TypeHint);
+                TypeHint = null;
+                if (hinted != null && (kinds.Length == 0 || kinds.Contains(hinted.Geometry)))
+                {
+                    return hinted;
+                }
+            }
+
+            if (argument == null && Interactive)
+            {
+                ElementType? picked = UI.TypePickerDialog.Pick(message, kinds);
+                if (picked == null)
+                {
+                    throw new CommandCancelled();
+                }
+
+                Write(message + ": " + picked.Name);
+                return picked;
+            }
+
             string query = argument ?? Text(message + " (id tipa ili dio naziva, ? za popis)", null, true);
             for (int attempt = 0; attempt < 5; attempt++)
             {

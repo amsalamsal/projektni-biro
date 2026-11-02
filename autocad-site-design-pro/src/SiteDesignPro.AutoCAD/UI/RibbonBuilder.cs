@@ -24,7 +24,18 @@ namespace SiteDesignPro.AutoCAD.UI
         public void Execute(object? parameter)
         {
             string? macro = (parameter as RibbonCommandItem)?.CommandParameter as string;
-            if (macro != null)
+            if (macro == null)
+            {
+                return;
+            }
+
+            // "hint:<type id>|<command>": the element type is handed to the command directly, not typed in
+            if (macro.StartsWith(RibbonBuilder.HintPrefix, StringComparison.Ordinal))
+            {
+                int bar = macro.IndexOf('|');
+                SitePalette.Run(macro.Substring(bar + 1), macro.Substring(RibbonBuilder.HintPrefix.Length, bar - RibbonBuilder.HintPrefix.Length));
+            }
+            else
             {
                 SitePalette.Run(macro);
             }
@@ -38,6 +49,9 @@ namespace SiteDesignPro.AutoCAD.UI
     internal static class RibbonBuilder
     {
         public const string TabId = "SITE_DESIGN_PRO_TAB";
+
+        /// <summary>Command parameter prefix of buttons that hand an element type to the command.</summary>
+        public const string HintPrefix = "hint:";
         private static readonly RibbonCommandHandler Handler = new RibbonCommandHandler();
 
         public static void Create()
@@ -57,138 +71,150 @@ namespace SiteDesignPro.AutoCAD.UI
             var tab = new RibbonTab { Title = "VANJSKO UREĐENJE PRO", Id = TabId };
             ElementCatalog cat = AcadEnv.Catalog;
 
-            tab.Panels.Add(Panel("Projekt",
-                Large("Novi projekat", "SDPNEW", "new", "Postavke projekta: naziv, jedinice, ishodište, sjever, razmjera."),
-                Stack(Small("Postavke", "SDPSETTINGS", "settings", "Postavke projekta: jedinice, ishodište, sjever, razmjera oznaka, numeracija."),
-                      Small("Slojevi", "SDPLAYERS", "layers", "Napravi, popravi ili provjeri standard slojeva proširenja (izvorni slojevi se ne mijenjaju)."),
-                      Small("Biblioteka", "SDPBROWSER", "browser", "Paleta: biblioteka elemenata, svojstva i rezultati provjere.")),
-                Break(),
-                Small("Primjer projekta", "SDPSAMPLE", "sample", "Primjer stambenog kompleksa i/ili primjer izvornog crteža za učenje toka rada.")));
+            // Six panels in the order of the work; rarely used tools are under Pomoć → Napredno.
+            tab.Panels.Add(Panel("Projekat",
+                Large("Novi projekat", "SDPNEW", "new", "Naziv, jedinice, mjerilo i nulta kota u jednom prozoru."),
+                Stack(Small("Prvi koraci", "SDPPRVIKORACI", "steps", "Redoslijed rada kao lista: svaki korak pokreće svoju naredbu i štiklira se kad je urađen."),
+                      Small("Nulta kota", "SDPDATUM", "spotlevel", "Nulta kota objekta (±0,00), kota partera i visinski datum."),
+                      Small("Postavke", "SDPSETTINGS", "settings", "Postavke projekta: jedinice, ishodište, sjever, mjerilo, numeracija.")),
+                Stack(Commands("Uvoz DWG-a", "import", "Rad na postojećem crtežu (geodetska podloga, arhitekta).",
+                          Small("Mapiranje slojeva", "SDPMAPIRANJE", "layers", "Povežite slojeve izvornog crteža s ulogama (parcela, objekti, kote...)."),
+                          Small("Provjera crteža", "SDPPROVJERADWG", "validate", "Izvještaj o ulaznom crtežu: jedinice, parcela, objekti, kote."),
+                          Small("Preuzmi objekte", "SDPPREUZMI", "convert", "Mapiranu parcelu i tlocrte objekata pretvara u elemente."),
+                          Small("Pretvori krive", "SDPCONVERT", "convert", "Odabrane polilinije, linije, lukove ili krugove pretvara u elemente.")),
+                      Small("Primjer projekta", "SDPSAMPLE", "sample", "Nacrta primjer projekta za učenje."),
+                      Small("Slojevi", "SDPLAYERS", "layers", "Napravi, popravi ili provjeri standard slojeva."))));
 
-            tab.Panels.Add(Panel("Uvoz DWG-a",
-                Large("Mapiranje slojeva", "SDPMAPIRANJE", "layers", "Povežite slojeve izvornog crteža s ulogama (parcela, objekti, kote...). Nazivi slojeva se ne mijenjaju."),
-                Stack(Small("Provjera crteža", "SDPPROVJERADWG", "validate", "Izvještaj o ulaznom crtežu: jedinice, parcela, objekti, kote, tačke terena. Ništa se ne izmišlja."),
-                      Small("Preuzmi objekte", "SDPPREUZMI", "convert", "Pretvori mapiranu parcelu i tlocrte objekata u elemente. Oznake objekata samo uz potvrdu."),
-                      Small("Pretvori krive", "SDPCONVERT", "convert", "Pretvori odabrane polilinije, linije, lukove ili krugove u elemente.")),
-                Stack(CategorySplits(cat, new[] { "site", "buildings" }).ToArray())));
+            tab.Panels.Add(Panel("Crtanje",
+                Large("Biblioteka", "SDPBROWSER", "browser", "Svi elementi s pretragom; dvostruki klik postavlja ili crta element."),
+                Large("Ulica", "SDPULICA", "street", "Cijela ulica iz jedne osovine: kolovoz, ivičnjaci, biciklističke staze, trotoari, drvored i rasvjeta."),
+                Large("Kružni tok", "SDPKRUZNITOK", "roundabout", "Cijeli kružni tok iz jedne tačke: prsten, ostrvo, ivičnjaci, razdjelna ostrva, prelazi, strelice, znakovi i krakovi."),
+                Stack(Types(cat, "Parcela i objekti", "site", "site", "buildings"),
+                      Types(cat, "Parter i ograde", "surfaces", "surfaces", "walls"),
+                      Types(cat, "Ceste i biciklisti", "roads", "roads", "cycling")),
+                Stack(Types(cat, "Zelenilo", "landscape", "landscape"),
+                      Types(cat, "Rasvjeta", "lighting", "lighting"),
+                      Types(cat, "Mobilijar i oprema", "furniture", "furniture", "structures", "decorative", "information")),
+                Stack(Types(cat, "Voda i instalacije", "utilities", "water", "utilities", "sustainability", "climate"),
+                      Small("Duž linije", "SDPPATHARRAY", "patharray", "Drvored, svjetiljke, klupe ili stalci duž linije na zadanom razmaku."),
+                      Small("Raster sadnje", "SDPGRID", "plantgrid", "Popuna površine sadnjom.")),
+                Stack(Small("Niz parking mjesta", "SDPPARKING", "parking", "Red parking mjesta uz ivicu prolaza."),
+                      Small("Pretvori krive", "SDPCONVERT", "convert", "Postojeće linije ili krugove pretvara u elemente."))));
 
-            tab.Panels.Add(Panel("Georeferenciranje",
-                Large("Kontrolne tačke", "SDPGEOREF", "coord", "Georeferenciranje preko kontrolnih tačaka (jedna tačka daje samo položaj). Bilježi se historija transformacija."),
-                Stack(Small("Izvoz KML", "SDPKML", "export", "KML za Google Earth – samo za orijentaciju, nije geodetska podloga."),
-                      Small("Koordinate", "SDPCOORD", "coord", "Oznaka koordinata Y / X."),
-                      Small("Sjever", "SDPNORTH", "north", "Strelica sjevera prema stvarnom sjeveru projekta."))));
+            tab.Panels.Add(Panel("Izmjena",
+                Large("Uredi element", "SDPEDIT", "edit", "Širina, visina i ostali podaci odabranih elemenata. Isto se može i u paleti, kartica Svojstva."),
+                Stack(Small("Odabir", "SDPSELECT", "select", "Odabir svih elemenata iste vrste, kategorije, oznake ili materijala."),
+                      Small("Zone sigurnosti", "SDPCLEARANCE", "clearance", "Zone servisa i sigurnosti oko opreme."),
+                      Small("Popravi oznake", "SDPAUDIT", "audit", "Nove oznake za kopirane elemente i izvještaj o problemima."))));
 
-            tab.Panels.Add(Panel("Teren i kote",
-                Large("Nulta kota", "SDPDATUM", "spotlevel", "Nulta kota objekta (±0,00), kota partera i visinski datum. Spuštanje saobraćajnica zadaje korisnik."),
-                Stack(Small("Dodijeli kotu", "SDPKOTA", "spotlevel", "Kota samo za odabrani objekat, s pregledom prije primjene."),
-                      Small("Kote iz oznaka", "SDPKOTEIZOZNAKA", "label", "Prijedlog kota iz tekstualnih oznaka; prikaz veza, pa potvrda. Nejasne oznake se ne pogađaju."),
-                      Small("Visinska kota", "SDPSPOTLEVEL", "spotlevel", "Oznaka relativne i apsolutne kote.")),
-                Stack(Small("Model terena", "SDPTEREN", "slope", "Teren iz tačaka, izohipsi i prelomnica; izvještaj kada podataka nema dovoljno."),
-                      Small("Profil", "SDPPROFIL", "section", "Uzdužni profil terena duž linije."),
-                      Small("Analiza terena", "SDPANALIZATERENA", "slope", "Nagibi, lokalne depresije, kubature prema koti. Orijentaciono, nije inženjerski proračun.")),
-                Small("Strelica nagiba", "SDPSLOPE", "slope", "Strelica nagiba iz kota tačaka.")));
+            tab.Panels.Add(Panel("Dokumentacija",
+                Large("Dokumentuj list", "SDPDOKUMENTUJ", "sheet", "Brojevi, oznake, površine, širine, legenda, tabele, sjever, razmjernik i okvir lista odjednom; veličina lista se bira sama."),
+                Stack(Small("Oznaka", "SDPLABEL", "label", "Oznake odabranih elemenata."),
+                      Small("Numeracija", "SDPNUMBER", "number", "Brojevi elemenata od sjevera prema jugu."),
+                      Small("Legenda", "SDPLEGEND", "legend", "Legenda vrsta elemenata.")),
+                Stack(Small("Tabele", "SDPSCHEDULE", "schedule", "Količinske tabele."),
+                      Small("Sastavnica", "SDPTITLEBLOCK", "titleblock", "Okvir lista i sastavnica."),
+                      Small("Izvoz CSV", "SDPSCHEDULECSV", "csv", "Tabele za Excel."))));
 
-            AddCategoryPanel(tab, cat, "Parter i popločanje", new[] { "surfaces", "walls" },
-                Small("Površina", "SDPDRAW surface.concrete_paving\n", "draw", "Površina iz polilinije, pravougaonika ili odabrane granice."),
-                Small("Oznake površina", "SDPAREALABEL", "area", "Šifra, vrsta i površina."));
-            AddCategoryPanel(tab, cat, "Zelenilo", new[] { "landscape" },
-                Small("Drvored", "SDPPATHARRAY", "patharray", "Ponavljanje stabala duž putanje na zadanom razmaku."),
-                Small("Raster sadnje", "SDPGRID", "plantgrid", "Popuna granice rasterom sadnje (kvadratni ili smaknuti)."));
-            AddCategoryPanel(tab, cat, "Saobraćaj i parking", new[] { "roads", "cycling" },
-                Small("Niz parking mjesta", "SDPPARKING", "parking", "Niz parking mjesta uz rub prolaza."),
-                Small("Oznake širina", "SDPWIDTHLABEL", "width", "Oznake širina saobraćajnica i staza."),
-                Small("Stalci duž staze", "SDPPATHARRAY", "patharray", "Ponavljanje stalaka duž staze."));
-            AddCategoryPanel(tab, cat, "Infrastruktura", new[] { "utilities", "water", "sustainability", "climate" });
-            AddCategoryPanel(tab, cat, "Rasvjeta", new[] { "lighting" },
-                Small("Svjetiljke duž puta", "SDPPATHARRAY", "patharray", "Ponavljanje svjetiljki duž puta ili staze."),
-                Small("Pokrivenost (ilustr.)", "SDPLIGHTCOVER", "lightcover", "Ilustrativni krugovi pokrivenosti; nije fotometrijski proračun."));
-            AddCategoryPanel(tab, cat, "Urbani mobilijar", new[] { "furniture", "structures", "decorative", "information" },
-                Small("Raspored duž staze", "SDPPATHARRAY", "patharray", "Raspored klupa ili mobilijara duž staze."));
-
-            tab.Panels.Add(Panel("3D modeli",
-                Large("Uredi element", "SDPEDIT", "edit", "Parametri, oznaka i svojstva odabranih elemenata. 3D model u SketchUpu se gradi iz ovih parametara."),
-                Stack(Small("Zone sigurnosti", "SDPCLEARANCE", "clearance", "Zone servisa, sigurnosti i podizanja iz vrijednosti elementa."),
-                      Small("Odabir", "SDPSELECT", "select", "Odabir elemenata po vrsti, kategoriji, oznaci, id-u ili materijalu."),
-                      Small("Korisnički katalozi", "SDPCATALOGFOLDER", "catalog", "Folder za korisničke vrste elemenata, slojeve i materijale."))));
-
-            tab.Panels.Add(Panel("SketchUp razmjena",
-                Large("Izvoz paketa", "SDPEXPORT", "export", "Provjera i zapis .sdpkg paketa za SketchUp (elementi, kote, georeferenca, teren)."),
-                Stack(Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Pregled i primjena izmjena iz SketchUpa (parametri, pomjereni elementi)."),
-                      Small("Uvoz paketa", "SDPUVOZPAKETA", "import", "Učitava .sdpkg paket u crtež kao uredive elemente (npr. paket pretvoren iz drugog DWG-a)."),
-                      Small("Provjera prije izvoza", "SDPVALIDATE", "validate", "Sve provjere prije izvoza."))));
-
-            tab.Panels.Add(Panel("Količinski obračun",
-                Large("Tabele", "SDPSCHEDULE", "schedule", "Količinske tabele kao AutoCAD tabele (mjereno i procijenjeno ~ odvojeno)."),
-                Stack(Small("Izvoz CSV", "SDPSCHEDULECSV", "csv", "Sve tabele u CSV (;) i JSON."),
+            tab.Panels.Add(Panel("Provjera i izvoz",
+                Large("Provjeri projekat", "SDPVALIDATE", "validate", "Greške, kolizije, izlazak iz parcele; rezultat u paleti, grupisano."),
+                Large("Izvoz paketa", "SDPEXPORT", "export", "Paket .sdpkg za 3D model u SketchUpu."),
+                Stack(Small("Uvoz paketa", "SDPUVOZPAKETA", "import", "Učitava .sdpkg paket u crtež."),
+                      Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Izmjene iz SketchUpa, s pregledom prije primjene."),
                       Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti u komandnoj liniji."))));
 
-            tab.Panels.Add(Panel("Nacrti i oznake",
-                Large("Oznaka", "SDPLABEL", "label", "Oznake elemenata s brojem i ključnim podacima (multileader)."),
-                Stack(Small("Numeracija", "SDPNUMBER", "number", "Dodjela brojeva ili prenumeracija sjever–jug, zapad–istok."),
-                      Small("Legenda", "SDPLEGEND", "legend", "Legenda vrsta elemenata u crtežu."),
-                      Small("Sastavnica", "SDPTITLEBLOCK", "titleblock", "Okvir lista i sastavnica u razmjeri projekta.")),
-                Break(),
-                Stack(Small("Razmjernik", "SDPSCALEBAR", "scalebar", "Grafički razmjernik."),
-                      Small("Presjek", "SDPSECTION", "section", "Linija presjeka s oznakama."),
-                      Small("Detalj", "SDPDETAIL", "detail", "Oznaka detalja.")),
-                Stack(Small("Rasterske ose", "SDPGRIDLINES", "grid", "Ose s oznakama."),
-                      Small("Oblak revizije", "SDPREVCLOUD", "revcloud", "Oblak revizije s napomenom."))));
-
-            tab.Panels.Add(Panel("Provjera projekta",
-                Large("Provjeri projekat", "SDPVALIDATE", "validate", "Geometrija, podaci, kolizije, izlazak iz parcele, kote saobraćajnica. Upozorenja softvera, ne potvrda propisa."),
-                Stack(Small("Provjera crteža", "SDPPROVJERADWG", "validate", "Ponovna provjera ulaznog DWG-a."),
-                      Small("Revizija", "SDPAUDIT", "audit", "Popravak identifikatora kopiranih objekata i izvještaj o problemima."))));
-
-            tab.Panels.Add(Panel("Postavke i pomoć",
+            tab.Panels.Add(Panel("Pomoć",
                 Large("Pomoć", "SDPPOMOC", "about", "Uputstvo za korištenje na bosanskom jeziku."),
-                Stack(Small("Sigurnosna kopija", "SDPKOPIJA", "export", "Provjerena kopija zadnje sačuvane verzije crteža."),
-                      Small("Postavke kopija", "SDPKOPIJEPOSTAVKE", "settings", "Automatske kopije prije većih operacija, broj i starost kopija."),
-                      Small("Oporavak", "SDPOPORAVAK", "apply", "Prekinute operacije i otvaranje kopije kao novog crteža.")),
-                Stack(Small("Učitaj katalog", "SDPRELOAD", "reload", "Ponovno učitavanje kataloga s korisničkim katalozima."),
-                      Small("O programu", "SDPABOUT", "about", "Verzija, katalog i log datoteka."))));
+                LargeCommands("Napredno", "advanced", "Alati koji se rjeđe koriste: georeferenciranje, teren, kote, posebne oznake, sigurnosne kopije.",
+                    Small("Kontrolne tačke (georeferenca)", "SDPGEOREF", "coord", "Georeferenciranje preko kontrolnih tačaka."),
+                    Small("Izvoz KML (Google Earth)", "SDPKML", "export", "KML samo za orijentaciju."),
+                    Small("Koordinate", "SDPCOORD", "coord", "Oznaka koordinata Y / X."),
+                    Small("Strelica sjevera", "SDPNORTH", "north", "Strelica prema stvarnom sjeveru."),
+                    Small("Razmjernik", "SDPSCALEBAR", "scalebar", "Grafički razmjernik."),
+                    Small("Dodijeli kotu", "SDPKOTA", "spotlevel", "Kota za odabrani objekat."),
+                    Small("Kote iz oznaka", "SDPKOTEIZOZNAKA", "label", "Prijedlog kota iz tekstualnih oznaka."),
+                    Small("Visinska kota", "SDPSPOTLEVEL", "spotlevel", "Oznaka relativne i apsolutne kote."),
+                    Small("Strelica nagiba", "SDPSLOPE", "slope", "Strelica nagiba iz kota."),
+                    Small("Model terena", "SDPTEREN", "slope", "Teren iz tačaka i izohipsi."),
+                    Small("Profil terena", "SDPPROFIL", "section", "Uzdužni profil duž linije."),
+                    Small("Analiza terena", "SDPANALIZATERENA", "slope", "Nagibi, depresije, kubature (orijentaciono)."),
+                    Small("Oznake površina", "SDPAREALABEL", "area", "Šifra, vrsta i površina."),
+                    Small("Oznake širina", "SDPWIDTHLABEL", "width", "Širine cesta i staza."),
+                    Small("Pokrivenost rasvjete", "SDPLIGHTCOVER", "lightcover", "Ilustrativni krugovi; nije fotometrija."),
+                    Small("Presjek", "SDPSECTION", "section", "Linija presjeka."),
+                    Small("Detalj", "SDPDETAIL", "detail", "Oznaka detalja."),
+                    Small("Rasterske ose", "SDPGRIDLINES", "grid", "Ose s oznakama."),
+                    Small("Oblak revizije", "SDPREVCLOUD", "revcloud", "Oblak revizije s napomenom."),
+                    Small("Korisnički katalozi", "SDPCATALOGFOLDER", "catalog", "Folder za vlastite vrste elemenata."),
+                    Small("Učitaj katalog", "SDPRELOAD", "reload", "Ponovno učitavanje kataloga."),
+                    Small("Sigurnosna kopija", "SDPKOPIJA", "export", "Provjerena kopija sačuvanog crteža."),
+                    Small("Postavke kopija", "SDPKOPIJEPOSTAVKE", "settings", "Automatske kopije prije većih operacija."),
+                    Small("Oporavak", "SDPOPORAVAK", "apply", "Prekinute operacije i otvaranje kopije."),
+                    Small("O programu", "SDPABOUT", "about", "Verzija, katalog i dnevnik."))));
 
             ribbon.Tabs.Add(tab);
             Log.Info("Ribbon tab created with " + tab.Panels.Count + " panels.");
         }
 
-        /// <summary>Panel with element types of one or more catalog categories, grouped into split buttons by subcategory.</summary>
-        private static void AddCategoryPanel(RibbonTab tab, ElementCatalog cat, string title, string[] categories, params RibbonItem[] tools)
+        /// <summary>Drop-down of all element types of the given categories; picking one starts placing or drawing it.</summary>
+        private static RibbonSplitButton Types(ElementCatalog cat, string title, string icon, params string[] categories)
         {
-            var items = new List<RibbonItem>
+            var names = categories.Select(c => CategoryName(cat, c)).ToList();
+            List<ElementType> types = cat.Types.Where(t => categories.Contains(t.Category) || t.ExtraPanels.Any(names.Contains)).ToList();
+            var split = new RibbonSplitButton
             {
-                Large("Pregled", "SDPBROWSECAT " + categories[0] + "\n", categories[0], "Svi elementi kategorije u paleti: " + string.Join(", ", categories.Select(c => CategoryName(cat, c))) + "."),
+                Text = title,
+                ShowText = true,
+                ShowImage = true,
+                Size = RibbonItemSize.Standard,
+                Image = Icons.Get(icon, 16),
+                LargeImage = Icons.Get(icon, 32),
+                IsSplit = false,
+                IsSynchronizedWithCurrentItem = false,
+                ListStyle = RibbonSplitButtonListStyle.List,
+                ToolTip = new RibbonToolTip { Title = title, Content = "Odaberite element s liste: tačkasti se postavlja klikom, linijski i površinski se crtaju." },
             };
-            List<RibbonItem> splits = CategorySplits(cat, categories);
-            for (int i = 0; i < splits.Count; i += 3)
+            foreach (ElementType t in types.OrderBy(t => t.Subcategory).ThenBy(t => t.Name))
             {
-                items.Add(Stack(splits.Skip(i).Take(3).ToArray()));
-                if (i == 0 && splits.Count > 6)
-                {
-                    // keep the panel compact: the remaining subcategories go to the slide-out
-                    items.Add(Break());
-                }
+                string command = t.Geometry == Core.Geometry.GeometryKind.Point ? "_SDPPLACE " : "_SDPDRAW ";
+                RibbonButton b = Small(t.Name, command, t.Category, PlacementTip(t));
+                b.CommandParameter = HintPrefix + t.Id + "|" + command;
+                b.Id = "SDP_TYPE_" + t.Id;
+                split.Items.Add(b);
             }
 
-            for (int i = 0; i < tools.Length; i += 3)
-            {
-                items.Add(Stack(tools.Skip(i).Take(3).ToArray()));
-            }
-
-            tab.Panels.Add(Panel(title, items.ToArray()));
+            return split;
         }
 
-        private static List<RibbonItem> CategorySplits(ElementCatalog cat, string[] categories)
+        /// <summary>Small drop-down grouping related commands.</summary>
+        private static RibbonSplitButton Commands(string title, string icon, string tip, params RibbonButton[] buttons) => CommandList(title, icon, tip, RibbonItemSize.Standard, buttons);
+
+        /// <summary>Large drop-down grouping related commands.</summary>
+        private static RibbonSplitButton LargeCommands(string title, string icon, string tip, params RibbonButton[] buttons) => CommandList(title, icon, tip, RibbonItemSize.Large, buttons);
+
+        private static RibbonSplitButton CommandList(string title, string icon, string tip, RibbonItemSize size, RibbonButton[] buttons)
         {
-            var result = new List<RibbonItem>();
-            foreach (string category in categories)
+            var split = new RibbonSplitButton
             {
-                string name = CategoryName(cat, category);
-                List<ElementType> types = cat.Types.Where(t => t.Category == category || t.ExtraPanels.Contains(name)).ToList();
-                result.AddRange(types.GroupBy(t => t.Subcategory.Length > 0 ? t.Subcategory : name)
-                    .Select(g => (RibbonItem)Split(g.Key, category, g.ToList())));
+                Text = title,
+                ShowText = true,
+                ShowImage = true,
+                Size = size,
+                Orientation = size == RibbonItemSize.Large ? System.Windows.Controls.Orientation.Vertical : System.Windows.Controls.Orientation.Horizontal,
+                Image = Icons.Get(icon, 16),
+                LargeImage = Icons.Get(icon, 32),
+                IsSplit = false,
+                IsSynchronizedWithCurrentItem = false,
+                ListStyle = RibbonSplitButtonListStyle.List,
+                ToolTip = new RibbonToolTip { Title = title, Content = tip },
+            };
+            foreach (RibbonButton b in buttons)
+            {
+                b.Id = "SDP_" + title.Replace(" ", string.Empty) + "_" + b.Id;
+                split.Items.Add(b);
             }
 
-            return result;
+            return split;
         }
 
         private static string CategoryName(ElementCatalog cat, string id) => cat.Categories.FirstOrDefault(c => c.Id == id)?.Name ?? id;
@@ -243,30 +269,6 @@ namespace SiteDesignPro.AutoCAD.UI
             }
 
             return row;
-        }
-
-        private static RibbonSplitButton Split(string title, string icon, List<ElementType> types)
-        {
-            var split = new RibbonSplitButton
-            {
-                Text = title,
-                ShowText = true,
-                ShowImage = true,
-                Size = RibbonItemSize.Standard,
-                Image = Icons.Get(icon, 16),
-                LargeImage = Icons.Get(icon, 32),
-                IsSplit = true,
-                IsSynchronizedWithCurrentItem = true,
-                ListStyle = RibbonSplitButtonListStyle.List,
-            };
-            foreach (ElementType t in types)
-            {
-                string command = t.Geometry == Core.Geometry.GeometryKind.Point ? "SDPPLACE " : "SDPDRAW ";
-                RibbonButton b = Small(t.Name, command + t.Id + "\n", icon, PlacementTip(t));
-                split.Items.Add(b);
-            }
-
-            return split;
         }
 
         private static string PlacementTip(ElementType t) => t.Name + " (" + t.Id + "). " + t.Builder.Description +

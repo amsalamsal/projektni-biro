@@ -22,6 +22,12 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void NewProject() => CommandContext.Run("SDPNEW", ctx =>
         {
             ProjectSettings s = ctx.Settings;
+            if (CommandContext.Interactive)
+            {
+                NewProjectFromWindow(ctx, s);
+                return;
+            }
+
             s.Name = ctx.Text("Naziv projekta", s.Name);
             s.Number = ctx.Text("Broj projekta", s.Number.Length > 0 ? s.Number : "-");
             if (s.Number == "-")
@@ -43,6 +49,51 @@ namespace SiteDesignPro.AutoCAD.Commands
                 CommandContext.F(o.X), CommandContext.F(o.Y), CommandContext.F(o.Z), created));
             ctx.Write("Visine nisu zadane: definišite nultu kotu objekta (SDPDATUM), zatim mapirajte slojeve ulaznog crteža (SDPMAPIRANJE).");
         });
+
+        /// <summary>The same project setup as the command-line questions, answered in one window.</summary>
+        private static void NewProjectFromWindow(CommandContext ctx, ProjectSettings s)
+        {
+            LengthUnit? ins = UnitConversion.FromInsUnits((int)ctx.Db.Insunits);
+            UI.ProjectAnswers? a = UI.ProjectDialog.Ask(s, ins.HasValue ? UnitConversion.Code(ins.Value) : s.DrawingUnit);
+            if (a == null)
+            {
+                throw new CommandCancelled();
+            }
+
+            s.Name = a.Name;
+            s.Number = a.Number;
+            s.Client = a.Client;
+            s.Location = a.Location;
+            LengthUnit unit = a.Unit == "m" ? LengthUnit.Meter : a.Unit == "cm" ? LengthUnit.Centimeter : LengthUnit.Millimeter;
+            if (ctx.ExistingElements().Count > 0 && UnitConversion.Code(unit) != s.DrawingUnit)
+            {
+                ctx.Write("Upozorenje: crtež već sadrži elemente nacrtane u jedinici " + s.DrawingUnit + ". Promjena jedinice ne mijenja mjerilo geometrije.");
+            }
+
+            s.DrawingUnit = UnitConversion.Code(unit);
+            ctx.Db.Insunits = (UnitsValue)UnitConversion.ToInsUnits(unit);
+            Point3d o = Point3d.Origin;
+            if (a.PickOrigin)
+            {
+                o = ctx.Point("Ishodište projekta (u SketchUp-u postaje 0,0,0)") ?? Point3d.Origin;
+            }
+
+            s.Origin = new[] { o.X, o.Y, o.Z };
+            s.TrueNorthDegrees = a.NorthDegrees;
+            s.Labels.ScaleDenominator = a.Scale;
+            if (a.BuildingZero.HasValue)
+            {
+                TerrainCommands.SetBuildingZero(ctx, s.Elevations, a.BuildingZero.Value, askOrigin: false);
+            }
+
+            ctx.SaveSettings();
+            (int created, _) = ctx.Svc.Layers.EnsureAll(false);
+            ctx.Write(Bs.T("Projekat '{0}' je postavljen ({1}, ishodište {2}; {3}; {4}, mjerilo 1:{5}). Napravljeno slojeva: {6}.", s.Name, s.DrawingUnit,
+                CommandContext.F(o.X), CommandContext.F(o.Y), CommandContext.F(o.Z), CommandContext.F(a.Scale, 0), created));
+            ctx.Write(a.BuildingZero.HasValue
+                ? "Sljedeće: nacrtajte parcelu (Biblioteka → Parcelna granica) ili otvorite Prvi koraci."
+                : "Nulta kota nije unesena; unesite je kada je budete znali (Nulta kota). Sljedeće: parcela (Biblioteka → Parcelna granica).");
+        }
 
         [CommandMethod("SITEDESIGNPRO", "SDPSETTINGS", CommandFlags.Modal)]
         public void Settings() => CommandContext.Run("SDPSETTINGS", ctx =>

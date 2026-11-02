@@ -120,7 +120,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
 
         /// <summary>Polyline by points: Enter ends, [Zatvori] closes, [Ponisti] removes the last point.</summary>
-        private static ObjectId DrawPolyline(CommandContext ctx, bool closeArea)
+        internal static ObjectId DrawPolyline(CommandContext ctx, bool closeArea)
         {
             var pts = new List<Point3d>();
             bool closed = false;
@@ -258,6 +258,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             // (or traced) here is rolled back with it instead of staying behind as a plain polyline.
             CommandContext.Run("SDPDRAW", ctx =>
             {
+                Dictionary<string, ParamValue>? overrides = AskWidth(ctx, type);
                 string method = type.Geometry == GeometryKind.Polygon
                     ? ctx.Keyword("Granica [POlilinija/PRavougaonik/Unutar/Odaberi]", new[] { "Polyline|POlilinija", "Rectangle|PRavougaonik", "Pick|Unutar", "Select|Odaberi" }, "Polyline")
                     : ctx.Keyword("Trasa [Polilinija/Odaberi]", new[] { "Polyline|Polilinija", "Select|Odaberi" }, "Polyline");
@@ -299,7 +300,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 if (picked.Count > 0)
                 {
-                    ctx.Write("Napravljeno: " + ConvertCurves(ctx, type, picked) + " × " + type.Name + ".");
+                    ctx.Write("Napravljeno: " + ConvertCurves(ctx, type, picked, overrides) + " × " + type.Name + ".");
                 }
             });
         }
@@ -310,7 +311,8 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             List<ObjectId> curves = SelectCurves(ctx);
             ElementType type = ctx.ChooseType("Tip elementa za odabrane objekte", null, GeometryKind.Path, GeometryKind.Polygon);
-            ctx.Write("Pretvoreno objekata u " + type.Name + ": " + ConvertCurves(ctx, type, curves) + ".");
+            Dictionary<string, ParamValue>? overrides = AskWidth(ctx, type);
+            ctx.Write("Pretvoreno objekata u " + type.Name + ": " + ConvertCurves(ctx, type, curves, overrides) + ".");
         });
 
         private static List<ObjectId> SelectCurves(CommandContext ctx)
@@ -331,7 +333,27 @@ namespace SiteDesignPro.AutoCAD.Commands
             return r.Value.GetObjectIds().ToList();
         }
 
-        private static int ConvertCurves(CommandContext ctx, ElementType type, IEnumerable<ObjectId> ids)
+        /// <summary>
+        /// Roads, paths and channels: asks their width right away (Enter keeps the last width used for that type), so
+        /// it need not be changed afterwards with SDPEDIT. Null for types without a width.
+        /// </summary>
+        internal static Dictionary<string, ParamValue>? AskWidth(CommandContext ctx, ElementType type)
+        {
+            string? key = type.Geometry == GeometryKind.Path ? type.Builder.PolylineWidthParam : null;
+            ParameterDefinition? def = key != null ? type.Parameter(key) : null;
+            if (def == null || key != "width")
+            {
+                return null;
+            }
+
+            double fallback = def.Default.IsNull ? 1.0 : def.Default.AsNumber();
+            double last = UI.Preferences.Current.LastWidth(type.Id) ?? fallback;
+            double w = ctx.Number(def.Label + " (m)", last);
+            UI.Preferences.Current.RememberWidth(type.Id, w);
+            return new Dictionary<string, ParamValue> { [key] = ParamValue.Of(w) };
+        }
+
+        internal static int ConvertCurves(CommandContext ctx, ElementType type, IEnumerable<ObjectId> ids, IDictionary<string, ParamValue>? overrides = null)
         {
             List<SiteElement> existing = ctx.ExistingElements();
             int count = 0;
@@ -356,6 +378,14 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
 
                 SiteElement element = ctx.NewElement(type, g, existing);
+                if (overrides != null)
+                {
+                    foreach (KeyValuePair<string, ParamValue> kv in overrides)
+                    {
+                        element.Parameters[kv.Key] = kv.Value;
+                    }
+                }
+
                 ValidationReport check = new ProjectValidator(ctx.Catalog, ctx.Settings.Checks).Validate(new[] { Core.Exchange.PackageWriter.ToPackageFrame(element, ctx.Settings) });
                 foreach (ValidationIssue issue in check.Issues.Where(i => i.Severity == Severity.Error && i.Kind == IssueKind.GeometricError))
                 {
@@ -645,19 +675,45 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Db.TryGetObjectId(new Handle(value), out id) && !id.IsErased;
         }
 
-        /// <summary>Zooms to an element by handle (used by the validation palette).</summary>
+        /// <summary>Zooms to one or more elements by handle (comma separated, used by the validation palette) and selects them.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPZOOM", CommandFlags.Modal | CommandFlags.Redraw)]
         public void Zoom() => CommandContext.Run("SDPZOOM", ctx =>
         {
-            string h = ctx.Text("Handle elementa", null, false);
-            if (!TryHandle(ctx, h, out ObjectId id))
+            string text = ctx.Text("Handle elementa", null, false);
+            var ids = new List<ObjectId>();
+            Extents3d? box = null;
+            foreach (string h in text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (!TryHandle(ctx, h, out ObjectId id))
+                {
+                    continue;
+                }
+
+                var e = (Entity)ctx.Tr.GetObject(id, OpenMode.ForRead);
+                if (e.Bounds is Extents3d b)
+                {
+                    if (box.HasValue)
+                    {
+                        Extents3d x = box.Value;
+                        x.AddExtents(b);
+                        box = x;
+                    }
+                    else
+                    {
+                        box = b;
+                    }
+                }
+
+                ids.Add(id);
+            }
+
+            if (ids.Count == 0 || !box.HasValue)
             {
                 ctx.Write("Element nije pronađen.");
                 return;
             }
 
-            var e = (Entity)ctx.Tr.GetObject(id, OpenMode.ForRead);
-            Extents3d ext = e.GeometricExtents;
+            Extents3d ext = box.Value;
             double pad = Math.Max(ext.MaxPoint.DistanceTo(ext.MinPoint), 10 * ctx.K) * 0.6;
             using ViewTableRecord view = ctx.Ed.GetCurrentView();
             Matrix3d wcsToDcs = Matrix3d.WorldToPlane(view.ViewDirection) * Matrix3d.Displacement(view.Target - Point3d.Origin).Inverse();
@@ -666,7 +722,11 @@ namespace SiteDesignPro.AutoCAD.Commands
             view.Height = pad * 2;
             view.Width = pad * 2;
             ctx.Ed.SetCurrentView(view);
-            ctx.Ed.SetImpliedSelection(new[] { id });
+            ctx.Ed.SetImpliedSelection(ids.ToArray());
+            if (ids.Count > 1)
+            {
+                ctx.Write("Odabrano: " + Bs.Elements(ids.Count) + ".");
+            }
         });
 
         /// <summary>Repeats a point element along a curve (trees, lights, bollards, benches).</summary>

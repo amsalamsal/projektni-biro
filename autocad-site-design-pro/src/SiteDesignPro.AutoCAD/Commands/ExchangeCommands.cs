@@ -190,6 +190,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Settings.LastExportPath = result.Path;
             ctx.SaveSettings();
             ctx.Write("Izvezeno elemenata: " + result.ElementCount + (options.Terrains.Count > 0 ? " i teren" : string.Empty) + " → " + result.Path + ". Uvoz u SketchUp: Proširenja > Vanjsko uređenje PRO > Uvoz paketa.");
+            SitePalette.MarkExported();
             foreach (string s in result.Skipped)
             {
                 ctx.Write("  preskočeno: " + s);

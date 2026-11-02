@@ -25,6 +25,9 @@ namespace SiteDesignPro.AutoCAD.Drawing
         private readonly ElementService svc;
         private readonly ProjectSettings settings;
 
+        /// <summary>Text boxes of labels placed by this instance, so later labels can avoid them.</summary>
+        private readonly List<Box2> placedLabels = new List<Box2>();
+
         public Annotations(Database db, Transaction tr, ElementService svc)
         {
             this.db = db;
@@ -120,17 +123,46 @@ namespace SiteDesignPro.AutoCAD.Drawing
             Vec2 anchor = LabelNumbering.Anchor(e);
             double h = TextHeight;
             var target = new Point3d(anchor.X, anchor.Y, 0);
-            var text = new MText { Contents = LabelText(e, catalog), TextHeight = h, Location = target + new Vector3d(h * 4, h * 4, 0) };
+            string contents = LabelText(e, catalog);
+            Vector3d offset = FreeLabelOffset(anchor, contents, h);
+            var text = new MText { Contents = contents, TextHeight = h, Location = target + offset };
             var ml = new MLeader();
             ObjectId id = Add(ml, "anno_labels");
             ml.ContentType = ContentType.MTextContent;
             ml.MText = text;
             ml.AddLeaderLine(target);
-            ml.TextLocation = target + new Vector3d(h * 4, h * 4, 0);
+            ml.TextLocation = target + offset;
             ml.ArrowSize = h * 0.8;
             ml.LandingGap = h * 0.3;
             ElementStore.WriteAux(ml, e.Id, "label", tr);
             return id;
+        }
+
+        /// <summary>
+        /// Text position for a leader label that does not cover labels placed earlier in the same run: tries the four
+        /// diagonals at growing distances and falls back to the usual upper-right position.
+        /// </summary>
+        private Vector3d FreeLabelOffset(Vec2 anchor, string contents, double h)
+        {
+            string[] lines = contents.Split(new[] { "\\P" }, StringSplitOptions.None);
+            double w = Math.Max(3, lines.Max(l => l.Length)) * h * 0.62;
+            double ht = lines.Length * h * 1.45;
+            Box2 BoxAt(double dx, double dy) => new Box2(anchor.X + dx, anchor.Y + dy - ht, anchor.X + dx + w, anchor.Y + dy);
+            foreach (double r in new[] { 4.0, 7.0, 10.0, 14.0 })
+            {
+                foreach ((double dx, double dy) in new[] { (r * h, r * h), (r * h, (-r * h) + ht), ((-r * h) - w, r * h), ((-r * h) - w, (-r * h) + ht) })
+                {
+                    Box2 box = BoxAt(dx, dy);
+                    if (!placedLabels.Any(b => b.Intersects(box)))
+                    {
+                        placedLabels.Add(box);
+                        return new Vector3d(dx, dy, 0);
+                    }
+                }
+            }
+
+            placedLabels.Add(BoxAt(h * 4, h * 4));
+            return new Vector3d(h * 4, h * 4, 0);
         }
 
         // ------------------------------------------------------------------ site annotation symbols

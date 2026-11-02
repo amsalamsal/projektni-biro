@@ -33,6 +33,59 @@ namespace SiteDesignPro.AutoCAD.UI
         private static LibraryView? library;
         private static PropertiesView? properties;
         private static ValidationView? validation;
+        private static FirstStepsView? firstSteps;
+        private static Document? hooked;
+
+        /// <summary>Set after a validation in this session; shown as done in the first-steps checklist.</summary>
+        internal static bool Validated { get; private set; }
+
+        /// <summary>Set after a package export in this session.</summary>
+        internal static bool Exported { get; private set; }
+
+        internal static void MarkExported()
+        {
+            Exported = true;
+            RefreshFirstSteps();
+        }
+
+        public static void ShowFirstSteps()
+        {
+            Show();
+            firstSteps!.Refresh();
+            set!.Activate(3);
+        }
+
+        internal static void RefreshFirstSteps()
+        {
+            if (set != null && set.Visible)
+            {
+                Log.Guard("Prvi koraci", () => firstSteps?.Refresh());
+            }
+        }
+
+        private static void Hook(Document? doc)
+        {
+            if (doc == null || ReferenceEquals(doc, hooked))
+            {
+                return;
+            }
+
+            if (hooked != null)
+            {
+                hooked.CommandEnded -= OnCommandEnded;
+            }
+
+            hooked = doc;
+            doc.CommandEnded += OnCommandEnded;
+        }
+
+        private static void OnCommandEnded(object sender, CommandEventArgs e)
+        {
+            if (e.GlobalCommandName.StartsWith("SDP", StringComparison.OrdinalIgnoreCase) || e.GlobalCommandName == "ERASE" || e.GlobalCommandName == "U" || e.GlobalCommandName == "UNDO")
+            {
+                RefreshFirstSteps();
+            }
+        }
 
         public static void Show(string? category = null)
         {
@@ -50,9 +103,18 @@ namespace SiteDesignPro.AutoCAD.UI
                 set.AddVisual("Biblioteka", library);
                 set.AddVisual("Svojstva", properties);
                 set.AddVisual("Provjera", validation);
-                AcApp.DocumentManager.DocumentActivated += (s, e) => Log.Guard("Osvježavanje palete", () => properties?.Refresh());
+                firstSteps = new FirstStepsView();
+                set.AddVisual("Prvi koraci", firstSteps);
+                AcApp.DocumentManager.DocumentActivated += (s, e) => Log.Guard("Osvježavanje palete", () =>
+                {
+                    properties?.Refresh();
+                    Hook(e.Document);
+                    RefreshFirstSteps();
+                });
             }
 
+            Hook(AcApp.DocumentManager.MdiActiveDocument);
+            bool firstUse = Preferences.Current.PaletteLayout < 1;
             set.Visible = true;
 
             // On first use AutoCAD floats a new palette as a small window in the top-left corner, over the ribbon
@@ -73,11 +135,17 @@ namespace SiteDesignPro.AutoCAD.UI
                 library!.SetCategory(category);
                 set.Activate(0);
             }
+            else if (firstUse)
+            {
+                firstSteps!.Refresh();
+                set.Activate(3);
+            }
         }
 
         public static void ShowValidation(ValidationReport report, IReadOnlyDictionary<string, string> handles)
         {
             Show();
+            Validated = true;
             validation!.Show(report, handles);
             set!.Activate(2);
         }
@@ -87,12 +155,17 @@ namespace SiteDesignPro.AutoCAD.UI
             properties?.Refresh();
         }
 
-        internal static void Run(string macro)
+        internal static void Run(string macro, string? typeHint = null)
         {
             Document? doc = AcApp.DocumentManager.MdiActiveDocument;
             if (doc == null)
             {
                 return;
+            }
+
+            if (typeHint != null)
+            {
+                SiteDesignPro.AutoCAD.Commands.CommandContext.TypeHint = typeHint;
             }
 
             doc.SendStringToExecute(macro, true, false, true);
@@ -325,7 +398,7 @@ namespace SiteDesignPro.AutoCAD.UI
             {
                 ElementType t = AcadEnv.Catalog.RequireType(id);
                 Preferences.Current.Used(id);
-                SitePalette.Run((t.Geometry == GeometryKind.Point ? "_SDPPLACE " : "_SDPDRAW ") + id + "\n");
+                SitePalette.Run(t.Geometry == GeometryKind.Point ? "_SDPPLACE " : "_SDPDRAW ", id);
             }
         }
     }
@@ -341,7 +414,7 @@ namespace SiteDesignPro.AutoCAD.UI
         public PropertiesView()
         {
             Background = SitePalette.Back;
-            var apply = new Button { Content = "Primijeni izmjene", Margin = new Thickness(6), Padding = new Thickness(8, 3, 8, 3) };
+            var apply = new Button { Content = "Primijeni izmjene", Margin = new Thickness(6), Padding = new Thickness(8, 3, 8, 3), ToolTip = "Izmjene se primjenjuju i same: Enter, izlazak iz polja ili izbor s liste." };
             apply.Click += (s, e) => Log.Guard("Primjena parametara", Apply);
             SetDock(apply, Dock.Bottom);
             Children.Add(apply);
@@ -410,6 +483,7 @@ namespace SiteDesignPro.AutoCAD.UI
                     lbl.ToolTip = p.Key;
                     row.Children.Add(lbl);
                     FrameworkElement editor = Editor(p, value, values.Count > 1);
+                    HookApply(editor);
                     Grid.SetColumn(editor, 1);
                     row.Children.Add(editor);
                     TextBlock unit = SitePalette.Label(p.DisplayUnit, 10, true);
@@ -419,6 +493,30 @@ namespace SiteDesignPro.AutoCAD.UI
                     editors[p.Key] = editor;
                     body.Children.Add(row);
                 }
+            }
+        }
+
+        /// <summary>A changed value is applied at once: Enter or leaving a text field, choosing a list item, ticking a box.</summary>
+        private void HookApply(FrameworkElement editor)
+        {
+            switch (editor)
+            {
+                case TextBox t:
+                    t.KeyDown += (s, e) =>
+                    {
+                        if (e.Key == Key.Enter)
+                        {
+                            Log.Guard("Primjena parametara", Apply);
+                        }
+                    };
+                    t.LostKeyboardFocus += (s, e) => Log.Guard("Primjena parametara", Apply);
+                    break;
+                case ComboBox c:
+                    c.SelectionChanged += (s, e) => Log.Guard("Primjena parametara", Apply);
+                    break;
+                case CheckBox b:
+                    b.Click += (s, e) => Log.Guard("Primjena parametara", Apply);
+                    break;
             }
         }
 
@@ -484,6 +582,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 }
 
                 macro.Append("_SDPSETPARAM ").Append(handles).Append('\n').Append(kv.Key).Append('\n').Append(value.Length == 0 ? "-" : value).Append('\n');
+                original[kv.Key] = value;
             }
 
             if (macro.Length > 0)
@@ -493,37 +592,63 @@ namespace SiteDesignPro.AutoCAD.UI
         }
     }
 
-    /// <summary>Validation results; double-click zooms to the element.</summary>
+    /// <summary>
+    /// Validation results grouped by message: errors and warnings first, items for professional review only on
+    /// request. Double-click zooms to the elements of a group; "Odaberi i uredi" opens SDPEDIT for all of them.
+    /// </summary>
     internal sealed class ValidationView : DockPanel
     {
         private readonly ListBox list = new ListBox { BorderThickness = new Thickness(0) };
-        private readonly TextBlock summary = SitePalette.Label("Pokrenite SDPVALIDATE ili SDPPROVJERADWG za provjeru crteža.", 12, true);
+        private readonly TextBlock summary = SitePalette.Label("Pokrenite Provjeri projekat (SDPVALIDATE) ili Provjera crteža (SDPPROVJERADWG).", 12, true);
+        private readonly CheckBox showReview = new CheckBox { Margin = new Thickness(6, 0, 6, 6) };
+        private ValidationReport? report;
+        private IReadOnlyDictionary<string, string> handles = new Dictionary<string, string>();
 
         public ValidationView()
         {
             Background = SitePalette.Back;
+            var top = new StackPanel();
             summary.Margin = new Thickness(6);
             summary.TextWrapping = TextWrapping.Wrap;
-            SetDock(summary, Dock.Top);
-            Children.Add(summary);
+            top.Children.Add(summary);
+            showReview.Content = SitePalette.Label("Prikaži i stavke za stručni pregled", 11);
+            showReview.Click += (s, e) => Log.Guard("Provjera", Render);
+            top.Children.Add(showReview);
+            SetDock(top, Dock.Top);
+            Children.Add(top);
             list.Background = SitePalette.Back;
             Children.Add(list);
             list.MouseDoubleClick += (s, e) =>
             {
-                if (list.SelectedItem is ListBoxItem i && i.Tag is string handle)
+                if (list.SelectedItem is ListBoxItem i && i.Tag is string h && h.Length > 0)
                 {
-                    SitePalette.Run("_SDPZOOM " + handle + "\n");
+                    SitePalette.Run("_SDPZOOM " + h + "\n");
                 }
             };
         }
 
-        public void Show(ValidationReport report, IReadOnlyDictionary<string, string> handles)
+        public void Show(ValidationReport newReport, IReadOnlyDictionary<string, string> newHandles)
         {
-            summary.Text = string.Format(CultureInfo.InvariantCulture, "{0} objekata: grešaka {1}, upozorenja {2}, za stručni pregled {3}. {4}",
-                report.ElementCount, report.ErrorCount, report.WarningCount, report.ReviewCount, ValidationReport.Disclaimer);
-            list.Items.Clear();
-            foreach (ValidationIssue i in report.Issues.OrderBy(i => i.Severity))
+            report = newReport;
+            handles = newHandles;
+            Render();
+        }
+
+        private void Render()
+        {
+            if (report == null)
             {
+                return;
+            }
+
+            bool review = showReview.IsChecked == true;
+            summary.Text = string.Format(CultureInfo.InvariantCulture, "{0} objekata: grešaka {1}, upozorenja {2}, za stručni pregled {3}{4}. {5}",
+                report.ElementCount, report.ErrorCount, report.WarningCount, report.ReviewCount, review || report.ReviewCount == 0 ? string.Empty : " (skriveno)", ValidationReport.Disclaimer);
+            list.Items.Clear();
+            IEnumerable<ValidationIssue> issues = report.Issues.Where(i => review || i.Severity == Severity.Error || i.Severity == Severity.Warning);
+            foreach (IGrouping<string, ValidationIssue> g in issues.GroupBy(i => ((int)i.Severity).ToString(CultureInfo.InvariantCulture) + "|" + i.Code + "|" + i.Message).OrderBy(g => g.First().Severity).ThenBy(g => g.First().Code))
+            {
+                ValidationIssue i = g.First();
                 Color c = i.Severity switch
                 {
                     Severity.Error => Color.FromRgb(0xD9, 0x3B, 0x2B),
@@ -531,10 +656,12 @@ namespace SiteDesignPro.AutoCAD.UI
                     Severity.Review => Color.FromRgb(0x7C, 0x5C, 0xD6),
                     _ => Color.FromRgb(0x88, 0x88, 0x88),
                 };
+                List<string> labels = g.Select(x => x.Label ?? x.ElementId ?? "crtež").Distinct().ToList();
+                string groupHandles = string.Join(",", g.Where(x => x.ElementId != null && handles.ContainsKey(x.ElementId)).Select(x => handles[x.ElementId!]).Distinct());
                 var panel = new StackPanel { Margin = new Thickness(2, 3, 2, 3) };
-                var head = new TextBlock { FontSize = 11, Foreground = SitePalette.Fore };
+                var head = new TextBlock { FontSize = 11, Foreground = SitePalette.Fore, TextWrapping = TextWrapping.Wrap };
                 head.Inlines.Add(new System.Windows.Documents.Run(ValidationReport.SeverityName(i.Severity).ToUpperInvariant() + "  ") { Foreground = new SolidColorBrush(c), FontWeight = FontWeights.SemiBold });
-                head.Inlines.Add(new System.Windows.Documents.Run(i.Code + "  " + (i.Label ?? i.ElementId ?? "crtež")));
+                head.Inlines.Add(new System.Windows.Documents.Run(i.Code + "  " + (labels.Count > 1 ? "×" + labels.Count + "  " : string.Empty) + string.Join(", ", labels.Take(6)) + (labels.Count > 6 ? ", …" : string.Empty)));
                 panel.Children.Add(head);
                 TextBlock msg = SitePalette.Label(i.Message, 11);
                 msg.TextWrapping = TextWrapping.Wrap;
@@ -542,9 +669,114 @@ namespace SiteDesignPro.AutoCAD.UI
                 TextBlock res = SitePalette.Label(i.Resolution, 10, true);
                 res.TextWrapping = TextWrapping.Wrap;
                 panel.Children.Add(res);
-                string? handle = i.ElementId != null && handles.TryGetValue(i.ElementId, out string? h) ? h : null;
-                list.Items.Add(new ListBoxItem { Content = panel, Tag = handle, ToolTip = handle != null ? "Dvostruki klik: zumiranje na objekat" : null });
+                if (groupHandles.Length > 0)
+                {
+                    var edit = new Button { Content = labels.Count > 1 ? "Odaberi svih " + labels.Count + " i uredi" : "Odaberi i uredi", HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 3, 0, 0), Padding = new Thickness(6, 1, 6, 1), FontSize = 11 };
+                    edit.Click += (s, e) => SitePalette.Run("_SDPZOOM " + groupHandles + "\n_SDPEDIT ");
+                    panel.Children.Add(edit);
+                }
+
+                list.Items.Add(new ListBoxItem { Content = panel, Tag = groupHandles, ToolTip = groupHandles.Length > 0 ? "Dvostruki klik: zumiranje na objekte" : null });
             }
+
+            if (list.Items.Count == 0)
+            {
+                list.Items.Add(new ListBoxItem { Content = SitePalette.Label(report.ErrorCount + report.WarningCount == 0 ? "Nema grešaka ni upozorenja." : "Nema stavki.", 12, true) });
+            }
+        }
+    }
+
+    /// <summary>
+    /// "Prvi koraci": the work order of a project as a checklist. Each step starts its command; a step is ticked
+    /// when the drawing shows it is done.
+    /// </summary>
+    internal sealed class FirstStepsView : DockPanel
+    {
+        private readonly StackPanel body = new StackPanel { Margin = new Thickness(6) };
+
+        public FirstStepsView()
+        {
+            Background = SitePalette.Back;
+            var refresh = new Button { Content = "Osvježi", Margin = new Thickness(6), Padding = new Thickness(8, 2, 8, 2), HorizontalAlignment = HorizontalAlignment.Right };
+            refresh.Click += (s, e) => Log.Guard("Prvi koraci", Refresh);
+            SetDock(refresh, Dock.Bottom);
+            Children.Add(refresh);
+            Children.Add(new ScrollViewer { Content = body, VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+        }
+
+        public void Refresh()
+        {
+            body.Children.Clear();
+            Document? doc = AcApp.DocumentManager.MdiActiveDocument;
+            if (doc == null)
+            {
+                return;
+            }
+
+            bool project, zero = false, site = false, roads = false, content = false, sheet = false;
+            using (Transaction tr = doc.TransactionManager.StartOpenCloseTransaction())
+            {
+                ProjectSettings? stored = ProjectStore.Read(doc.Database, tr);
+                project = stored != null;
+                zero = stored?.Elevations.BuildingZeroAbsolute.HasValue == true;
+                var svc = new ElementService(doc.Database, tr, AcadEnv.Catalog, stored ?? new ProjectSettings());
+                foreach (ManagedElement m in svc.ReadAll())
+                {
+                    string cat = m.Type?.Category ?? string.Empty;
+                    site |= m.Record.TypeId == "site.boundary";
+                    roads |= cat == "roads" || cat == "cycling";
+                    content |= cat == "buildings" || cat == "surfaces" || cat == "landscape" || cat == "furniture" || cat == "lighting" || cat == "recreation";
+                }
+
+                sheet = svc.Aux("sheet").Any();
+                tr.Commit();
+            }
+
+            TextBlock intro = SitePalette.Label("Redoslijed rada. Kliknite korak da ga pokrenete; urađeni koraci se sami štikliraju.", 11, true);
+            intro.TextWrapping = TextWrapping.Wrap;
+            intro.Margin = new Thickness(0, 0, 0, 8);
+            body.Children.Add(intro);
+            Step(1, "Novi projekat", "Naziv, jedinice, mjerilo i nulta kota u jednom prozoru.", "_SDPNEW ", project);
+            Step(2, "Nulta kota ±0,00", "Apsolutna visina poda prizemlja (može i kasnije).", "_SDPDATUM ", zero);
+            Step(3, "Parcela", "Nacrtajte granicu parcele (pravougaonik ili polilinija).", "_SDPDRAW ", site, "site.boundary");
+            Step(4, "Ceste, staze, kružni tokovi", "Ulica po profilu iz jedne osovine; kružni tok iz jedne tačke.", "_SDPULICA ", roads);
+            Step(5, "Objekti, parter, zelenilo, oprema", "Iz biblioteke: dvostruki klik na element.", "_SDPBROWSER ", content);
+            Step(6, "Dokumentuj list", "Oznake, legenda, tabele, sjever, razmjernik i okvir lista odjednom.", "_SDPDOKUMENTUJ ", sheet);
+            Step(7, "Provjeri projekat", "Kolizije, izlazak iz parcele, podaci.", "_SDPVALIDATE ", SitePalette.Validated);
+            Step(8, "Izvoz za SketchUp", "Paket .sdpkg za 3D model.", "_SDPEXPORT ", SitePalette.Exported);
+        }
+
+        private void Step(int n, string title, string hint, string macro, bool done, string? typeHint = null)
+        {
+            var b = new Button
+            {
+                HorizontalContentAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 0, 0, 4),
+                Padding = new Thickness(6, 4, 6, 4),
+                Background = SitePalette.Back,
+                BorderBrush = new SolidColorBrush(done ? Color.FromRgb(0x4E, 0x9A, 0x49) : Color.FromRgb(0x6A, 0x72, 0x7E)),
+            };
+            var row = new DockPanel();
+            var mark = new TextBlock
+            {
+                Text = done ? "✔" : n.ToString(CultureInfo.InvariantCulture),
+                Width = 22,
+                FontSize = 14,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = done ? new SolidColorBrush(Color.FromRgb(0x5D, 0xB8, 0x57)) : SitePalette.Fore,
+                VerticalAlignment = VerticalAlignment.Top,
+            };
+            SetDock(mark, Dock.Left);
+            row.Children.Add(mark);
+            var text = new StackPanel();
+            text.Children.Add(SitePalette.Label(title, 12));
+            TextBlock h = SitePalette.Label(hint, 10, true);
+            h.TextWrapping = TextWrapping.Wrap;
+            text.Children.Add(h);
+            row.Children.Add(text);
+            b.Content = row;
+            b.Click += (s, e) => SitePalette.Run(macro, typeHint);
+            body.Children.Add(b);
         }
     }
 
