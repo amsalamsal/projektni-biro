@@ -6,7 +6,6 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.Windows;
 using SiteDesignPro.AutoCAD.Infrastructure;
 using SiteDesignPro.Core.Catalog;
-using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace SiteDesignPro.AutoCAD.UI
 {
