@@ -23,6 +23,8 @@
 * **Oznake se ne preklapaju**: oznaka koja bi pala preko druge pomjera se dijagonalno.
 * **Mirnija provjera**: iste poruke su grupisane (×N), stavke „za stručni pregled“ su skrivene dok se ne uključe,
   dvoklik zumira na sve elemente grupe.
+* Ulica: rasvjeta u istom pojasu kao drvored postavlja se između stabala (ranije je padala na stabla i javljala kolizije).
+* Provjera grupiše stavke po šifri (npr. sve kolizije u jednu stavku ×N); dugme Biblioteka uvijek otvara karticu Biblioteka.
 * **Prvi koraci** (`SDPPRVIKORACI`, kartica u paleti): 8 koraka od projekta do izvoza koji se sami štikliraju;
   dvoklik pokreće korak.
 
