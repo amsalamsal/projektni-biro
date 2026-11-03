@@ -67,7 +67,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 ribbon.Tabs.Remove(old);
             }
 
-            var tab = new RibbonTab { Title = "VANJSKO UREĐENJE PRO", Id = TabId };
+            var tab = new RibbonTab { Title = "VANJSKO UREĐENJE PRO", Id = TabId, Description = "Vanjsko uređenje PRO – autor " + Author };
             ElementCatalog cat = AcadEnv.Catalog;
 
             // Six panels in the order of the work; rarely used tools are under Pomoć → Napredno.
@@ -149,7 +149,8 @@ namespace SiteDesignPro.AutoCAD.UI
                     Small("Sigurnosna kopija", "SDPKOPIJA", "export", "Provjerena kopija sačuvanog crteža."),
                     Small("Postavke kopija", "SDPKOPIJEPOSTAVKE", "settings", "Automatske kopije prije većih operacija."),
                     Small("Oporavak", "SDPOPORAVAK", "apply", "Prekinute operacije i otvaranje kopije."),
-                    Small("O programu", "SDPABOUT", "about", "Verzija, katalog i dnevnik."))));
+                    Small("O programu", "SDPABOUT", "about", "Verzija, katalog i dnevnik.")),
+                Stack(Label("Vanjsko uređenje PRO"), Label("Autor: " + Author), Label("© 2026"))));
 
             ribbon.Tabs.Add(tab);
             Log.Info("Ribbon tab created with " + tab.Panels.Count + " panels.");
@@ -253,6 +254,11 @@ namespace SiteDesignPro.AutoCAD.UI
         private static RibbonButton Large(string text, string macro, string icon, string tip) => Button(text, macro, icon, tip, RibbonItemSize.Large);
 
         private static RibbonButton Small(string text, string macro, string icon, string tip) => Button(text, macro, icon, tip, RibbonItemSize.Standard);
+
+        /// <summary>Author credit shown on the ribbon and by SDPABOUT.</summary>
+        internal const string Author = "Amsal Aganspahić";
+
+        private static RibbonLabel Label(string text) => new RibbonLabel { Text = text };
 
         private static RibbonRowPanel Stack(params RibbonItem[] items)
         {

@@ -405,7 +405,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             CommandContext.Safe("SDPABOUT", () =>
             {
-                AcadEnv.Message("Vanjsko uređenje PRO za AutoCAD " + AcadEnv.Version + " (.NET " + Environment.Version + ") | shema razmjene " + Core.Exchange.PackageFormat.SchemaVersion +
+                AcadEnv.Message("Vanjsko uređenje PRO, autor " + UI.RibbonBuilder.Author + " | AutoCAD " + AcadEnv.Version + " (.NET " + Environment.Version + ") | shema razmjene " + Core.Exchange.PackageFormat.SchemaVersion +
                     " | katalog " + AcadEnv.Catalog.CatalogId + " " + AcadEnv.Catalog.Version + " (" + AcadEnv.Catalog.Types.Count() + " tipova) | dnevnik: " + Log.FilePath);
             });
         }
