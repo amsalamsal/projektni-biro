@@ -140,6 +140,11 @@ namespace SiteDesignPro.AutoCAD.UI
                 firstSteps!.Refresh();
                 set.Activate(3);
             }
+            else
+            {
+                // the Biblioteka button opens the library even when another tab was showing
+                set.Activate(0);
+            }
         }
 
         public static void ShowValidation(ValidationReport report, IReadOnlyDictionary<string, string> handles)
@@ -647,7 +652,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 report.ElementCount, report.ErrorCount, report.WarningCount, report.ReviewCount, review || report.ReviewCount == 0 ? string.Empty : " (skriveno)", ValidationReport.Disclaimer);
             list.Items.Clear();
             IEnumerable<ValidationIssue> issues = report.Issues.Where(i => review || i.Severity == Severity.Error || i.Severity == Severity.Warning);
-            foreach (IGrouping<string, ValidationIssue> g in issues.GroupBy(i => ((int)i.Severity).ToString(CultureInfo.InvariantCulture) + "|" + i.Code + "|" + i.Message).OrderBy(g => g.First().Severity).ThenBy(g => g.First().Code))
+            foreach (IGrouping<string, ValidationIssue> g in issues.GroupBy(i => ((int)i.Severity).ToString(CultureInfo.InvariantCulture) + "|" + i.Code).OrderBy(g => g.First().Severity).ThenBy(g => g.First().Code))
             {
                 ValidationIssue i = g.First();
                 Color c = i.Severity switch
@@ -664,7 +669,8 @@ namespace SiteDesignPro.AutoCAD.UI
                 head.Inlines.Add(new System.Windows.Documents.Run(ValidationReport.SeverityName(i.Severity).ToUpperInvariant() + "  ") { Foreground = new SolidColorBrush(c), FontWeight = FontWeights.SemiBold });
                 head.Inlines.Add(new System.Windows.Documents.Run(i.Code + "  " + (labels.Count > 1 ? "×" + labels.Count + "  " : string.Empty) + string.Join(", ", labels.Take(6)) + (labels.Count > 6 ? ", …" : string.Empty)));
                 panel.Children.Add(head);
-                TextBlock msg = SitePalette.Label(i.Message, 11);
+                int others = g.Select(x => x.Message).Distinct().Count() - 1;
+                TextBlock msg = SitePalette.Label(i.Message + (others > 0 ? " (i još " + others + " " + (others == 1 ? "slučaj" : "slučajeva") + " iste vrste)" : string.Empty), 11);
                 msg.TextWrapping = TextWrapping.Wrap;
                 panel.Children.Add(msg);
                 TextBlock res = SitePalette.Label(i.Resolution, 10, true);

@@ -108,6 +108,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             (Ring axisRing, bool closed) = ElementService.ReadCurve(axis);
             double k = ctx.K;
             var counts = new Dictionary<string, int>(StringComparer.Ordinal) { [axisType.Name] = 1 };
+            var rows = new Dictionary<long, List<Placement>>();
             foreach (StreetPart part in profile.Parts.Where(p => p.Kind != StreetPartKind.Axis))
             {
                 foreach (int side in part.Both ? new[] { 1, -1 } : new[] { 1 })
@@ -148,7 +149,15 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                         case StreetPartKind.Row:
                             {
-                                List<Placement> row = PathPlacement.Distribute(axisRing, closed, part.Spacing * k, part.Spacing * k / 2, part.Spacing * k / 2, SpacingMode.Fit, offset * k, 0);
+                                long key = (long)Math.Round(offset * 100);
+                                List<Placement> row = rows.TryGetValue(key, out List<Placement>? earlier) && earlier.Count > 1
+                                    ? Between(earlier, part.Spacing * k)
+                                    : PathPlacement.Distribute(axisRing, closed, part.Spacing * k, part.Spacing * k / 2, part.Spacing * k / 2, SpacingMode.Fit, offset * k, 0);
+                                if (!rows.ContainsKey(key))
+                                {
+                                    rows[key] = row;
+                                }
+
                                 foreach (Placement pl in row)
                                 {
                                     Make(ctx, existing, type, new PointGeometry(pl.Position, pl.Rotation), null);
@@ -166,6 +175,30 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Write(profile.Name + " (širina " + CommandContext.F(width, 2) + " m): " + string.Join(", ", counts.Where(kv => kv.Value > 0).Select(kv => kv.Value + " × " + kv.Key)) + ".");
             ctx.Write("Pojedine dijelove možete urediti (Uredi element) ili obrisati; ulica je jedan korak poništavanja (UNDO).");
         });
+
+        /// <summary>
+        /// A second row on the same line as an earlier one (lights in a tree row) goes into the gaps between the earlier
+        /// items, every n-th gap so the spacing stays close to the requested one; nothing lands on a tree.
+        /// </summary>
+        private static List<Placement> Between(List<Placement> earlier, double spacing)
+        {
+            double step = 0;
+            for (int i = 1; i < earlier.Count; i++)
+            {
+                step += (earlier[i].Position - earlier[i - 1].Position).Length;
+            }
+
+            step /= earlier.Count - 1;
+            int every = Math.Max(1, (int)Math.Round(spacing / Math.Max(step, 1e-9)));
+            var result = new List<Placement>();
+            for (int i = every / 2; i < earlier.Count - 1; i += every)
+            {
+                Placement a = earlier[i], b = earlier[i + 1];
+                result.Add(new Placement((a.Position + b.Position) * 0.5, a.Rotation));
+            }
+
+            return result;
+        }
 
         /// <summary>Curve parallel to the axis, offset to the left (positive) or right (negative), as a ring.</summary>
         private static Ring? OffsetRing(Curve axis, double leftOffset)
