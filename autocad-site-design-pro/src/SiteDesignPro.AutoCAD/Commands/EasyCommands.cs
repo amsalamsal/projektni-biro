@@ -149,13 +149,13 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                         case StreetPartKind.Row:
                             {
-                                long key = (long)Math.Round(offset * 100);
-                                List<Placement> row = rows.TryGetValue(key, out List<Placement>? earlier) && earlier.Count > 1
+                                long rowKey = (long)Math.Round(offset * 100);
+                                List<Placement> row = rows.TryGetValue(rowKey, out List<Placement>? earlier) && earlier.Count > 1
                                     ? Between(earlier, part.Spacing * k)
                                     : PathPlacement.Distribute(axisRing, closed, part.Spacing * k, part.Spacing * k / 2, part.Spacing * k / 2, SpacingMode.Fit, offset * k, 0);
-                                if (!rows.ContainsKey(key))
+                                if (!rows.ContainsKey(rowKey))
                                 {
-                                    rows[key] = row;
+                                    rows[rowKey] = row;
                                 }
 
                                 foreach (Placement pl in row)
