@@ -86,7 +86,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
 
                 // cell size follows the largest symbol of the category so big items (solar array) do not overlap
-                double largest = types.Select(t => Core.Symbols.SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters(), null, t.Id).Bounds())
+                double largest = types.Where(t => t.Builder.Id != "circle_zone").DefaultIfEmpty(types[0]).Select(t => Core.Symbols.SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters(), null, t.Id).Bounds())
                     .Max(b => Math.Max(b.Width, b.Height));
                 double cell = Math.Max(6.0, (largest * 1.2) + 1.5) * k;
                 Add(new DBText { TextString = cat.Name, Height = h * 2, Position = new Point3d(origin.X, y, 0) });
