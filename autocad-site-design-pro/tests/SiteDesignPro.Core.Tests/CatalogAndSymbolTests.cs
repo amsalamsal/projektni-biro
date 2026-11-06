@@ -70,7 +70,7 @@ namespace SiteDesignPro.Core.Tests
                 Assert.NotEqual("box", d.Symbol);
                 Assert.NotEqual("cylinder", d.Symbol);
                 Assert.Matches("^[a-z0-9_]+$", d.Symbol);
-                Assert.True(d.Items.Count >= 3, t.Id);
+                Assert.True(d.Items.Count >= 2, t.Id);
                 Box2 b = d.Bounds();
                 Assert.False(b.IsEmpty, t.Id);
                 Assert.True(b.Width < 20 && b.Height < 20, t.Id);

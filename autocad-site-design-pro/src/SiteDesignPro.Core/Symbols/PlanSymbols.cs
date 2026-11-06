@@ -773,6 +773,7 @@ namespace SiteDesignPro.Core.Symbols
                     {
                         b.Circle(0, 0, R);
                         b.Star(0, 0, R * 0.7, R * 0.3, 5);
+                        b.Circle(0, 0, R * 0.08);
                         b.Symbol = "focal_point";
                         return true;
                     }
