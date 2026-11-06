@@ -245,6 +245,7 @@ namespace SiteDesignPro.Core.Symbols
                     {
                         b.Rect(0, 0, S * 0.6, S * 0.6);
                         b.Bolt(0, 0, S * 0.45);
+                        b.Wheel(S * 0.45, -S * 0.35, S * 0.12);
                         b.Symbol = "ebike_charger";
                         return true;
                     }
