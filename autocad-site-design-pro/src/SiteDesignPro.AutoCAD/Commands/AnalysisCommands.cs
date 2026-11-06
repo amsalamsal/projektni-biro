@@ -71,9 +71,10 @@ namespace SiteDesignPro.AutoCAD.Commands
                 var table = (Table)ctx.Tr.GetObject(id, OpenMode.ForWrite);
                 for (int r = 0; r < rows.Count; r++)
                 {
-                    if (rows[r].Met.HasValue)
+                    bool? met = rows[r].Met;
+                    if (met != null)
                     {
-                        table.Cells[r + 2, 3].ContentColor = Color.FromColorIndex(ColorMethod.ByAci, rows[r].Met.Value ? (short)3 : (short)1);
+                        table.Cells[r + 2, 3].ContentColor = Color.FromColorIndex(ColorMethod.ByAci, met == true ? (short)3 : (short)1);
                     }
                 }
 
@@ -284,13 +285,15 @@ namespace SiteDesignPro.AutoCAD.Commands
             var h = new Hatch();
             h.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
             h.Associative = false;
-            h.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, Loop(pts));
+            (Point2dCollection v, DoubleCollection bl) = Loop(pts);
+            h.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, v, bl);
             foreach (Ring hole in holes)
             {
                 List<Vec3> hp = GeometryMath.Tessellate(hole, true, 0.02 * k);
                 if (hp.Count >= 3)
                 {
-                    h.AppendLoop(HatchLoopTypes.Polyline, Loop(hp));
+                    (Point2dCollection hv, DoubleCollection hb) = Loop(hp);
+                    h.AppendLoop(HatchLoopTypes.Polyline, hv, hb);
                 }
             }
 
@@ -298,20 +301,23 @@ namespace SiteDesignPro.AutoCAD.Commands
             return h;
         }
 
-        private static BulgeVertexCollection Loop(List<Vec3> pts)
+        private static (Point2dCollection Vertices, DoubleCollection Bulges) Loop(List<Vec3> pts)
         {
-            var bv = new BulgeVertexCollection();
+            var v = new Point2dCollection();
+            var b = new DoubleCollection();
             foreach (Vec3 p in pts)
             {
-                bv.Add(new BulgeVertex(new Point2d(p.X, p.Y), 0));
+                v.Add(new Point2d(p.X, p.Y));
+                b.Add(0);
             }
 
             if (pts.Count > 1 && (pts[0].XY - pts[pts.Count - 1].XY).Length > 1e-9)
             {
-                bv.Add(new BulgeVertex(new Point2d(pts[0].X, pts[0].Y), 0));
+                v.Add(new Point2d(pts[0].X, pts[0].Y));
+                b.Add(0);
             }
 
-            return bv;
+            return (v, b);
         }
 
         private static Hatch Disc(double cx, double cy, double r)
@@ -319,13 +325,9 @@ namespace SiteDesignPro.AutoCAD.Commands
             var h = new Hatch();
             h.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
             h.Associative = false;
-            var bv = new BulgeVertexCollection
-            {
-                new BulgeVertex(new Point2d(cx - r, cy), 1),
-                new BulgeVertex(new Point2d(cx + r, cy), 1),
-                new BulgeVertex(new Point2d(cx - r, cy), 0),
-            };
-            h.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, bv);
+            var v = new Point2dCollection { new Point2d(cx - r, cy), new Point2d(cx + r, cy), new Point2d(cx - r, cy) };
+            var b = new DoubleCollection { 1, 1, 0 };
+            h.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, v, b);
             h.EvaluateHatch(true);
             return h;
         }
