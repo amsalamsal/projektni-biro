@@ -2,6 +2,15 @@
 
 ## Neobjavljeno
 
+### Prepoznatljivi simboli u tlocrtu
+* 69 vrsta opreme koje su do sada imale opći znak (pravougaonik ili krug s krstom) dobilo je vlastiti simbol pogleda
+  odozgo u stvarnoj veličini: tobogan, dječija sprava, penjalica, fitness sprava, gol, trampolin, kontejner, korpa,
+  toplotna pumpa i druge jedinice s ventilatorom, punjači za auta i bicikle, ormari, zidne i podne svjetiljke,
+  žardinjere, skulpture, znakovi, kiosk, interfon i ostalo. Vlastiti simbol dobili su i ležaljka, stolica, stol za
+  stoni tenis, šahovski sto, košarkaški koš, vanjski tuš, kamera, zvučnik i Wi-Fi tačka.
+* Postojeći crteži dobijaju nove simbole naredbom **Popravi oznake**.
+* Nova naredba **Pregled simbola** (`SDPSIMBOLI`, Napredno): list sa svim simbolima i nazivima.
+
 ### Jednostavnije za korištenje
 * **Ulica** (`SDPULICA`): cijeli profil ulice iz jedne osovine – kolovoz, ivičnjaci, trotoari, biciklističke staze,
   drvoredi i rasvjeta. Profili Stambena, Sabirna, Bulevar, Pješačka, Prilaz; širina kolovoza se pita.
