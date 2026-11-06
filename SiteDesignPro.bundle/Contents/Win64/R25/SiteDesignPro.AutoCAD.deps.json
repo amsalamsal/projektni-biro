@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "SiteDesignPro.AutoCAD/0.2.0": {
+        "dependencies": {
+          "SiteDesignPro.Core": "0.2.0"
+        },
+        "runtime": {
+          "SiteDesignPro.AutoCAD.dll": {}
+        }
+      },
+      "SiteDesignPro.Core/0.2.0": {
+        "runtime": {
+          "SiteDesignPro.Core.dll": {
+            "assemblyVersion": "0.2.0.0",
+            "fileVersion": "0.2.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "SiteDesignPro.AutoCAD/0.2.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SiteDesignPro.Core/0.2.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

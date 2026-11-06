@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://site-design-pro.local/schema/1.0/changes.schema.json",
+  "title": "Site Design Pro change set (SketchUp to AutoCAD)",
+  "description": "Edits made in SketchUp that can be applied back to the AutoCAD drawing: parameter changes of any element and moves/rotations of point elements. Positions are metres in the package frame (relative to coordinateSystem.origin); rotations are radians counter-clockwise about +Z.",
+  "type": "object",
+  "required": ["format", "schemaVersion", "createdUtc", "generator", "projectId", "units", "coordinateSystem", "changes"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "site-design-pro-changes" },
+    "schemaVersion": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
+    "createdUtc": { "type": "string" },
+    "generator": {
+      "type": "object",
+      "required": ["application", "version"],
+      "properties": { "application": { "type": "string" }, "version": { "type": "string" } }
+    },
+    "projectId": { "type": "string" },
+    "sourcePackageId": { "type": ["string", "null"] },
+    "units": {
+      "type": "object",
+      "required": ["length", "angle"],
+      "properties": { "length": { "const": "m" }, "angle": { "const": "rad" } }
+    },
+    "coordinateSystem": {
+      "type": "object",
+      "required": ["origin"],
+      "properties": { "origin": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 3, "maxItems": 3 } }
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "baseContentHash"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "label": { "type": ["string", "null"] },
+          "baseContentHash": { "type": ["string", "null"] },
+          "parameters": { "type": "object", "additionalProperties": { "type": ["number", "string", "boolean", "null"] } },
+          "position": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+          "rotation": { "type": "number" }
+        }
+      }
+    }
+  }
+}
