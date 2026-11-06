@@ -262,7 +262,7 @@ namespace SiteDesignPro.Core.Layout
                         if (at.HasValue)
                         {
                             hit.Add(o.Id);
-                            result.Conflicts.Add(new SweptConflict(at.Value, station, "Točkovi prelaze preko površine " + o.Label + " (ostrvo, travnjak ili zasad).", o.Id));
+                            result.Conflicts.Add(new SweptConflict(at.Value, station, "Točkovi prelaze preko površine " + o.Label + " – ostrvo, travnjak ili zasad nije vozna površina.", o.Id));
                         }
 
                         continue;
@@ -337,9 +337,13 @@ namespace SiteDesignPro.Core.Layout
                     Vec2 a = wheels[i], b = wheels[(i + 1) % wheels.Length];
                     for (int j = 0; j < ring.Count; j++)
                     {
-                        if (SegmentsIntersect(a, b, ring[j], ring[(j + 1) % ring.Count]))
+                        Vec2 c = ring[j], d = ring[(j + 1) % ring.Count];
+                        if (SegmentsIntersect(a, b, c, d))
                         {
-                            return ring[j];
+                            // crossing point of the wheel edge and the area edge
+                            double den = ((b.X - a.X) * (d.Y - c.Y)) - ((b.Y - a.Y) * (d.X - c.X));
+                            double t = Math.Abs(den) < 1e-12 ? 0.5 : (((c.X - a.X) * (d.Y - c.Y)) - ((c.Y - a.Y) * (d.X - c.X))) / den;
+                            return a + ((b - a) * t);
                         }
                     }
                 }
