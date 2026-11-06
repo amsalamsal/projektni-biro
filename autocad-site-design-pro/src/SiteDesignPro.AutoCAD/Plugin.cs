@@ -18,6 +18,7 @@ using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 [assembly: CommandClass(typeof(TerrainCommands))]
 [assembly: CommandClass(typeof(SafetyCommands))]
 [assembly: CommandClass(typeof(EasyCommands))]
+[assembly: CommandClass(typeof(AnalysisCommands))]
 
 namespace SiteDesignPro.AutoCAD
 {

@@ -148,6 +148,9 @@ namespace SiteDesignPro.Core.Model
 
         public CheckSettings Checks { get; set; } = new CheckSettings();
 
+        /// <summary>Limits from the regulation plan for the urban indicator table (SDPPOKAZATELJI).</summary>
+        public global::SiteDesignPro.Core.Urban.UrbanRequirements Urban { get; set; } = new global::SiteDesignPro.Core.Urban.UrbanRequirements();
+
         public string LastExportPath { get; set; } = string.Empty;
 
         [JsonIgnore]
@@ -184,6 +187,7 @@ namespace SiteDesignPro.Core.Model
 
             s.Labels ??= new LabelSettings();
             s.Checks ??= new CheckSettings();
+            s.Urban ??= new global::SiteDesignPro.Core.Urban.UrbanRequirements();
             s.Elevations ??= new ElevationDatum();
             s.Georeference ??= new GeoreferenceSettings();
             s.Backups ??= new BackupPolicy();

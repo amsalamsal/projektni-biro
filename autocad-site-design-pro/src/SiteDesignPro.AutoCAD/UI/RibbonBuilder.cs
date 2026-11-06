@@ -113,14 +113,17 @@ namespace SiteDesignPro.AutoCAD.UI
                       Small("Legenda", "SDPLEGEND", "legend", "Legenda vrsta elemenata.")),
                 Stack(Small("Tabele", "SDPSCHEDULE", "schedule", "Količinske tabele."),
                       Small("Sastavnica", "SDPTITLEBLOCK", "titleblock", "Okvir lista i sastavnica."),
-                      Small("Izvoz CSV", "SDPSCHEDULECSV", "csv", "Tabele za Excel."))));
+                      Small("Izvoz CSV", "SDPSCHEDULECSV", "csv", "Tabele za Excel.")),
+                Large("Prezentacija u boji", "SDPPREZENTACIJA", "decorative", "Plan u boji za investitora: materijali, zelenilo, voda, krošnje i sjene. Ponovni klik osvježava boje.")));
 
             tab.Panels.Add(Panel("Provjera i izvoz",
                 Large("Provjeri projekat", "SDPVALIDATE", "validate", "Greške, kolizije, izlazak iz parcele; rezultat u paleti, grupisano."),
                 Large("Izvoz paketa", "SDPEXPORT", "export", "Paket .sdpkg za 3D model u SketchUpu."),
                 Stack(Small("Uvoz paketa", "SDPUVOZPAKETA", "import", "Učitava .sdpkg paket u crtež."),
                       Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Izmjene iz SketchUpa, s pregledom prije primjene."),
-                      Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti u komandnoj liniji."))));
+                      Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti u komandnoj liniji.")),
+                Stack(Small("Urbanistički pokazatelji", "SDPPOKAZATELJI", "area", "Kiz, Kis, zelenilo, vodopropusne površine i parking prema zahtjevima regulacionog plana."),
+                      Small("Prohodnost vozila", "SDPPROHODNOST", "clearance", "Putanja vatrogasnog vozila, kamiona za smeće, dostavnog ili putničkog vozila: krivine i udari u prepreke."))));
 
             tab.Panels.Add(Panel("Pomoć",
                 Large("Pomoć", "SDPPOMOC", "about", "Uputstvo za korištenje na bosanskom jeziku."),
