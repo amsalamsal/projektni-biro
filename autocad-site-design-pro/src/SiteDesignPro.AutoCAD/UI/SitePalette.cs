@@ -202,7 +202,7 @@ namespace SiteDesignPro.AutoCAD.UI
             {
                 if (t.Geometry == GeometryKind.Point)
                 {
-                    SymbolDrawing d = SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters());
+                    SymbolDrawing d = SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters(), null, t.Id);
                     Box2 b = d.Bounds();
                     double size = Math.Max(Math.Max(b.Width, b.Height), 0.2);
                     pen.Thickness = size / 40;

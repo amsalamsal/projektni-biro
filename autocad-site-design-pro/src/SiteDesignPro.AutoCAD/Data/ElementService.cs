@@ -599,7 +599,7 @@ namespace SiteDesignPro.AutoCAD.Data
 
         private ObjectId SymbolBlock(ElementType type, ParameterSet parameters)
         {
-            SymbolDrawing drawing = SymbolLibrary.Build(type.Builder.Id, parameters, k => type.Parameter(k)?.Default.AsNumber() ?? double.NaN);
+            SymbolDrawing drawing = SymbolLibrary.Build(type.Builder.Id, parameters, k => type.Parameter(k)?.Default.AsNumber() ?? double.NaN, type.Id);
             return SymbolBlocks.Ensure(db, tr, drawing, settings.Scale);
         }
 

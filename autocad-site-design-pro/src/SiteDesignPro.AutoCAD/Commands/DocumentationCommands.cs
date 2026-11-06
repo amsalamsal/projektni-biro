@@ -61,6 +61,57 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Write("Izmijenjeno oznaka: " + changed.Count + ".");
         });
 
+        /// <summary>Sheet with the plan symbol of every point type and its name, grouped by category (for checking symbols).</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPSIMBOLI", CommandFlags.Modal)]
+        public void SymbolSheet() => CommandContext.Run("SDPSIMBOLI", ctx =>
+        {
+            Point3d origin = ctx.Point("Gornji lijevi ugao lista simbola") ?? Point3d.Origin;
+            double k = ctx.K, cell = 6.0 * k, h = 0.3 * k;
+            int columns = 10;
+            BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
+            void Add(Entity e)
+            {
+                ms.AppendEntity(e);
+                ctx.Tr.AddNewlyCreatedDBObject(e, true);
+            }
+
+            double y = origin.Y;
+            int count = 0;
+            foreach (CategoryDefinition cat in ctx.Catalog.Categories)
+            {
+                List<ElementType> types = ctx.Catalog.Types.Where(t => t.Category == cat.Id && t.Geometry == GeometryKind.Point).ToList();
+                if (types.Count == 0)
+                {
+                    continue;
+                }
+
+                Add(new DBText { TextString = cat.Name, Height = h * 2, Position = new Point3d(origin.X, y, 0) });
+                y -= h * 4;
+                for (int i = 0; i < types.Count; i++)
+                {
+                    double cx = origin.X + ((i % columns) + 0.5) * cell;
+                    double cy = y - ((i / columns) + 0.45) * cell;
+                    ObjectId block = ctx.Svc.SymbolBlockFor(types[i], types[i].CreateDefaultParameters());
+                    Add(new BlockReference(new Point3d(cx, cy, 0), block));
+                    string name = types[i].Name.Length > 30 ? types[i].Name.Substring(0, 29) + "…" : types[i].Name;
+                    Add(new DBText
+                    {
+                        TextString = name,
+                        Height = h,
+                        HorizontalMode = TextHorizontalMode.TextCenter,
+                        VerticalMode = TextVerticalMode.TextTop,
+                        Position = new Point3d(cx, cy - (cell * 0.38), 0),
+                        AlignmentPoint = new Point3d(cx, cy - (cell * 0.38), 0),
+                    });
+                    count++;
+                }
+
+                y -= ((types.Count + columns - 1) / columns) * cell + (h * 3);
+            }
+
+            ctx.Write("Nacrtano simbola: " + count + ". Simboli su u stvarnoj veličini; vrlo mali elementi imaju najmanju čitljivu veličinu.");
+        });
+
         [CommandMethod("SITEDESIGNPRO", "SDPNORTH", CommandFlags.Modal)]
         public void North() => CommandContext.Run("SDPNORTH", ctx =>
             new Annotations(ctx.Db, ctx.Tr, ctx.Svc).NorthArrow(ctx.Point("Položaj strelice sjevera")!.Value));

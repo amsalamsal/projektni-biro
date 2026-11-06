@@ -343,7 +343,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
                 var center = new Point3d(at.X + (h * 1.5), y, 0);
                 if (t.Geometry == GeometryKind.Point)
                 {
-                    SymbolDrawing d = SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters());
+                    SymbolDrawing d = SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters(), null, t.Id);
                     Box2 b = d.Bounds();
                     double size = Math.Max(b.Width, b.Height) * K;
                     double s = size > 0 ? Math.Min(1.0, h * 2.2 / size) : 1.0;

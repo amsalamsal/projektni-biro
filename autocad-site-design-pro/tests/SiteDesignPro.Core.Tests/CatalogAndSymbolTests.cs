@@ -62,6 +62,22 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void GenericEquipmentTypes_HaveTheirOwnRecognisablePlanSymbol()
+        {
+            foreach (ElementType t in TestSupport.Catalog.Types.Where(t => t.Builder.Id == "box_equipment" || t.Builder.Id == "cylinder_equipment"))
+            {
+                SymbolDrawing d = SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters(), null, t.Id);
+                Assert.NotEqual("box", d.Symbol);
+                Assert.NotEqual("cylinder", d.Symbol);
+                Assert.Matches("^[a-z0-9_]+$", d.Symbol);
+                Assert.True(d.Items.Count >= 3, t.Id);
+                Box2 b = d.Bounds();
+                Assert.False(b.IsEmpty, t.Id);
+                Assert.True(b.Width < 20 && b.Height < 20, t.Id);
+            }
+        }
+
+        [Fact]
         public void UserOverlay_AddsTypeAndOverridesLayer()
         {
             string dir = TestSupport.TempDir();

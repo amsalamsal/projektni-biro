@@ -137,7 +137,8 @@ namespace SiteDesignPro.Core.Symbols
         /// <summary>Minimum marker radius for tiny objects, metres.</summary>
         public const double MinMarker = 0.15;
 
-        public static SymbolDrawing Build(string builder, ParameterSet p, Func<string, double>? defaults = null)
+        /// <param name="typeId">Element type; types with their own plan symbol (slide, heat pump...) use it instead of the builder's generic one.</param>
+        public static SymbolDrawing Build(string builder, ParameterSet p, Func<string, double>? defaults = null, string? typeId = null)
         {
             double N(string k, double fallback)
             {
@@ -156,6 +157,13 @@ namespace SiteDesignPro.Core.Symbols
 
             var items = new List<SymbolPrimitive>();
             string symbol = builder;
+            if (typeId != null && (builder == "box_equipment" || builder == "cylinder_equipment") &&
+                PlanSymbols.TryBuild(typeId, N("width", 1), N("depth", 0.6), N("diameter", 0.6), items, out string own))
+            {
+                return new SymbolDrawing(own, items);
+            }
+
+            items.Clear();
             switch (builder)
             {
                 case "tree":

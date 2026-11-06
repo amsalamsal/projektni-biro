@@ -144,6 +144,7 @@ namespace SiteDesignPro.AutoCAD.UI
                     Small("Detalj", "SDPDETAIL", "detail", "Oznaka detalja."),
                     Small("Rasterske ose", "SDPGRIDLINES", "grid", "Ose s oznakama."),
                     Small("Oblak revizije", "SDPREVCLOUD", "revcloud", "Oblak revizije s napomenom."),
+                    Small("Pregled simbola", "SDPSIMBOLI", "legend", "List sa svim simbolima elemenata i njihovim nazivima."),
                     Small("Korisnički katalozi", "SDPCATALOGFOLDER", "catalog", "Folder za vlastite vrste elemenata."),
                     Small("Učitaj katalog", "SDPRELOAD", "reload", "Ponovno učitavanje kataloga."),
                     Small("Sigurnosna kopija", "SDPKOPIJA", "export", "Provjerena kopija sačuvanog crteža."),
