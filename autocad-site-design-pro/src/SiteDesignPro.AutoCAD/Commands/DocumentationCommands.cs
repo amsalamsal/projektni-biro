@@ -66,7 +66,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void SymbolSheet() => CommandContext.Run("SDPSIMBOLI", ctx =>
         {
             Point3d origin = ctx.Point("Gornji lijevi ugao lista simbola") ?? Point3d.Origin;
-            double k = ctx.K, cell = 6.0 * k, h = 0.3 * k;
+            double k = ctx.K, h = 0.3 * k;
             int columns = 10;
             BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
             void Add(Entity e)
@@ -85,6 +85,10 @@ namespace SiteDesignPro.AutoCAD.Commands
                     continue;
                 }
 
+                // cell size follows the largest symbol of the category so big items (solar array) do not overlap
+                double largest = types.Select(t => Core.Symbols.SymbolLibrary.Build(t.Builder.Id, t.CreateDefaultParameters(), null, t.Id).Bounds())
+                    .Max(b => Math.Max(b.Width, b.Height));
+                double cell = Math.Max(6.0, (largest * 1.2) + 1.5) * k;
                 Add(new DBText { TextString = cat.Name, Height = h * 2, Position = new Point3d(origin.X, y, 0) });
                 y -= h * 4;
                 for (int i = 0; i < types.Count; i++)

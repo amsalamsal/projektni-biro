@@ -916,8 +916,8 @@ namespace SiteDesignPro.Core.Symbols
                         b.Line(0, 1.0, 0, h);
                         b.Rect(0, h, bw, 0.06);
                         b.Circle(0, h - 0.3, 0.23);
-                        b.Poly(false, -2.45, h, -2.45, h - 5.8, 2.45, h - 5.8, 2.45, h);
-                        b.Arc(0, h - 5.8, 1.8, Math.PI, 2 * Math.PI);
+                        b.Line(-0.9, h - 0.3, -0.6, h - 0.3);
+                        b.Line(0.6, h - 0.3, 0.9, h - 0.3);
                         b.Symbol = "basketball";
                         return true;
                     }
