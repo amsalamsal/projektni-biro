@@ -2,6 +2,20 @@
 
 ## Neobjavljeno
 
+### Analize za investitora i inspekciju
+* **Urbanistički pokazatelji** (`SDPPOKAZATELJI`, Provjera i izvoz): koeficijent izgrađenosti i iskorištenosti,
+  procenat zelenih i vodopropusnih površina, broj parking mjesta, mjesta za osobe s invaliditetom i mjesta s
+  punjačem. Zahtjeve regulacionog plana upisujete u prozoru (čuvaju se u projektu); uz svaki pokazatelj stoji
+  ocjena „ispunjeno“ (zeleno) ili „NIJE ispunjeno“ (crveno). Tabela se postavlja klikom, a ponovno pokretanje je
+  zamjenjuje.
+* **Prezentacija u boji** (`SDPPREZENTACIJA`, Dokumentacija): jednim klikom travnjak i zasadi u zelenim tonovima,
+  popločanje i ceste u boji svog materijala, voda plava, stabla i grmlje s krošnjom, odsjajem i sjenom, objekti
+  svijetli s bačenom sjenom. Boje su na slojevima VU-PREZ-* ispod crteža; opcija Ukloni ih briše.
+* **Prohodnost vozila** (`SDPPROHODNOST`, Provjera i izvoz): stvarna provjera kretanja vatrogasnog vozila, kamiona
+  za smeće, dostavnog ili putničkog vozila po odabranoj ili nacrtanoj putanji (i kroz kružni tok). Crta obrise
+  karoserije i tragove točkova, a crvenim krugom i porukom označava krivine preoštre za vozilo, udare karoserije u
+  drveće, stubove, opremu, objekte i zidove, te prelazak točkova preko srednjeg ostrva, travnjaka i zasada.
+
 ### Prepoznatljivi simboli u tlocrtu
 * 69 vrsta opreme koje su do sada imale opći znak (pravougaonik ili krug s krstom) dobilo je vlastiti simbol pogleda
   odozgo u stvarnoj veličini: tobogan, dječija sprava, penjalica, fitness sprava, gol, trampolin, kontejner, korpa,

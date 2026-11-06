@@ -102,17 +102,28 @@ namespace SiteDesignPro.Core.Layout
         }
     }
 
-    /// <summary>Obstacle the vehicle body must not touch: a circle (trunk, post) or a polygon (building, wall).</summary>
+    /// <summary>
+    /// Obstacle on the swept path: a circle (trunk, post) or a polygon (building, wall) the body must not touch, or a
+    /// ground area (lawn, planted island, flower bed) the wheels must not run over while the body may overhang it.
+    /// </summary>
     public sealed class SweptObstacle
     {
-        private SweptObstacle(string id, string label, Vec2 centre, double radius, IReadOnlyList<Vec2>? polygon)
+        private SweptObstacle(string id, string label, Vec2 centre, double radius, IReadOnlyList<Vec2>? polygon, bool wheelsOnly = false, IReadOnlyList<IReadOnlyList<Vec2>>? holes = null)
         {
             Id = id;
             Label = label;
             Centre = centre;
             Radius = radius;
             Polygon = polygon;
+            WheelsOnly = wheelsOnly;
+            Holes = holes ?? Array.Empty<IReadOnlyList<Vec2>>();
         }
+
+        /// <summary>Only the wheels are checked (low area the body may overhang: lawn, island, planting).</summary>
+        public bool WheelsOnly { get; }
+
+        /// <summary>Openings in a ground area (for example a paved path cut out of a lawn).</summary>
+        public IReadOnlyList<IReadOnlyList<Vec2>> Holes { get; }
 
         public string Id { get; }
 
@@ -130,6 +141,12 @@ namespace SiteDesignPro.Core.Layout
         {
             Vec2 c = new Vec2(polygon.Average(p => p.X), polygon.Average(p => p.Y));
             return new SweptObstacle(id, label, c, 0, polygon);
+        }
+
+        public static SweptObstacle Ground(string id, string label, IReadOnlyList<Vec2> outer, IReadOnlyList<IReadOnlyList<Vec2>>? holes = null)
+        {
+            Vec2 c = new Vec2(outer.Average(p => p.X), outer.Average(p => p.Y));
+            return new SweptObstacle(id, label, c, 0, outer, true, holes);
         }
     }
 
@@ -230,9 +247,28 @@ namespace SiteDesignPro.Core.Layout
                 rightTrack.Add(rear - (n * (v.Width / 2 - 0.15)));
 
                 Vec2[] test = clearance > 0 ? Inflate(body, clearance) : body;
+                double tw = (v.Width / 2) - 0.15;
+                Vec2[] wheels = { rear + (n * tw), rear - (n * tw), front - (n * tw), front + (n * tw) };
                 foreach (SweptObstacle o in obs)
                 {
-                    if (hit.Contains(o.Id) || !Touches(test, o))
+                    if (hit.Contains(o.Id))
+                    {
+                        continue;
+                    }
+
+                    if (o.WheelsOnly)
+                    {
+                        Vec2? at = WheelsOn(wheels, o);
+                        if (at.HasValue)
+                        {
+                            hit.Add(o.Id);
+                            result.Conflicts.Add(new SweptConflict(at.Value, station, "Točkovi prelaze preko površine " + o.Label + " (ostrvo, travnjak ili zasad).", o.Id));
+                        }
+
+                        continue;
+                    }
+
+                    if (!Touches(test, o))
                     {
                         continue;
                     }
@@ -276,6 +312,40 @@ namespace SiteDesignPro.Core.Layout
             }
 
             return pts;
+        }
+
+        /// <summary>Point where the wheel footprint enters a ground area (inside it and not in one of its holes), or null.</summary>
+        public static Vec2? WheelsOn(Vec2[] wheels, SweptObstacle o)
+        {
+            if (o.Polygon == null)
+            {
+                return null;
+            }
+
+            foreach (Vec2 p in wheels)
+            {
+                if (PointInPolygon(p, o.Polygon) && !o.Holes.Any(h => PointInPolygon(p, h)))
+                {
+                    return p;
+                }
+            }
+
+            foreach (IReadOnlyList<Vec2> ring in new[] { o.Polygon }.Concat(o.Holes))
+            {
+                for (int i = 0; i < wheels.Length; i++)
+                {
+                    Vec2 a = wheels[i], b = wheels[(i + 1) % wheels.Length];
+                    for (int j = 0; j < ring.Count; j++)
+                    {
+                        if (SegmentsIntersect(a, b, ring[j], ring[(j + 1) % ring.Count]))
+                        {
+                            return ring[j];
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         public static bool Touches(Vec2[] body, SweptObstacle o)

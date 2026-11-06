@@ -114,6 +114,25 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void WheelsOverIsland_AreFlagged_OverhangAndHolesAreNot()
+        {
+            var path = new List<Vec2> { new Vec2(0, 0), new Vec2(40, 0) };
+            List<Vec2> Box(double x0, double y0, double x1, double y1) => new List<Vec2> { new Vec2(x0, y0), new Vec2(x1, y0), new Vec2(x1, y1), new Vec2(x0, y1) };
+
+            // island across the road: wheels run over it
+            var island = SweptObstacle.Ground("i", "ostrvo", Box(18, -3, 22, 3));
+            Assert.Contains(SweptPath.Run(path, Fire, new[] { island }).Conflicts, c => c.ObstacleId == "i");
+
+            // verge starting 1.2 m beside the axis: only the body (half width 1.25) overhangs, the wheels stay off
+            var verge = SweptObstacle.Ground("v", "travnjak", Box(0, 1.2, 40, 5));
+            Assert.Empty(SweptPath.Run(path, Fire, new[] { verge }).Conflicts);
+
+            // lawn with the road cut out as a hole: no conflict
+            var lawn = SweptObstacle.Ground("l", "travnjak", Box(-10, -10, 50, 10), new[] { (IReadOnlyList<Vec2>)Box(-10, -2, 50, 2) });
+            Assert.Empty(SweptPath.Run(path, Fire, new[] { lawn }).Conflicts);
+        }
+
+        [Fact]
         public void TreeBesideTheRoad_IsHitOnlyWhenTooClose()
         {
             var path = new List<Vec2> { new Vec2(0, 0), new Vec2(40, 0) };

@@ -53,7 +53,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             List<UrbanIndicator> rows = UrbanIndicators.Compute(m, req);
             foreach (UrbanIndicator i in rows)
             {
-                ctx.Write("  " + i.Name.PadRight(48) + i.Value.PadLeft(22) + "   " + (i.Requirement.Length > 0 ? i.Requirement.PadRight(28) + i.Verdict : string.Empty));
+                ctx.Write("  " + i.Name.PadRight(48) + i.Value.PadLeft(22) + "   " + (i.Requirement.Length > 0 ? i.Requirement.PadRight(30) + "  " + i.Verdict : string.Empty));
             }
 
             int failed = rows.Count(r => r.Met == false);
@@ -448,7 +448,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 " Provjera je orijentaciona (model krutog vozila pri maloj brzini) i ne zamjenjuje provjeru prema propisima.");
         });
 
-        /// <summary>Things a vehicle body must not touch: trunks, posts, signs, furniture, equipment, buildings, walls and fences.</summary>
+        /// <summary>Things a vehicle body must not touch (trunks, posts, signs, furniture, equipment, buildings, walls, fences) and green areas and islands its wheels must not run over.</summary>
         private static List<SweptObstacle> Obstacles(CommandContext ctx, double k)
         {
             var list = new List<SweptObstacle>();
@@ -479,6 +479,14 @@ namespace SiteDesignPro.AutoCAD.Commands
                             }
 
                             list.Add(SweptObstacle.Circle(e.Id, label, new Vec2(p.Position.X / k, p.Position.Y / k), r));
+                            break;
+                        }
+
+                    case PolygonGeometry pg when SiteDesignPro.Core.Urban.UrbanIndicators.IsGreen(t) || t.Builder.Id == "basin" ||
+                                                 t.Id == "water.rain_garden" || t.Id == "water.bioswale":
+                        {
+                            List<Vec2> Ring2(Ring r) => GeometryMath.Tessellate(r, true, 0.05 * k).Select(v => new Vec2(v.X / k, v.Y / k)).ToList();
+                            list.Add(SweptObstacle.Ground(e.Id, label, Ring2(pg.Outer), pg.Holes.Select(h => (IReadOnlyList<Vec2>)Ring2(h)).ToList()));
                             break;
                         }
 
