@@ -58,6 +58,113 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
     }
 
+    /// <summary>Rubber-band preview of a polyline being drawn point by point; keywords [Zatvori/Ponisti], Enter ends.</summary>
+    internal sealed class PolylineJig : DrawJig
+    {
+        private readonly List<Point3d> fixedPoints;
+        private Point3d current;
+        private bool snapped;
+        private double snapSize;
+
+        public PolylineJig(List<Point3d> points)
+        {
+            fixedPoints = points;
+            current = points[points.Count - 1];
+        }
+
+        public Point3d Current => current;
+
+        protected override SamplerStatus Sampler(JigPrompts prompts)
+        {
+            bool canClose = fixedPoints.Count >= 3;
+            var o = new JigPromptPointOptions
+            {
+                UserInputControls = UserInputControls.Accept3dCoordinates | UserInputControls.NullResponseAccepted,
+                UseBasePoint = true,
+                BasePoint = fixedPoints[fixedPoints.Count - 1],
+            };
+            if (canClose)
+            {
+                o.SetMessageAndKeywords("\nSljedeća tačka [Zatvori/Ponisti] <kraj>: ", "Close Undo");
+            }
+            else
+            {
+                o.SetMessageAndKeywords("\nSljedeća tačka [Ponisti] <kraj>: ", "Undo");
+            }
+
+            PromptPointResult r = prompts.AcquirePoint(o);
+            if (r.Status == PromptStatus.Cancel || r.Status == PromptStatus.Error)
+            {
+                return SamplerStatus.Cancel;
+            }
+
+            if (r.Status != PromptStatus.OK)
+            {
+                return SamplerStatus.OK; // keyword or Enter: ends this Drag, the caller reads the status
+            }
+
+            // Like PLINE: near the start point the cursor snaps to it (square marker); a click there closes the polyline.
+            Point3d value = r.Value;
+            bool snap = false;
+            snapSize = SnapTolerance();
+            if (canClose && snapSize > 0 && value.DistanceTo(fixedPoints[0]) < snapSize)
+            {
+                value = fixedPoints[0];
+                snap = true;
+            }
+
+            if (value.DistanceTo(current) < 1e-9 && snap == snapped)
+            {
+                return SamplerStatus.NoChange;
+            }
+
+            current = value;
+            snapped = snap;
+            return SamplerStatus.OK;
+        }
+
+        /// <summary>About 12 screen pixels expressed in drawing units (0 if it cannot be determined).</summary>
+        private static double SnapTolerance()
+        {
+            try
+            {
+                double viewHeight = Convert.ToDouble(AcApp.GetSystemVariable("VIEWSIZE"), CultureInfo.InvariantCulture);
+                var screen = (Point2d)AcApp.GetSystemVariable("SCREENSIZE");
+                return screen.Y > 0 ? 12.0 * viewHeight / screen.Y : 0;
+            }
+            catch (System.Exception)
+            {
+                return 0;
+            }
+        }
+
+        protected override bool WorldDraw(Autodesk.AutoCAD.GraphicsInterface.WorldDraw draw)
+        {
+            for (int i = 1; i < fixedPoints.Count; i++)
+            {
+                draw.Geometry.WorldLine(fixedPoints[i - 1], fixedPoints[i]);
+            }
+
+            Point3d last = fixedPoints[fixedPoints.Count - 1];
+            draw.Geometry.WorldLine(last, current);
+            if (snapped && snapSize > 0)
+            {
+                double h = snapSize / 2;
+                Point3d c = fixedPoints[0];
+                var a = new Point3d(c.X - h, c.Y - h, c.Z);
+                var b = new Point3d(c.X + h, c.Y - h, c.Z);
+                var d = new Point3d(c.X + h, c.Y + h, c.Z);
+                var e = new Point3d(c.X - h, c.Y + h, c.Z);
+                draw.Geometry.WorldLine(a, b);
+                draw.Geometry.WorldLine(b, d);
+                draw.Geometry.WorldLine(d, e);
+                draw.Geometry.WorldLine(e, a);
+            }
+
+            return true;
+        }
+    }
+
     /// <summary>Element placement, drawing, conversion, editing, selection and layout tools.</summary>
     public sealed class PlacementCommands
     {
@@ -133,21 +240,11 @@ namespace SiteDesignPro.AutoCAD.Commands
             pts.Add(first.Value);
             while (true)
             {
-                var o = new PromptPointOptions(pts.Count >= 2 ? "\nSljedeća tačka [Zatvori/Ponisti] <kraj>" : "\nSljedeća tačka [Ponisti] <kraj>")
-                {
-                    AllowNone = true,
-                    AppendKeywordsToMessage = false,
-                    UseBasePoint = true,
-                    BasePoint = pts[pts.Count - 1].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()),
-                };
-                if (pts.Count >= 2)
-                {
-                    o.Keywords.Add("Close", "Zatvori", "Zatvori");
-                }
-
-                o.Keywords.Add("Undo", "Ponisti", "Ponisti");
-                PromptPointResult r = ctx.Ed.GetPoint(o);
-                if (r.Status == PromptStatus.Keyword && r.StringResult == "Close")
+                // A jig redraws the whole polyline on every refresh, so it survives zoom, pan and regen
+                // (Editor.DrawVector is transient graphics and disappears on the first regen).
+                var jig = new PolylineJig(pts);
+                PromptResult r = ctx.Ed.Drag(jig);
+                if (r.Status == PromptStatus.Keyword && r.StringResult == "Close" && pts.Count >= 3)
                 {
                     closed = true;
                     break;
@@ -158,11 +255,6 @@ namespace SiteDesignPro.AutoCAD.Commands
                     if (pts.Count > 1)
                     {
                         pts.RemoveAt(pts.Count - 1);
-                        ctx.Ed.Regen();
-                        for (int i = 1; i < pts.Count; i++)
-                        {
-                            ctx.Ed.DrawVector(pts[i - 1].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()), pts[i].TransformBy(ctx.Ed.CurrentUserCoordinateSystem.Inverse()), 1, false);
-                        }
                     }
 
                     continue;
@@ -175,16 +267,23 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 if (r.Status != PromptStatus.OK)
                 {
-                    ctx.Ed.Regen();
                     throw new CommandCancelled();
                 }
 
-                Point3d p = r.Value.TransformBy(ctx.Ed.CurrentUserCoordinateSystem);
-                ctx.Ed.DrawVector(o.BasePoint, r.Value, 1, false);
-                pts.Add(p);
+                Point3d p = jig.Current;
+                if (pts.Count >= 3 && p.DistanceTo(pts[0]) < 1e-6)
+                {
+                    // clicking the start point closes the polyline
+                    closed = true;
+                    break;
+                }
+
+                if (p.DistanceTo(pts[pts.Count - 1]) > 1e-9)
+                {
+                    pts.Add(p);
+                }
             }
 
-            ctx.Ed.Regen();
             int needed = closeArea ? 3 : 2;
             if (pts.Count < needed)
             {
