@@ -157,8 +157,9 @@ namespace SiteDesignPro.Core.Symbols
 
             var items = new List<SymbolPrimitive>();
             string symbol = builder;
-            if (typeId != null && (builder == "box_equipment" || builder == "cylinder_equipment") &&
-                PlanSymbols.TryBuild(typeId, N("width", 1), N("depth", 0.6), N("diameter", 0.6), items, out string own))
+            double ownW = builder == "bench" || builder == "table" ? N("length", 1) : N("width", 1);
+            double ownD = builder == "table" ? N("width", 0.8) : N("depth", 0.6);
+            if (typeId != null && PlanSymbols.TryBuild(typeId, ownW, ownD, N("diameter", 0.6), items, out string own))
             {
                 return new SymbolDrawing(own, items);
             }

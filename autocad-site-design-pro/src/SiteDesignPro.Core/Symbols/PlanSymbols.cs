@@ -262,10 +262,11 @@ namespace SiteDesignPro.Core.Symbols
 
                 case "sustainability.ev_charger_wallbox":
                     {
-                        b.Wall(S * 0.9, S * 0.25);
-                        b.Rect(0, S * 0.25 - (S * 0.15), S * 0.5, S * 0.3);
-                        b.Bolt(0, S * 0.1, S * 0.22);
-                        b.Poly(false, S * 0.25, S * 0.05, S * 0.4, -S * 0.2, S * 0.2, -S * 0.4);
+                        b.Wall(S * 0.9, S * 0.3);
+                        b.Rect(0, 0, S * 0.5, S * 0.3);
+                        b.Bolt(0, 0, S * 0.24);
+                        b.Poly(false, S * 0.25, -S * 0.05, S * 0.42, -S * 0.25, S * 0.22, -S * 0.42);
+                        b.Rect(S * 0.18, -S * 0.46, S * 0.1, S * 0.08);
                         b.Symbol = "ev_wallbox";
                         return true;
                     }
@@ -562,7 +563,7 @@ namespace SiteDesignPro.Core.Symbols
 
                 case "lighting.control_cabinet":
                     b.Cabinet(W, D, null);
-                    b.Bolt(0, 0, Math.Min(W, D) * 0.7);
+                    b.Bolt(0, D * 0.08, Math.Min(W, D) * 0.55);
                     b.Symbol = "lighting_cabinet";
                     return true;
 
@@ -647,7 +648,7 @@ namespace SiteDesignPro.Core.Symbols
                     {
                         b.Rect(0, 0, W, D);
                         b.Fan(0, 0, Math.Min(W, D) * 0.38);
-                        b.Text(0, -D * 0.43, Math.Min(W, D) * 0.1, "*");
+                        b.Snow(W * 0.38, D * 0.38, Math.Min(W, D) * 0.08);
                         b.Symbol = "cooling_unit";
                         return true;
                     }
@@ -752,7 +753,7 @@ namespace SiteDesignPro.Core.Symbols
                 case "decorative.sculpture":
                     {
                         b.Rect(0, 0, W, D);
-                        b.Poly(true, -W * 0.25, -D * 0.2, -W * 0.05, -D * 0.32, W * 0.22, -D * 0.12, W * 0.18, D * 0.2, -W * 0.02, D * 0.3, -W * 0.3, D * 0.08);
+                        b.Blob(new[] { -W * 0.25, -D * 0.2, -W * 0.05, -D * 0.32, W * 0.22, -D * 0.12, W * 0.18, D * 0.2, -W * 0.02, D * 0.3, -W * 0.3, D * 0.08 }, 0.35);
                         b.Circle(W * 0.02, D * 0.02, Math.Min(W, D) * 0.07);
                         b.Symbol = "sculpture";
                         return true;
@@ -818,10 +819,12 @@ namespace SiteDesignPro.Core.Symbols
 
                 case "info.access_reader":
                     {
-                        b.Rect(0, 0, S * 0.35, S * 0.35);
-                        b.Rect(S * 0.28, -S * 0.15, S * 0.28, S * 0.18);
-                        b.Arc(0, 0, S * 0.25, -Math.PI * 0.75, -Math.PI * 0.25);
-                        b.Arc(0, 0, S * 0.33, -Math.PI * 0.75, -Math.PI * 0.25);
+                        b.Rect(0, S * 0.1, S * 0.3, S * 0.3);
+                        b.Rect(0, S * 0.1, S * 0.16, S * 0.2);
+                        b.Line(-S * 0.05, S * 0.05, S * 0.05, S * 0.05);
+                        b.Arc(0, -S * 0.05, S * 0.12, -Math.PI * 0.8, -Math.PI * 0.2);
+                        b.Arc(0, -S * 0.05, S * 0.22, -Math.PI * 0.8, -Math.PI * 0.2);
+                        b.Arc(0, -S * 0.05, S * 0.32, -Math.PI * 0.8, -Math.PI * 0.2);
                         b.Symbol = "access_reader";
                         return true;
                     }
@@ -832,7 +835,7 @@ namespace SiteDesignPro.Core.Symbols
                         b.Circle(0, 0, S * 0.12);
                         b.Line(-S * 0.08, 0, S * 0.08, 0);
                         b.Line(0, -S * 0.08, 0, S * 0.08);
-                        b.Arc(0, 0, S * 0.3, -Math.PI * 0.8, -Math.PI * 0.2);
+                        b.Rect(0, -S * 0.12, S * 0.2, S * 0.06);
                         b.Symbol = "intercom";
                         return true;
                     }
@@ -843,6 +846,128 @@ namespace SiteDesignPro.Core.Symbols
                         b.Line(-S * 0.3, -S * 0.3, -S * 0.3, S * 0.3);
                         b.Text(S * 0.04, S * 0.0, S * 0.2, "SOS");
                         b.Symbol = "emergency_call";
+                        return true;
+                    }
+
+                // ---------------- furniture, sport and pole equipment with their own look ----------------
+                case "furniture.lounger":
+                    {
+                        // sun lounger: mattress, raised back with a pillow, armrests
+                        b.Rect(0, 0, W, D);
+                        b.Line(-W / 2, D * 0.15, W / 2, D * 0.15);
+                        b.Rounded(0, D * 0.32, W * 0.6, D * 0.14);
+                        b.Rect(-W / 2 + (W * 0.05), -D * 0.1, W * 0.1, D * 0.45);
+                        b.Rect(W / 2 - (W * 0.05), -D * 0.1, W * 0.1, D * 0.45);
+                        b.Grille(W * 0.6, D * 0.45, 4);
+                        b.Symbol = "lounger";
+                        return true;
+                    }
+
+                case "furniture.chair":
+                    {
+                        // seat, backrest at +Y and two armrests
+                        b.Rect(0, -D * 0.05, W * 0.8, D * 0.75);
+                        b.Rounded(0, D * 0.4, W, D * 0.18);
+                        b.Rect(-W * 0.45, -D * 0.05, W * 0.1, D * 0.7);
+                        b.Rect(W * 0.45, -D * 0.05, W * 0.1, D * 0.7);
+                        b.Symbol = "chair";
+                        return true;
+                    }
+
+                case "recreation.table_tennis":
+                    {
+                        b.Rect(0, 0, W, D);
+                        b.Line(0, -D / 2 - (D * 0.08), 0, D / 2 + (D * 0.08));
+                        b.Line(-W * 0.02, -D / 2 - (D * 0.08), -W * 0.02, D / 2 + (D * 0.08));
+                        b.Line(-W / 2, 0, W / 2, 0);
+                        b.Circle(-W * 0.25, D * 0.2, D * 0.05);
+                        b.Symbol = "table_tennis";
+                        return true;
+                    }
+
+                case "recreation.chess_table":
+                    {
+                        b.Rect(0, 0, W, D);
+                        double c = Math.Min(W, D) * 0.7, q = c / 8;
+                        b.Rect(0, 0, c, c);
+                        for (int i = 0; i < 8; i++)
+                        {
+                            for (int j = 0; j < 8; j++)
+                            {
+                                if ((i + j) % 2 == 0)
+                                {
+                                    b.Fill(Rect(-c / 2 + ((i + 0.5) * q), -c / 2 + ((j + 0.5) * q), q, q));
+                                }
+                            }
+                        }
+
+                        double sw = W * 0.3;
+                        b.Rect(0, -D / 2 - (sw * 0.75), W * 0.8, sw);
+                        b.Rect(0, D / 2 + (sw * 0.75), W * 0.8, sw);
+                        b.Symbol = "chess_table";
+                        return true;
+                    }
+
+                case "recreation.basketball_hoop":
+                    {
+                        // post, backboard, rim and the free-throw key on the ground
+                        double bw = 1.8, h = 0.45;
+                        b.Circle(0, 1.0, 0.1);
+                        b.Line(0, 1.0, 0, h);
+                        b.Rect(0, h, bw, 0.06);
+                        b.Circle(0, h - 0.3, 0.23);
+                        b.Poly(false, -2.45, h, -2.45, h - 5.8, 2.45, h - 5.8, 2.45, h);
+                        b.Arc(0, h - 5.8, 1.8, Math.PI, 2 * Math.PI);
+                        b.Symbol = "basketball";
+                        return true;
+                    }
+
+                case "furniture.outdoor_shower":
+                    {
+                        b.Rect(0, 0, 0.9, 0.9);
+                        b.Circle(0, 0.3, 0.05);
+                        b.Line(0, 0.3, 0, 0.12);
+                        b.Circle(0, 0.05, 0.13);
+                        foreach ((double x, double y) in new[] { (0.0, 0.05), (-0.06, 0.05), (0.06, 0.05), (0.0, -0.01), (0.0, 0.11) })
+                        {
+                            b.Circle(x, y, 0.012);
+                        }
+
+                        b.Rect(0, -0.28, 0.16, 0.16);
+                        b.Line(-0.08, -0.28, 0.08, -0.28);
+                        b.Symbol = "shower";
+                        return true;
+                    }
+
+                case "info.cctv_camera":
+                    {
+                        b.Circle(0, 0.2, 0.06);
+                        b.Line(0, 0.2, 0, 0.05);
+                        b.Rect(0, -0.05, 0.14, 0.24);
+                        b.Poly(false, -0.06, -0.17, -0.35, -0.65, 0.35, -0.65, 0.06, -0.17);
+                        b.Symbol = "cctv";
+                        return true;
+                    }
+
+                case "info.speaker":
+                    {
+                        b.Circle(0, 0.2, 0.06);
+                        b.Line(0, 0.2, 0, 0.08);
+                        b.Poly(true, -0.06, 0.08, 0.06, 0.08, 0.16, -0.12, -0.16, -0.12);
+                        b.Arc(0, -0.05, 0.25, -Math.PI * 0.75, -Math.PI * 0.25);
+                        b.Arc(0, -0.05, 0.35, -Math.PI * 0.75, -Math.PI * 0.25);
+                        b.Symbol = "speaker";
+                        return true;
+                    }
+
+                case "info.wifi_ap":
+                    {
+                        b.Circle(0, -0.15, 0.06);
+                        b.Fill(Circle(0, -0.15, 0.03, 10));
+                        b.Arc(0, -0.15, 0.15, Math.PI * 0.25, Math.PI * 0.75);
+                        b.Arc(0, -0.15, 0.25, Math.PI * 0.25, Math.PI * 0.75);
+                        b.Arc(0, -0.15, 0.35, Math.PI * 0.25, Math.PI * 0.75);
+                        b.Symbol = "wifi";
                         return true;
                     }
 
@@ -954,11 +1079,17 @@ namespace SiteDesignPro.Core.Symbols
             public void Fan(double cx, double cy, double r)
             {
                 Circle(cx, cy, r);
-                Circle(cx, cy, r * 0.15);
+                Circle(cx, cy, r * 0.14);
                 for (int i = 0; i < 4; i++)
                 {
                     double a = i * Math.PI / 2;
-                    Arc(cx + (Math.Cos(a) * r * 0.45), cy + (Math.Sin(a) * r * 0.45), r * 0.4, a + (Math.PI * 0.5), a + (Math.PI * 1.2));
+                    var pts = new List<Vec2>
+                    {
+                        new Vec2(cx + (Math.Cos(a) * r * 0.14), cy + (Math.Sin(a) * r * 0.14)),
+                        new Vec2(cx + (Math.Cos(a + 0.35) * r * 0.88), cy + (Math.Sin(a + 0.35) * r * 0.88)),
+                        new Vec2(cx + (Math.Cos(a + 1.05) * r * 0.82), cy + (Math.Sin(a + 1.05) * r * 0.82)),
+                    };
+                    items.Add(new SymPolyline(pts, true, new List<double> { 0.25, 0.3, -0.2 }));
                 }
             }
 
@@ -1110,6 +1241,29 @@ namespace SiteDesignPro.Core.Symbols
                     new List<double> { 0, 0, -0.3, -0.3, 0 }));
                 Line(cx - (r * 0.4), cy, cx - (r * 0.1), cy - (r * 0.3));
                 Line(cx - (r * 0.1), cy - (r * 0.3), cx + (r * 0.45), cy + (r * 0.35));
+            }
+
+            public void Snow(double cx, double cy, double r)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    double a = i * Math.PI / 3;
+                    Line(cx - (Math.Cos(a) * r), cy - (Math.Sin(a) * r), cx + (Math.Cos(a) * r), cy + (Math.Sin(a) * r));
+                }
+            }
+
+            /// <summary>Closed organic outline through the points, every side slightly bowed outwards.</summary>
+            public void Blob(double[] xy, double bulge)
+            {
+                var pts = new List<Vec2>();
+                var bulges = new List<double>();
+                for (int i = 0; i + 1 < xy.Length; i += 2)
+                {
+                    pts.Add(new Vec2(xy[i], xy[i + 1]));
+                    bulges.Add(bulge);
+                }
+
+                items.Add(new SymPolyline(pts, true, bulges));
             }
 
             public void Star(double cx, double cy, double r1, double r0, int n)
