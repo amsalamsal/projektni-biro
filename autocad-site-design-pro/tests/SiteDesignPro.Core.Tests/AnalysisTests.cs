@@ -28,7 +28,7 @@ namespace SiteDesignPro.Core.Tests
         [Fact]
         public void Measures_AreasCountsAndRatios()
         {
-            UrbanMeasures m = UrbanIndicators.Measure(Site(), Catalog);
+            UrbanMeasures m = UrbanIndicators.Measure(Site(), TestSupport.Catalog);
             Assert.Equal(5000, m.Parcel, 6);
             Assert.Equal(600, m.Footprint, 6);
             Assert.Equal(2400, m.FloorArea, 6);
@@ -42,7 +42,7 @@ namespace SiteDesignPro.Core.Tests
         [Fact]
         public void Requirements_AreJudged()
         {
-            UrbanMeasures m = UrbanIndicators.Measure(Site(), Catalog);
+            UrbanMeasures m = UrbanIndicators.Measure(Site(), TestSupport.Catalog);
             var r = new UrbanRequirements { MaxCoverage = 0.10, MaxFloorAreaRatio = 0.6, MinGreenPercent = 20, MinPermeablePercent = 30, Dwellings = 4, ParkingPerDwelling = 1.1, MinAccessiblePercent = 5 };
             List<UrbanIndicator> rows = UrbanIndicators.Compute(m, r);
             Assert.False(rows.Single(x => x.Name.StartsWith("Koeficijent izgrađenosti")).Met);   // 0.12 > 0.10
@@ -58,7 +58,7 @@ namespace SiteDesignPro.Core.Tests
         [Fact]
         public void NoRequirement_GivesNoVerdict()
         {
-            List<UrbanIndicator> rows = UrbanIndicators.Compute(UrbanIndicators.Measure(Site(), Catalog), new UrbanRequirements());
+            List<UrbanIndicator> rows = UrbanIndicators.Compute(UrbanIndicators.Measure(Site(), TestSupport.Catalog), new UrbanRequirements());
             Assert.All(rows, r => Assert.Null(r.Met));
         }
     }
@@ -68,13 +68,13 @@ namespace SiteDesignPro.Core.Tests
         [Fact]
         public void Paint_ByMaterialAndKind()
         {
-            Assert.Equal(PresentationKind.Canopy, PresentationStyle.For(Catalog.RequireType("landscape.tree_deciduous"), Element("landscape.tree_deciduous", Pt(0, 0)), Catalog).Kind);
-            Assert.Equal(PresentationKind.Building, PresentationStyle.For(Catalog.RequireType("building.footprint"), Element("building.footprint", Rect(0, 0, 1, 1)), Catalog).Kind);
-            PresentationPaint pool = PresentationStyle.For(Catalog.RequireType("water.swimming_pool"), Element("water.swimming_pool", Rect(0, 0, 1, 1)), Catalog);
+            Assert.Equal(PresentationKind.Canopy, PresentationStyle.For(TestSupport.Catalog.RequireType("landscape.tree_deciduous"), Element("landscape.tree_deciduous", Pt(0, 0)), TestSupport.Catalog).Kind);
+            Assert.Equal(PresentationKind.Building, PresentationStyle.For(TestSupport.Catalog.RequireType("building.footprint"), Element("building.footprint", Rect(0, 0, 1, 1)), TestSupport.Catalog).Kind);
+            PresentationPaint pool = PresentationStyle.For(TestSupport.Catalog.RequireType("water.swimming_pool"), Element("water.swimming_pool", Rect(0, 0, 1, 1)), TestSupport.Catalog);
             Assert.True(pool.B > pool.R);
-            Assert.Equal(PresentationKind.Fill, PresentationStyle.For(Catalog.RequireType("surface.concrete_paving"), Element("surface.concrete_paving", Rect(0, 0, 1, 1)), Catalog).Kind);
-            Assert.Equal(PresentationKind.Band, PresentationStyle.For(Catalog.RequireType("road.access_road"), Element("road.access_road", Line(0, 0, 10, 0)), Catalog).Kind);
-            Assert.Equal(PresentationKind.None, PresentationStyle.For(Catalog.RequireType("site.boundary"), Element("site.boundary", Rect(0, 0, 1, 1)), Catalog).Kind);
+            Assert.Equal(PresentationKind.Fill, PresentationStyle.For(TestSupport.Catalog.RequireType("surface.concrete_paving"), Element("surface.concrete_paving", Rect(0, 0, 1, 1)), TestSupport.Catalog).Kind);
+            Assert.Equal(PresentationKind.Band, PresentationStyle.For(TestSupport.Catalog.RequireType("road.access_road"), Element("road.access_road", Line(0, 0, 10, 0)), TestSupport.Catalog).Kind);
+            Assert.Equal(PresentationKind.None, PresentationStyle.For(TestSupport.Catalog.RequireType("site.boundary"), Element("site.boundary", Rect(0, 0, 1, 1)), TestSupport.Catalog).Kind);
         }
     }
 
