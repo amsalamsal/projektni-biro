@@ -222,6 +222,11 @@ namespace SiteDesignPro.AutoCAD.Commands
             BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
             ms.AppendEntity(br);
             ctx.Tr.AddNewlyCreatedDBObject(br, true);
+            if (roads.Count > 0)
+            {
+                Rebuild(ctx, false); // lane lines and arrows stop at the crossing
+            }
+
             int bars = Bars(lanes * lw).Count;
             ctx.Write("Pješački prijelaz: " + bars + " pruga 0,50 m s razmakom 0,50 m preko " + Bs.Num(lanes * lw, 2) + " m kolovoza, dužina pruga " + Bs.Num(length, 2) + " m" +
                       (onRoad ? string.Empty : " (slobodno postavljen)") + ". Prijelaz je blok: pomjera se i rotira kao jedan element.");
@@ -244,7 +249,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return null;
             }
 
-            RoadNetworkResult res = RoadNetwork.Build(roads.Select(r => r.Spec).ToList());
+            RoadNetworkResult res = RoadNetwork.Build(roads.Select(r => r.Spec).ToList(), CrossingAreas(ctx));
             double k = ctx.K;
             ObjectId layer = RoadLayer(ctx);
             BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
@@ -354,6 +359,44 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             return res;
+        }
+
+        internal const string CrossingPrefix = "VU_PJESACKI_PRIJELAZ_";
+
+        private static readonly System.Text.RegularExpressions.Regex CrossingName =
+            new System.Text.RegularExpressions.Regex(@"^VU_PJESACKI_PRIJELAZ_(\d+)x(\d+)cm_(\d+)cm", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+
+        /// <summary>Areas of the pedestrian crossings (metres), where lane lines and arrows are left out.</summary>
+        private static List<IReadOnlyList<Vec2>> CrossingAreas(CommandContext ctx)
+        {
+            var list = new List<IReadOnlyList<Vec2>>();
+            double k = ctx.K;
+            RXClass refClass = RXObject.GetClass(typeof(BlockReference));
+            foreach (ObjectId id in ctx.Svc.ModelSpace(OpenMode.ForRead))
+            {
+                if (id.IsErased || !id.ObjectClass.IsDerivedFrom(refClass))
+                {
+                    continue;
+                }
+
+                var br = (BlockReference)ctx.Tr.GetObject(id, OpenMode.ForRead);
+                System.Text.RegularExpressions.Match m = CrossingName.Match(br.Name);
+                if (!m.Success)
+                {
+                    continue;
+                }
+
+                double width = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) * int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture) / 100.0;
+                double length = int.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture) / 100.0;
+                double hx = (width / 2) + 0.5, hy = (length / 2) + 0.5;
+                Matrix3d t = br.BlockTransform;
+                list.Add(new[] { new Vec2(-hx, -hy), new Vec2(hx, -hy), new Vec2(hx, hy), new Vec2(-hx, hy) }
+                    .Select(p => new Point3d(p.X * k, p.Y * k, 0).TransformBy(t))
+                    .Select(p => new Vec2(p.X / k, p.Y / k))
+                    .ToList());
+            }
+
+            return list;
         }
 
         private static int EraseNetwork(CommandContext ctx)
@@ -540,7 +583,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         private static ObjectId CrossingBlock(CommandContext ctx, int lanes, double laneWidth, double length)
         {
             double k = ctx.K;
-            string name = "VU_PJESACKI_PRIJELAZ_" + lanes + "x" + Math.Round(laneWidth * 100) + "cm_" + Math.Round(length * 100) + "cm_" + ctx.Settings.DrawingUnit;
+            string name = CrossingPrefix + lanes + "x" + Math.Round(laneWidth * 100) + "cm_" + Math.Round(length * 100) + "cm_" + ctx.Settings.DrawingUnit + "_v2";
             var bt = (BlockTable)ctx.Tr.GetObject(ctx.Db.BlockTableId, OpenMode.ForRead);
             if (bt.Has(name))
             {
@@ -571,11 +614,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Tr.AddNewlyCreatedDBObject(h, true);
             }
 
-            // dimensions of one bar and one gap (0,50 m), above the crossing
+            // dimensions of one bar and one gap (0,50 m), above the crossing; text sized to fit between the lines
             if (bars.Count >= 2)
             {
-                double th = new Annotations(ctx.Db, ctx.Tr, ctx.Svc).TextHeight;
-                double yd = y1 + Math.Max(0.6 * k, th * 2);
+                double th = 0.12 * k;
+                double yd = y1 + (0.45 * k);
                 foreach ((double a, double b) in new[] { (bars[0], bars[0] + 0.5), (bars[0] + 0.5, bars[1]) })
                 {
                     var dim = new AlignedDimension(new Point3d(a * k, y1, 0), new Point3d(b * k, y1, 0), new Point3d(a * k, yd, 0), string.Empty, ctx.Db.Dimstyle);
@@ -585,13 +628,14 @@ namespace SiteDesignPro.AutoCAD.Commands
                     dim.Dimlfac = 1.0 / k;
                     dim.Dimdec = 2;
                     dim.Dimtxt = th;
-                    dim.Dimtsz = th * 0.6;
-                    dim.Dimexo = th * 0.3;
-                    dim.Dimexe = th * 0.4;
-                    dim.Dimgap = th * 0.3;
-                    dim.Dimtix = false;
+                    dim.Dimtsz = 0.05 * k;
+                    dim.Dimexo = 0.05 * k;
+                    dim.Dimexe = 0.08 * k;
+                    dim.Dimgap = 0.03 * k;
+                    dim.Dimtix = true;
                     dim.Dimtad = 1;
                     dim.Dimzin = 0;
+                    dim.Dimclrt = Color.FromColorIndex(ColorMethod.ByAci, 7);
                 }
             }
 
@@ -691,7 +735,22 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             try
             {
-                if (RoadCommands.Busy || o is not Curve c || (running != null && (UndoCommands.Contains(running) || running.StartsWith("SDP", StringComparison.OrdinalIgnoreCase))))
+                if (RoadCommands.Busy || (running != null && (UndoCommands.Contains(running) || running.StartsWith("SDP", StringComparison.OrdinalIgnoreCase))))
+                {
+                    return;
+                }
+
+                if (o is BlockReference br)
+                {
+                    if (br.Name.StartsWith(RoadCommands.CrossingPrefix, StringComparison.Ordinal))
+                    {
+                        Dirty.Add(db); // a moved crossing moves the gap in the lane lines
+                    }
+
+                    return;
+                }
+
+                if (o is not Curve c)
                 {
                     return;
                 }

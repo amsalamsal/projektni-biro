@@ -161,6 +161,16 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void LaneMarkings_AreInterruptedAtAPedestrianCrossing()
+        {
+            var crossing = new List<Vec2> { new Vec2(48, -4), new Vec2(52, -4), new Vec2(52, 4), new Vec2(48, 4) };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, new[] { crossing });
+            Assert.NotEmpty(res.Markings);
+            Assert.All(res.Markings.SelectMany(m => m.Points), p => Assert.False(p.X > 48.01 && p.X < 51.99, "marking inside the crossing at " + p));
+            Assert.All(res.Arrows, a => Assert.False(Math.Abs(a.Position.X - 50) < 5, "arrow on the crossing at " + a.Position));
+        }
+
+        [Fact]
         public void Arrows_EveryFortyMetres_InBothDirections()
         {
             RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", 0, 0, 200, 0) });

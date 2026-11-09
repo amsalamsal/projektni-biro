@@ -138,7 +138,13 @@ namespace SiteDesignPro.Core.Roads
         private const double DashLength = 3.0;
         private const double DashGap = 3.0;
 
-        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input)
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input) => Build(input, null);
+
+        /// <summary>
+        /// Builds the network; <paramref name="noMarking"/> are areas (pedestrian crossings, metres) where lane lines
+        /// and arrows are left out.
+        /// </summary>
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking)
         {
             var result = new RoadNetworkResult();
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
@@ -226,9 +232,18 @@ namespace SiteDesignPro.Core.Roads
                 result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
             }
 
+            var gaps = new PathsD();
+            foreach (IReadOnlyList<Vec2> area in noMarking ?? Enumerable.Empty<IReadOnlyList<Vec2>>())
+            {
+                if (area.Count >= 3)
+                {
+                    gaps.Add(Positive(area.Select(p => p - origin)));
+                }
+            }
+
             for (int i = 0; i < roads.Count; i++)
             {
-                Paint(roads, i, bands, result, origin);
+                Paint(roads, i, bands, result, origin, gaps);
             }
 
             return result;
@@ -645,7 +660,7 @@ namespace SiteDesignPro.Core.Roads
 
         // ------------------------------------------------------------------ markings and arrows
 
-        private static void Paint(List<RoadSpec> roads, int i, Dictionary<RoadLevel, List<PathsD>> bands, RoadNetworkResult result, Vec2 origin)
+        private static void Paint(List<RoadSpec> roads, int i, Dictionary<RoadLevel, List<PathsD>> bands, RoadNetworkResult result, Vec2 origin, PathsD gaps)
         {
             RoadSpec r = roads[i];
 
@@ -662,6 +677,11 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
+            others.AddRange(gaps);
+            if (gaps.Count > 0)
+            {
+                othersWide.AddRange(Clipper.InflatePaths(gaps, 3.0, JoinType.Miter, EndType.Polygon, 4, Precision));
+            }
             others = Union(others);
             othersWide = Union(othersWide);
 
