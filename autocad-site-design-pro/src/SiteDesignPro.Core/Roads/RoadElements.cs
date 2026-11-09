@@ -122,6 +122,7 @@ namespace SiteDesignPro.Core.Roads
             }
 
             s.Id = e.Id;
+            s.Name = !string.IsNullOrWhiteSpace(e.Label) ? e.Label! : e.Name;
             s.Closed = path.Closed;
             s.Axis = GeometryMath.Tessellate(path.Ring, path.Closed, 0.02 * unitsPerMeter).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
             return s;

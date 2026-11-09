@@ -150,7 +150,7 @@ namespace SiteDesignPro.Core.Roads
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
             foreach (RoadSpec r in input.Where(r => r.Axis.Count < 2))
             {
-                result.Notes.Add("Osovina " + r.Id + " ima manje od dvije tačke i preskočena je.");
+                result.Notes.Add("Osovina " + r.DisplayName + " ima manje od dvije tačke i preskočena je.");
             }
 
             if (roads.Count == 0)
@@ -308,7 +308,7 @@ namespace SiteDesignPro.Core.Roads
                             a[a.Count - 1] = hit;
                         }
 
-                        notes.Add("Saobraćajnica " + r.Id + " je produžena " + Fmt(best) + " m do osovine saobraćajnice " + target.Id + ".");
+                        notes.Add("Cesta " + r.DisplayName + " je produžena " + Fmt(best) + " m do osovine ceste " + target.DisplayName + ".");
                     }
                 }
             }
@@ -944,6 +944,7 @@ namespace SiteDesignPro.Core.Roads
         {
             RoadSpec c = r.CloneParameters();
             c.Id = r.Id;
+            c.Name = r.Name;
             c.Axis = new List<Vec2>(r.Axis);
             c.Closed = r.Closed;
             return c;

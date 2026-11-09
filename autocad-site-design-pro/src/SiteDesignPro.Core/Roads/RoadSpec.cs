@@ -20,6 +20,11 @@ namespace SiteDesignPro.Core.Roads
 
         public string Id { get; set; } = string.Empty;
 
+        /// <summary>Label shown in notes (element label such as U-001); the id when there is none.</summary>
+        public string Name { get; set; } = string.Empty;
+
+        public string DisplayName => string.IsNullOrWhiteSpace(Name) ? Id : Name;
+
         /// <summary>Axis (centre line) points in metres; arcs already tessellated.</summary>
         public List<Vec2> Axis { get; set; } = new List<Vec2>();
 
