@@ -584,7 +584,11 @@ namespace SiteDesignPro.Core.Roads
                 return false;
             }
 
-            double tol = Math.Max(0.004, r * 0.0015);
+            // the points come from round joins polygonised to a few millimetres: every point lies on the circle within
+            // that, and no chord bulges away from the circle by more than that (a long straight edge next to an arc
+            // would otherwise be swallowed into a flat, wrong arc)
+            const double tol = 0.005;
+            const double maxSagitta = 0.012;
             double sign = 0;
             double sweep = 0;
             for (int i = from; i < to; i++)
@@ -595,8 +599,8 @@ namespace SiteDesignPro.Core.Roads
                     return false;
                 }
 
-                // every chord short against the radius (points of a polygonised arc, not a corner)
-                if ((q - p).Length > Math.Max(0.3 * r, 0.05) * 1.2)
+                double half = (q - p).Length / 2;
+                if (half >= r || r - Math.Sqrt((r * r) - (half * half)) > maxSagitta)
                 {
                     return false;
                 }

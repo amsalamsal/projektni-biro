@@ -105,6 +105,36 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void StraightEdgesStayStraight_OnlyTheCornersAreArcs()
+        {
+            var a = Road("A", -60, 0, 60, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
+            var b = Road("B", 0, -60, 0, 60, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
+            var c = Road("C", 30, -60, 30, -5, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
+            RoadNetworkResult res = RoadNetwork.Build(new[] { a, b, c });
+
+            // concentric corner radii: 7.5 carriageway, 6.0 kerb, 5.85 kerb back, 4.25 sidewalk, 4.15 edge
+            var allowed = new[] { 7.5, 6.0, 5.85, 4.25, 4.15 };
+            foreach (KeyValuePair<RoadLevel, List<RoadLoop>> level in res.Outlines)
+            {
+                foreach (double r in level.Value.SelectMany(l => l.ArcRadii()))
+                {
+                    Assert.True(allowed.Any(x => Math.Abs(x - r) < 0.05), level.Key + ": unexpected arc radius " + r);
+                }
+            }
+
+            foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
+            {
+                foreach (RoadRegion region in band.Value)
+                {
+                    foreach (double r in region.Outer.ArcRadii().Concat(region.Holes.SelectMany(h => h.ArcRadii())))
+                    {
+                        Assert.True(allowed.Any(x => Math.Abs(x - r) < 0.05), band.Key + " band: unexpected arc radius " + r);
+                    }
+                }
+            }
+        }
+
+        [Fact]
         public void ParallelStreetsCloseToEachOther_AreNotMerged()
         {
             var a = Road("A", 0, 0, 100, 0);
