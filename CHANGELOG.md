@@ -2,6 +2,25 @@
 
 ## Neobjavljeno
 
+### Kartica SAOBRAĆAJNICE
+* **Nova saobraćajnica** (`SDPSAOBRACAJNICA`): u prozoru jednosmjerna ili dvosmjerna, 1–3 trake po smjeru, širina
+  trake, trotoar lijevo/desno (0–5 m, tamno sivi, 30 % prozirnosti) i biciklistička staza uz kolovoz prije trotoara
+  (0–2 m, bordo, 30 % prozirnosti), radijus ivičnjaka i strelice smjera (svakih 40 m). Uz kolovoz se crta ivičnjak
+  15 cm, uz vanjsku ivicu trotoara 10 cm; isprekidane linije traka (puna sredina kod 2 + 2 trake). Sve na sloju
+  „Saobraćajnice“; osovina na sloju „Saobraćajnice-osovine“ (ne štampa se).
+* **Saobraćajnice se više ne preklapaju**: sve se crtaju zajedno, a na raskrsnicama i T-spojevima uglovi se
+  zaobljuju radijusom ivičnjaka (stambena zona do 40 km/h, putnička i manja teretna vozila; podrazumijevano 6 m).
+  Ivica kolovoza, staze i trotoara imaju zajednički centar, pa efektivni radijus prati stvarni (stvarni + širina
+  biciklističke staze). Kraća osovina koja staje ispred druge ceste sama se produži do nje. Linije traka i strelice
+  staju prije raskrsnice. Radijus luka vidi se kad kursor stoji na ivičnjaku ili šrafuri kod ugla.
+* Nakon pomjeranja, rastezanja, kopiranja ili brisanja osovine (MOVE, STRETCH, COPY, ERASE, ručke) saobraćajnice se
+  same ponovo crtaju. **Uredi**, **Osvježi** i **Ukloni** su na istoj kartici.
+* **Pješački prijelaz** (`SDPPJESACKIPRIJELAZ`): gotov blok s bijelim prugama 0,50 m i razmakom 0,50 m preko svih
+  traka, s kotama pruge i razmaka. Klikom na saobraćajnicu sam se okrene i uzme broj i širinu traka; linije traka i
+  strelice se na prijelazu prekidaju (i kad se prijelaz pomjeri).
+* Crtež bez projekta dobija mjerilo 1 m = 100 cm (jedinica cm). Rasvjeta se dodaje posebno (kartica VANJSKO UREĐENJE
+  PRO → Rasvjeta).
+
 ### Analize za investitora i inspekciju
 * **Urbanistički pokazatelji** (`SDPPOKAZATELJI`, Provjera i izvoz): koeficijent izgrađenosti i iskorištenosti,
   procenat zelenih i vodopropusnih površina, broj parking mjesta, mjesta za osobe s invaliditetom i mjesta s
