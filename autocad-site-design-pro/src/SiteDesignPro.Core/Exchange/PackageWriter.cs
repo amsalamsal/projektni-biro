@@ -93,7 +93,10 @@ namespace SiteDesignPro.Core.Exchange
             var usedTypes = new SortedDictionary<string, ElementType>(StringComparer.Ordinal);
             var seen = new HashSet<string>(StringComparer.Ordinal);
 
-            foreach (SiteElement e in packageFrameElements)
+            // the road network adds its carriageway, bike lanes, kerbs, sidewalks, lane lines and arrows
+            List<SiteElement> elementList = packageFrameElements.ToList();
+            elementList.AddRange(Roads.RoadElements.Derived(elementList, catalog));
+            foreach (SiteElement e in elementList)
             {
                 ElementType? type = catalog.FindType(e.TypeId);
                 if (type == null)
@@ -143,6 +146,15 @@ namespace SiteDesignPro.Core.Exchange
                 if (e.Custom.Count > 0)
                 {
                     el["custom"] = e.Custom.ToJson();
+                }
+
+                if (Roads.RoadElements.IsNetworkRoad(type))
+                {
+                    // its surfaces are the generated network elements; SketchUp builds no strip of its own
+                    // (added after the content hash, so it does not count as a change of the road)
+                    var custom = el["custom"] as JsonObject ?? new JsonObject();
+                    custom[Roads.RoadElements.NetworkFlag] = true;
+                    el["custom"] = custom;
                 }
 
                 if (!string.IsNullOrEmpty(e.SourceHandle))

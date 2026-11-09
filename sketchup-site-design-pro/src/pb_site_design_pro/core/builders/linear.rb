@@ -6,6 +6,9 @@ module ProjektniBiro
       # Strip of constant width along a centreline (roads, paths, markings, trenches); follows path elevations.
       class LinearSlab < PathBuilder
         def build(e, c)
+          # a road of the road network: its carriageway comes as a generated surface of the package
+          return if e.custom['networkSurface'] == true
+
           pts = path_points(e)
           w = e.num('width', 3.0)
           top = e.num('topOffset')
@@ -33,6 +36,51 @@ module ProjektniBiro
         end
       end
       register('linear_slab', LinearSlab)
+
+      # Street from its centreline: carriageway, bike lanes, 15 cm kerbs, sidewalks and 10 cm edging swept along the
+      # axis. In a package the joined network (no overlaps, rounded junctions) arrives as generated surfaces and the
+      # street itself is flagged, so only a street built on its own draws its cross-section here.
+      class Street < PathBuilder
+        KERB = 0.15
+        EDGE = 0.10
+        RAISE = 0.15
+
+        def build(e, c)
+          return if e.custom['networkSurface'] == true
+
+          pts = path_points(e)
+          closed = e.geometry[:closed] ? true : false
+          one_way = e.text('direction', 'two_way') == 'one_way'
+          lw = e.num('laneWidth', 3.0)
+          left_lanes = e.num('lanesLeft', 1.0).round
+          right_lanes = e.num('lanesRight', 1.0).round
+          cl, cr = one_way ? [right_lanes * lw / 2.0, right_lanes * lw / 2.0] : [left_lanes * lw, right_lanes * lw]
+          t = e.num('thickness', 0.1)
+          c.mesh(Mesh.sweep(pts, rect_profile(cl, cr, -t, 0.0), closed), material: mat(e, 'material', 'asphalt'), name: 'Kolovoz')
+          [[1, cl, e.num('bikeLeft'), e.num('sidewalkLeft')], [-1, cr, e.num('bikeRight'), e.num('sidewalkRight')]].each do |side, start, bike, walk|
+            a = start
+            if bike.positive?
+              band(c, pts, closed, side, a, a + bike, -t, 0.0, mat(e, 'bikeMaterial', 'asphalt_red'), 'Biciklistička staza')
+              a += bike
+            end
+            band(c, pts, closed, side, a, a + KERB, -0.35 + RAISE, RAISE, mat(e, 'kerbMaterial', 'concrete'), 'Ivičnjak')
+            a += KERB
+            next unless walk.positive?
+
+            band(c, pts, closed, side, a, a + walk, RAISE - 0.2, RAISE, mat(e, 'sidewalkMaterial', 'concrete_paver'), 'Trotoar')
+            band(c, pts, closed, side, a + walk, a + walk + EDGE, RAISE - 0.3, RAISE + 0.02, mat(e, 'kerbMaterial', 'concrete'), 'Ivičnjak trotoara')
+          end
+        end
+
+        private
+
+        # Band from a to b metres away from the axis on one side (side 1 = left, -1 = right).
+        def band(c, pts, closed, side, a, b, bottom, top, material, name)
+          profile = side.positive? ? rect_profile(b, -a, bottom, top) : rect_profile(-a, b, bottom, top)
+          c.mesh(Mesh.sweep(pts, profile, closed), material: material, name: name)
+        end
+      end
+      register('street', Street)
 
       # Wall, kerb, hedge or edging with optional strip footing.
       class Wall < PathBuilder

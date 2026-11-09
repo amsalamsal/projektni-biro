@@ -115,15 +115,36 @@ namespace SiteDesignPro.Core.Quantities
             this.catalog = catalog;
         }
 
+        private List<SiteElement>? lastInput;
+        private List<SiteElement>? lastOutput;
+
+        /// <summary>The elements plus the carriageway, sidewalks, kerbs and markings their roads generate (computed once per list).</summary>
+        private List<SiteElement> WithRoads(IEnumerable<SiteElement> elements)
+        {
+            List<SiteElement> list = elements as List<SiteElement> ?? elements.ToList();
+            if (lastInput != null && ReferenceEquals(lastInput, list) && lastOutput != null)
+            {
+                return lastOutput;
+            }
+
+            // generated elements are never generated twice (a list that already has them is used as it is)
+            bool hasGenerated = list.Any(e => catalog.FindType(e.TypeId)?.Generated == true);
+            lastInput = list;
+            lastOutput = hasGenerated ? list : Roads.RoadElements.WithDerived(list, catalog);
+            return lastOutput;
+        }
+
         /// <summary>Schedules that contain at least one element.</summary>
         public IEnumerable<ScheduleDefinition> Applicable(IEnumerable<SiteElement> elements)
         {
+            elements = WithRoads(elements);
             var used = new HashSet<string>(elements.Select(e => catalog.FindType(e.TypeId)?.ScheduleId ?? string.Empty), StringComparer.Ordinal);
             return catalog.Schedules.Where(s => used.Contains(s.Id));
         }
 
         public ScheduleTable Build(ScheduleDefinition def, IEnumerable<SiteElement> elements, int decimals = 2)
         {
+            elements = WithRoads(elements);
             var table = new ScheduleTable { Id = def.Id, Title = def.Title };
             foreach (string key in def.Columns)
             {

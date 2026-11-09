@@ -49,8 +49,6 @@ namespace SiteDesignPro.AutoCAD.UI
     {
         public const string TabId = "SITE_DESIGN_PRO_TAB";
 
-        /// <summary>Second tab: the road network (roads, junctions, crossings).</summary>
-        public const string RoadTabId = "SITE_DESIGN_PRO_ROADS_TAB";
 
         /// <summary>Command parameter prefix of buttons that hand an element type to the command.</summary>
         public const string HintPrefix = "hint:";
@@ -89,7 +87,7 @@ namespace SiteDesignPro.AutoCAD.UI
 
             tab.Panels.Add(Panel("Crtanje",
                 Large("Biblioteka", "SDPBROWSER", "browser", "Svi elementi s pretragom; dvostruki klik postavlja ili crta element."),
-                Large("Ulica", "SDPULICA", "street", "Cijela ulica iz jedne osovine: kolovoz, ivičnjaci, biciklističke staze, trotoari, drvored i rasvjeta."),
+                Large("Ulica", "SDPULICA", "street", "Ulica iz osovine: jednosmjerna ili dvosmjerna, 1–3 trake, trotoari i biciklističke staze, ivičnjaci, linije traka i strelice. Sve ulice i ceste se spajaju bez preklapanja, uglovi raskrsnica se zaobljuju."),
                 Large("Kružni tok", "SDPKRUZNITOK", "roundabout", "Cijeli kružni tok iz jedne tačke: prsten, ostrvo, ivičnjaci, razdjelna ostrva, prelazi, strelice, znakovi i krakovi."),
                 Stack(Types(cat, "Parcela i objekti", "site", "site", "buildings"),
                       Types(cat, "Parter i ograde", "surfaces", "surfaces", "walls"),
@@ -100,6 +98,9 @@ namespace SiteDesignPro.AutoCAD.UI
                 Stack(Types(cat, "Voda i instalacije", "utilities", "water", "utilities", "sustainability", "climate"),
                       Small("Duž linije", "SDPPATHARRAY", "patharray", "Drvored, svjetiljke, klupe ili stalci duž linije na zadanom razmaku."),
                       Small("Raster sadnje", "SDPGRID", "plantgrid", "Popuna površine sadnjom.")),
+                Stack(Small("Uredi ulicu", "SDPULICAUREDI", "edit", "Trake, širine, trotoari, staze, radijus i strelice ulice; obična cesta tako postaje ulica."),
+                      Small("Pješački prijelaz", "SDPPJESACKIPRIJELAZ", "roads", "Bijele pruge 0,50 m s razmakom 0,50 m preko svih traka; na ulici se sam okrene i uzme trake."),
+                      Small("Osvježi ceste", "SDPCESTEOSVJEZI", "reload", "Ponovo crta kolovoze, ivičnjake, trotoare i oznake svih ulica i cesta (radi se i samo).")),
                 Stack(Small("Niz parking mjesta", "SDPPARKING", "parking", "Red parking mjesta uz ivicu prolaza."),
                       Small("Pretvori krive", "SDPCONVERT", "convert", "Postojeće linije ili krugove pretvara u elemente."))));
 
@@ -161,38 +162,14 @@ namespace SiteDesignPro.AutoCAD.UI
 
             ribbon.Tabs.Add(tab);
             Log.Info("Ribbon tab created with " + tab.Panels.Count + " panels.");
-            CreateRoadTab(ribbon);
         }
-
-        /// <summary>Kartica SAOBRAĆAJNICE: roads with lanes, sidewalks, bike lanes and junctions, and pedestrian crossings.</summary>
-        private static void CreateRoadTab(RibbonControl ribbon)
-        {
-            RibbonTab? old = ribbon.Tabs.FirstOrDefault(t => t.Id == RoadTabId);
-            if (old != null)
-            {
-                ribbon.Tabs.Remove(old);
-            }
-
-            var tab = new RibbonTab { Title = "SAOBRAĆAJNICE", Id = RoadTabId, Description = "Vanjsko uređenje PRO – saobraćajnice, autor " + Author };
-            tab.Panels.Add(Panel("Saobraćajnica",
-                Large("Nova saobraćajnica", "SDPSAOBRACAJNICA", "roads",
-                    "Jednosmjerna ili dvosmjerna, 1–3 trake po smjeru, trotoari i biciklističke staze; spaja se s drugim saobraćajnicama i zaobljuje uglove raskrsnica."),
-                Large("Uredi", "SDPSAOBRACAJNICAUREDI", "edit", "Trake, širine, trotoari, staze, radijus i strelice odabrane saobraćajnice."),
-                Stack(Small("Osvježi", "SDPSAOBRACAJNICEOSVJEZI", "reload", "Ponovo crta sve saobraćajnice iz osovina (radi se i samo nakon pomjeranja osovina)."),
-                      Small("Ukloni", "SDPSAOBRACAJNICEUKLONI", "audit", "Uklanja nacrtane saobraćajnice; osovine po želji ostaju."))));
-            tab.Panels.Add(Panel("Prijelazi",
-                Large("Pješački prijelaz", "SDPPJESACKIPRIJELAZ", "street",
-                    "Gotov element: bijele pruge 0,50 m s razmakom 0,50 m preko svih traka; na saobraćajnici se sam okreće i uzima broj i širinu traka.")));
-            tab.Panels.Add(Panel("Info",
-                Stack(Label("Sloj: " + global::SiteDesignPro.AutoCAD.Commands.RoadCommands.LayerName), Label("Rasvjeta: kartica VANJSKO UREĐENJE PRO"), Label("Autor: " + Author))));
-            ribbon.Tabs.Add(tab);
         }
 
         /// <summary>Drop-down of all element types of the given categories; picking one starts placing or drawing it.</summary>
         private static RibbonSplitButton Types(ElementCatalog cat, string title, string icon, params string[] categories)
         {
             var names = categories.Select(c => CategoryName(cat, c)).ToList();
-            List<ElementType> types = cat.Types.Where(t => categories.Contains(t.Category) || t.ExtraPanels.Any(names.Contains)).ToList();
+            List<ElementType> types = cat.PlaceableTypes.Where(t => categories.Contains(t.Category) || t.ExtraPanels.Any(names.Contains)).ToList();
             var split = new RibbonSplitButton
             {
                 Text = title,

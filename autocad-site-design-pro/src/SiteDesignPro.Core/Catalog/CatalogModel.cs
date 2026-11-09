@@ -237,6 +237,12 @@ namespace SiteDesignPro.Core.Catalog
         /// <summary>Origin of the definition: "core" or a user catalog file name.</summary>
         public string Source { get; set; } = "core";
 
+        /// <summary>
+        /// Made by the program, never placed by hand (carriageway, sidewalks and kerbs computed from streets): hidden
+        /// from the library, the ribbon and the type picker, but listed in schedules and exported to SketchUp.
+        /// </summary>
+        public bool Generated { get; set; }
+
         public GeometryKind Geometry => Builder.Geometry;
 
         public ParameterDefinition? Parameter(string key) => Parameters.FirstOrDefault(p => p.Key == key);

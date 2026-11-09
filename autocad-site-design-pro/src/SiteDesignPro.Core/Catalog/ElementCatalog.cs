@@ -40,6 +40,9 @@ namespace SiteDesignPro.Core.Catalog
 
         public IEnumerable<ElementType> Types => typeOrder.Select(id => types[id]);
 
+        /// <summary>Types a user can place or draw (without the generated ones).</summary>
+        public IEnumerable<ElementType> PlaceableTypes => Types.Where(t => !t.Generated);
+
         public IReadOnlyList<CategoryDefinition> Categories { get; private set; } = Array.Empty<CategoryDefinition>();
 
         public IReadOnlyList<ModelGroupDefinition> ModelGroups { get; private set; } = Array.Empty<ModelGroupDefinition>();
@@ -343,6 +346,7 @@ namespace SiteDesignPro.Core.Catalog
                 PropertyKeys = StrList(t, "properties"),
                 ReviewRequired = StrList(t, "reviewRequired"),
                 ExtraPanels = StrList(t, "panels"),
+                Generated = t.TryGetProperty("generated", out JsonElement gen) && gen.ValueKind == JsonValueKind.True,
                 Source = source,
             };
         }

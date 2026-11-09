@@ -350,7 +350,7 @@ namespace SiteDesignPro.AutoCAD.UI
             string q = search.Text.Trim();
             string cat = (category.SelectedItem as ComboBoxItem)?.Tag as string ?? string.Empty;
             Preferences prefs = Preferences.Current;
-            IEnumerable<ElementType> types = AcadEnv.Catalog.Types;
+            IEnumerable<ElementType> types = AcadEnv.Catalog.PlaceableTypes;
             if (cat == "*fav")
             {
                 types = types.Where(t => prefs.Favorites.Contains(t.Id));

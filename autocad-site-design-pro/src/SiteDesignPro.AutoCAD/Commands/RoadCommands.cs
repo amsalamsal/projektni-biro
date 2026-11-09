@@ -13,6 +13,7 @@ using SiteDesignPro.AutoCAD.Drawing;
 using SiteDesignPro.AutoCAD.Infrastructure;
 using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Geometry;
+using SiteDesignPro.Core.Model;
 using SiteDesignPro.Core.Roads;
 using SiteDesignPro.Core.Text;
 using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -20,16 +21,16 @@ using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 namespace SiteDesignPro.AutoCAD.Commands
 {
     /// <summary>
-    /// Road network (kartica SAOBRAĆAJNICE): roads are axes with their cross-section stored on them; the carriageway,
-    /// bike lanes, kerbs, sidewalks, lane markings and arrows of ALL roads are rebuilt together, so roads never overlap
-    /// and every junction gets rounded kerbs. Pedestrian crossings are ready-made blocks.
+    /// Streets and roads of the drawing as one network: streets (road.street) and the simple roads (access road,
+    /// driveway, service route) are elements whose axis is drawn; their carriageway, bike lanes, kerbs, sidewalks, lane
+    /// lines and arrows are drawn together, so roads never overlap and every junction gets rounded kerbs. Pedestrian
+    /// crossings are elements (road.pedestrian_crossing).
     /// </summary>
     public sealed class RoadCommands
     {
-        internal const string RoadApp = "SITEDESIGNPRO_CESTA";
         internal const string NetOwner = "roadnet";
         internal const string LayerName = "Saobraćajnice";
-        internal const string AxisLayerName = "Saobraćajnice-osovine";
+        private const string LegacyApp = "SITEDESIGNPRO_CESTA";
         private const string PrefKey = "roadSpec";
 
         // hatch colours (RGB) and transparency (%)
@@ -47,13 +48,16 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ commands
 
-        /// <summary>New road: cross-section in a window, then the axis is drawn or picked; the network is rebuilt.</summary>
-        [CommandMethod("SITEDESIGNPRO", "SDPSAOBRACAJNICA", CommandFlags.Modal)]
-        public void NewRoad() => Guarded(() => CommandContext.Run("SDPSAOBRACAJNICA", ctx =>
+        /// <summary>
+        /// Ulica: the cross-section in a window (direction, lanes, lane width, sidewalks, bike lanes, kerb radius, arrows),
+        /// then the axis is drawn or picked; the street is an element (road.street) and joins all roads of the drawing.
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPULICA", CommandFlags.Modal)]
+        public void Street() => Guarded(() => CommandContext.RunMajor("SDPULICA", "Ulica (SDPULICA)", ctx =>
         {
             EnsureUnits(ctx);
             RoadSpec spec = RoadSpec.FromParameterString(UI.Preferences.Current.Default(PrefKey, new RoadSpec().ToParameterString()));
-            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(spec, "Nova saobraćajnica", UnitText(ctx)) : AskText(ctx, spec);
+            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(spec, "Ulica", UnitText(ctx)) : AskText(ctx, spec);
             if (chosen == null)
             {
                 throw new CommandCancelled();
@@ -65,12 +69,13 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             UI.Preferences.Current.RememberDefault(PrefKey, chosen.ToParameterString());
-            ctx.Write(Describe(chosen) + ".");
-            string how = ctx.Keyword("Osovina saobraćajnice [Nacrtaj/Odaberi]", new[] { "Draw|Nacrtaj", "Select|Odaberi" }, "Draw");
+            ElementType type = ctx.Catalog.RequireType(RoadElements.StreetType);
+            ctx.Write("Ulica: " + Describe(chosen) + ".");
+            string how = ctx.Keyword("Osovina ulice [Nacrtaj/Odaberi]", new[] { "Draw|Nacrtaj", "Select|Odaberi" }, "Draw");
             ObjectId axisId;
             if (how == "Draw")
             {
-                ctx.Write("Nacrtajte osovinu (sredinu kolovoza) u smjeru crtanja: desne trake voze u tom smjeru. Saobraćajnica se spaja sa saobraćajnicama koje dodiruje.");
+                ctx.Write("Nacrtajte osovinu (sredinu kolovoza) u smjeru vožnje desnih traka. Ulica se sama spaja s ulicama i cestama koje dodiruje.");
                 axisId = PlacementCommands.DrawPolyline(ctx, false);
                 if (axisId.IsNull)
                 {
@@ -80,47 +85,62 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
             else
             {
-                axisId = ctx.Entity("Odaberite osovinu (polilinija, linija ili luk)", typeof(Curve));
+                axisId = ctx.Entity("Odaberite osovinu (polilinija, linija ili luk; može i postojeća cesta)", typeof(Curve));
             }
 
-            var axis = (Entity)ctx.Tr.GetObject(axisId, OpenMode.ForWrite);
-            if (ElementStore.ReadAux(axis).HasValue)
+            var entity = (Entity)ctx.Tr.GetObject(axisId, OpenMode.ForRead);
+            ManagedElement? existing = ElementStore.IsManaged(entity) ? ctx.Svc.Read(entity) : null;
+            if (existing?.Element != null)
             {
-                ctx.Write("Odabrani objekat je dio nacrtane saobraćajnice; odaberite osovinu ili nacrtajte novu.");
+                if (!RoadElements.IsNetworkRoad(existing.Type))
+                {
+                    ctx.Write("Odabrani objekat je element druge vrste (" + existing.Type?.Name + "); odaberite osovinu ili cestu.");
+                    return;
+                }
+
+                ctx.Svc.Update(existing, AsStreet(existing.Element, chosen));
+                ctx.Write("Cesta " + existing.Element.Label + " je postala ulica s ovim presjekom.");
+            }
+            else if (PlacementCommands.ConvertCurves(ctx, type, new[] { axisId }, Params(chosen)) == 0)
+            {
                 return;
             }
 
-            axis.LayerId = AxisLayer(ctx);
-            WriteSpec(axis, chosen, ctx.Tr);
             Rebuild(ctx, true);
         }));
 
-        /// <summary>Changes the cross-section of an existing road (pick its axis or anything drawn for it).</summary>
-        [CommandMethod("SITEDESIGNPRO", "SDPSAOBRACAJNICAUREDI", CommandFlags.Modal | CommandFlags.UsePickSet)]
-        public void EditRoad() => Guarded(() => CommandContext.Run("SDPSAOBRACAJNICAUREDI", ctx =>
+        /// <summary>Changes the cross-section of a street (or turns a simple road into a street) in the same window.</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPULICAUREDI", CommandFlags.Modal)]
+        public void EditStreet() => Guarded(() => CommandContext.Run("SDPULICAUREDI", ctx =>
         {
-            List<(ObjectId Id, RoadSpec Spec)> roads = ReadRoads(ctx);
+            List<ManagedElement> roads = ctx.Svc.ReadAll().Where(m => m.Element != null && RoadElements.IsNetworkRoad(m.Type)).ToList();
             if (roads.Count == 0)
             {
-                ctx.Write("U crtežu nema saobraćajnica. Nova: SDPSAOBRACAJNICA.");
+                ctx.Write("U crtežu nema ulica ni cesta. Nova ulica: Ulica (SDPULICA).");
                 return;
             }
 
-            Point3d? pick = ctx.Point("Kliknite osovinu ili kolovoz saobraćajnice");
+            Point3d? pick = ctx.Point("Kliknite ulicu ili cestu");
             if (!pick.HasValue)
             {
                 return;
             }
 
-            (ObjectId id, RoadSpec spec, _, _, double dist) = Nearest(roads, pick.Value, ctx.K);
-            if (dist > Math.Max(spec.Extent(RoadLevel.Edge, true), spec.Extent(RoadLevel.Edge, false)) + 2)
+            (ManagedElement? road, RoadSpec? spec, _, _, double dist) = Nearest(ctx, roads, pick.Value);
+            if (road?.Element == null || spec == null || dist > Math.Max(spec.Extent(RoadLevel.Edge, true), spec.Extent(RoadLevel.Edge, false)) + 2)
             {
-                ctx.Write("Na tom mjestu nema saobraćajnice.");
+                ctx.Write("Na tom mjestu nema ulice ni ceste.");
                 return;
             }
 
-            ctx.Write("Odabrana saobraćajnica: " + Describe(spec) + ".");
-            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(spec, "Uredi saobraćajnicu", UnitText(ctx)) : AskText(ctx, spec);
+            bool street = road.Type!.Id == RoadElements.StreetType;
+            ctx.Write((street ? "Ulica " : road.Type.Name + " ") + road.Element.Label + ": " + Describe(spec) + ".");
+            if (!street)
+            {
+                ctx.Write("Ova cesta je zadana samo širinom; u prozoru joj možete dati trake, trotoare i staze (postaje ulica).");
+            }
+
+            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(spec, "Uredi ulicu " + road.Element.Label, UnitText(ctx)) : AskText(ctx, spec);
             if (chosen == null)
             {
                 throw new CommandCancelled();
@@ -131,78 +151,53 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Write(note);
             }
 
-            WriteSpec((Entity)ctx.Tr.GetObject(id, OpenMode.ForWrite), chosen, ctx.Tr);
+            ctx.Svc.Update(road, AsStreet(road.Element, chosen));
             UI.Preferences.Current.RememberDefault(PrefKey, chosen.ToParameterString());
             Rebuild(ctx, true);
         }));
 
-        /// <summary>Redraws all roads from their axes (after moving, stretching, copying or erasing axes).</summary>
-        [CommandMethod("SITEDESIGNPRO", "SDPSAOBRACAJNICEOSVJEZI", CommandFlags.Modal)]
-        public void RefreshRoads() => Guarded(() => CommandContext.Run("SDPSAOBRACAJNICEOSVJEZI", ctx => Rebuild(ctx, true)));
+        /// <summary>Redraws carriageways, kerbs, sidewalks, lane lines and arrows of all streets and roads.</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPCESTEOSVJEZI", CommandFlags.Modal)]
+        public void RefreshRoads() => Guarded(() => CommandContext.Run("SDPCESTEOSVJEZI", ctx => Rebuild(ctx, true)));
 
-        /// <summary>Quiet redraw started automatically after an axis was changed by an ordinary AutoCAD command.</summary>
-        [CommandMethod("SITEDESIGNPRO", "SDPSAOBRACAJNICEAUTO", CommandFlags.Modal | CommandFlags.NoHistory)]
-        public void AutoRefresh() => Guarded(() => CommandContext.Run("SDPSAOBRACAJNICEAUTO", ctx => Rebuild(ctx, false)));
+        /// <summary>Quiet redraw started automatically after a street or road was changed, moved, copied or erased.</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPCESTEAUTO", CommandFlags.Modal | CommandFlags.NoHistory)]
+        public void AutoRefresh() => Guarded(() => CommandContext.Run("SDPCESTEAUTO", ctx => Rebuild(ctx, false)));
 
-        /// <summary>Removes the drawn roads (axes stay) or the roads with their axes.</summary>
-        [CommandMethod("SITEDESIGNPRO", "SDPSAOBRACAJNICEUKLONI", CommandFlags.Modal)]
-        public void RemoveRoads() => Guarded(() => CommandContext.Run("SDPSAOBRACAJNICEUKLONI", ctx =>
-        {
-            string mode = ctx.Keyword("Ukloniti [Crtez/Sve]", new[] { "Drawing|Crtez", "All|Sve" }, "Drawing");
-            int n = EraseNetwork(ctx);
-            if (mode == "All")
-            {
-                foreach ((ObjectId id, _) in ReadRoads(ctx))
-                {
-                    ctx.Tr.GetObject(id, OpenMode.ForWrite).Erase();
-                }
-
-                ctx.Write("Saobraćajnice i njihove osovine su uklonjene.");
-            }
-            else
-            {
-                ctx.Write("Uklonjeno je " + n + " nacrtanih dijelova; osovine ostaju (SDPSAOBRACAJNICEOSVJEZI ih ponovo crta).");
-            }
-        }));
-
-        /// <summary>Pedestrian crossing as a ready-made block: white 0,50 m bars with 0,50 m gaps across all lanes.</summary>
+        /// <summary>
+        /// Pedestrian crossing as an element (road.pedestrian_crossing): white 0,50 m bars with 0,50 m gaps across all
+        /// lanes; on a street or road it turns itself and takes the number and width of the lanes.
+        /// </summary>
         [CommandMethod("SITEDESIGNPRO", "SDPPJESACKIPRIJELAZ", CommandFlags.Modal)]
         public void Crossing() => Guarded(() => CommandContext.Run("SDPPJESACKIPRIJELAZ", ctx =>
         {
-            EnsureUnits(ctx);
             double k = ctx.K;
-            Point3d? at = ctx.Point("Mjesto pješačkog prijelaza (klik na saobraćajnicu)");
+            Point3d? at = ctx.Point("Mjesto pješačkog prijelaza (klik na ulicu ili cestu)");
             if (!at.HasValue)
             {
                 return;
             }
 
-            List<(ObjectId Id, RoadSpec Spec)> roads = ReadRoads(ctx);
+            List<ManagedElement> roads = ctx.Svc.ReadAll().Where(m => m.Element != null && RoadElements.IsNetworkRoad(m.Type)).ToList();
             int lanes = 2;
             double lw = 3.0;
             Vec2 centre = new Vec2(at.Value.X / k, at.Value.Y / k);
-            double angle;
+            Vec2 dir;
             bool onRoad = false;
-            if (roads.Count > 0)
+            (ManagedElement? road, RoadSpec? spec, Vec2 foot, Vec2 roadDir, double dist) = roads.Count > 0 ? Nearest(ctx, roads, at.Value) : (null, null, centre, new Vec2(1, 0), double.MaxValue);
+            if (spec != null && dist <= Math.Max(spec.CarriagewayLeft, spec.CarriagewayRight) + 1.0)
             {
-                (_, RoadSpec spec, Vec2 foot, Vec2 dir, double dist) = Nearest(roads, at.Value, k);
-                if (dist <= Math.Max(spec.CarriagewayLeft, spec.CarriagewayRight) + 1.0)
-                {
-                    onRoad = true;
-                    lanes = spec.TotalLanes;
-                    lw = spec.LaneWidth;
-                    centre = foot + (dir.Perp() * ((spec.CarriagewayLeft - spec.CarriagewayRight) / 2));
-                    angle = dir.Angle;
-                    ctx.Write("Saobraćajnica: " + Bs.Count(lanes, "traka", "trake", "traka") + " × " + Bs.Num(lw, 2) + " m; prijelaz se postavlja okomito na osovinu, preko cijelog kolovoza.");
-                }
-                else
-                {
-                    angle = ctx.Angle("Smjer saobraćajnice (drugi klik ili ugao)", at.Value, 0);
-                }
+                onRoad = true;
+                lanes = spec.TotalLanes;
+                lw = spec.LaneWidth;
+                dir = roadDir;
+                centre = foot + (dir.Perp() * ((spec.CarriagewayLeft - spec.CarriagewayRight) / 2));
+                ctx.Write((road?.Element?.Label ?? string.Empty) + ": " + Bs.Count(lanes, "traka", "trake", "traka") + " × " + Bs.Num(lw, 2) + " m; prijelaz ide okomito na osovinu, preko cijelog kolovoza.");
             }
             else
             {
-                angle = ctx.Angle("Smjer saobraćajnice (drugi klik ili ugao)", at.Value, 0);
+                double a = ctx.Angle("Smjer ulice (drugi klik ili ugao)", at.Value, 0);
+                dir = new Vec2(Math.Cos(a), Math.Sin(a));
             }
 
             lanes = Math.Min(6, ctx.Integer("Broj traka", lanes, 1));
@@ -214,22 +209,28 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            Busy = true;
-            ObjectId block = CrossingBlock(ctx, lanes, lw, length);
-            var br = new BlockReference(new Point3d(centre.X * k, centre.Y * k, 0), block) { Rotation = angle - (Math.PI / 2) };
-            br.SetDatabaseDefaults(ctx.Db);
-            br.LayerId = RoadLayer(ctx);
-            BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
-            ms.AppendEntity(br);
-            ctx.Tr.AddNewlyCreatedDBObject(br, true);
+            // the bars (0,50 m, gaps 0,50 m) cover the carriageway and are centred on it; the outline runs exactly
+            // around them, its first edge along the road, so the stripes lie along the road as in SketchUp
+            int bars = Math.Max(1, (int)Math.Floor(((lanes * lw) + 0.5) / 1.0 + 1e-9));
+            double across = (bars * 0.5) + ((bars - 1) * 0.5);
+            Vec2 side = dir.Perp();
+            Vec2 c0 = centre - (dir * (length / 2)) - (side * (across / 2));
+            var ring = new Ring(new List<Vec3>
+            {
+                (c0 * k).WithZ(0), ((c0 + (dir * length)) * k).WithZ(0), ((c0 + (dir * length) + (side * across)) * k).WithZ(0), ((c0 + (side * across)) * k).WithZ(0),
+            });
+            ElementType type = ctx.Catalog.RequireType(RoadElements.CrossingType);
+            SiteElement crossing = ctx.NewElement(type, new PolygonGeometry(ring), ctx.ExistingElements());
+            crossing.Parameters["stripeWidth"] = ParamValue.Of(0.5);
+            crossing.Parameters["gapWidth"] = ParamValue.Of(0.5);
+            ctx.Svc.Create(crossing);
             if (roads.Count > 0)
             {
                 Rebuild(ctx, false); // lane lines and arrows stop at the crossing
             }
 
-            int bars = Bars(lanes * lw).Count;
-            ctx.Write("Pješački prijelaz: " + bars + " pruga 0,50 m s razmakom 0,50 m preko " + Bs.Num(lanes * lw, 2) + " m kolovoza, dužina pruga " + Bs.Num(length, 2) + " m" +
-                      (onRoad ? string.Empty : " (slobodno postavljen)") + ". Prijelaz je blok: pomjera se i rotira kao jedan element.");
+            ctx.Write("Pješački prijelaz " + crossing.Label + ": " + bars + " pruga 0,50 m s razmakom 0,50 m preko " + Bs.Num(lanes * lw, 2) + " m kolovoza, dužina pruga " + Bs.Num(length, 2) + " m" +
+                      (onRoad ? string.Empty : " (slobodno postavljen)") + ". Pomjera se i uređuje kao svaki element; linije traka se na njemu prekidaju.");
         }));
 
         // ------------------------------------------------------------------ network
@@ -237,7 +238,19 @@ namespace SiteDesignPro.AutoCAD.Commands
         internal static RoadNetworkResult? Rebuild(CommandContext ctx, bool verbose)
         {
             Busy = true;
-            List<(ObjectId Id, RoadSpec Spec)> roads = ReadRoads(ctx);
+            MigrateLegacy(ctx);
+            List<ManagedElement> managed = ctx.Svc.ReadAll().Where(m => m.Element != null && m.Type != null).ToList();
+            List<ManagedElement> roads = managed.Where(m => RoadElements.IsNetworkRoad(m.Type)).ToList();
+            foreach (ManagedElement m in roads)
+            {
+                // drawings made before the road network: the road was a wide band with its own edges
+                ctx.Svc.EraseAux(m.Element!.Id, "edge");
+                if (ctx.Tr.GetObject(m.ObjectId, OpenMode.ForRead) is Polyline pl && Math.Abs(pl.ConstantWidth) > 1e-9)
+                {
+                    pl.UpgradeOpen();
+                    pl.ConstantWidth = 0;
+                }
+            }
 
             // a locked road layer is unlocked for the redraw and locked again afterwards
             ObjectId layerId = RoadLayer(ctx);
@@ -246,7 +259,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             layerRecord.IsLocked = false;
             try
             {
-                return Redraw(ctx, roads, verbose);
+                return Redraw(ctx, managed.Select(m => m.Element!).ToList(), roads.Count, verbose);
             }
             finally
             {
@@ -254,20 +267,20 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
         }
 
-        private static RoadNetworkResult? Redraw(CommandContext ctx, List<(ObjectId Id, RoadSpec Spec)> roads, bool verbose)
+        private static RoadNetworkResult? Redraw(CommandContext ctx, List<SiteElement> elements, int roadCount, bool verbose)
         {
             EraseNetwork(ctx);
-            if (roads.Count == 0)
+            RoadNetworkResult? res = roadCount == 0 ? null : RoadElements.Network(elements, ctx.Catalog, ctx.K);
+            if (res == null)
             {
                 if (verbose)
                 {
-                    ctx.Write("U crtežu nema saobraćajnica (osovina s podacima saobraćajnice).");
+                    ctx.Write("U crtežu nema ulica ni cesta.");
                 }
 
                 return null;
             }
 
-            RoadNetworkResult res = RoadNetwork.Build(roads.Select(r => r.Spec).ToList(), CrossingAreas(ctx));
             double k = ctx.K;
             ObjectId layer = RoadLayer(ctx);
             BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForWrite);
@@ -364,11 +377,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                 int junctions = res.Outlines.TryGetValue(RoadLevel.Carriageway, out List<RoadLoop>? edges)
                     ? edges.Sum(l => l.ArcRadii().Count(r => Math.Abs(r - res.EffectiveRadius) < 0.05))
                     : 0;
-                ctx.Write(Bs.T("Saobraćajnice ({0}): kolovoz {1}, biciklističke staze {2}, trotoari {3}; {4} oznaka traka, {5} strelica; zaobljenih uglova raskrsnica: {6}.",
-                    roads.Count, Bs.SquareMeters(res.Area(RoadLevel.Carriageway), 1), Bs.SquareMeters(res.Area(RoadLevel.Bike), 1),
+                ctx.Write(Bs.T("Ulice i ceste ({0}): kolovoz {1}, biciklističke staze {2}, trotoari {3}; {4} oznaka traka, {5} strelica; zaobljenih uglova raskrsnica: {6}.",
+                    roadCount, Bs.SquareMeters(res.Area(RoadLevel.Carriageway), 1), Bs.SquareMeters(res.Area(RoadLevel.Bike), 1),
                     Bs.SquareMeters(res.Area(RoadLevel.Sidewalk), 1), res.Markings.Count, res.Arrows.Count, junctions));
                 ctx.Write("Radijus ivičnjaka (stvarni) " + Bs.Meters(res.ActualRadius) + ", efektivni radijus (ivica kolovoza) " + Bs.Meters(res.EffectiveRadius) +
-                          ". Radijus pojedinog luka vidite kad kursor stoji na liniji. Sloj: " + LayerName + ". Nakon pomjeranja osovina crtež se osvježava sam.");
+                          ". Radijus luka vidite kad kursor stoji na ivičnjaku. Nakon izmjene, pomjeranja ili brisanja ulice crtež se osvježava sam.");
             }
 
             if (failed > 0)
@@ -377,44 +390,6 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             return res;
-        }
-
-        internal const string CrossingPrefix = "VU_PJESACKI_PRIJELAZ_";
-
-        private static readonly System.Text.RegularExpressions.Regex CrossingName =
-            new System.Text.RegularExpressions.Regex(@"^VU_PJESACKI_PRIJELAZ_(\d+)x(\d+)cm_(\d+)cm", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
-
-        /// <summary>Areas of the pedestrian crossings (metres), where lane lines and arrows are left out.</summary>
-        private static List<IReadOnlyList<Vec2>> CrossingAreas(CommandContext ctx)
-        {
-            var list = new List<IReadOnlyList<Vec2>>();
-            double k = ctx.K;
-            RXClass refClass = RXObject.GetClass(typeof(BlockReference));
-            foreach (ObjectId id in ctx.Svc.ModelSpace(OpenMode.ForRead))
-            {
-                if (id.IsErased || !id.ObjectClass.IsDerivedFrom(refClass))
-                {
-                    continue;
-                }
-
-                var br = (BlockReference)ctx.Tr.GetObject(id, OpenMode.ForRead);
-                System.Text.RegularExpressions.Match m = CrossingName.Match(br.Name);
-                if (!m.Success)
-                {
-                    continue;
-                }
-
-                double width = int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture) * int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture) / 100.0;
-                double length = int.Parse(m.Groups[3].Value, CultureInfo.InvariantCulture) / 100.0;
-                double hx = (width / 2) + 0.5, hy = (length / 2) + 0.5;
-                Matrix3d t = br.BlockTransform;
-                list.Add(new[] { new Vec2(-hx, -hy), new Vec2(hx, -hy), new Vec2(hx, hy), new Vec2(-hx, hy) }
-                    .Select(p => new Point3d(p.X * k, p.Y * k, 0).TransformBy(t))
-                    .Select(p => new Vec2(p.X / k, p.Y / k))
-                    .ToList());
-            }
-
-            return list;
         }
 
         private static int EraseNetwork(CommandContext ctx)
@@ -432,74 +407,20 @@ namespace SiteDesignPro.AutoCAD.Commands
             return n;
         }
 
-        internal static List<(ObjectId Id, RoadSpec Spec)> ReadRoads(CommandContext ctx)
+        /// <summary>The road whose axis is closest to a point, with its cross-section, foot point and direction there (metres).</summary>
+        private static (ManagedElement? Road, RoadSpec? Spec, Vec2 Foot, Vec2 Dir, double Dist) Nearest(CommandContext ctx, List<ManagedElement> roads, Point3d p)
         {
-            var list = new List<(ObjectId, RoadSpec)>();
             double k = ctx.K;
-            BlockTableRecord ms = ctx.Svc.ModelSpace(OpenMode.ForRead);
-            RXClass curveClass = RXObject.GetClass(typeof(Curve));
-            foreach (ObjectId id in ms)
-            {
-                if (id.IsErased || !id.ObjectClass.IsDerivedFrom(curveClass))
-                {
-                    continue;
-                }
-
-                var c = (Curve)ctx.Tr.GetObject(id, OpenMode.ForRead);
-                RoadSpec? spec = ReadSpec(c);
-                if (spec == null)
-                {
-                    continue;
-                }
-
-                (Ring ring, bool closed) = ElementService.ReadCurve(c);
-                spec.Id = c.Handle.ToString();
-                spec.Closed = closed;
-                spec.Axis = GeometryMath.Tessellate(ring, closed, 0.02 * k).Select(v => new Vec2(v.X / k, v.Y / k)).ToList();
-                list.Add((id, spec));
-            }
-
-            return list;
-        }
-
-        internal static RoadSpec? ReadSpec(Entity e)
-        {
-            using ResultBuffer? rb = e.GetXDataForApplication(RoadApp);
-            if (rb == null)
-            {
-                return null;
-            }
-
-            TypedValue[] v = rb.AsArray();
-            return v.Length >= 2 && v[1].Value is string s ? RoadSpec.FromParameterString(s) : null;
-        }
-
-        private static void WriteSpec(Entity e, RoadSpec s, Transaction tr)
-        {
-            var table = (RegAppTable)tr.GetObject(e.Database.RegAppTableId, OpenMode.ForRead);
-            if (!table.Has(RoadApp))
-            {
-                table.UpgradeOpen();
-                var rec = new RegAppTableRecord { Name = RoadApp };
-                table.Add(rec);
-                tr.AddNewlyCreatedDBObject(rec, true);
-            }
-
-            if (!e.IsWriteEnabled)
-            {
-                e.UpgradeOpen();
-            }
-
-            e.XData = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, RoadApp), new TypedValue((int)DxfCode.ExtendedDataAsciiString, s.ToParameterString()));
-        }
-
-        /// <summary>The road whose axis is closest to a point: its foot point and direction there (metres).</summary>
-        private static (ObjectId Id, RoadSpec Spec, Vec2 Foot, Vec2 Dir, double Dist) Nearest(List<(ObjectId Id, RoadSpec Spec)> roads, Point3d p, double k)
-        {
             Vec2 q = new Vec2(p.X / k, p.Y / k);
-            (ObjectId, RoadSpec, Vec2, Vec2, double) best = (roads[0].Id, roads[0].Spec, q, new Vec2(1, 0), double.MaxValue);
-            foreach ((ObjectId id, RoadSpec s) in roads)
+            (ManagedElement?, RoadSpec?, Vec2, Vec2, double) best = (null, null, q, new Vec2(1, 0), double.MaxValue);
+            foreach (ManagedElement m in roads)
             {
+                RoadSpec? s = RoadElements.Spec(m.Element!, m.Type!, k);
+                if (s == null)
+                {
+                    continue;
+                }
+
                 int segs = s.Closed ? s.Axis.Count : s.Axis.Count - 1;
                 for (int i = 0; i < segs; i++)
                 {
@@ -516,12 +437,93 @@ namespace SiteDesignPro.AutoCAD.Commands
                     double d = foot.DistanceTo(q);
                     if (d < best.Item5)
                     {
-                        best = (id, s, foot, ab.Normalized(), d);
+                        best = (m, s, foot, ab.Normalized(), d);
                     }
                 }
             }
 
             return best;
+        }
+
+        /// <summary>The cross-section as parameters of a street element.</summary>
+        private static Dictionary<string, ParamValue> Params(RoadSpec s) => new Dictionary<string, ParamValue>(StringComparer.Ordinal)
+        {
+            ["direction"] = ParamValue.Of(s.OneWay ? "one_way" : "two_way"),
+            ["lanesLeft"] = ParamValue.Of((double)s.LanesLeft),
+            ["lanesRight"] = ParamValue.Of((double)s.LanesRight),
+            ["laneWidth"] = ParamValue.Of(s.LaneWidth),
+            ["sidewalkLeft"] = ParamValue.Of(s.SidewalkLeft),
+            ["sidewalkRight"] = ParamValue.Of(s.SidewalkRight),
+            ["bikeLeft"] = ParamValue.Of(s.BikeLeft),
+            ["bikeRight"] = ParamValue.Of(s.BikeRight),
+            ["cornerRadius"] = ParamValue.Of(s.CornerRadius),
+            ["arrows"] = ParamValue.Of(s.Arrows),
+            ["arrowSpacing"] = ParamValue.Of(s.ArrowSpacing),
+        };
+
+        /// <summary>The element as a street with the given cross-section (a simple road becomes a street; label and data stay).</summary>
+        private static SiteElement AsStreet(SiteElement e, RoadSpec s)
+        {
+            ElementType street = AcadEnv.Catalog.RequireType(RoadElements.StreetType);
+            ParameterSet parameters = e.TypeId == RoadElements.StreetType ? e.Parameters.Clone() : street.CreateDefaultParameters();
+            if (e.TypeId != RoadElements.StreetType && e.Parameters.Contains("material"))
+            {
+                parameters["material"] = e.Parameters["material"];
+            }
+
+            foreach (KeyValuePair<string, ParamValue> kv in Params(s))
+            {
+                parameters[kv.Key] = kv.Value;
+            }
+
+            return new SiteElement(e.Id, RoadElements.StreetType, e.Geometry)
+            {
+                Name = e.TypeId == RoadElements.StreetType ? e.Name : string.Empty,
+                Label = e.Label,
+                Parameters = parameters,
+                Properties = new SortedDictionary<string, string>(e.Properties, StringComparer.Ordinal),
+                Custom = e.Custom.Clone(),
+                Revision = e.Revision,
+                SourceHandle = e.SourceHandle,
+                AssetId = e.AssetId,
+            };
+        }
+
+        /// <summary>Axes of the first road version (cross-section stored on a plain polyline) become street elements.</summary>
+        private static void MigrateLegacy(CommandContext ctx)
+        {
+            RXClass curveClass = RXObject.GetClass(typeof(Curve));
+            var legacy = new List<(ObjectId Id, RoadSpec Spec)>();
+            foreach (ObjectId id in ctx.Svc.ModelSpace(OpenMode.ForRead))
+            {
+                if (id.IsErased || !id.ObjectClass.IsDerivedFrom(curveClass))
+                {
+                    continue;
+                }
+
+                var c = (Curve)ctx.Tr.GetObject(id, OpenMode.ForRead);
+                using ResultBuffer? rb = c.GetXDataForApplication(LegacyApp);
+                TypedValue[]? v = rb?.AsArray();
+                if (v != null && v.Length >= 2 && v[1].Value is string text && !ElementStore.IsManaged(c))
+                {
+                    legacy.Add((id, RoadSpec.FromParameterString(text)));
+                }
+            }
+
+            if (legacy.Count == 0)
+            {
+                return;
+            }
+
+            ElementType street = ctx.Catalog.RequireType(RoadElements.StreetType);
+            foreach ((ObjectId id, RoadSpec spec) in legacy)
+            {
+                var c = (Curve)ctx.Tr.GetObject(id, OpenMode.ForWrite);
+                c.XData = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, LegacyApp));
+                PlacementCommands.ConvertCurves(ctx, street, new[] { id }, Params(spec));
+            }
+
+            ctx.Write("Osovine iz prve verzije (" + legacy.Count + ") pretvorene su u ulice.");
         }
 
         // ------------------------------------------------------------------ drawing helpers
@@ -578,87 +580,6 @@ namespace SiteDesignPro.AutoCAD.Commands
             Plot = true,
             Description = "Vanjsko uređenje PRO – saobraćajnice (kolovoz, staze, trotoari, ivičnjaci, oznake)",
         });
-
-        private static ObjectId AxisLayer(CommandContext ctx) => ctx.Svc.Layers.Ensure(new LayerDefinition
-        {
-            Key = "roads_axis",
-            Name = AxisLayerName,
-            Color = 1,
-            Plot = false,
-            Description = "Vanjsko uređenje PRO – osovine saobraćajnica (podaci za crtanje; ne štampa se)",
-        });
-
-        /// <summary>Starting position of each 0,50 m bar across a carriageway of the given width (centred, 0,50 m gaps).</summary>
-        internal static List<double> Bars(double width)
-        {
-            const double bar = 0.5, gap = 0.5;
-            int n = Math.Max(1, (int)Math.Floor((width + gap) / (bar + gap) + 1e-9));
-            double total = (n * bar) + ((n - 1) * gap);
-            return Enumerable.Range(0, n).Select(i => (-total / 2) + (i * (bar + gap))).ToList();
-        }
-
-        /// <summary>Block of a pedestrian crossing (X across the road, Y along it), made once per size.</summary>
-        private static ObjectId CrossingBlock(CommandContext ctx, int lanes, double laneWidth, double length)
-        {
-            double k = ctx.K;
-            string name = CrossingPrefix + lanes + "x" + Math.Round(laneWidth * 100) + "cm_" + Math.Round(length * 100) + "cm_" + ctx.Settings.DrawingUnit + "_v2";
-            var bt = (BlockTable)ctx.Tr.GetObject(ctx.Db.BlockTableId, OpenMode.ForRead);
-            if (bt.Has(name))
-            {
-                return bt[name];
-            }
-
-            bt.UpgradeOpen();
-            var btr = new BlockTableRecord { Name = name, Origin = Point3d.Origin, Comments = "Pješački prijelaz: " + lanes + " × " + Bs.Num(laneWidth, 2) + " m, pruge 0,50/0,50 m, dužina " + Bs.Num(length, 2) + " m" };
-            ObjectId id = bt.Add(btr);
-            ctx.Tr.AddNewlyCreatedDBObject(btr, true);
-
-            List<double> bars = Bars(lanes * laneWidth);
-            double y0 = -length / 2 * k, y1 = length / 2 * k;
-            foreach (double x in bars)
-            {
-                var h = new Hatch();
-                h.SetDatabaseDefaults(ctx.Db);
-                h.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
-                h.Associative = false;
-                h.Color = Color.FromRgb(255, 255, 255);
-                var v = new Point2dCollection
-                {
-                    new Point2d(x * k, y0), new Point2d((x + 0.5) * k, y0), new Point2d((x + 0.5) * k, y1), new Point2d(x * k, y1), new Point2d(x * k, y0),
-                };
-                h.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, v, new DoubleCollection { 0, 0, 0, 0, 0 });
-                h.EvaluateHatch(true);
-                btr.AppendEntity(h);
-                ctx.Tr.AddNewlyCreatedDBObject(h, true);
-            }
-
-            // dimensions of one bar and one gap (0,50 m), above the crossing; text sized to fit between the lines
-            if (bars.Count >= 2)
-            {
-                double th = 0.12 * k;
-                double yd = y1 + (0.45 * k);
-                foreach ((double a, double b) in new[] { (bars[0], bars[0] + 0.5), (bars[0] + 0.5, bars[1]) })
-                {
-                    var dim = new AlignedDimension(new Point3d(a * k, y1, 0), new Point3d(b * k, y1, 0), new Point3d(a * k, yd, 0), string.Empty, ctx.Db.Dimstyle);
-                    dim.SetDatabaseDefaults(ctx.Db);
-                    btr.AppendEntity(dim);
-                    ctx.Tr.AddNewlyCreatedDBObject(dim, true);
-                    dim.Dimlfac = 1.0 / k;
-                    dim.Dimdec = 2;
-                    dim.Dimtxt = th;
-                    dim.Dimtsz = 0.05 * k;
-                    dim.Dimexo = 0.05 * k;
-                    dim.Dimexe = 0.08 * k;
-                    dim.Dimgap = 0.03 * k;
-                    dim.Dimtix = true;
-                    dim.Dimtad = 1;
-                    dim.Dimzin = 0;
-                    dim.Dimclrt = Color.FromColorIndex(ColorMethod.ByAci, 7);
-                }
-            }
-
-            return id;
-        }
 
         // ------------------------------------------------------------------ input and units
 
@@ -753,28 +674,20 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             try
             {
-                if (RoadCommands.Busy || (running != null && (UndoCommands.Contains(running) || running.StartsWith("SDP", StringComparison.OrdinalIgnoreCase))))
+                // the road commands redraw themselves; undo restores the drawn roads together with the axes
+                if (RoadCommands.Busy || (running != null && (UndoCommands.Contains(running) || running.StartsWith("SDPCESTE", StringComparison.OrdinalIgnoreCase))))
                 {
                     return;
                 }
 
-                if (o is BlockReference br)
-                {
-                    if (br.Name.StartsWith(RoadCommands.CrossingPrefix, StringComparison.Ordinal))
-                    {
-                        Dirty.Add(db); // a moved crossing moves the gap in the lane lines
-                    }
-
-                    return;
-                }
-
-                if (o is not Curve c)
+                if (o is not Entity ent)
                 {
                     return;
                 }
 
-                using ResultBuffer? rb = c.GetXDataForApplication(RoadCommands.RoadApp);
-                if (rb != null)
+                // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
+                (string Id, string Type)? key = ElementStore.ReadKey(ent);
+                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
                 {
                     Dirty.Add(db);
                 }
@@ -795,7 +708,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             Dirty.Remove(doc.Database);
-            doc.SendStringToExecute("_.SDPSAOBRACAJNICEAUTO ", true, false, false);
+            doc.SendStringToExecute("_.SDPCESTEAUTO ", true, false, false);
         }
 
         private static void OnPointMonitor(object? sender, PointMonitorEventArgs e)
@@ -835,10 +748,13 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         private static string? Tip(Entity ent, Point3d at, Database db, Transaction tr)
         {
-            RoadSpec? spec = RoadCommands.ReadSpec(ent);
-            if (spec != null)
+            (string Id, string Type)? key = ElementStore.ReadKey(ent);
+            if (key.HasValue && key.Value.Type == RoadElements.StreetType && ElementStore.Read(ent, tr) is ElementRecord rec)
             {
-                return "Saobraćajnica: " + RoadCommands.Describe(spec) + ".\nIzmjena: Uredi saobraćajnicu (SDPSAOBRACAJNICAUREDI).";
+                ElementType street = AcadEnv.Catalog.RequireType(RoadElements.StreetType);
+                var probe = new SiteElement(rec.Id, rec.TypeId, new PathGeometry(new Ring(new List<Vec3> { new Vec3(0, 0, 0), new Vec3(1, 0, 0) }), false)) { Parameters = rec.Parameters };
+                RoadSpec? spec = RoadElements.Spec(probe, street);
+                return spec == null ? null : "Ulica " + rec.Label + ": " + RoadCommands.Describe(spec) + ".\nIzmjena: Uredi ulicu (SDPULICAUREDI) ili paleta Svojstva.";
             }
 
             (string OwnerId, string Role)? aux = ElementStore.ReadAux(ent);

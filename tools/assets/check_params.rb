@@ -12,7 +12,7 @@ include ProjektniBiro::SiteDesignPro # rubocop:disable Style/MixinUsage
 # Data only (not 3D shape): power, clearances, volumes, design intent, joint pattern shown by the texture.
 DESCRIPTIVE = %w[power serviceClearance jointPattern requiredClearWidth nominalVolume coverageRadius status matureCanopyDiameter
                  matureHeight gradient flowDirection safetyClearance maxSlope modulePower ratedPower excavationMargin liftingClearance
-                 installation bikesPerStand].freeze
+                 installation bikesPerStand cornerRadius arrows arrowSpacing].freeze
 # [type, parameter] whose effect the change in this check cannot show (value capped, part hidden by another default,
 # or the option is drawn the same way) - each was reviewed.
 KNOWN = {
@@ -34,7 +34,8 @@ KNOWN = {
   'waterMaterial' => %w[water.rain_garden water.bioswale], 'depth' => %w[recreation.playground_unit], # no water by default; tower depth capped
   'plateShape' => %w[recreation.basketball_hoop info.site_map], 'postHeight' => %w[info.site_map], # backboard; tilted map table
   'columnMaterial' => %w[utility.waste_container_semi], 'columnDiameter' => %w[utility.waste_container_semi], # semi: no column
-  'bodyWidth' => %w[utility.waste_container_semi], 'bodyLength' => %w[utility.waste_container_semi] # round body: min(l, w)
+  'bodyWidth' => %w[utility.waste_container_semi], 'bodyLength' => %w[utility.waste_container_semi], # round body: min(l, w)
+  'bikeMaterial' => %w[road.street], 'lanesLeft' => %w[road.street] # no bike lane by default; one-way uses lanesRight only
 }.freeze
 
 lib = AssetLibrary.new(File.join(ROOT, 'sketchup-site-design-pro/src/pb_site_design_pro/Assets'), File.join(ROOT, 'shared/catalog'))

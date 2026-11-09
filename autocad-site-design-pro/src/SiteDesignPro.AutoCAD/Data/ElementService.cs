@@ -401,6 +401,17 @@ namespace SiteDesignPro.AutoCAD.Data
             }
 
             EraseAux(element.Id, "edge");
+            if (Core.Roads.RoadElements.IsNetworkRoad(type))
+            {
+                // a road of the road network is its axis; carriageway, kerbs and sidewalks are drawn by the network
+                if (curve is Polyline axis)
+                {
+                    axis.ConstantWidth = 0;
+                }
+
+                return;
+            }
+
             string? widthParam = type.Builder.PolylineWidthParam;
             if (widthParam == null)
             {
@@ -498,6 +509,12 @@ namespace SiteDesignPro.AutoCAD.Data
         private void ApplyHatch(Curve boundary, SiteElement element, ElementType type)
         {
             EraseAux(element.Id, "hatch");
+            if (type.Builder.Id == "stripes")
+            {
+                ApplyStripes(boundary, element, type);
+                return;
+            }
+
             HatchDefinition? def = type.Hatch;
             if (def == null)
             {
@@ -544,6 +561,92 @@ namespace SiteDesignPro.AutoCAD.Data
             Remember(element.Id, hatch.ObjectId);
             hatch.DowngradeOpen();
             hatch.Draworder(tr, boundary.ObjectId);
+        }
+
+        /// <summary>
+        /// Striped area (pedestrian crossing, hatched area) drawn as real white bars, the same as in SketchUp; a
+        /// pedestrian crossing also gets the dimensions of one bar and one gap.
+        /// </summary>
+        private void ApplyStripes(Curve boundary, SiteElement element, ElementType type)
+        {
+            EraseAux(element.Id, "dim");
+            (Ring ring, bool _) = ReadCurve(boundary);
+            List<Vec2> outer = GeometryMath.Tessellate(ring, true, 0.01 * K).Select(v => new Vec2(v.X / K, v.Y / K)).ToList();
+            if (outer.Count > 1 && outer[0].DistanceTo(outer[outer.Count - 1]) < 1e-9)
+            {
+                outer.RemoveAt(outer.Count - 1);
+            }
+
+            double N(string key, double fallback)
+            {
+                double v = element.Parameters.Number(key, double.NaN);
+                if (Core.Compat.IsFinite(v))
+                {
+                    return v;
+                }
+
+                double d = type.Parameter(key)?.Default.AsNumber() ?? double.NaN;
+                return Core.Compat.IsFinite(d) ? d : fallback;
+            }
+
+            double stripe = N("stripeWidth", 0.5), gap = N("gapWidth", 0.5);
+            List<Vec2[]> bars = Core.Roads.RoadElements.StripeBars(outer, stripe, gap);
+            BlockTableRecord ms = ModelSpace(OpenMode.ForWrite);
+            string layer = layers.Ensure("surfaces_pattern");
+            foreach (Vec2[] bar in bars)
+            {
+                var hatch = new Hatch();
+                hatch.SetDatabaseDefaults(db);
+                hatch.Layer = layer;
+                hatch.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 255, 255);
+                hatch.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
+                hatch.Associative = false;
+                var v = new Point2dCollection();
+                foreach (Vec2 p in bar)
+                {
+                    v.Add(new Point2d(p.X * K, p.Y * K));
+                }
+
+                v.Add(new Point2d(bar[0].X * K, bar[0].Y * K));
+                hatch.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, v, new DoubleCollection(new double[v.Count]));
+                hatch.EvaluateHatch(true);
+                ms.AppendEntity(hatch);
+                tr.AddNewlyCreatedDBObject(hatch, true);
+                ElementStore.WriteAux(hatch, element.Id, "hatch", tr);
+                Remember(element.Id, hatch.ObjectId);
+                hatch.Draworder(tr, boundary.ObjectId);
+            }
+
+            if (type.Id != Core.Roads.RoadElements.CrossingType || bars.Count < 2)
+            {
+                return;
+            }
+
+            // dimensions of the first bar and the first gap, beside the start of the bars
+            Vec2 u = (bars[0][1] - bars[0][0]).Normalized();
+            double th = 0.12 * K;
+            Vec2 a0 = bars[0][0], a1 = bars[0][3], a2 = bars[1][0];
+            foreach ((Vec2 from, Vec2 to) in new[] { (a0, a1), (a1, a2) })
+            {
+                Vec2 at = from - (u * 0.45);
+                var dim = new AlignedDimension(new Point3d(from.X * K, from.Y * K, 0), new Point3d(to.X * K, to.Y * K, 0), new Point3d(at.X * K, at.Y * K, 0), string.Empty, db.Dimstyle);
+                dim.SetDatabaseDefaults(db);
+                dim.Layer = boundary.Layer;
+                ms.AppendEntity(dim);
+                tr.AddNewlyCreatedDBObject(dim, true);
+                dim.Dimlfac = 1.0 / K;
+                dim.Dimdec = 2;
+                dim.Dimtxt = th;
+                dim.Dimtsz = 0.05 * K;
+                dim.Dimexo = 0.05 * K;
+                dim.Dimexe = 0.08 * K;
+                dim.Dimgap = 0.03 * K;
+                dim.Dimtix = true;
+                dim.Dimtad = 1;
+                dim.Dimzin = 0;
+                ElementStore.WriteAux(dim, element.Id, "dim", tr);
+                Remember(element.Id, dim.ObjectId);
+            }
         }
 
         public void EraseAux(string ownerId, string role)

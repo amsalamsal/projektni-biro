@@ -677,9 +677,9 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
-            others.AddRange(gaps);
             if (gaps.Count > 0)
             {
+                others.AddRange(Clipper.InflatePaths(gaps, 0.5, JoinType.Miter, EndType.Polygon, 4, Precision));
                 othersWide.AddRange(Clipper.InflatePaths(gaps, 3.0, JoinType.Miter, EndType.Polygon, 4, Precision));
             }
             others = Union(others);
@@ -688,14 +688,14 @@ namespace SiteDesignPro.Core.Roads
             // lines between lanes (offset from the axis, left positive)
             var lines = new List<(double Offset, bool Centre)>();
             double lw = r.LaneWidth;
-            if (r.OneWay)
+            if (r.Markings && r.OneWay)
             {
                 for (int k = 1; k < r.TotalLanes; k++)
                 {
                     lines.Add((r.CarriagewayLeft - (k * lw), false));
                 }
             }
-            else
+            else if (r.Markings)
             {
                 lines.Add((0, true));
                 for (int k = 1; k < r.LanesLeft; k++)

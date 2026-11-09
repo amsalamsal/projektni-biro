@@ -450,7 +450,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             string query = argument ?? Text(message + " (id tipa ili dio naziva, ? za popis)", null, true);
             for (int attempt = 0; attempt < 5; attempt++)
             {
-                IEnumerable<ElementType> pool = Catalog.Types.Where(t => kinds.Length == 0 || kinds.Contains(t.Geometry));
+                IEnumerable<ElementType> pool = Catalog.PlaceableTypes.Where(t => kinds.Length == 0 || kinds.Contains(t.Geometry));
                 ElementType? exact = pool.FirstOrDefault(t => string.Equals(t.Id, query, StringComparison.OrdinalIgnoreCase));
                 if (exact != null)
                 {

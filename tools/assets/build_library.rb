@@ -38,7 +38,7 @@ FOLDERS = {
 NOT_MODELS = %w[zone circle_zone outline marker massing].freeze
 EXCLUDED = %w[road.swept_path_placeholder].freeze
 # Builders whose parametric geometry already is the real object (textured surfaces, strips, paint, pipes).
-PARAMETRIC_REAL = %w[slab linear_slab stripes pipe].freeze
+PARAMETRIC_REAL = %w[slab linear_slab street stripes pipe].freeze
 
 STATUS = {
   not_started: ['Not started', 'Nije započeto'], custom: ['Custom model created', 'Napravljen vlastiti model'],
@@ -324,6 +324,7 @@ TYPES.each do |t|
   folder = FOLDERS[t['category']]
   next unless folder
   next if (NOT_MODELS.include?(t['builder']) && !Models.for(t['id'])) || EXCLUDED.include?(t['id'])
+  next if t['generated'] # computed from streets and roads, never placed on its own
   next unless ONLY.empty? || ONLY.include?(t['id'])
 
   pkg = package_for(t)

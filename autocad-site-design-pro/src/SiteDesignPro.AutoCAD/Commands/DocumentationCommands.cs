@@ -311,7 +311,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPQUANTITIES", CommandFlags.Modal)]
         public void Quantities() => CommandContext.Run("SDPQUANTITIES", ctx =>
         {
-            List<SiteElement> elements = PackageFrameElements(ctx);
+            List<SiteElement> elements = Core.Roads.RoadElements.WithDerived(PackageFrameElements(ctx), ctx.Catalog);
             foreach (IGrouping<string, SiteElement> g in elements.GroupBy(e => e.TypeId).OrderBy(g => g.Key))
             {
                 ElementType t = ctx.Catalog.RequireType(g.Key);

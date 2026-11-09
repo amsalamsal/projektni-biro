@@ -77,6 +77,9 @@ namespace SiteDesignPro.Core.Quantities
                     }
 
                     break;
+                case "area" when Roads.RoadElements.IsNetworkRoad(type):
+                    // a road of the network: its surface is counted once, as the generated carriageway
+                    break;
                 case "area":
                     secondaryUnit = "m2";
                     if (e.Geometry is PathGeometry ap)

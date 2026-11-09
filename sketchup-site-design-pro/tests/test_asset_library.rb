@@ -25,7 +25,7 @@ class TestAssetLibrary < Minitest::Test
   end
 
   def test_every_object_type_has_a_model_and_preview
-    expected = types.reject { |t| NOT_MODELS.include?(t['builder']) && !Models.for(t['id']) }.map { |t| t['id'] } - %w[road.swept_path_placeholder]
+    expected = types.reject { |t| (NOT_MODELS.include?(t['builder']) && !Models.for(t['id'])) || t['generated'] }.map { |t| t['id'] } - %w[road.swept_path_placeholder]
     assert_equal expected.sort, lib.assets.map { |a| a['assetId'] }.sort
     assert_empty lib.missing_files
     lib.assets.each do |a|

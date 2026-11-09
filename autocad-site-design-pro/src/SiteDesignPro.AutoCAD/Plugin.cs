@@ -102,7 +102,7 @@ namespace SiteDesignPro.AutoCAD
 
             lastTabCheck = now;
             RibbonControl? ribbon = ComponentManager.Ribbon;
-            if (ribbon != null && (!ribbon.Tabs.Any(t => t.Id == RibbonBuilder.TabId) || !ribbon.Tabs.Any(t => t.Id == RibbonBuilder.RoadTabId)))
+            if (ribbon != null && !ribbon.Tabs.Any(t => t.Id == RibbonBuilder.TabId))
             {
                 Log.Guard("Izrada trake", RibbonBuilder.Create);
             }

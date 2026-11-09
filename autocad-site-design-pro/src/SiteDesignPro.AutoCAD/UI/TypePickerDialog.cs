@@ -119,7 +119,7 @@ namespace SiteDesignPro.AutoCAD.UI
             string q = search.Text.Trim();
             string cat = (category.SelectedItem as ComboBoxItem)?.Tag as string ?? string.Empty;
             Preferences prefs = Preferences.Current;
-            IEnumerable<ElementType> types = AcadEnv.Catalog.Types.Where(t => kinds.Length == 0 || kinds.Contains(t.Geometry));
+            IEnumerable<ElementType> types = AcadEnv.Catalog.PlaceableTypes.Where(t => kinds.Length == 0 || kinds.Contains(t.Geometry));
             if (q.Length > 0)
             {
                 // a search always looks through everything, whatever category is shown

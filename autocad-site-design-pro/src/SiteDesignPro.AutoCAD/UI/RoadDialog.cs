@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +12,17 @@ namespace SiteDesignPro.AutoCAD.UI
     /// <summary>Cross-section of a road: direction, lanes, lane width, sidewalks, bike lanes, kerb radius and arrows.</summary>
     internal sealed class RoadDialog : Window
     {
+        /// <summary>Usual cross-sections; picking one fills the fields (they can still be changed).</summary>
+        private static readonly (string Name, RoadSpec Spec)[] Profiles =
+        {
+            ("Stambena ulica (1 + 1 × 2,75 m, trotoari 1,60 m)", new RoadSpec { LanesLeft = 1, LanesRight = 1, LaneWidth = 2.75, SidewalkLeft = 1.6, SidewalkRight = 1.6, CornerRadius = 6 }),
+            ("Sabirna ulica (1 + 1 × 3,25 m, bic. staze 1,50 m, trotoari 2,00 m)", new RoadSpec { LanesLeft = 1, LanesRight = 1, LaneWidth = 3.25, BikeLeft = 1.5, BikeRight = 1.5, SidewalkLeft = 2.0, SidewalkRight = 2.0, CornerRadius = 6 }),
+            ("Bulevar (2 + 2 × 3,25 m, bic. staze 1,50 m, trotoari 2,50 m)", new RoadSpec { LanesLeft = 2, LanesRight = 2, LaneWidth = 3.25, BikeLeft = 1.5, BikeRight = 1.5, SidewalkLeft = 2.5, SidewalkRight = 2.5, CornerRadius = 8 }),
+            ("Jednosmjerna ulica (1 × 3,50 m, trotoari 1,60 m)", new RoadSpec { OneWay = true, LanesRight = 1, LaneWidth = 3.5, SidewalkLeft = 1.6, SidewalkRight = 1.6, CornerRadius = 6 }),
+            ("Kolni prilaz (1 × 3,50 m, bez trotoara)", new RoadSpec { OneWay = true, LanesRight = 1, LaneWidth = 3.5, SidewalkLeft = 0, SidewalkRight = 0, CornerRadius = 5, Arrows = false }),
+        };
+
+        private readonly ComboBox profile = new ComboBox { Margin = new Thickness(0, 2, 0, 2) };
         private readonly RadioButton twoWay = new RadioButton { Content = "Dvosmjerna", Margin = new Thickness(0, 0, 16, 0) };
         private readonly RadioButton oneWay = new RadioButton { Content = "Jednosmjerna" };
         private readonly ComboBox lanesLeft = Lanes();
@@ -38,18 +50,7 @@ namespace SiteDesignPro.AutoCAD.UI
             ShowInTaskbar = false;
             ResizeMode = ResizeMode.NoResize;
 
-            twoWay.IsChecked = !s.OneWay;
-            oneWay.IsChecked = s.OneWay;
-            lanesLeft.SelectedIndex = s.LanesLeft - 1;
-            lanesRight.SelectedIndex = s.LanesRight - 1;
-            laneWidth.Text = Bs.Num(s.LaneWidth, 2);
-            walkLeft.Text = Bs.Num(s.SidewalkLeft, 2);
-            walkRight.Text = Bs.Num(s.SidewalkRight, 2);
-            bikeLeft.Text = Bs.Num(s.BikeLeft, 2);
-            bikeRight.Text = Bs.Num(s.BikeRight, 2);
-            radius.Text = Bs.Num(s.CornerRadius, 2);
-            arrows.IsChecked = s.Arrows;
-            arrowSpacing.Text = Bs.Num(s.ArrowSpacing, 0);
+            Fill(s);
 
             var grid = new Grid { Margin = new Thickness(14, 10, 14, 0) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(250) });
@@ -88,7 +89,22 @@ namespace SiteDesignPro.AutoCAD.UI
             var direction = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
             direction.Children.Add(twoWay);
             direction.Children.Add(oneWay);
+            profile.Items.Add("— zadnje korištene vrijednosti —");
+            foreach ((string name, RoadSpec _) in Profiles)
+            {
+                profile.Items.Add(name);
+            }
+
+            profile.SelectedIndex = 0;
+            profile.SelectionChanged += (o, e) =>
+            {
+                if (profile.SelectedIndex > 0)
+                {
+                    Fill(Profiles[profile.SelectedIndex - 1].Spec);
+                }
+            };
             Header("Saobraćajnica");
+            Add(L("Profil"), profile, "Uobičajeni presjeci; vrijednosti se mogu dalje mijenjati.");
             Add(L("Smjer"), direction);
             Add(lanesLeftLabel, lanesLeft, "Trake lijevo od osovine voze suprotno od smjera crtanja osovine.");
             Add(lanesRightLabel, lanesRight, "Trake desno od osovine voze u smjeru crtanja osovine.");
@@ -115,7 +131,7 @@ namespace SiteDesignPro.AutoCAD.UI
             panel.Children.Add(arrowRow);
             var foot = new StackPanel { Margin = new Thickness(14, 6, 14, 14) };
             summary.Text = "Uz kolovoz se crta ivičnjak 15 cm, a uz vanjsku ivicu trotoara ivičnjak 10 cm. Isprekidane linije traka, " +
-                           "spajanje na raskrsnicama i sloj „Saobraćajnice“ rade se automatski. Rasvjeta se dodaje posebno (kartica VANJSKO UREĐENJE PRO → Rasvjeta). " +
+                           "spajanje s drugim ulicama i cestama i zaobljeni uglovi raskrsnica rade se automatski. Rasvjeta se dodaje posebno (Rasvjeta ili Duž linije). " +
                            "Jedinice crteža: " + units + ".";
             foot.Children.Add(summary);
             foot.Children.Add(error);
@@ -141,6 +157,22 @@ namespace SiteDesignPro.AutoCAD.UI
         }
 
         public RoadSpec? Result { get; private set; }
+
+        private void Fill(RoadSpec s)
+        {
+            twoWay.IsChecked = !s.OneWay;
+            oneWay.IsChecked = s.OneWay;
+            lanesLeft.SelectedIndex = Math.Max(0, Math.Min(2, s.LanesLeft - 1));
+            lanesRight.SelectedIndex = Math.Max(0, Math.Min(2, s.LanesRight - 1));
+            laneWidth.Text = Bs.Num(s.LaneWidth, 2);
+            walkLeft.Text = Bs.Num(s.SidewalkLeft, 2);
+            walkRight.Text = Bs.Num(s.SidewalkRight, 2);
+            bikeLeft.Text = Bs.Num(s.BikeLeft, 2);
+            bikeRight.Text = Bs.Num(s.BikeRight, 2);
+            radius.Text = Bs.Num(s.CornerRadius, 2);
+            arrows.IsChecked = s.Arrows;
+            arrowSpacing.Text = Bs.Num(s.ArrowSpacing, 0);
+        }
 
         public static RoadSpec? Ask(RoadSpec current, string title, string units)
         {

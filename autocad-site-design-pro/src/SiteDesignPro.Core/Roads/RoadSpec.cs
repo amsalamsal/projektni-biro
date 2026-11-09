@@ -43,6 +43,12 @@ namespace SiteDesignPro.Core.Roads
 
         public double BikeRight { get; set; }
 
+        /// <summary>15 cm kerb at the road edge (simple roads without a cross-section have none).</summary>
+        public bool Kerbs { get; set; } = true;
+
+        /// <summary>Dashed lines between lanes and the centre line.</summary>
+        public bool Markings { get; set; } = true;
+
         /// <summary>Direction arrows on the carriageway.</summary>
         public bool Arrows { get; set; } = true;
 
@@ -73,7 +79,7 @@ namespace SiteDesignPro.Core.Roads
         {
             double c = left ? CarriagewayLeft : CarriagewayRight;
             double b = c + (left ? BikeLeft : BikeRight);
-            double k = b + KerbWidth;
+            double k = b + (Kerbs ? KerbWidth : 0);
             double sw = left ? SidewalkLeft : SidewalkRight;
             double s = k + sw;
             double e = s + (sw > 0 ? EdgeWidth : 0);
@@ -142,6 +148,8 @@ namespace SiteDesignPro.Core.Roads
             BikeRight = BikeRight,
             Arrows = Arrows,
             ArrowSpacing = ArrowSpacing,
+            Kerbs = Kerbs,
+            Markings = Markings,
             CornerRadius = CornerRadius,
         };
 

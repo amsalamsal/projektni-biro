@@ -64,6 +64,12 @@ namespace SiteDesignPro.Core.Presentation
         public static PresentationPaint For(ElementType t, SiteElement e, ElementCatalog catalog)
         {
             string builder = t.Builder.Id;
+            if (Roads.RoadElements.IsNetworkRoad(t))
+            {
+                // roads are painted by the road network itself
+                return PresentationPaint.None;
+            }
+
             switch (builder)
             {
                 case "tree":
