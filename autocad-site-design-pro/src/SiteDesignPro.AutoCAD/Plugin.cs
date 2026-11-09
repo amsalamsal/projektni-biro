@@ -19,6 +19,7 @@ using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 [assembly: CommandClass(typeof(SafetyCommands))]
 [assembly: CommandClass(typeof(EasyCommands))]
 [assembly: CommandClass(typeof(AnalysisCommands))]
+[assembly: CommandClass(typeof(RoadCommands))]
 
 namespace SiteDesignPro.AutoCAD
 {
@@ -48,6 +49,7 @@ namespace SiteDesignPro.AutoCAD
 
                 AcApp.SystemVariableChanged += OnSystemVariableChanged;
                 AcApp.Idle += OnIdle;
+                AcApp.Idle += RoadWatcher.OnIdle;
                 AcApp.DocumentManager.DocumentCreated += (s, e) => Log.Guard("Priprema crteža", () => Hook(e.Document));
                 foreach (Document doc in AcApp.DocumentManager)
                 {
@@ -72,6 +74,7 @@ namespace SiteDesignPro.AutoCAD
         private static void Hook(Document doc)
         {
             doc.ImpliedSelectionChanged += (s, e) => Log.Guard("Osvježavanje palete", SitePalette.SelectionChanged);
+            RoadWatcher.Attach(doc);
         }
 
         private static void OnItemInitialized(object? sender, RibbonItemEventArgs e)
@@ -99,7 +102,7 @@ namespace SiteDesignPro.AutoCAD
 
             lastTabCheck = now;
             RibbonControl? ribbon = ComponentManager.Ribbon;
-            if (ribbon != null && !ribbon.Tabs.Any(t => t.Id == RibbonBuilder.TabId))
+            if (ribbon != null && (!ribbon.Tabs.Any(t => t.Id == RibbonBuilder.TabId) || !ribbon.Tabs.Any(t => t.Id == RibbonBuilder.RoadTabId)))
             {
                 Log.Guard("Izrada trake", RibbonBuilder.Create);
             }
