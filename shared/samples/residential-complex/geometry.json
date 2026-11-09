@@ -1711,6 +1711,374 @@
         0.3
       ],
       "rotation": 0
+    },
+    {
+      "id": "1f1c25c5-f30a-520d-8059-9a4fd9c0fc2f",
+      "kind": "polygon",
+      "outer": {
+        "vertices": [
+          [
+            120,
+            33,
+            0
+          ],
+          [
+            0,
+            33,
+            0
+          ],
+          [
+            0,
+            27,
+            0
+          ],
+          [
+            120,
+            27,
+            0
+          ]
+        ]
+      }
+    },
+    {
+      "id": "63e9b8b2-cd6b-57e1-b35b-eeae052378c7",
+      "kind": "path",
+      "vertices": [
+        [
+          0.2,
+          30,
+          0
+        ],
+        [
+          3.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "740b7ff3-54a0-56f9-ad92-769364b9def9",
+      "kind": "path",
+      "vertices": [
+        [
+          6.2,
+          30,
+          0
+        ],
+        [
+          9.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "321397de-bc7b-54d2-ad95-54c55ad0afd8",
+      "kind": "path",
+      "vertices": [
+        [
+          12.2,
+          30,
+          0
+        ],
+        [
+          15.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "f31e75f2-36e7-5ea7-9284-a144eafff550",
+      "kind": "path",
+      "vertices": [
+        [
+          18.2,
+          30,
+          0
+        ],
+        [
+          21.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "d268209f-d0fe-516a-aa0c-f9c595e8aa42",
+      "kind": "path",
+      "vertices": [
+        [
+          24.2,
+          30,
+          0
+        ],
+        [
+          27.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "d317a53e-a139-50b2-a0ee-553d83498a81",
+      "kind": "path",
+      "vertices": [
+        [
+          30.2,
+          30,
+          0
+        ],
+        [
+          33.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "b17fb9dd-e854-5dae-8a6d-7a51df41bcb5",
+      "kind": "path",
+      "vertices": [
+        [
+          36.2,
+          30,
+          0
+        ],
+        [
+          39.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "ff3033cd-6d5a-5321-83fa-5c9ed8d114db",
+      "kind": "path",
+      "vertices": [
+        [
+          42.2,
+          30,
+          0
+        ],
+        [
+          45.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "78a57fee-2abb-595b-b318-476b221f2933",
+      "kind": "path",
+      "vertices": [
+        [
+          48.2,
+          30,
+          0
+        ],
+        [
+          51.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "08a36e82-1894-53f2-92e4-afc9b05c60eb",
+      "kind": "path",
+      "vertices": [
+        [
+          54.2,
+          30,
+          0
+        ],
+        [
+          57.2,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "d4999dd0-c148-5616-9855-715421e03630",
+      "kind": "path",
+      "vertices": [
+        [
+          62.5,
+          30,
+          0
+        ],
+        [
+          65.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "e915bffb-27ff-5c00-8af2-ac551919a3a4",
+      "kind": "path",
+      "vertices": [
+        [
+          68.5,
+          30,
+          0
+        ],
+        [
+          71.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "e847d888-c6bc-56f2-8d7e-d337ffa55db2",
+      "kind": "path",
+      "vertices": [
+        [
+          74.5,
+          30,
+          0
+        ],
+        [
+          77.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "101c5f42-1e78-5567-9df6-661bf58b0861",
+      "kind": "path",
+      "vertices": [
+        [
+          80.5,
+          30,
+          0
+        ],
+        [
+          83.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "dc986063-ea90-5843-a14e-f6978556fbbd",
+      "kind": "path",
+      "vertices": [
+        [
+          86.5,
+          30,
+          0
+        ],
+        [
+          89.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "ce22682f-e242-599a-94c4-011b888cfe56",
+      "kind": "path",
+      "vertices": [
+        [
+          92.5,
+          30,
+          0
+        ],
+        [
+          95.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "91fbc8e2-bd0d-5390-9d73-c5f88001da06",
+      "kind": "path",
+      "vertices": [
+        [
+          98.5,
+          30,
+          0
+        ],
+        [
+          101.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "50316461-4768-5ae4-8a56-734d7cf54882",
+      "kind": "path",
+      "vertices": [
+        [
+          104.5,
+          30,
+          0
+        ],
+        [
+          107.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "275daf96-f38c-5c0d-bacf-0b7ac2dca95c",
+      "kind": "path",
+      "vertices": [
+        [
+          110.5,
+          30,
+          0
+        ],
+        [
+          113.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
+    },
+    {
+      "id": "81dcab0c-6477-5c29-9331-14418e468fe8",
+      "kind": "path",
+      "vertices": [
+        [
+          116.5,
+          30,
+          0
+        ],
+        [
+          119.5,
+          30,
+          0
+        ]
+      ],
+      "closed": false
     }
   ]
 }

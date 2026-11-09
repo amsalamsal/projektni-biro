@@ -1361,6 +1361,132 @@
       ]
     },
     {
+      "id": "road.carriageway",
+      "name": "Kolovoz (iz ulica i cesta)",
+      "category": "roads",
+      "subcategory": "Saobraćajnice",
+      "builder": "slab",
+      "geometry": "polygon",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "thickness",
+          "label": "Debljina / dubina slojeva",
+          "type": "length",
+          "default": 0.1,
+          "min": 0.001,
+          "max": 5,
+          "required": true,
+          "group": "Dimenzije"
+        },
+        {
+          "key": "topOffset",
+          "label": "Pomak vrha od kote granice",
+          "type": "length",
+          "default": 0,
+          "min": -20,
+          "max": 20,
+          "group": "Visine"
+        },
+        {
+          "key": "material",
+          "label": "Materijal",
+          "type": "material",
+          "default": "asphalt",
+          "group": "Izgled"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Oznaka površine",
+          "type": "text",
+          "group": "Specifikacija"
+        },
+        {
+          "key": "buildup",
+          "label": "Slojevi konstrukcije (odozgo prema dolje)",
+          "type": "text",
+          "group": "Specifikacija"
+        },
+        {
+          "key": "jointPattern",
+          "label": "Uzorak popločanja / fuga",
+          "type": "enum",
+          "default": "none",
+          "options": [
+            "none",
+            "stretcher",
+            "stack",
+            "herringbone",
+            "basketweave",
+            "random"
+          ],
+          "group": "Specifikacija"
+        }
+      ]
+    },
+    {
+      "id": "road.marking_line",
+      "name": "Linija horizontalne signalizacije",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "geometry": "path",
+      "modelGroup": "roads",
+      "parameters": [
+        {
+          "key": "width",
+          "label": "Širina",
+          "type": "length",
+          "default": 0.12,
+          "min": 0.005,
+          "max": 100,
+          "required": true,
+          "group": "Dimenzije"
+        },
+        {
+          "key": "thickness",
+          "label": "Debljina",
+          "type": "length",
+          "default": 0.003,
+          "min": 0.001,
+          "max": 10,
+          "required": true,
+          "group": "Dimenzije"
+        },
+        {
+          "key": "topOffset",
+          "label": "Pomak vrha od kote osovine",
+          "type": "length",
+          "default": 0.003,
+          "min": -20,
+          "max": 20,
+          "group": "Visine"
+        },
+        {
+          "key": "material",
+          "label": "Materijal",
+          "type": "material",
+          "default": "line_paint_white",
+          "group": "Izgled"
+        },
+        {
+          "key": "requiredClearWidth",
+          "label": "Potrebna svijetla širina (pravilo projekta)",
+          "type": "length",
+          "default": null,
+          "min": 0,
+          "max": 100,
+          "group": "Provjere"
+        },
+        {
+          "key": "surfaceCode",
+          "label": "Oznaka površine",
+          "type": "text",
+          "group": "Specifikacija"
+        }
+      ]
+    },
+    {
       "id": "road.parking_bay",
       "name": "Parking mjesto",
       "category": "roads",
@@ -4070,6 +4196,9 @@
         "thickness": 0.1,
         "topOffset": 0,
         "width": 6
+      },
+      "custom": {
+        "networkSurface": true
       }
     },
     {
@@ -7234,6 +7363,426 @@
         "power": null,
         "serviceClearance": null,
         "width": 3.5
+      }
+    },
+    {
+      "id": "1f1c25c5-f30a-520d-8059-9a4fd9c0fc2f",
+      "type": "road.carriageway",
+      "category": "roads",
+      "subcategory": "Saobraćajnice",
+      "builder": "slab",
+      "name": "Kolovoz",
+      "layer": "VU-SAOBRACAJNICE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "e72148f80b42f4ca9a34b70f62d4d2f5883e9f1fb5aee2cb8deb66021f899887",
+      "parameters": {
+        "buildup": "",
+        "jointPattern": "none",
+        "material": "asphalt",
+        "surfaceCode": "",
+        "thickness": 0.1,
+        "topOffset": 0
+      }
+    },
+    {
+      "id": "63e9b8b2-cd6b-57e1-b35b-eeae052378c7",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "5d6f75b7a13d419b2649b4d595e45d282f557a2440dccb092bae69883da02763",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "740b7ff3-54a0-56f9-ad92-769364b9def9",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "42f46bdbb94dcdf3f3ab8bf9d31158a369c43e20fda5076c970906b65a8bd40a",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "321397de-bc7b-54d2-ad95-54c55ad0afd8",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "b39dc21659ba5368b47c86c5a6994fc4ac529f299922f7223594d1e809dc0a15",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "f31e75f2-36e7-5ea7-9284-a144eafff550",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "c3eeb33a481fd5d9b44c1e56a9e337733cb9bee92855a3c288c984e8ff03ccb1",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "d268209f-d0fe-516a-aa0c-f9c595e8aa42",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "ebde8b5f4be6805d0ebcde186149daf7f153152b8fc0cfb83fd228045abe39d7",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "d317a53e-a139-50b2-a0ee-553d83498a81",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "91ae6320e21f6e16e7fe2f46b949c05654a07e38ec854fbed866365505ce75b8",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "b17fb9dd-e854-5dae-8a6d-7a51df41bcb5",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "318c6186736b9b793e405e527efc776aee5fb2091b981eaa88e39e7528c3ef52",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "ff3033cd-6d5a-5321-83fa-5c9ed8d114db",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "1b0bf9ae7187de18a137003bc9ef66234dce0c0641f4d6a3f8a350eef4a65519",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "78a57fee-2abb-595b-b318-476b221f2933",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "282716e3cdf0c4f3d9a5c4b3264e801da2830ccb42fd43635a3ff36fdae8db8a",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "08a36e82-1894-53f2-92e4-afc9b05c60eb",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "d796c33a2a1cef9d570a65629cc4f501fc38a8259291d252d77f9cae914ae1a7",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "d4999dd0-c148-5616-9855-715421e03630",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "ff3116bd3e491b80e34c5a48f742895e0faf96104779c45c2e963df0c592f552",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "e915bffb-27ff-5c00-8af2-ac551919a3a4",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "5c0c447dbe9e695a6e94177e8b3582818741d262aea60006cec9f2347d28ba8e",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "e847d888-c6bc-56f2-8d7e-d337ffa55db2",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "dc41f67fbde779b69d310f60e43fa1e2e34aeeb375504596d496bda59d9e0356",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "101c5f42-1e78-5567-9df6-661bf58b0861",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "b16a202e2843225865dccdaf286654a4af9b004ec0990a5d3e33381f33ddea71",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "dc986063-ea90-5843-a14e-f6978556fbbd",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "49f4155e62b7e2eee46d48635fd83be0b5ffd8de5d1568dac06042a92c69ab68",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "ce22682f-e242-599a-94c4-011b888cfe56",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "b10e22076b5f28a191ebd727e7eb3ba90ccfe7df88c92e94c95e74ecc7352c32",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "91fbc8e2-bd0d-5390-9d73-c5f88001da06",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "a0cacb3f61288ac3431d26319964744c877f2e9e2410cc6192d7b500d251b014",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "50316461-4768-5ae4-8a56-734d7cf54882",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "a41b2d005e837ab119cf640f9f3baced576b08016db8e758ef31def12660ccac",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "275daf96-f38c-5c0d-bacf-0b7ac2dca95c",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "d03c9a047190cb95d4c4e08c4178d709bca9c56549ae5f8e10a7fcd15b45b2aa",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
+      }
+    },
+    {
+      "id": "81dcab0c-6477-5c29-9331-14418e468fe8",
+      "type": "road.marking_line",
+      "category": "roads",
+      "subcategory": "Oznake",
+      "builder": "linear_slab",
+      "name": "Razdjelna linija",
+      "layer": "VU-SAOB-OZNAKE",
+      "modelGroup": "roads",
+      "revision": 1,
+      "contentHash": "ab317347b7a1a5fe360eb42448256c14daf6bd0777fa22debd87412ddfc8da1a",
+      "parameters": {
+        "material": "line_paint_white",
+        "requiredClearWidth": null,
+        "surfaceCode": "",
+        "thickness": 0.003,
+        "topOffset": 0.003,
+        "width": 0.12
       }
     }
   ],
