@@ -159,7 +159,21 @@ namespace SiteDesignPro.AutoCAD.UI
             return c;
         }
 
-        private static TextBox Field() => new TextBox { Margin = new Thickness(0, 2, 0, 2), Padding = new Thickness(3) };
+        /// <summary>Number field whose text is selected on entry, so a new value simply replaces the old one.</summary>
+        private static TextBox Field()
+        {
+            var box = new TextBox { Margin = new Thickness(0, 2, 0, 2), Padding = new Thickness(3) };
+            box.GotKeyboardFocus += (s, e) => box.SelectAll();
+            box.PreviewMouseLeftButtonDown += (s, e) =>
+            {
+                if (!box.IsKeyboardFocusWithin)
+                {
+                    e.Handled = true;
+                    box.Focus();
+                }
+            };
+            return box;
+        }
 
         private void Refresh()
         {

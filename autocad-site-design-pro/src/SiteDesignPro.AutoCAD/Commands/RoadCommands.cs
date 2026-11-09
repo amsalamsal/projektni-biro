@@ -269,6 +269,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ElementStore.WriteAux(e, NetOwner, role, ctx.Tr);
             }
 
+            string bikeText = (res.EffectiveRadius - res.ActualRadius).ToString("0.###", CultureInfo.InvariantCulture) + ":" + res.ActualRadius.ToString("0.###", CultureInfo.InvariantCulture);
             foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
             {
                 (byte r, byte g, byte b, int t) = Fill[band.Key];
@@ -277,7 +278,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     try
                     {
                         Hatch h = RegionHatch(region, k);
-                        Add(h, "povrsina:" + (int)band.Key, Color.FromRgb(r, g, b), t);
+                        Add(h, "povrsina:" + (int)band.Key + ":" + bikeText, Color.FromRgb(r, g, b), t);
                         hatches.Add(h.ObjectId);
                     }
                     catch (Autodesk.AutoCAD.Runtime.Exception ex)
@@ -764,28 +765,86 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             (string OwnerId, string Role)? aux = ElementStore.ReadAux(ent);
-            if (!aux.HasValue || aux.Value.OwnerId != RoadCommands.NetOwner || !aux.Value.Role.StartsWith("rub:", StringComparison.Ordinal) || ent is not Polyline pl)
+            if (!aux.HasValue || aux.Value.OwnerId != RoadCommands.NetOwner)
             {
                 return null;
             }
 
             string[] parts = aux.Value.Role.Split(':');
-            int level = int.Parse(parts[1], CultureInfo.InvariantCulture);
-            double bike = parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 0;
-            Point3d close = pl.GetClosestPointTo(at, false);
-            int seg = (int)Math.Floor(pl.GetParameterAtPoint(close));
-            if (seg >= pl.NumberOfVertices)
-            {
-                seg = pl.NumberOfVertices - 1;
-            }
-
-            if (Math.Abs(pl.GetBulgeAt(seg)) < 1e-9)
+            bool line = parts[0] == "rub";
+            if ((!line && parts[0] != "povrsina") || parts.Length < 2)
             {
                 return null;
             }
 
+            int level = int.Parse(parts[1], CultureInfo.InvariantCulture);
+            double bike = parts.Length > 2 ? double.Parse(parts[2], CultureInfo.InvariantCulture) : 0;
+            double actual = parts.Length > 3 ? double.Parse(parts[3], CultureInfo.InvariantCulture) : 0;
             double k = ProjectStore.ReadOrDefault(db, tr).Scale.DrawingUnitsPerMeter;
-            double r = pl.GetArcSegment2dAt(seg).Radius / k;
+            double? radius = null;
+            if (ent is Polyline pl)
+            {
+                Point3d close = pl.GetClosestPointTo(at, false);
+                int seg = Math.Min((int)Math.Floor(pl.GetParameterAtPoint(close)), pl.NumberOfVertices - 1);
+                if (Math.Abs(pl.GetBulgeAt(seg)) > 1e-9)
+                {
+                    radius = pl.GetArcSegment2dAt(seg).Radius / k;
+                }
+            }
+            else if (ent is Hatch h)
+            {
+                // hatch of a band: the arc of its boundary nearest to the cursor, if it is within 2 m
+                var p = new Point2d(at.X, at.Y);
+                double best = 2.0 * k;
+                for (int i = 0; i < h.NumberOfLoops; i++)
+                {
+                    HatchLoop loop = h.GetLoopAt(i);
+                    if (!loop.IsPolyline)
+                    {
+                        continue;
+                    }
+
+                    BulgeVertexCollection v = loop.Polyline;
+                    for (int j = 0; j < v.Count - 1; j++)
+                    {
+                        if (Math.Abs(v[j].Bulge) < 1e-9)
+                        {
+                            continue;
+                        }
+
+                        var arc = new CircularArc2d(v[j].Vertex, v[j + 1].Vertex, v[j].Bulge, false);
+                        double d = arc.GetDistanceTo(p);
+                        if (d < best)
+                        {
+                            best = d;
+                            radius = arc.Radius / k;
+                        }
+                    }
+                }
+            }
+
+            if (!radius.HasValue)
+            {
+                return null;
+            }
+
+            double r = radius.Value;
+            if (!line)
+            {
+                // which edge of the band the arc is: the carriageway edge (effective) or a kerb (actual)
+                string what = (RoadLevel)level switch
+                {
+                    RoadLevel.Carriageway => "Kolovoz",
+                    RoadLevel.Bike => "Biciklistička staza",
+                    RoadLevel.Kerb => "Ivičnjak 15 cm",
+                    RoadLevel.Sidewalk => "Trotoar",
+                    _ => "Ivičnjak 10 cm",
+                };
+                string kind = Math.Abs(r - (actual + bike)) < 0.05 && bike > 0 ? " (ivica kolovoza – efektivni radijus)"
+                    : Math.Abs(r - actual) < 0.05 ? " (ivičnjak – stvarni radijus)" : string.Empty;
+                return what + ": luk R = " + Bs.Meters(r) + kind + "\nRaskrsnice: stvarni radijus ivičnjaka " + Bs.Meters(actual) + ", efektivni radijus " + Bs.Meters(actual + bike);
+            }
+
             switch ((RoadLevel)level)
             {
                 case RoadLevel.Carriageway:
