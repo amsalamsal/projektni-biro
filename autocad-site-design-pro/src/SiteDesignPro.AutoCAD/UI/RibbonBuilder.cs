@@ -163,7 +163,6 @@ namespace SiteDesignPro.AutoCAD.UI
             ribbon.Tabs.Add(tab);
             Log.Info("Ribbon tab created with " + tab.Panels.Count + " panels.");
         }
-        }
 
         /// <summary>Drop-down of all element types of the given categories; picking one starts placing or drawing it.</summary>
         private static RibbonSplitButton Types(ElementCatalog cat, string title, string icon, params string[] categories)
