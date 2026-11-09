@@ -238,6 +238,24 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             Busy = true;
             List<(ObjectId Id, RoadSpec Spec)> roads = ReadRoads(ctx);
+
+            // a locked road layer is unlocked for the redraw and locked again afterwards
+            ObjectId layerId = RoadLayer(ctx);
+            var layerRecord = (LayerTableRecord)ctx.Tr.GetObject(layerId, OpenMode.ForWrite);
+            bool wasLocked = layerRecord.IsLocked;
+            layerRecord.IsLocked = false;
+            try
+            {
+                return Redraw(ctx, roads, verbose);
+            }
+            finally
+            {
+                layerRecord.IsLocked = wasLocked;
+            }
+        }
+
+        private static RoadNetworkResult? Redraw(CommandContext ctx, List<(ObjectId Id, RoadSpec Spec)> roads, bool verbose)
+        {
             EraseNetwork(ctx);
             if (roads.Count == 0)
             {
