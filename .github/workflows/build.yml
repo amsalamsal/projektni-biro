@@ -58,6 +58,7 @@ jobs:
           out=$(mktemp -d)
           cp -r dist/SiteDesignPro.bundle dist/pb_site_design_pro.rbz "$out"/
           cp simboli.json "$out"/ 2>/dev/null || true
+          cp -r shared/samples "$out"/samples
           cd "$out"
           printf 'Izgradnja %s (%s), %s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$(date -u +%FT%TZ)" > IZGRADNJA.txt
           git init -q -b builds
