@@ -73,7 +73,10 @@ namespace SiteDesignPro.Core.Tests
             PresentationPaint pool = PresentationStyle.For(TestSupport.Catalog.RequireType("water.swimming_pool"), Element("water.swimming_pool", Rect(0, 0, 1, 1)), TestSupport.Catalog);
             Assert.True(pool.B > pool.R);
             Assert.Equal(PresentationKind.Fill, PresentationStyle.For(TestSupport.Catalog.RequireType("surface.concrete_paving"), Element("surface.concrete_paving", Rect(0, 0, 1, 1)), TestSupport.Catalog).Kind);
-            Assert.Equal(PresentationKind.Band, PresentationStyle.For(TestSupport.Catalog.RequireType("road.access_road"), Element("road.access_road", Line(0, 0, 10, 0)), TestSupport.Catalog).Kind);
+            Assert.Equal(PresentationKind.Band, PresentationStyle.For(TestSupport.Catalog.RequireType("cycling.bike_path"), Element("cycling.bike_path", Line(0, 0, 10, 0)), TestSupport.Catalog).Kind);
+
+            // roads of the road network are painted by the network itself
+            Assert.Equal(PresentationKind.None, PresentationStyle.For(TestSupport.Catalog.RequireType("road.access_road"), Element("road.access_road", Line(0, 0, 10, 0)), TestSupport.Catalog).Kind);
             Assert.Equal(PresentationKind.None, PresentationStyle.For(TestSupport.Catalog.RequireType("site.boundary"), Element("site.boundary", Rect(0, 0, 1, 1)), TestSupport.Catalog).Kind);
         }
     }
