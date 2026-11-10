@@ -564,13 +564,16 @@ namespace SiteDesignPro.Core.Roads
         /// (by the inner side); where the points are too close for that (a curve drawn with several points), the
         /// neighbouring bends turning the same way are taken together and rounded with one arc.
         /// </summary>
-        internal static List<BendArc> PlanBends(IReadOnlyList<Vec2> a, bool closed, Func<int, bool> isCorner, Func<bool, double> axisRadius)
+        internal static (List<int> Keep, List<BendArc> Bends) PlanBends(IReadOnlyList<Vec2> all, bool closed, Func<int, bool> isCornerAll, Func<bool, double> axisRadius)
         {
+            List<int> keep = Simplify(all, closed, i => (closed || (i > 0 && i < all.Count - 1)) && isCornerAll(i), BendTolerance);
+            var a = keep.Select(i => all[i]).ToList();
+            bool isCorner(int j) => isCornerAll(keep[j]);
             var list = new List<BendArc>();
             int n = a.Count;
             if (n < 3)
             {
-                return list;
+                return (keep, list);
             }
 
             int W(int i) => ((i % n) + n) % n;
@@ -655,7 +658,7 @@ namespace SiteDesignPro.Core.Roads
                 while ((best == null || !best.Fits) && e + 1 < n && Bendable(e + 1))
                 {
                     double tn = Turn(e + 1);
-                    if ((Math.Abs(tn) >= 0.01 && Math.Sign(tn) != Math.Sign(ti)) || Math.Abs(total + tn) > Math.PI - 0.05)
+                    if ((Math.Abs(tn) >= 0.1 && Math.Sign(tn) != Math.Sign(ti)) || Math.Abs(total + tn) > Math.PI - 0.05)
                     {
                         break;
                     }
@@ -679,7 +682,94 @@ namespace SiteDesignPro.Core.Roads
                 i = best.Last + 1;
             }
 
-            return list;
+            return (keep, list);
+        }
+
+        /// <summary>Points of a hand-drawn curve closer than this to the line through their neighbours are left out.</summary>
+        internal const double BendTolerance = 0.3;
+
+        /// <summary>
+        /// Douglas-Peucker over the vertices that may be dropped (<paramref name="droppable"/>); the others are always
+        /// kept. Returns the kept vertex indices in order.
+        /// </summary>
+        internal static List<int> Simplify(IReadOnlyList<Vec2> a, bool closed, Func<int, bool> droppable, double tol)
+        {
+            int n = a.Count;
+            var keep = new bool[n];
+            for (int i = 0; i < n; i++)
+            {
+                keep[i] = !droppable(i);
+            }
+
+            if (n < 3)
+            {
+                return Enumerable.Range(0, n).ToList();
+            }
+
+            if (!keep.Any(k => k))
+            {
+                // closed loop of bends only: keep the first vertex and the one farthest from it
+                keep[0] = true;
+                int far = 0;
+                for (int i = 1; i < n; i++)
+                {
+                    if (a[i].DistanceTo(a[0]) > a[far].DistanceTo(a[0]))
+                    {
+                        far = i;
+                    }
+                }
+
+                keep[far] = true;
+            }
+
+            void Dp(int p, int q)
+            {
+                // vertices strictly between p and q (indices modulo n, q may be p + n for a closed loop)
+                double best = -1;
+                int bi = -1;
+                for (int k = p + 1; k < q; k++)
+                {
+                    double d = SegmentDistance(a[k % n], a[p % n], a[q % n]);
+                    if (d > best)
+                    {
+                        best = d;
+                        bi = k;
+                    }
+                }
+
+                if (bi >= 0 && best > tol)
+                {
+                    keep[bi % n] = true;
+                    Dp(p, bi);
+                    Dp(bi, q);
+                }
+            }
+
+            var anchors = Enumerable.Range(0, n).Where(i => keep[i]).ToList();
+            for (int j = 0; j + 1 < anchors.Count; j++)
+            {
+                Dp(anchors[j], anchors[j + 1]);
+            }
+
+            if (closed)
+            {
+                Dp(anchors[anchors.Count - 1], anchors[0] + n);
+            }
+
+            return Enumerable.Range(0, n).Where(i => keep[i]).ToList();
+        }
+
+        private static double SegmentDistance(Vec2 p, Vec2 a, Vec2 b)
+        {
+            Vec2 ab = b - a;
+            double l2 = ab.Dot(ab);
+            if (l2 < 1e-18)
+            {
+                return p.DistanceTo(a);
+            }
+
+            double t = Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
+            return p.DistanceTo(a + (ab * t));
         }
 
         /// <summary>Axis radius of a bend of road <paramref name="r"/>: the inner kerb gets the kerb radius.</summary>
@@ -691,13 +781,14 @@ namespace SiteDesignPro.Core.Roads
         /// </summary>
         internal static List<Vec2> Fillet(RoadSpec r)
         {
-            List<Vec2> a = r.Axis;
-            List<BendArc> bends = PlanBends(a, r.Closed, i => r.Corners == null || r.Corners.Any(c => c.DistanceTo(a[i]) < 1e-3), left => AxisRadius(r, left));
-            if (bends.Count == 0)
+            List<Vec2> all = r.Axis;
+            (List<int> keep, List<BendArc> bends) = PlanBends(all, r.Closed, i => r.Corners == null || r.Corners.Any(c => c.DistanceTo(all[i]) < 1e-3), left => AxisRadius(r, left));
+            if (bends.Count == 0 && keep.Count == all.Count)
             {
-                return a;
+                return all;
             }
 
+            var a = keep.Select(i => all[i]).ToList();
             var byFirst = bends.ToDictionary(b => b.First);
             var result = new List<Vec2>(a.Count * 4);
             for (int v = 0; v < a.Count; v++)
@@ -751,7 +842,7 @@ namespace SiteDesignPro.Core.Roads
                         continue;
                     }
 
-                    PathsD zone = Clipper.InflatePaths(overlap, Math.Max(4 * r, 3), JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
+                    PathsD zone = Clipper.InflatePaths(overlap, Math.Max(8 * r, 3), JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
                     var pair = new PathsD(perRoad[i]);
                     pair.AddRange(perRoad[j]);
                     fill.AddRange(Clipper.Intersect(Close(Union(pair), r), zone, FillRule.NonZero, Precision));

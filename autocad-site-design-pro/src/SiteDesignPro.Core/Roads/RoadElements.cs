@@ -157,8 +157,8 @@ namespace SiteDesignPro.Core.Roads
             var m = points.Select(p => new Vec2(p.X / unitsPerMeter, p.Y / unitsPerMeter)).ToList();
             double B(int i) => i >= 0 && i < bulges.Count ? bulges[i] : 0;
             bool IsCorner(int i) => Math.Abs(B(((i - 1) % n + n) % n)) < 1e-9 && Math.Abs(B(i)) < 1e-9;
-            List<RoadNetwork.BendArc> bends = RoadNetwork.PlanBends(m, closed, IsCorner, left => RoadNetwork.AxisRadius(spec, left));
-            if (bends.Count == 0)
+            (List<int> keep, List<RoadNetwork.BendArc> bends) = RoadNetwork.PlanBends(m, closed, IsCorner, left => RoadNetwork.AxisRadius(spec, left));
+            if (bends.Count == 0 && keep.Count == n)
             {
                 return null;
             }
@@ -166,19 +166,19 @@ namespace SiteDesignPro.Core.Roads
             var byFirst = bends.ToDictionary(b => b.First);
             var pts = new List<Vec2>();
             var bs = new List<double>();
-            for (int v = 0; v < n; v++)
+            for (int v = 0; v < keep.Count; v++)
             {
                 if (!byFirst.TryGetValue(v, out RoadNetwork.BendArc? b))
                 {
-                    pts.Add(points[v]);
-                    bs.Add(B(v));
+                    pts.Add(points[keep[v]]);
+                    bs.Add(B(keep[v]));
                     continue;
                 }
 
                 pts.Add(b.T1 * unitsPerMeter);
                 bs.Add(Math.Tan(b.Turn / 4));
                 pts.Add(b.T2 * unitsPerMeter);
-                bs.Add(B(b.Last));
+                bs.Add(B(keep[b.Last]));
                 v = b.Last;
             }
 

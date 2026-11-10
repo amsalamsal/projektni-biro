@@ -189,6 +189,19 @@ namespace SiteDesignPro.Core.Tests
             Assert.Single(c.Bulges, b => Math.Abs(b) > 1e-9);
             Assert.Equal(4, c.Points.Count);
 
+            // the same curve drawn unevenly by hand (points 15 cm off the curve, alternating): still one smooth arc
+            var wobbly = new List<Vec2> { new Vec2(-30, 0) };
+            for (int i = 0; i <= 12; i++)
+            {
+                double a = Math.PI / 2 * i / 12;
+                double rr = 12 + (i % 2 == 0 ? 0.15 : -0.15);
+                wobbly.Add(new Vec2(Math.Sin(a) * rr, 12 - (Math.Cos(a) * rr)));
+            }
+
+            wobbly.Add(new Vec2(12, 50));
+            var w = RoadElements.RoundedAxis(wobbly, wobbly.Select(_ => 0.0).ToList(), false, spec, 1)!.Value;
+            Assert.True(w.Bulges.Count(b => Math.Abs(b) > 1e-9) <= 2, "bends: " + w.Bulges.Count(b => Math.Abs(b) > 1e-9));
+
             // already rounded: nothing to do
             Assert.Null(RoadElements.RoundedAxis(l.Points, l.Bulges, false, spec, 100));
         }
