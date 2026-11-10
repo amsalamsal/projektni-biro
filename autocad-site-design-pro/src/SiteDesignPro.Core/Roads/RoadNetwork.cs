@@ -513,7 +513,7 @@ namespace SiteDesignPro.Core.Roads
 
             var pts = fillet.Select(q => new Vec2(q.x, q.y)).ToList();
 
-            // straight edges of the fillet (runs of collinear pieces at least 0,5 m long) lie on straight kerb lines;
+            // straight edges of the fillet (runs of collinear pieces at least 1,2 m long) lie on straight kerb lines;
             // the corner arc and a curved kerb (a roundabout ring) are made of short pieces
             Vec2 Dir(int i) => (pts[(i + 1) % n] - pts[i]).Normalized();
             var runs = new List<(int Start, int End, double Length)>();
@@ -548,7 +548,7 @@ namespace SiteDesignPro.Core.Roads
                     len += (pts[(e + 1) % n] - pts[e]).Length;
                 }
 
-                if (len >= 0.5)
+                if (len >= 1.2)
                 {
                     runs.Add((i0, (e + 1) % n, len));
                 }
