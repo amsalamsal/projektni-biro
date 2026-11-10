@@ -182,6 +182,28 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void DeadEndNearAJunction_EndsSquare()
+        {
+            var main = Road("A", -60, 0, 60, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
+            var side = Road("B", 20, -30, 0, -5, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
+            RoadNetworkResult res = RoadNetwork.Build(new[] { main, side });
+
+            // nothing reaches past the line across the dead end of B at (20, -30)
+            Vec2 dir = (new Vec2(20, -30) - new Vec2(0, -5)).Normalized();
+            foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
+            {
+                foreach (RoadRegion region in band.Value)
+                {
+                    foreach (Vec2 p in region.Outer.Points)
+                    {
+                        double along = (p - new Vec2(20, -30)).Dot(dir);
+                        Assert.True(along < 0.01, band.Key + " reaches " + along.ToString("0.###") + " m past the dead end at " + p);
+                    }
+                }
+            }
+        }
+
+        [Fact]
         public void ParallelStreetsCloseToEachOther_AreNotMerged()
         {
             var a = Road("A", 0, 0, 100, 0);
