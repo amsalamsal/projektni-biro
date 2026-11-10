@@ -209,6 +209,47 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void StreetToARoundabout_EndsSquare()
+        {
+            var circle = new List<Vec2>();
+            for (int i = 0; i < 180; i++)
+            {
+                double a = 2 * Math.PI * i / 180;
+                circle.Add(new Vec2(Math.Cos(a) * 11, Math.Sin(a) * 11));
+            }
+
+            var ring = new RoadSpec { Id = "R", Axis = circle, Closed = true, OneWay = true, LanesRight = 1, LaneWidth = 6, SidewalkLeft = 0, SidewalkRight = 1.6, Arrows = false, Corners = new List<Vec2>() };
+            var roads = new List<RoadSpec> { ring };
+            for (int i = 0; i < 3; i++)
+            {
+                double a = i * 2 * Math.PI / 3;
+                var u = new Vec2(Math.Cos(a), Math.Sin(a));
+                roads.Add(Road("A" + i, u.X * 14, u.Y * 14, u.X * 39, u.Y * 39, x => { x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; }));
+            }
+
+            roads.Add(Road("S", 14.7324, -24.7912, 7.35075, -12.1623, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; }));
+            RoadNetworkResult res = RoadNetwork.Build(roads);
+            var end = new Vec2(14.7324, -24.7912);
+            Vec2 dir = (end - new Vec2(7.35075, -12.1623)).Normalized();
+            foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
+            {
+                foreach (RoadRegion region in band.Value)
+                {
+                    foreach (Vec2 p in region.Outer.Points)
+                    {
+                        if (p.DistanceTo(end) > 10)
+                        {
+                            continue;
+                        }
+
+                        double along = (p - end).Dot(dir);
+                        Assert.True(along < 0.01, band.Key + " reaches " + along.ToString("0.###") + " m past the dead end at " + p + "; fillets near: " + res.Notes.Count);
+                    }
+                }
+            }
+        }
+
+        [Fact]
         public void ParallelStreetsCloseToEachOther_AreNotMerged()
         {
             var a = Road("A", 0, 0, 100, 0);
