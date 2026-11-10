@@ -241,6 +241,11 @@ namespace SiteDesignPro.AutoCAD.Commands
             MigrateLegacy(ctx);
             List<ManagedElement> managed = ctx.Svc.ReadAll().Where(m => m.Element != null && m.Type != null).ToList();
             List<ManagedElement> roads = managed.Where(m => RoadElements.IsNetworkRoad(m.Type)).ToList();
+            if (RoundAxes(ctx, roads) > 0)
+            {
+                managed = ctx.Svc.ReadAll().Where(m => m.Element != null && m.Type != null).ToList();
+                roads = managed.Where(m => RoadElements.IsNetworkRoad(m.Type)).ToList();
+            }
             foreach (ManagedElement m in roads)
             {
                 // drawings made before the road network: the road was a wide band with its own edges
@@ -265,6 +270,60 @@ namespace SiteDesignPro.AutoCAD.Commands
             {
                 layerRecord.IsLocked = wasLocked;
             }
+        }
+
+        /// <summary>
+        /// Rounds the sharp bends of the road axes (between two straight segments) with the radius of the road, so the
+        /// drawn axis follows the curved road. Returns the number of axes changed.
+        /// </summary>
+        private static int RoundAxes(CommandContext ctx, List<ManagedElement> roads)
+        {
+            int changed = 0;
+            foreach (ManagedElement m in roads)
+            {
+                if (m.IsCopy || !(ctx.Tr.GetObject(m.ObjectId, OpenMode.ForRead) is Polyline pl) || pl.NumberOfVertices < 3)
+                {
+                    continue;
+                }
+
+                RoadSpec? spec = RoadElements.Spec(m.Element!, m.Type!, ctx.K);
+                if (spec == null)
+                {
+                    continue;
+                }
+
+                var pts = new List<Vec2>();
+                var bulges = new List<double>();
+                for (int i = 0; i < pl.NumberOfVertices; i++)
+                {
+                    Point2d p = pl.GetPoint2dAt(i);
+                    pts.Add(new Vec2(p.X, p.Y));
+                    bulges.Add(pl.GetBulgeAt(i));
+                }
+
+                (List<Vec2> Points, List<double> Bulges)? rounded = RoadElements.RoundedAxis(pts, bulges, pl.Closed, spec, ctx.K);
+                if (rounded == null)
+                {
+                    continue;
+                }
+
+                pl.UpgradeOpen();
+                int old = pl.NumberOfVertices;
+                List<Vec2> np = rounded.Value.Points;
+                for (int i = 0; i < np.Count; i++)
+                {
+                    pl.AddVertexAt(old + i, new Point2d(np[i].X, np[i].Y), rounded.Value.Bulges[i], 0, 0);
+                }
+
+                for (int i = old - 1; i >= 0; i--)
+                {
+                    pl.RemoveVertexAt(i);
+                }
+
+                changed++;
+            }
+
+            return changed;
         }
 
         private static RoadNetworkResult? Redraw(CommandContext ctx, List<SiteElement> elements, int roadCount, bool verbose)

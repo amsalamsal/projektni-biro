@@ -141,6 +141,50 @@ namespace SiteDesignPro.Core.Roads
             return s;
         }
 
+        /// <summary>
+        /// The axis of a road with its bends between straight segments rounded the way the network rounds them
+        /// (points and bulges in drawing units), or null when there is no such bend. Used to make the drawn axis
+        /// follow the road, like the road itself.
+        /// </summary>
+        public static (List<Vec2> Points, List<double> Bulges)? RoundedAxis(IReadOnlyList<Vec2> points, IReadOnlyList<double> bulges, bool closed, RoadSpec spec, double unitsPerMeter = 1.0)
+        {
+            int n = points.Count;
+            if (n < 3)
+            {
+                return null;
+            }
+
+            var m = points.Select(p => new Vec2(p.X / unitsPerMeter, p.Y / unitsPerMeter)).ToList();
+            double B(int i) => i >= 0 && i < bulges.Count ? bulges[i] : 0;
+            bool IsCorner(int i) => Math.Abs(B(((i - 1) % n + n) % n)) < 1e-9 && Math.Abs(B(i)) < 1e-9;
+            List<RoadNetwork.BendArc> bends = RoadNetwork.PlanBends(m, closed, IsCorner, left => RoadNetwork.AxisRadius(spec, left));
+            if (bends.Count == 0)
+            {
+                return null;
+            }
+
+            var byFirst = bends.ToDictionary(b => b.First);
+            var pts = new List<Vec2>();
+            var bs = new List<double>();
+            for (int v = 0; v < n; v++)
+            {
+                if (!byFirst.TryGetValue(v, out RoadNetwork.BendArc? b))
+                {
+                    pts.Add(points[v]);
+                    bs.Add(B(v));
+                    continue;
+                }
+
+                pts.Add(b.T1 * unitsPerMeter);
+                bs.Add(Math.Tan(b.Turn / 4));
+                pts.Add(b.T2 * unitsPerMeter);
+                bs.Add(B(b.Last));
+                v = b.Last;
+            }
+
+            return (pts, bs);
+        }
+
         /// <summary>Outlines of the pedestrian crossings (metres), where lane lines and arrows stop.</summary>
         public static List<IReadOnlyList<Vec2>> CrossingAreas(IEnumerable<SiteElement> elements, double unitsPerMeter = 1.0)
         {

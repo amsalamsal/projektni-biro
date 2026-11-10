@@ -165,6 +165,35 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void RoundedAxis_GivesTheBendTheRoadRadius_AndOneArcForACurveOfManyPoints()
+        {
+            var spec = new RoadSpec { LanesLeft = 1, LanesRight = 1, LaneWidth = 3, CornerRadius = 6 };
+
+            // L-shaped axis in centimetres: one arc with axis radius 6 + 3 = 9 m, left turn of 90 degrees
+            var l = RoadElements.RoundedAxis(new[] { new Vec2(0, 0), new Vec2(5000, 0), new Vec2(5000, 5000) }, new[] { 0.0, 0, 0 }, false, spec, 100)!.Value;
+            Assert.Equal(4, l.Points.Count);
+            Assert.Equal(4100, l.Points[1].X, 3);
+            Assert.Equal(Math.Tan(Math.PI / 8), l.Bulges[1], 6);
+            Assert.Equal(900, l.Points[2].Y, 3);
+
+            // a curve drawn with points 2 m apart turning 90 degrees in steps: rounded with one arc, not a wave
+            var pts = new List<Vec2> { new Vec2(-30, 0) };
+            for (int i = 0; i <= 6; i++)
+            {
+                double a = Math.PI / 2 * i / 6;
+                pts.Add(new Vec2(Math.Sin(a) * 4, 4 - (Math.Cos(a) * 4)));
+            }
+
+            pts.Add(new Vec2(4, 40));
+            var c = RoadElements.RoundedAxis(pts, pts.Select(_ => 0.0).ToList(), false, spec, 1)!.Value;
+            Assert.Single(c.Bulges, b => Math.Abs(b) > 1e-9);
+            Assert.Equal(4, c.Points.Count);
+
+            // already rounded: nothing to do
+            Assert.Null(RoadElements.RoundedAxis(l.Points, l.Bulges, false, spec, 100));
+        }
+
+        [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {
             // crossing 4 m along the road (first edge) and 5,5 m across it: 6 bars of 0,50 m with 0,50 m gaps

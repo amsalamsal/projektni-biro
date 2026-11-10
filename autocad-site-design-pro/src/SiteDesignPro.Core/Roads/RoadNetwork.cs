@@ -538,6 +538,153 @@ namespace SiteDesignPro.Core.Roads
             return Union(zone);
         }
 
+        /// <summary>One rounded bend of an axis: vertices First..Last replaced by an arc from T1 to T2.</summary>
+        internal sealed class BendArc
+        {
+            public int First { get; set; }
+
+            public int Last { get; set; }
+
+            public Vec2 T1 { get; set; }
+
+            public Vec2 T2 { get; set; }
+
+            public Vec2 Centre { get; set; }
+
+            public double Radius { get; set; }
+
+            /// <summary>Signed turn (positive: left, counter-clockwise).</summary>
+            public double Turn { get; set; }
+
+            public bool Fits { get; set; }
+        }
+
+        /// <summary>
+        /// Plans the rounding of the bends of an axis. A bend gets the axis radius <paramref name="axisRadius"/>
+        /// (by the inner side); where the points are too close for that (a curve drawn with several points), the
+        /// neighbouring bends turning the same way are taken together and rounded with one arc.
+        /// </summary>
+        internal static List<BendArc> PlanBends(IReadOnlyList<Vec2> a, bool closed, Func<int, bool> isCorner, Func<bool, double> axisRadius)
+        {
+            var list = new List<BendArc>();
+            int n = a.Count;
+            if (n < 3)
+            {
+                return list;
+            }
+
+            int W(int i) => ((i % n) + n) % n;
+            bool Interior(int i) => closed || (i > 0 && i < n - 1);
+            bool Bendable(int i) => Interior(i) && isCorner(i);
+            double Turn(int i)
+            {
+                Vec2 u1 = a[i] - a[W(i - 1)], u2 = a[W(i + 1)] - a[i];
+                if (u1.Length < 1e-9 || u2.Length < 1e-9)
+                {
+                    return 0;
+                }
+
+                return Math.Atan2(u1.Cross(u2), u1.Dot(u2));
+            }
+
+            BendArc? Make(int s, int e)
+            {
+                Vec2 pIn = a[W(s - 1)], pOut = a[W(e + 1)];
+                Vec2 dIn = a[s] - pIn, dOut = pOut - a[e];
+                if (dIn.Length < 1e-9 || dOut.Length < 1e-9)
+                {
+                    return null;
+                }
+
+                Vec2 uIn = dIn.Normalized(), uOut = dOut.Normalized();
+                double turn = Math.Atan2(uIn.Cross(uOut), uIn.Dot(uOut));
+                double th = Math.Abs(turn);
+                if (th < 0.01 || th > Math.PI - 0.05)
+                {
+                    return null;
+                }
+
+                Vec2 v = a[s];
+                if (e != s)
+                {
+                    double den = uIn.Cross(uOut);
+                    v = a[s] + (uIn * ((a[e] - a[s]).Cross(uOut) / den));
+                }
+
+                double lenIn = (v - pIn).Dot(uIn), lenOut = (pOut - v).Dot(uOut);
+                if (lenIn <= 1e-6 || lenOut <= 1e-6)
+                {
+                    return null;
+                }
+
+                bool left = turn > 0;
+                double ra = axisRadius(left);
+                double tan = Math.Tan(th / 2);
+                double need = ra * tan;
+                double availIn = lenIn * (Bendable(W(s - 1)) && W(s - 1) != e ? 0.5 : 0.98);
+                double availOut = lenOut * (Bendable(W(e + 1)) && W(e + 1) != s ? 0.5 : 0.98);
+                double t = Math.Min(need, Math.Min(availIn, availOut));
+                double r = t / tan;
+                Vec2 t1 = v - (uIn * t);
+                return new BendArc
+                {
+                    First = s,
+                    Last = e,
+                    T1 = t1,
+                    T2 = v + (uOut * t),
+                    Centre = t1 + ((left ? uIn.Perp() : -uIn.Perp()) * r),
+                    Radius = r,
+                    Turn = turn,
+                    Fits = need <= Math.Min(availIn, availOut) + 1e-9,
+                };
+            }
+
+            int i = 0;
+            while (i < n)
+            {
+                double ti = Bendable(i) ? Turn(i) : 0;
+                if (Math.Abs(ti) < 0.01)
+                {
+                    i++;
+                    continue;
+                }
+
+                BendArc? best = Make(i, i);
+                int e = i;
+                double total = ti;
+                while ((best == null || !best.Fits) && e + 1 < n && Bendable(e + 1))
+                {
+                    double tn = Turn(e + 1);
+                    if ((Math.Abs(tn) >= 0.01 && Math.Sign(tn) != Math.Sign(ti)) || Math.Abs(total + tn) > Math.PI - 0.05)
+                    {
+                        break;
+                    }
+
+                    e++;
+                    total += tn;
+                    BendArc? c = Make(i, e);
+                    if (c != null && (best == null || c.Fits || c.Radius > best.Radius))
+                    {
+                        best = c;
+                    }
+                }
+
+                if (best == null)
+                {
+                    i++;
+                    continue;
+                }
+
+                list.Add(best);
+                i = best.Last + 1;
+            }
+
+            return list;
+        }
+
+        /// <summary>Axis radius of a bend of road <paramref name="r"/>: the inner kerb gets the kerb radius.</summary>
+        internal static double AxisRadius(RoadSpec r, bool left) => r.CornerRadius + r.Extent(RoadLevel.Bike, left);
+
         /// <summary>
         /// Rounds the bends of an axis drawn with straight segments, so the inner kerb of the bend gets the kerb radius
         /// and every edge of the cross-section is concentric (inner and outer side). Arcs drawn in the axis stay.
@@ -545,60 +692,31 @@ namespace SiteDesignPro.Core.Roads
         internal static List<Vec2> Fillet(RoadSpec r)
         {
             List<Vec2> a = r.Axis;
-            int n = a.Count;
-            if (n < 3)
+            List<BendArc> bends = PlanBends(a, r.Closed, i => r.Corners == null || r.Corners.Any(c => c.DistanceTo(a[i]) < 1e-3), left => AxisRadius(r, left));
+            if (bends.Count == 0)
             {
                 return a;
             }
 
-            var result = new List<Vec2>(n * 4);
-            for (int v = 0; v < n; v++)
+            var byFirst = bends.ToDictionary(b => b.First);
+            var result = new List<Vec2>(a.Count * 4);
+            for (int v = 0; v < a.Count; v++)
             {
-                Vec2 cur = a[v];
-                bool interior = r.Closed || (v > 0 && v < n - 1);
-                if (!interior || (r.Corners != null && !r.Corners.Any(c => c.DistanceTo(cur) < 1e-3)))
+                if (!byFirst.TryGetValue(v, out BendArc? b))
                 {
-                    result.Add(cur);
+                    result.Add(a[v]);
                     continue;
                 }
 
-                Vec2 prev = a[(v - 1 + n) % n], next = a[(v + 1) % n];
-                double l1 = (cur - prev).Length, l2 = (next - cur).Length;
-                if (l1 < 1e-6 || l2 < 1e-6)
+                double a0 = (b.T1 - b.Centre).Angle;
+                int steps = Math.Max(2, (int)Math.Ceiling(Math.Abs(b.Turn) / (Math.PI / 36)));
+                for (int k = 0; k <= steps; k++)
                 {
-                    result.Add(cur);
-                    continue;
+                    double ang = a0 + (b.Turn * k / steps);
+                    result.Add(b.Centre + (new Vec2(Math.Cos(ang), Math.Sin(ang)) * b.Radius));
                 }
 
-                Vec2 u1 = (cur - prev) * (1 / l1), u2 = (next - cur) * (1 / l2);
-                double turn = Math.Atan2(u1.Cross(u2), u1.Dot(u2));
-                double th = Math.Abs(turn);
-                if (th < 0.01 || th > Math.PI - 0.01)
-                {
-                    result.Add(cur);
-                    continue;
-                }
-
-                bool left = turn > 0; // the inner side of the bend
-                double ra = r.CornerRadius + r.Extent(RoadLevel.Bike, left);
-                double t = ra * Math.Tan(th / 2);
-                bool prevEnd = !r.Closed && v - 1 == 0, nextEnd = !r.Closed && v + 1 == n - 1;
-                double tMax = Math.Min(l1 * (prevEnd ? 0.98 : 0.5), l2 * (nextEnd ? 0.98 : 0.5));
-                if (t > tMax)
-                {
-                    t = tMax;
-                    ra = t / Math.Tan(th / 2);
-                }
-
-                Vec2 t1 = cur - (u1 * t);
-                Vec2 centre = t1 + ((left ? u1.Perp() : -u1.Perp()) * ra);
-                double a0 = (t1 - centre).Angle;
-                int steps = Math.Max(2, (int)Math.Ceiling(th / (Math.PI / 36)));
-                for (int s = 0; s <= steps; s++)
-                {
-                    double ang = a0 + (turn * s / steps);
-                    result.Add(centre + (new Vec2(Math.Cos(ang), Math.Sin(ang)) * ra));
-                }
+                v = b.Last;
             }
 
             return Clean(result);
