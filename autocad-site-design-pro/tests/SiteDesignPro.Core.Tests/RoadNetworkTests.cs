@@ -116,9 +116,12 @@ namespace SiteDesignPro.Core.Tests
             var allowed = new[] { 7.5, 6.0, 5.85, 4.25, 4.15 };
             foreach (KeyValuePair<RoadLevel, List<RoadLoop>> level in res.Outlines)
             {
-                foreach (double r in level.Value.SelectMany(l => l.ArcRadii()))
+                foreach (RoadLoop loop in level.Value)
                 {
-                    Assert.True(allowed.Any(x => Math.Abs(x - r) < 0.05), level.Key + ": unexpected arc radius " + r);
+                    foreach (double r in loop.ArcRadii())
+                    {
+                        Assert.True(allowed.Any(x => Math.Abs(x - r) < 0.05), level.Key + ": unexpected arc radius " + r + "\n" + Dump(loop));
+                    }
                 }
             }
 
@@ -149,9 +152,12 @@ namespace SiteDesignPro.Core.Tests
             var allowed = new[] { 6.0, 12.0, 5.85, 12.15, 3.85, 14.15, 3.75, 14.25 };
             foreach (RoadRegion region in res.Bands.Values.SelectMany(b => b))
             {
-                foreach (double x in region.Outer.ArcRadii().Concat(region.Holes.SelectMany(h => h.ArcRadii())))
+                foreach (RoadLoop loop in new[] { region.Outer }.Concat(region.Holes))
                 {
-                    Assert.True(allowed.Any(a => Math.Abs(a - x) < 0.05), "unexpected arc radius " + x);
+                    foreach (double x in loop.ArcRadii())
+                    {
+                        Assert.True(allowed.Any(a => Math.Abs(a - x) < 0.05), "unexpected arc radius " + x + "\n" + Dump(loop));
+                    }
                 }
             }
 
@@ -260,6 +266,8 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal((2 * 120 * 6) - 36 + ((36 - (Math.PI * 36 / 4)) * 4), res.Area(RoadLevel.Carriageway), 0);
             Assert.All(res.Outlines[RoadLevel.Carriageway][0].Points, p => Assert.True(p.X > x0 - 100 && p.Y > y0 - 100));
         }
+
+        private static string Dump(RoadLoop l) => string.Join("\n", l.Points.Select((p, i) => p.X.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + " " + p.Y.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture) + " b=" + l.Bulges[i].ToString("0.####", System.Globalization.CultureInfo.InvariantCulture)));
 
         private static double Length(List<Vec2> pts)
         {
