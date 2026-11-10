@@ -513,44 +513,31 @@ namespace SiteDesignPro.Core.Roads
 
             var pts = fillet.Select(q => new Vec2(q.x, q.y)).ToList();
 
-            // straight edges of the fillet (runs of collinear pieces at least 1,2 m long) lie on straight kerb lines;
+            // straight edges of the fillet (at least 1,2 m long) lie on straight kerb lines;
             // the corner arc and a curved kerb (a roundabout ring) are made of short pieces
             Vec2 Dir(int i) => (pts[(i + 1) % n] - pts[i]).Normalized();
+
+            // direction of the first edge longer than 5 cm from edge i in direction step (+1 forward, -1 back)
+            Vec2 RealDir(int i, int step)
+            {
+                for (int g = 0, j = i; g < n; g++, j = (j + step + n) % n)
+                {
+                    if ((pts[(j + 1) % n] - pts[j]).Length > 0.05)
+                    {
+                        return Dir(j);
+                    }
+                }
+
+                return Dir(i);
+            }
+
             var runs = new List<(int Start, int End, double Length)>();
-            var used = new bool[n];
             for (int i0 = 0; i0 < n; i0++)
             {
-                if (used[i0] || (pts[(i0 + 1) % n] - pts[i0]).Length < 1e-9)
-                {
-                    continue;
-                }
-
-                // start a run at an edge whose previous edge turns
-                int prev = (i0 - 1 + n) % n;
-                if (Math.Abs(Dir(prev).Cross(Dir(i0))) < 0.02 && Dir(prev).Dot(Dir(i0)) > 0 && !used[prev] && prev != i0)
-                {
-                    continue;
-                }
-
-                int e = i0;
-                double len = (pts[(e + 1) % n] - pts[e]).Length;
-                used[e] = true;
-                while (true)
-                {
-                    int nx = (e + 1) % n;
-                    if (nx == i0 || used[nx] || Math.Abs(Dir(e).Cross(Dir(nx))) > 0.02 || Dir(e).Dot(Dir(nx)) < 0)
-                    {
-                        break;
-                    }
-
-                    e = nx;
-                    used[e] = true;
-                    len += (pts[(e + 1) % n] - pts[e]).Length;
-                }
-
+                double len = (pts[(i0 + 1) % n] - pts[i0]).Length;
                 if (len >= 1.2)
                 {
-                    runs.Add((i0, (e + 1) % n, len));
+                    runs.Add((i0, (i0 + 1) % n, len));
                 }
             }
 
@@ -579,8 +566,9 @@ namespace SiteDesignPro.Core.Roads
                 {
                     Vec2 a0 = pts[st], b0 = pts[en];
                     Vec2 d = (b0 - a0).Normalized();
-                    double turnA = Math.Abs(Dir((st - 1 + n) % n).Cross(d)) + (Dir((st - 1 + n) % n).Dot(d) < 0 ? 2 : 0);
-                    double turnB = Math.Abs(d.Cross(Dir(en))) + (d.Dot(Dir(en)) < 0 ? 2 : 0);
+                    Vec2 before = RealDir((st - 1 + n) % n, -1), after = RealDir(en, 1);
+                    double turnA = Math.Abs(before.Cross(d)) + (before.Dot(d) < 0 ? 2 : 0);
+                    double turnB = Math.Abs(d.Cross(after)) + (d.Dot(after) < 0 ? 2 : 0);
                     (Vec2 tip, Vec2 along) = turnB <= turnA ? (b0, d) : (a0, -d);
                     starts.Add((tip + (along * Math.Sqrt(0.04 * radius)), along));
                 }
