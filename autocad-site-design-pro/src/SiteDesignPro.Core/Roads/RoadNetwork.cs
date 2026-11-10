@@ -727,6 +727,8 @@ namespace SiteDesignPro.Core.Roads
                 pts.RemoveAt(pts.Count - 1);
             }
 
+            pts = Despike(pts);
+
             int n = pts.Count;
             var outPts = new List<Vec2>();
             var outBulges = new List<double>();
@@ -1122,6 +1124,36 @@ namespace SiteDesignPro.Core.Roads
             }
 
             return winding != 0;
+        }
+
+        /// <summary>
+        /// Removes millimetre back-steps (rounding where two offset boundaries meet) and zero-width spikes from a
+        /// closed loop, so its arcs are recognised whole.
+        /// </summary>
+        internal static List<Vec2> Despike(List<Vec2> pts)
+        {
+            var list = new List<Vec2>(pts);
+            bool changed = true;
+            while (changed && list.Count > 3)
+            {
+                changed = false;
+                for (int i = 0; i < list.Count && list.Count > 3; i++)
+                {
+                    Vec2 a = list[(i - 1 + list.Count) % list.Count], b = list[i], c = list[(i + 1) % list.Count];
+                    Vec2 ab = b - a, bc = c - b;
+                    double la = ab.Length, lc = bc.Length;
+                    bool tiny = la < 0.0025;
+                    bool spike = la > 1e-9 && lc > 1e-9 && ab.Dot(bc) < 0 && Math.Abs(ab.Cross(bc)) / (la * lc) < 0.09;
+                    if (tiny || spike)
+                    {
+                        list.RemoveAt(i);
+                        i--;
+                        changed = true;
+                    }
+                }
+            }
+
+            return list;
         }
 
         private static List<Vec2> Clean(List<Vec2> pts)
