@@ -18,6 +18,10 @@
   radijus ivičnjaka; unutrašnja i vanjska strana krivine su zakrivljene, a kolovoz, staza, ivičnjak i trotoar ostaju
   paralelni (koncentrični). I nacrtana osovina postaje luk. Kriva nacrtana s više tačaka postaje jedna glatka krivina
   (bez talasa), a ivice blokova između ulica i cesta različitog presjeka ostaju paralelne.
+* Zadnji kratki klik na kraju osovine (malo skrenut) više ne pravi zavrnut kraj: ulica završava ravno.
+* **Kružni tok** (`SDPKRUZNITOK`): prsten je sada ulica u jednom smjeru (suprotno kazaljci) s ivičnjacima i trotoarom
+  izvana, a krakovi su ulice s trotoarima. Ulice i ceste nacrtane do kružnog toka same se spoje sa zaobljenim
+  uglovima, bez preklapanja; linije traka staju i na razdjelnim ostrvima.
 * Nakon pomjeranja, rastezanja, kopiranja, brisanja ili izmjene u Svojstvima (`SDPEDIT`) mreža se sama osvježi.
   **Uredi ulicu** (`SDPULICAUREDI`) otvara isti prozor za postojeću ulicu ili cestu; **Osvježi ceste**
   (`SDPCESTEOSVJEZI`) ručno. Osovine iz prve verzije pretvaraju se u ulice.
