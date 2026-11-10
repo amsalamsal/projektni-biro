@@ -141,6 +141,17 @@ namespace SiteDesignPro.Core.Tests
             Assert.Contains(res.Ramps, r => r.Points.All(p => p.Y > 2.9));
             Assert.Contains(res.Ramps, r => r.Points.All(p => p.Y < -2.9));
 
+            // the sidewalk and kerb are cut where the ramps are (they are lowered there)
+            double walk = res.Bands[RoadLevel.Sidewalk].Sum(r => r.Area);
+            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 1.2 * 2.0) - 0.2, (2 * 100 * 2.0) - (2 * 1.2 * 2.0) + 0.2);
+
+            // in 3D the ramp rises from the carriageway (0) to the sidewalk (0,13 above the ramp's own offset)
+            List<List<Vec2>> kerbLines = res.Outlines[RoadLevel.Carriageway].Select(l => l.Points).ToList();
+            List<Vec3[]> tris = RoadElements.RampTriangles(res.Ramps[0].Points, kerbLines, 0.13, _ => 0);
+            Assert.NotEmpty(tris);
+            Assert.InRange(tris.SelectMany(t => t).Min(v => v.Z), -0.001, 0.001);
+            Assert.InRange(tris.SelectMany(t => t).Max(v => v.Z), 0.129, 0.131);
+
             // no sidewalk on the right: only the left ramp
             RoadNetworkResult one = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0, x => x.SidewalkRight = 0) }, new[] { box }, new[] { box });
             Assert.Single(one.Ramps);

@@ -304,30 +304,6 @@ namespace SiteDesignPro.Core.Roads
             PathsD toWalk = Clipper.Union(toBike, walk, FillRule.NonZero, Precision);
             PathsD edge = Clipper.Difference(Union(pieces[RoadLevel.Edge]), toWalk, FillRule.NonZero, Precision);
 
-            var region = new Dictionary<RoadLevel, PathsD>
-            {
-                [RoadLevel.Carriageway] = carriageway,
-                [RoadLevel.Kerb] = kerb,
-                [RoadLevel.Bike] = bike,
-                [RoadLevel.Sidewalk] = walk,
-                [RoadLevel.Edge] = edge,
-            };
-            var outline = new Dictionary<RoadLevel, PathsD>
-            {
-                [RoadLevel.Carriageway] = carriageway,
-                [RoadLevel.Kerb] = toKerb,
-                [RoadLevel.Bike] = toBike,
-                [RoadLevel.Sidewalk] = toWalk,
-                [RoadLevel.Edge] = Clipper.Union(toWalk, edge, FillRule.NonZero, Precision),
-            };
-
-            foreach (RoadLevel level in (RoadLevel[])Enum.GetValues(typeof(RoadLevel)))
-            {
-                result.Bands[level] = Regions(region[level], origin);
-                bool draw = level == RoadLevel.Carriageway || region[level].Count > 0;
-                result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
-            }
-
             // accessible kerb ramps (120 cm) where the straight part starts after each junction corner, on the sides
             // with a sidewalk; the ramp lowers the kerb and runs across the bike lane and the sidewalk
             PathsD behindKerb = Clipper.Union(Clipper.Union(kerb, bike, FillRule.NonZero, Precision), walk, FillRule.NonZero, Precision);
@@ -361,6 +337,34 @@ namespace SiteDesignPro.Core.Roads
                         result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
                     }
                 }
+            }
+
+            // the ramps lower the kerb, bike lane and sidewalk: those surfaces leave them out
+            PathsD rampArea = new PathsD(result.Ramps.Select(l => Positive(l.Points.Select(q => q - origin))));
+            PathsD Lowered(PathsD band) => rampArea.Count == 0 ? band : Clipper.Difference(band, rampArea, FillRule.NonZero, Precision);
+
+            var region = new Dictionary<RoadLevel, PathsD>
+            {
+                [RoadLevel.Carriageway] = carriageway,
+                [RoadLevel.Kerb] = Lowered(kerb),
+                [RoadLevel.Bike] = Lowered(bike),
+                [RoadLevel.Sidewalk] = Lowered(walk),
+                [RoadLevel.Edge] = edge,
+            };
+            var outline = new Dictionary<RoadLevel, PathsD>
+            {
+                [RoadLevel.Carriageway] = carriageway,
+                [RoadLevel.Kerb] = toKerb,
+                [RoadLevel.Bike] = toBike,
+                [RoadLevel.Sidewalk] = toWalk,
+                [RoadLevel.Edge] = Clipper.Union(toWalk, edge, FillRule.NonZero, Precision),
+            };
+
+            foreach (RoadLevel level in (RoadLevel[])Enum.GetValues(typeof(RoadLevel)))
+            {
+                result.Bands[level] = Regions(region[level], origin);
+                bool draw = level == RoadLevel.Carriageway || region[level].Count > 0;
+                result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
             }
 
             var gaps = new PathsD();

@@ -302,9 +302,20 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
+            // ramps in 3D: from the carriageway (kerb line) up to the sidewalk, across their whole depth
+            double rampTop = catalog.FindType(RampType)?.CreateDefaultParameters().Number("topOffset", 0.02) ?? 0.02;
+            double walkTop = catalog.FindType(LevelTypes[RoadLevel.Sidewalk].Type)?.CreateDefaultParameters().Number("topOffset", 0.15) ?? 0.15;
+            List<List<Vec2>> kerbLines = res.Outlines.TryGetValue(RoadLevel.Carriageway, out List<RoadLoop>? cw)
+                ? cw.Select(l => GeometryMath.Tessellate(ToRing(l, 0), true, 0.005).Select(v => v.XY).ToList()).ToList()
+                : new List<List<Vec2>>();
             foreach (RoadLoop ramp in res.Ramps)
             {
                 Add(RampType, "Rampa za invalide 120 cm", new PolygonGeometry(ToRing(ramp, z)));
+                List<Vec3[]> tris = RampTriangles(ramp.Points, kerbLines, walkTop - rampTop, p => z + (profiles != null ? RoadLevels.Height(profiles, p) : 0));
+                if (tris.Count > 0)
+                {
+                    list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(tris));
+                }
             }
 
             foreach (RoadMarking m in res.Markings)
@@ -364,6 +375,53 @@ namespace SiteDesignPro.Core.Roads
             }
 
             return bars;
+        }
+
+        /// <summary>
+        /// Surface of a kerb ramp: at the carriageway on the side touching the kerb line, rising by <paramref name="rise"/>
+        /// to the far side (the sidewalk); a fan of triangles from the centre.
+        /// </summary>
+        public static List<Vec3[]> RampTriangles(IReadOnlyList<Vec2> outline, List<List<Vec2>> kerbLines, double rise, Func<Vec2, double> baseHeight)
+        {
+            var tris = new List<Vec3[]>();
+            if (outline.Count < 3 || kerbLines.Count == 0)
+            {
+                return tris;
+            }
+
+            double Dist(Vec2 p)
+            {
+                double best = double.MaxValue;
+                foreach (List<Vec2> line in kerbLines)
+                {
+                    for (int i = 0; i < line.Count; i++)
+                    {
+                        Vec2 a = line[i], b = line[(i + 1) % line.Count];
+                        Vec2 ab = b - a;
+                        double l2 = ab.Dot(ab);
+                        double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
+                        best = Math.Min(best, (a + (ab * t)).DistanceTo(p));
+                    }
+                }
+
+                return best;
+            }
+
+            double depth = outline.Max(Dist);
+            if (depth < 0.1)
+            {
+                return tris;
+            }
+
+            Vec3 P(Vec2 p) => p.WithZ(baseHeight(p) + (rise * Math.Min(1, Dist(p) / depth)));
+            Vec2 c = new Vec2(outline.Average(p => p.X), outline.Average(p => p.Y));
+            Vec3 pc = P(c);
+            for (int i = 0; i < outline.Count; i++)
+            {
+                tris.Add(new[] { pc, P(outline[i]), P(outline[(i + 1) % outline.Count]) });
+            }
+
+            return tris;
         }
 
         private static Ring ToRing(RoadLoop loop, double z) => new Ring(loop.Points.Select(p => p.WithZ(z)).ToList(), loop.Bulges.ToList());
