@@ -974,6 +974,14 @@ namespace SiteDesignPro.Core.Roads
                         break;
                     }
 
+                    // a run that bulges less than a centimetre from its chord is a straight edge, not an arc
+                    double chord = ring[idx].DistanceTo(ring[end]);
+                    double sweep = 4 * Math.Atan(Math.Abs(bulge));
+                    if (chord / 2 * Math.Tan(sweep / 4) < 0.01)
+                    {
+                        continue;
+                    }
+
                     bestEnd = end;
                     bestBulge = bulge;
                 }
@@ -1049,11 +1057,6 @@ namespace SiteDesignPro.Core.Roads
                 return false;
             }
 
-            // a run that bulges less than a centimetre from its chord is a straight edge, not an arc
-            if (r * (1 - Math.Cos(Math.Abs(sweep) / 2)) < 0.01)
-            {
-                return false;
-            }
 
             bulge = Math.Tan(sweep / 4);
             return true;
