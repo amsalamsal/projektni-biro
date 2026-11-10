@@ -112,8 +112,8 @@ namespace SiteDesignPro.AutoCAD.UI
             Header("Trotoari i biciklističke staze (0 = nema)");
             Add(L("Trotoar lijevo (m, 0–5)"), walkLeft, "Hatch tamno sivi, 30 % prozirnosti.");
             Add(L("Trotoar desno (m, 0–5)"), walkRight, "Hatch tamno sivi, 30 % prozirnosti.");
-            Add(L("Biciklistička staza lijevo (m, 0–2)"), bikeLeft, "Uz kolovoz, prije trotoara. Hatch bordo, 30 % prozirnosti.");
-            Add(L("Biciklistička staza desno (m, 0–2)"), bikeRight, "Uz kolovoz, prije trotoara. Hatch bordo, 30 % prozirnosti.");
+            Add(L("Biciklistička staza lijevo (m, 0–2)"), bikeLeft, "Iza ivičnjaka 15 cm, na visini trotoara (bez ivičnjaka prema trotoaru). Hatch bordo, 30 % prozirnosti.");
+            Add(L("Biciklistička staza desno (m, 0–2)"), bikeRight, "Iza ivičnjaka 15 cm, na visini trotoara (bez ivičnjaka prema trotoaru). Hatch bordo, 30 % prozirnosti.");
             Header("Raskrsnice");
             Add(L("Radijus ivičnjaka – stvarni (m)"), radius,
                 "Stambena zona do 40 km/h, putnička i manja teretna vozila: 5–8 m. Ivice kolovoza, staza i trotoara prate isti centar.");
@@ -130,7 +130,7 @@ namespace SiteDesignPro.AutoCAD.UI
             panel.Children.Add(eff);
             panel.Children.Add(arrowRow);
             var foot = new StackPanel { Margin = new Thickness(14, 6, 14, 14) };
-            summary.Text = "Uz kolovoz se crta ivičnjak 15 cm, a uz vanjsku ivicu trotoara ivičnjak 10 cm. Isprekidane linije traka, " +
+            summary.Text = "Uz kolovoz se crta ivičnjak 15 cm (između kolovoza i biciklističke staze), a uz vanjsku ivicu trotoara ivičnjak 10 cm. Na početku ravnog dijela iza svake raskrsnice crta se rampa za invalide 120 cm. Isprekidane linije traka, " +
                            "spajanje s drugim ulicama i cestama i zaobljeni uglovi raskrsnica rade se automatski. Rasvjeta se dodaje posebno (Rasvjeta ili Duž linije). " +
                            "Jedinice crteža: " + units + ".";
             foot.Children.Add(summary);
@@ -226,7 +226,7 @@ namespace SiteDesignPro.AutoCAD.UI
             }
 
             effective.Text = Bs.TryParse(radius.Text, out double r)
-                ? "Efektivni radijus (ivica kolovoza) = " + Bs.Num(r + bike, 2) + " m" + (bike > 0 ? " (stvarni + biciklistička staza)." : " (isti kao stvarni, nema biciklističke staze).") +
+                ? "Efektivni radijus (ivica kolovoza) = stvarni = " + Bs.Num(r, 2) + " m: ivičnjak 15 cm je na ivici kolovoza" + (bike > 0 ? ", biciklistička staza je iza njega." : ".") +
                   " Radijusi se vide kad kursor stoji na liniji ivičnjaka."
                 : string.Empty;
         }

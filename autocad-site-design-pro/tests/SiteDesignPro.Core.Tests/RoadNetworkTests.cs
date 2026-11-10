@@ -78,16 +78,49 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
-        public void BikeLanes_MakeTheEffectiveRadiusLargerThanTheKerbRadius()
+        public void BikeLanes_StandBehindTheKerb_TheEffectiveRadiusIsTheKerbRadius()
         {
             var a = Road("A", -60, 0, 60, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; });
             var b = Road("B", 0, -60, 0, 60, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; });
             RoadNetworkResult res = RoadNetwork.Build(new[] { a, b });
             Assert.Equal(6.0, res.ActualRadius, 6);
-            Assert.Equal(7.5, res.EffectiveRadius, 6);
-            Assert.Equal(4, res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 7.5) < 0.05));
-            Assert.Equal(4, res.Outlines[RoadLevel.Bike].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 6.0) < 0.05));
-            Assert.True(res.Area(RoadLevel.Bike) > 0);
+            Assert.Equal(6.0, res.EffectiveRadius, 6);
+
+            // kerb at the carriageway edge (R 6), the bike lane behind it (outer edge R 6 - 0,15 - 1,5 = 4,35)
+            Assert.Equal(4, res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 6.0) < 0.05));
+            Assert.Equal(4, res.Outlines[RoadLevel.Kerb].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 5.85) < 0.05));
+            Assert.Equal(4, res.Outlines[RoadLevel.Bike].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 4.35) < 0.05));
+            Assert.Equal(4 * 120 * 1.5, res.Area(RoadLevel.Bike), -1);
+        }
+
+        [Fact]
+        public void Crossroads_GetAnAccessibleRampAtEveryCornerEnd()
+        {
+            var a = Road("A", -60, 0, 60, 0);
+            var b = Road("B", 0, -60, 0, 60);
+            RoadNetworkResult res = RoadNetwork.Build(new[] { a, b });
+            Assert.Equal(8, res.Ramps.Count);
+            foreach (RoadLoop ramp in res.Ramps)
+            {
+                // 1,20 m along the kerb, across the kerb (0,15) and the sidewalk (1,60), right after the corner arc
+                double area = Math.Abs(Area(ramp.Points));
+                Assert.Equal(1.2 * 1.75, area, 1);
+                Assert.All(ramp.Points, p => Assert.True(Math.Abs(p.X) >= 8.99 || Math.Abs(p.Y) >= 8.99, "ramp inside the corner at " + p));
+            }
+
+            // no sidewalk: no ramp
+            Assert.Empty(RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }), Road("B", 0, -60, 0, 60, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }) }).Ramps);
+        }
+
+        private static double Area(IReadOnlyList<Vec2> p)
+        {
+            double s = 0;
+            for (int i = 0; i < p.Count; i++)
+            {
+                s += p[i].Cross(p[(i + 1) % p.Count]);
+            }
+
+            return s / 2;
         }
 
         [Fact]
@@ -112,8 +145,8 @@ namespace SiteDesignPro.Core.Tests
             var c = Road("C", 30, -60, 30, -5, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
             RoadNetworkResult res = RoadNetwork.Build(new[] { a, b, c });
 
-            // concentric corner radii: 7.5 carriageway, 6.0 kerb, 5.85 kerb back, 4.25 sidewalk, 4.15 edge
-            var allowed = new[] { 7.5, 6.0, 5.85, 4.25, 4.15 };
+            // concentric corner radii: 6.0 kerb at the carriageway, 5.85 kerb back, 4.35 bike lane, 2.75 sidewalk, 2.65 edge
+            var allowed = new[] { 6.0, 5.85, 4.35, 2.75, 2.65 };
             foreach (KeyValuePair<RoadLevel, List<RoadLoop>> level in res.Outlines)
             {
                 foreach (RoadLoop loop in level.Value)
@@ -148,8 +181,8 @@ namespace SiteDesignPro.Core.Tests
             Assert.Contains(kerbLine, x => Math.Abs(x - 6.0) < 0.05);
             Assert.Contains(kerbLine, x => Math.Abs(x - 12.0) < 0.05);
 
-            // the sidewalk on the inner side follows the kerb concentrically: kerb back 5,85, sidewalk 3,85, edge 3,75
-            var allowed = new[] { 6.0, 12.0, 5.85, 12.15, 3.85, 14.15, 3.75, 14.25 };
+            // the sidewalk on the inner side follows the kerb concentrically: kerb back 5,85, sidewalk 4,25, edge 4,15
+            var allowed = new[] { 6.0, 12.0, 5.85, 12.15, 4.25, 13.75, 4.15, 13.85 };
             foreach (RoadRegion region in res.Bands.Values.SelectMany(b => b))
             {
                 foreach (RoadLoop loop in new[] { region.Outer }.Concat(region.Holes))
@@ -172,9 +205,9 @@ namespace SiteDesignPro.Core.Tests
             var simple = Road("B", 0, -60, 0, 60, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; x.Kerbs = false; x.Markings = true; x.Arrows = false; x.LaneWidth = 2.75; });
             RoadNetworkResult res = RoadNetwork.Build(new[] { street, simple });
 
-            // the kerb line has the kerb radius, the carriageway edge is concentric with it where the bike lane runs
-            Assert.All(res.Outlines[RoadLevel.Bike].SelectMany(l => l.ArcRadii()), x => Assert.True(Math.Abs(x - 6.0) < 0.05, "kerb line arc " + x));
-            Assert.All(res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()), x => Assert.True(Math.Abs(x - 6.0) < 0.05 || Math.Abs(x - 7.5) < 0.05, "carriageway arc " + x));
+            // the kerb line (carriageway edge) has the kerb radius
+            Assert.All(res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()), x => Assert.True(Math.Abs(x - 6.0) < 0.05, "carriageway arc " + x));
+            Assert.True(res.Area(RoadLevel.Bike) > 0);
 
             // no bike lane along the simple road: away from the corners its sides are carriageway up to the kerb line
             Assert.All(res.Bands[RoadLevel.Bike], b => Assert.All(b.Outer.Points, p => Assert.True(Math.Abs(p.Y) < 40 || Math.Abs(p.X) > 10, "bike lane along the simple road at " + p)));

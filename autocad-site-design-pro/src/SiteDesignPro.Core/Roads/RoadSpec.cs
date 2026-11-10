@@ -9,7 +9,7 @@ namespace SiteDesignPro.Core.Roads
     /// One road of the network: its axis and cross-section (metres). Two-way roads have their axis between the two
     /// directions (lanes left of the axis drive against the axis direction, lanes right of it with it - right-hand
     /// traffic); one-way roads have the axis in the middle and all lanes drive along the axis direction.
-    /// From the axis outwards on each side: carriageway, bike lane, kerb (15 cm), sidewalk, edge (10 cm).
+    /// From the axis outwards on each side: carriageway, kerb (15 cm), bike lane, sidewalk, edge (10 cm).
     /// </summary>
     public sealed class RoadSpec
     {
@@ -82,23 +82,31 @@ namespace SiteDesignPro.Core.Roads
 
         public double CarriagewayWidth => CarriagewayLeft + CarriagewayRight;
 
-        /// <summary>Effective corner radius on the side with the wider bike lane: the carriageway edge is concentric with the kerb.</summary>
-        public double EffectiveRadius => CornerRadius + Math.Max(BikeLeft, BikeRight);
+        /// <summary>
+        /// Effective corner radius (carriageway edge). The 15 cm kerb stands at the carriageway edge, the bike lane is
+        /// behind it at sidewalk level, so the effective radius is the actual kerb radius.
+        /// </summary>
+        public double EffectiveRadius => CornerRadius;
 
-        /// <summary>Distance from the axis to the outer edge of a level on one side (0 carriageway … 4 edge strip).</summary>
+        /// <summary>
+        /// Distance from the axis to the outer edge of a level on one side. From the axis outwards: carriageway, kerb
+        /// 15 cm (at the carriageway edge), bike lane (at sidewalk level, no kerb between it and the sidewalk),
+        /// sidewalk, edging 10 cm along the outer line.
+        /// </summary>
         public double Extent(RoadLevel level, bool left)
         {
             double c = left ? CarriagewayLeft : CarriagewayRight;
-            double b = c + (left ? BikeLeft : BikeRight);
-            double k = b + (Kerbs ? KerbWidth : 0);
+            double k = c + (Kerbs ? KerbWidth : 0);
+            double bike = left ? BikeLeft : BikeRight;
+            double b = k + bike;
             double sw = left ? SidewalkLeft : SidewalkRight;
-            double s = k + sw;
-            double e = s + (sw > 0 ? EdgeWidth : 0);
+            double s = b + sw;
+            double e = s + (sw + bike > 0 ? EdgeWidth : 0);
             switch (level)
             {
                 case RoadLevel.Carriageway: return c;
-                case RoadLevel.Bike: return b;
                 case RoadLevel.Kerb: return k;
+                case RoadLevel.Bike: return b;
                 case RoadLevel.Sidewalk: return s;
                 default: return e;
             }

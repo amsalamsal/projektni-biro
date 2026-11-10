@@ -122,10 +122,16 @@ module ProjektniBiro
       def arc_steps(arc, max_dev, max_steps)
         tol = [[max_dev, arc[:radius]].min, 1e-6].max
         step = 2 * Math.acos([[1 - (tol / arc[:radius]), -1.0].max, 1.0].min)
-        return max_steps if step < 1e-6
+        # at least 30 segments per 10 m of arc length (smooth curbs and curves in 3D)
+        by_length = (arc[:radius] * arc[:sweep].abs / ARC_SEGMENT_LENGTH).ceil
+        limit = [max_steps, [by_length, 1024].min].max
+        return limit if step < 1e-6
 
-        [[(arc[:sweep].abs / step).ceil, 2].max, max_steps].min
+        [[(arc[:sweep].abs / step).ceil, by_length, 2].max, limit].min
       end
+
+      # Longest straight piece of a tessellated arc: 10 m / 30 segments.
+      ARC_SEGMENT_LENGTH = 10.0 / 30
 
       def polyline_length(points, closed = false)
         total = 0.0

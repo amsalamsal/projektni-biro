@@ -23,6 +23,7 @@ namespace SiteDesignPro.Core.Roads
         public const string MarkingType = "road.marking_line";
         public const string ArrowType = "road.arrow";
         public const string HatchedAreaType = "road.hatched_area";
+        public const string RampType = "road.curb_ramp";
 
         /// <summary>Custom flag on exported roads whose surfaces come from the network (SketchUp builds no strip for them).</summary>
         public const string NetworkFlag = "networkSurface";
@@ -261,6 +262,11 @@ namespace SiteDesignPro.Core.Roads
                 {
                     Add(type, name, new PolygonGeometry(ToRing(region.Outer, z), region.Holes.Select(h => ToRing(h, z)).ToList()));
                 }
+            }
+
+            foreach (RoadLoop ramp in res.Ramps)
+            {
+                Add(RampType, "Rampa za invalide 120 cm", new PolygonGeometry(ToRing(ramp, z)));
             }
 
             foreach (RoadMarking m in res.Markings)

@@ -315,13 +315,29 @@ namespace SiteDesignPro.AutoCAD.Commands
                     bulges.Add(pl.GetBulgeAt(i));
                 }
 
+                if (Math.Abs(pl.Elevation) > 1e-9)
+                {
+                    // all road lines lie at Z = 0,00; heights come from the elevation marks
+                    if (!pl.IsWriteEnabled)
+                    {
+                        pl.UpgradeOpen();
+                    }
+
+                    pl.Elevation = 0;
+                    changed++;
+                }
+
                 (List<Vec2> Points, List<double> Bulges)? rounded = RoadElements.RoundedAxis(pts, bulges, pl.Closed, spec, ctx.K);
                 if (rounded == null)
                 {
                     continue;
                 }
 
-                pl.UpgradeOpen();
+                if (!pl.IsWriteEnabled)
+                {
+                    pl.UpgradeOpen();
+                }
+
                 int old = pl.NumberOfVertices;
                 List<Vec2> np = rounded.Value.Points;
                 for (int i = 0; i < np.Count; i++)
@@ -434,6 +450,20 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
+            foreach (RoadLoop ramp in res.Ramps)
+            {
+                try
+                {
+                    Hatch h = RegionHatch(new RoadRegion(ramp, new List<RoadLoop>(), 0), k);
+                    Add(h, "rampa", Color.FromRgb(90, 140, 210), 20);
+                    Add(LoopPolyline(ramp, k), "rampa:rub", null, 0);
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception)
+                {
+                    failed++;
+                }
+            }
+
             if (hatches.Count > 0)
             {
                 var dot = (DrawOrderTable)ctx.Tr.GetObject(ms.DrawOrderTableId, OpenMode.ForWrite);
@@ -450,10 +480,10 @@ namespace SiteDesignPro.AutoCAD.Commands
                 int junctions = res.Outlines.TryGetValue(RoadLevel.Carriageway, out List<RoadLoop>? edges)
                     ? edges.Sum(l => l.ArcRadii().Count(r => Math.Abs(r - res.EffectiveRadius) < 0.05))
                     : 0;
-                ctx.Write(Bs.T("Ulice i ceste ({0}): kolovoz {1}, biciklističke staze {2}, trotoari {3}; {4} oznaka traka, {5} strelica; zaobljenih uglova raskrsnica: {6}.",
+                ctx.Write(Bs.T("Ulice i ceste ({0}): kolovoz {1}, biciklističke staze {2}, trotoari {3}; {4} oznaka traka, {5} strelica; zaobljenih uglova raskrsnica: {6}; rampi za invalide: {7}.",
                     roadCount, Bs.SquareMeters(res.Area(RoadLevel.Carriageway), 1), Bs.SquareMeters(res.Area(RoadLevel.Bike), 1),
-                    Bs.SquareMeters(res.Area(RoadLevel.Sidewalk), 1), res.Markings.Count, res.Arrows.Count, junctions));
-                ctx.Write("Radijus ivičnjaka (stvarni) " + Bs.Meters(res.ActualRadius) + ", efektivni radijus (ivica kolovoza) " + Bs.Meters(res.EffectiveRadius) +
+                    Bs.SquareMeters(res.Area(RoadLevel.Sidewalk), 1), res.Markings.Count, res.Arrows.Count, junctions, res.Ramps.Count));
+                ctx.Write("Radijus ivičnjaka (stvarni) " + Bs.Meters(res.ActualRadius) + " = efektivni radijus (ivičnjak je na ivici kolovoza)" +
                           ". Radijus luka vidite kad kursor stoji na ivičnjaku. Nakon izmjene, pomjeranja ili brisanja ulice crtež se osvježava sam.");
             }
 
@@ -898,30 +928,27 @@ namespace SiteDesignPro.AutoCAD.Commands
             double r = radius.Value;
             if (!line)
             {
-                // which edge of the band the arc is: the carriageway edge (effective) or a kerb (actual)
+                // which edge of the band the arc is: the kerb line (carriageway edge) carries the actual radius
                 string what = (RoadLevel)level switch
                 {
-                    RoadLevel.Carriageway => "Kolovoz",
+                    RoadLevel.Carriageway => "Ivičnjak uz kolovoz",
+                    RoadLevel.Kerb => "Ivičnjak 15 cm, stražnja strana",
                     RoadLevel.Bike => "Biciklistička staza",
-                    RoadLevel.Kerb => "Ivičnjak 15 cm",
                     RoadLevel.Sidewalk => "Trotoar",
                     _ => "Ivičnjak 10 cm",
                 };
-                string kind = Math.Abs(r - (actual + bike)) < 0.05 && bike > 0 ? " (ivica kolovoza – efektivni radijus)"
-                    : Math.Abs(r - actual) < 0.05 ? " (ivičnjak – stvarni radijus)" : string.Empty;
-                return what + ": luk R = " + Bs.Meters(r) + kind + "\nRaskrsnice: stvarni radijus ivičnjaka " + Bs.Meters(actual) + ", efektivni radijus " + Bs.Meters(actual + bike);
+                string kind = Math.Abs(r - actual) < 0.05 ? " (ivičnjak – stvarni = efektivni radijus)" : string.Empty;
+                return what + ": luk R = " + Bs.Meters(r) + kind + "\nRaskrsnice: radijus ivičnjaka " + Bs.Meters(actual) + " (efektivni = stvarni)";
             }
 
             switch ((RoadLevel)level)
             {
                 case RoadLevel.Carriageway:
-                    return bike > 0
-                        ? "Ivica kolovoza: efektivni radijus R = " + Bs.Meters(r) + "\nStvarni radijus ivičnjaka = " + Bs.Meters(Math.Max(0, r - bike)) + " (biciklistička staza " + Bs.Meters(bike) + ")"
-                        : "Ivičnjak uz kolovoz: stvarni radijus R = " + Bs.Meters(r) + "\nEfektivni radijus = " + Bs.Meters(r) + " (nema biciklističke staze)";
-                case RoadLevel.Bike:
-                    return "Ivičnjak: stvarni radijus R = " + Bs.Meters(r) + "\nEfektivni radijus (ivica kolovoza) = " + Bs.Meters(r + bike);
+                    return "Ivičnjak uz kolovoz: stvarni radijus R = " + Bs.Meters(r) + "\nEfektivni radijus (ivica kolovoza) = " + Bs.Meters(r);
                 case RoadLevel.Kerb:
-                    return "Ivičnjak 15 cm, strana trotoara: R = " + Bs.Meters(r);
+                    return "Ivičnjak 15 cm, stražnja strana: R = " + Bs.Meters(r);
+                case RoadLevel.Bike:
+                    return "Vanjska ivica biciklističke staze: R = " + Bs.Meters(r);
                 case RoadLevel.Sidewalk:
                     return "Vanjska ivica trotoara: R = " + Bs.Meters(r);
                 default:
