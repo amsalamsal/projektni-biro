@@ -14,6 +14,10 @@
   radijusom ivičnjaka (stambena zona do 40 km/h, putnička i manja teretna vozila; podrazumijevano 6 m). Efektivni
   radijus prati stvarni (stvarni + biciklistička staza); radijus se vidi kad kursor stoji na ivičnjaku. Kraća
   osovina koja staje ispred druge ceste sama se produži do nje; linije traka i strelice staju prije raskrsnice.
+* **Zakrivljenja kao u igri Sims**: oštar prelom osovine ulice sam se zaobli tako da unutrašnji ivičnjak dobije
+  radijus ivičnjaka; unutrašnja i vanjska strana krivine su zakrivljene, a kolovoz, staza, ivičnjak i trotoar ostaju
+  paralelni (koncentrični). I nacrtana osovina postaje luk. Kriva nacrtana s više tačaka postaje jedna glatka krivina
+  (bez talasa), a ivice blokova između ulica i cesta različitog presjeka ostaju paralelne.
 * Nakon pomjeranja, rastezanja, kopiranja, brisanja ili izmjene u Svojstvima (`SDPEDIT`) mreža se sama osvježi.
   **Uredi ulicu** (`SDPULICAUREDI`) otvara isti prozor za postojeću ulicu ili cestu; **Osvježi ceste**
   (`SDPCESTEOSVJEZI`) ručno. Osovine iz prve verzije pretvaraju se u ulice.
