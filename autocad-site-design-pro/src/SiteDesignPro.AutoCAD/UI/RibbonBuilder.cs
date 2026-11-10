@@ -212,6 +212,12 @@ namespace SiteDesignPro.AutoCAD.UI
             foreach (IGrouping<string, ElementType> g in groups.OrderBy(g => byCategory ? CategoryName(cat, g.Key) : g.Key))
             {
                 List<ElementType> members = g.ToList();
+                if (!byCategory && members.Count == 1)
+                {
+                    list.Add(TypeItem(members[0])); // a group of one needs no sub-menu
+                    continue;
+                }
+
                 var sub = new RibbonMenuItem
                 {
                     Text = (byCategory ? CategoryName(cat, g.Key) : g.Key) + " (" + members.Count + ")",

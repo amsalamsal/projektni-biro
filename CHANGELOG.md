@@ -18,6 +18,8 @@
   radijus ivičnjaka; unutrašnja i vanjska strana krivine su zakrivljene, a kolovoz, staza, ivičnjak i trotoar ostaju
   paralelni (koncentrični). I nacrtana osovina postaje luk. Kriva nacrtana s više tačaka postaje jedna glatka krivina
   (bez talasa), a ivice blokova između ulica i cesta različitog presjeka ostaju paralelne.
+* Dugi meniji elemenata na traci (Parter i ograde, Mobilijar i oprema, Voda i instalacije, Zelenilo...) otvaraju
+  podmenije po kategoriji i potkategoriji, pa sve stavke stanu na ekran.
 * Kraj ulice je uvijek ravan (bez zavrnutog trotoara na jednoj strani), i kad je zadnji klik malo skrenut.
 * Ulica u crtežu koji već ima elemente više ne mijenja mjerilo crteža (1 m = 100 cm postavlja samo u praznom crtežu).
 * **Kružni tok** (`SDPKRUZNITOK`): prsten je sada ulica u jednom smjeru (suprotno kazaljci) s ivičnjacima i trotoarom
