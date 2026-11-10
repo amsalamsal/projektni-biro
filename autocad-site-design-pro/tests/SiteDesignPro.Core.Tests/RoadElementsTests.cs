@@ -202,6 +202,15 @@ namespace SiteDesignPro.Core.Tests
             var w = RoadElements.RoundedAxis(wobbly, wobbly.Select(_ => 0.0).ToList(), false, spec, 1)!.Value;
             Assert.All(w.Bulges.Where(b => Math.Abs(b) > 1e-9), b => Assert.True(b > 0, "the curve waves: bulge " + b));
 
+            // and the arcs meet: no straight piece longer than 10 cm inside the curve
+            for (int i = 1; i + 2 < w.Points.Count; i++)
+            {
+                if (Math.Abs(w.Bulges[i]) < 1e-9)
+                {
+                    Assert.True(w.Points[i].DistanceTo(w.Points[i + 1]) < 0.1, "straight piece in the curve at " + w.Points[i]);
+                }
+            }
+
             // already rounded: nothing to do
             Assert.Null(RoadElements.RoundedAxis(l.Points, l.Bulges, false, spec, 100));
         }

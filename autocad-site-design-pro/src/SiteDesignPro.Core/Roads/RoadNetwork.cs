@@ -590,6 +590,8 @@ namespace SiteDesignPro.Core.Roads
                 return Math.Atan2(u1.Cross(u2), u1.Dot(u2));
             }
 
+            bool IsBend(int i) => Bendable(i) && Math.Abs(Turn(i)) >= 0.01;
+
             BendArc? Make(int s, int e)
             {
                 Vec2 pIn = a[W(s - 1)], pOut = a[W(e + 1)];
@@ -624,9 +626,16 @@ namespace SiteDesignPro.Core.Roads
                 double ra = axisRadius(left);
                 double tan = Math.Tan(th / 2);
                 double need = ra * tan;
-                double availIn = lenIn * (Bendable(W(s - 1)) && W(s - 1) != e ? 0.5 : 0.98);
-                double availOut = lenOut * (Bendable(W(e + 1)) && W(e + 1) != s ? 0.5 : 0.98);
-                double t = Math.Min(need, Math.Min(availIn, availOut));
+                bool bendIn = IsBend(W(s - 1)) && W(s - 1) != e, bendOut = IsBend(W(e + 1)) && W(e + 1) != s;
+                double availIn = lenIn * (bendIn ? 0.5 : 0.98);
+                double availOut = lenOut * (bendOut ? 0.5 : 0.98);
+
+                // in a chain of bends (a curve drawn with several points) every arc takes its whole share of the
+                // segments, so the arcs meet and the road is one smooth curve instead of a rounded polygon
+                // (only where the points are close compared with the radius; long sides keep the road radius)
+                bool closeIn = bendIn && lenIn < 3 * ra, closeOut = bendOut && lenOut < 3 * ra;
+                double smooth = closeIn && closeOut ? Math.Min(availIn, availOut) : closeIn ? availIn : closeOut ? availOut : 0;
+                double t = Math.Min(Math.Max(need, smooth), Math.Min(availIn, availOut));
                 double r = t / tan;
                 Vec2 t1 = v - (uIn * t);
                 return new BendArc
