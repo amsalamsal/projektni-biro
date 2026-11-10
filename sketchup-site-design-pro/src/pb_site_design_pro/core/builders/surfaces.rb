@@ -6,9 +6,31 @@ module ProjektniBiro
       # Surface slab: top at boundary elevation + topOffset, extruded down by thickness.
       class Slab < PolygonBuilder
         def build(e, c)
+          return build_draped(e, c) if draped?(e)
+
           outer, holes = polygon_rings(e)
           top = base_z(outer) + e.num('topOffset')
           c.mesh(Mesh.prism(outer, top - e.num('thickness', 0.08), top, holes), material: mat(e, 'material'), name: 'Površina')
+        end
+
+        private
+
+        # Road surfaces with elevation marks come as triangles following the road profile ("x,y,z;x,y,z;x,y,z|...").
+        def draped?(e)
+          t = e.custom['triangles']
+          t.is_a?(String) && !t.empty?
+        end
+
+        def build_draped(e, c)
+          top = e.num('topOffset')
+          polys = e.custom['triangles'].split('|').map do |tri|
+            tri.split(';').map do |p|
+              x, y, z = p.split(',').map(&:to_f)
+              [x, y, z + top]
+            end
+          end
+          polys.select! { |t| t.length == 3 }
+          c.mesh(polys, material: mat(e, 'material'), name: 'Površina') unless polys.empty?
         end
       end
       register('slab', Slab)

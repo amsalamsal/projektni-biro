@@ -464,6 +464,87 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
+            // elevation marks: the symbol (quartered circle, line, relative height above, absolute height below) and
+            // the longitudinal slope between consecutive marks; slopes over 10 % are reported at once
+            List<RoadLevelMark> marks = RoadElements.LevelMarks(elements, k);
+            if (marks.Count > 0)
+            {
+                RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+                double th = 0.35 * k;
+                foreach (RoadLevelMark m in marks)
+                {
+                    Point3d p0 = new Point3d(m.Position.X * k, m.Position.Y * k, 0);
+                    double r = 0.25 * k;
+                    Add(new Circle(p0, Vector3d.ZAxis, r), "kota", null, 0);
+                    foreach (int q in new[] { 0, 2 })
+                    {
+                        var wedge = new Polyline();
+                        double a0 = (q * Math.PI / 2) + (Math.PI / 2);
+                        wedge.AddVertexAt(0, new Point2d(p0.X, p0.Y), 0, 0, 0);
+                        wedge.AddVertexAt(1, new Point2d(p0.X + (r * Math.Cos(a0)), p0.Y + (r * Math.Sin(a0))), Math.Tan(Math.PI / 8), 0, 0);
+                        wedge.AddVertexAt(2, new Point2d(p0.X + (r * Math.Cos(a0 + (Math.PI / 2))), p0.Y + (r * Math.Sin(a0 + (Math.PI / 2)))), 0, 0, 0);
+                        wedge.Closed = true;
+                        try
+                        {
+                            var hw = new Hatch();
+                            hw.SetDatabaseDefaults(ctx.Db);
+                            hw.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
+                            BlockTableRecord msp = (BlockTableRecord)ctx.Tr.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(ctx.Db), OpenMode.ForWrite);
+                            ObjectId wid = msp.AppendEntity(wedge);
+                            ctx.Tr.AddNewlyCreatedDBObject(wedge, true);
+                            hw.AppendLoop(HatchLoopTypes.Outermost, new ObjectIdCollection(new[] { wid }));
+                            hw.EvaluateHatch(true);
+                            wedge.Erase();
+                            Add(hw, "kota", null, 0);
+                        }
+                        catch (Autodesk.AutoCAD.Runtime.Exception)
+                        {
+                            failed++;
+                        }
+                    }
+
+                    var line = new Line(new Point3d(p0.X - (0.6 * k), p0.Y, 0), new Point3d(p0.X + (3.2 * k), p0.Y, 0));
+                    Add(line, "kota", null, 0);
+                    Add(new DBText { Position = new Point3d(p0.X + (0.5 * k), p0.Y + (0.1 * k), 0), Height = th, TextString = LevelText(m.Value) }, "kota", null, 0);
+                    if (levels.Defined)
+                    {
+                        Add(new DBText { Position = new Point3d(p0.X + (0.5 * k), p0.Y - (0.1 * k) - (th * 0.8), 0), Height = th * 0.7, TextString = Bs.Num(levels.Base + m.Value, 2) + " m n.v." }, "kota", null, 0);
+                    }
+                }
+
+                List<RoadProfile> profiles = RoadElements.Profiles(elements, ctx.Catalog, k);
+                foreach (RoadProfile prof in profiles)
+                {
+                    for (int i = 1; i < prof.Points.Count; i++)
+                    {
+                        (double s0, double h0) = prof.Points[i - 1];
+                        (double s1, double h1) = prof.Points[i];
+                        if (s1 - s0 < 0.01)
+                        {
+                            continue;
+                        }
+
+                        double slope = Math.Abs(h1 - h0) / (s1 - s0);
+                        (Vec2 at, Vec2 dir) = RoadLevels.PointAt(prof.Road.Axis, prof.Road.Closed, (s0 + s1) / 2);
+                        double ang = Math.Atan2(dir.Y, dir.X);
+                        if (ang > Math.PI / 2 || ang < -Math.PI / 2)
+                        {
+                            ang += Math.PI;
+                        }
+
+                        Vec2 off = at + (dir.Perp() * 0.6);
+                        var t = new DBText { Position = new Point3d(off.X * k, off.Y * k, 0), Height = th * 0.8, Rotation = ang, TextString = "i = " + Bs.Num(slope * 100, 2) + " %" + (slope > RoadLevels.MaxRoadSlope + 1e-9 ? " > 10 %!" : string.Empty) };
+                        Add(t, slope > RoadLevels.MaxRoadSlope + 1e-9 ? "nagib:previse" : "nagib", slope > RoadLevels.MaxRoadSlope + 1e-9 ? Color.FromRgb(230, 40, 40) : null, 0);
+                    }
+                }
+
+                foreach (RoadSlope sl in RoadLevels.Slopes(profiles).Where(x => x.TooSteep))
+                {
+                    ctx.Write("UPOZORENJE: uzdužni nagib saobraćajnice " + sl.RoadName + " između stacionaža " + Bs.Num(sl.From, 2) + " i " + Bs.Num(sl.To, 2) + " m je " +
+                              Bs.Num(sl.Slope * 100, 2) + " % (dozvoljeno najviše 10 %; garažne rampe 17 %).");
+                }
+            }
+
             if (hatches.Count > 0)
             {
                 var dot = (DrawOrderTable)ctx.Tr.GetObject(ms.DrawOrderTableId, OpenMode.ForWrite);
@@ -738,6 +819,68 @@ namespace SiteDesignPro.AutoCAD.Commands
                    Bs.Num(s.BikeLeft) + " / " + Bs.Num(s.BikeRight) + " m, radijus ivičnjaka " + Bs.Meters(s.CornerRadius) + (s.Arrows ? ", strelice svakih " + Bs.Num(s.ArrowSpacing, 0) + " m" : ", bez strelica");
         }
 
+        /// <summary>Base elevation of the roads (m above sea level) and the terrain mode: flat or uneven.</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPVISINECESTA", CommandFlags.Modal)]
+        public void RoadLevelBase() => Guarded(() => CommandContext.Run("SDPVISINECESTA", ctx =>
+        {
+            RoadLevelSettings s = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+            string mode = ctx.Keyword("Teren [Ravan/Neravan]", new[] { "Ravan", "Neravan" }, s.Flat ? "Ravan" : "Neravan");
+            s.Flat = mode == "Ravan";
+            s.Base = ctx.Number(s.Flat ? "Visina saobraćajnica (m n.v.)" : "Osnovna visina saobraćajnica (m n.v.)", s.Base, true, true);
+            s.Write(ctx.Db, ctx.Tr);
+            ctx.Write(s.Flat
+                ? "Potpuno ravan teren: sve saobraćajnice su na " + Bs.Num(s.Base, 2) + " m n.v."
+                : "Neravan teren: osnovna visina " + Bs.Num(s.Base, 2) + " m n.v.; visine dijelova saobraćajnica zadajte kotama (Kota saobraćajnice), npr. −1,00 znači " + Bs.Num(s.Base - 1, 2) + " m n.v.");
+            Rebuild(ctx, true);
+        }));
+
+        /// <summary>
+        /// Elevation mark on a road: height relative to the base elevation of the roads (the whole width of the road at
+        /// that place, with the sidewalks and bike lanes). Heights are linear between the marks of a road.
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPKOTACESTE", CommandFlags.Modal)]
+        public void RoadLevelMark() => Guarded(() => CommandContext.Run("SDPKOTACESTE", ctx =>
+        {
+            RoadLevelSettings s = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+            if (!s.Defined)
+            {
+                ctx.Write("Osnovna visina saobraćajnica još nije zadana; zadajte je sada (može se promijeniti s Visine saobraćajnica).");
+                s.Flat = false;
+                s.Base = ctx.Number("Osnovna visina saobraćajnica (m n.v.)", 0, true, true);
+                s.Write(ctx.Db, ctx.Tr);
+            }
+            else if (s.Flat)
+            {
+                s.Flat = false;
+                s.Write(ctx.Db, ctx.Tr);
+                ctx.Write("Teren je prebačen na neravan: kote određuju visine saobraćajnica.");
+            }
+
+            ElementType type = ctx.Catalog.RequireType(RoadElements.LevelMarkType);
+            double last = double.TryParse(UI.Preferences.Current.Default("roadLevel", "0"), NumberStyles.Float, CultureInfo.InvariantCulture, out double lv) ? lv : 0;
+            while (true)
+            {
+                Point3d? at = ctx.Point("Mjesto kote na saobraćajnici (Enter za kraj)", null, true);
+                if (!at.HasValue)
+                {
+                    break;
+                }
+
+                double value = ctx.Number("Visina u odnosu na osnovnu " + Bs.Num(s.Base, 2) + " m n.v. (npr. -1,00 ili 5,00)", last, true, true);
+                last = value;
+                UI.Preferences.Current.RememberDefault("roadLevel", value.ToString(CultureInfo.InvariantCulture));
+                SiteElement e = ctx.NewElement(type, new PointGeometry(new Vec3(at.Value.X, at.Value.Y, 0), 0), ctx.ExistingElements());
+                e.Parameters["level"] = ParamValue.Of(value);
+                ctx.Svc.Create(e);
+                ctx.Write("Kota " + LevelText(value) + " = " + Bs.Num(s.Base + value, 2) + " m n.v.");
+            }
+
+            Rebuild(ctx, false);
+        }));
+
+        /// <summary>Relative height as written above the line of the symbol: +5,00 / −1,00 / ±0,00.</summary>
+        internal static string LevelText(double v) => Math.Abs(v) < 0.005 ? "±0,00" : (v > 0 ? "+" : "−") + Bs.Num(Math.Abs(v), 2);
+
         private static void Guarded(Action body)
         {
             try
@@ -792,7 +935,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
                 (string Id, string Type)? key = ElementStore.ReadKey(ent);
-                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
+                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
                 {
                     Dirty.Add(db);
                 }

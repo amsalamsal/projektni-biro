@@ -24,6 +24,7 @@ namespace SiteDesignPro.Core.Roads
         public const string ArrowType = "road.arrow";
         public const string HatchedAreaType = "road.hatched_area";
         public const string RampType = "road.curb_ramp";
+        public const string LevelMarkType = "road.level_mark";
 
         /// <summary>Custom flag on exported roads whose surfaces come from the network (SketchUp builds no strip for them).</summary>
         public const string NetworkFlag = "networkSurface";
@@ -207,8 +208,15 @@ namespace SiteDesignPro.Core.Roads
         public static RoadNetworkResult? Network(IEnumerable<SiteElement> elements, ElementCatalog catalog, double unitsPerMeter = 1.0)
         {
             List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
+            List<RoadSpec> specs = Specs(all, catalog, unitsPerMeter);
+            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter));
+        }
+
+        /// <summary>Cross-sections of all roads of the network among the elements (metres).</summary>
+        public static List<RoadSpec> Specs(IEnumerable<SiteElement> elements, ElementCatalog catalog, double unitsPerMeter = 1.0)
+        {
             var specs = new List<RoadSpec>();
-            foreach (SiteElement e in all)
+            foreach (SiteElement e in elements)
             {
                 ElementType? t = catalog.FindType(e.TypeId);
                 RoadSpec? s = t != null ? Spec(e, t, unitsPerMeter) : null;
@@ -218,7 +226,29 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
-            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter));
+            return specs;
+        }
+
+        /// <summary>Elevation marks on the roads (metres; values relative to the base elevation of the roads).</summary>
+        public static List<RoadLevelMark> LevelMarks(IEnumerable<SiteElement> elements, double unitsPerMeter = 1.0)
+        {
+            var list = new List<RoadLevelMark>();
+            foreach (SiteElement e in elements)
+            {
+                if (e.TypeId == LevelMarkType && e.Geometry is PointGeometry pg)
+                {
+                    list.Add(new RoadLevelMark(e.Id, new Vec2(pg.Position.X / unitsPerMeter, pg.Position.Y / unitsPerMeter), e.Parameters.Number("level", 0)));
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>Height profiles of the roads from their elevation marks.</summary>
+        public static List<RoadProfile> Profiles(IEnumerable<SiteElement> elements, ElementCatalog catalog, double unitsPerMeter = 1.0)
+        {
+            List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
+            return RoadLevels.Profiles(Specs(all, catalog, unitsPerMeter), LevelMarks(all, unitsPerMeter));
         }
 
         /// <summary>
@@ -256,12 +286,18 @@ namespace SiteDesignPro.Core.Roads
                 list.Add(e);
             }
 
+            // with elevation marks the surfaces follow the road profiles in 3D (triangles on a 0,5 m grid)
+            List<RoadProfile>? profiles = LevelMarks(all).Count > 0 ? Profiles(all, catalog) : null;
             foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
             {
                 (string type, string name) = LevelTypes[band.Key];
                 foreach (RoadRegion region in band.Value)
                 {
                     Add(type, name, new PolygonGeometry(ToRing(region.Outer, z), region.Holes.Select(h => ToRing(h, z)).ToList()));
+                    if (profiles != null)
+                    {
+                        list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(RoadLevels.Drape(region, profiles)));
+                    }
                 }
             }
 

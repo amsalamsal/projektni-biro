@@ -373,6 +373,42 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void LevelMarks_GiveTheRoadAProfile_TheSlopeIsChecked_AndTheSurfacesAreDraped()
+        {
+            var elements = new List<SiteElement> { Path(RoadElements.StreetType, 0, 0, 100, 0) };
+            ElementType mt = Cat.RequireType(RoadElements.LevelMarkType);
+            SiteElement Mark(double x, double y, double v)
+            {
+                var e = new SiteElement(Guid.NewGuid().ToString(), RoadElements.LevelMarkType, new PointGeometry(new Vec3(x, y, 0), 0)) { Parameters = mt.CreateDefaultParameters() };
+                e.Parameters["level"] = ParamValue.Of(v);
+                return e;
+            }
+
+            elements.Add(Mark(10, 1, 0));
+            elements.Add(Mark(60, -2, -1));
+            elements.Add(Mark(70, 0, 0.5)); // 1,5 m over 10 m: 15 %
+
+            List<RoadProfile> profiles = RoadElements.Profiles(elements, Cat);
+            RoadProfile p = Assert.Single(profiles);
+            Assert.Equal(0, p.At(0), 6);
+            Assert.Equal(-0.5, p.At(35), 6);
+            Assert.Equal(0.5, p.At(95), 6);
+            List<RoadSlope> slopes = RoadLevels.Slopes(profiles);
+            Assert.Equal(2, slopes.Count);
+            Assert.False(slopes[0].TooSteep);
+            Assert.True(slopes[1].TooSteep);
+            Assert.Equal(0.15, slopes[1].Slope, 6);
+
+            // the generated surfaces carry triangles following the profile
+            SiteElement carriageway = RoadElements.Derived(elements, Cat).First(e => e.TypeId == "road.carriageway");
+            string tri = carriageway.Custom["triangles"].AsText();
+            Assert.False(string.IsNullOrEmpty(tri));
+            var zs = tri.Split('|').SelectMany(t => t.Split(';')).Select(v => double.Parse(v.Split(',')[2], System.Globalization.CultureInfo.InvariantCulture)).ToList();
+            Assert.InRange(zs.Min(), -1.0001, -0.9);
+            Assert.InRange(zs.Max(), 0.4, 0.5001);
+        }
+
+        [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {
             // crossing 4 m along the road (first edge) and 5,5 m across it: 6 bars of 0,50 m with 0,50 m gaps
