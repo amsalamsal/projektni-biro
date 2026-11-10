@@ -389,24 +389,35 @@ namespace SiteDesignPro.Core.Roads
                 return tris;
             }
 
-            double Dist(Vec2 p)
+            // a plane: the height grows with the distance from the kerb line, measured square to it from the
+            // point of the kerb line nearest to the middle of the ramp
+            Vec2 c0 = new Vec2(outline.Average(p => p.X), outline.Average(p => p.Y));
+            Vec2 foot = c0;
+            double best = double.MaxValue;
+            foreach (List<Vec2> line in kerbLines)
             {
-                double best = double.MaxValue;
-                foreach (List<Vec2> line in kerbLines)
+                for (int i = 0; i < line.Count; i++)
                 {
-                    for (int i = 0; i < line.Count; i++)
+                    Vec2 a = line[i], b = line[(i + 1) % line.Count];
+                    Vec2 ab = b - a;
+                    double l2 = ab.Dot(ab);
+                    double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (c0 - a).Dot(ab) / l2));
+                    Vec2 f = a + (ab * t);
+                    if (f.DistanceTo(c0) < best)
                     {
-                        Vec2 a = line[i], b = line[(i + 1) % line.Count];
-                        Vec2 ab = b - a;
-                        double l2 = ab.Dot(ab);
-                        double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
-                        best = Math.Min(best, (a + (ab * t)).DistanceTo(p));
+                        best = f.DistanceTo(c0);
+                        foot = f;
                     }
                 }
-
-                return best;
             }
 
+            if (best < 1e-6)
+            {
+                return tris;
+            }
+
+            Vec2 n = (c0 - foot).Normalized();
+            double Dist(Vec2 p) => Math.Max(0, (p - foot).Dot(n));
             double depth = outline.Max(Dist);
             if (depth < 0.1)
             {
@@ -414,8 +425,7 @@ namespace SiteDesignPro.Core.Roads
             }
 
             Vec3 P(Vec2 p) => p.WithZ(baseHeight(p) + (rise * Math.Min(1, Dist(p) / depth)));
-            Vec2 c = new Vec2(outline.Average(p => p.X), outline.Average(p => p.Y));
-            Vec3 pc = P(c);
+            Vec3 pc = P(c0);
             for (int i = 0; i < outline.Count; i++)
             {
                 tris.Add(new[] { pc, P(outline[i]), P(outline[(i + 1) % outline.Count]) });
