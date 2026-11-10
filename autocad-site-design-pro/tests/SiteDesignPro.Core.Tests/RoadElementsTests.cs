@@ -290,6 +290,79 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void StreetToARoundabout_InMillimetres_EndsSquare_AlsoItsArcs()
+        {
+            ElementType t = Cat.RequireType(RoadElements.StreetType);
+            SiteElement Street(Ring ring, bool closed, params (string Key, ParamValue Value)[] p)
+            {
+                var e = new SiteElement(Guid.NewGuid().ToString(), RoadElements.StreetType, new PathGeometry(ring, closed)) { Parameters = t.CreateDefaultParameters(), Label = "U" };
+                foreach ((string key, ParamValue value) in p)
+                {
+                    e.Parameters[key] = value;
+                }
+
+                return e;
+            }
+
+            var elements = new List<SiteElement>
+            {
+                Street(new Ring(new List<Vec3> { new Vec3(11000, 0, 0), new Vec3(-11000, 0, 0) }, new List<double> { 1, 1 }), true,
+                    ("direction", ParamValue.Of("one_way")), ("lanesRight", ParamValue.Of(1.0)), ("laneWidth", ParamValue.Of(6.0)), ("sidewalkLeft", ParamValue.Of(0.0)), ("sidewalkRight", ParamValue.Of(1.6)),
+                    ("bikeLeft", ParamValue.Of(0.0)), ("bikeRight", ParamValue.Of(0.0)), ("arrows", ParamValue.Of(false))),
+            };
+            for (int i = 0; i < 3; i++)
+            {
+                double a = i * 2 * Math.PI / 3;
+                elements.Add(Street(new Ring(new List<Vec3> { new Vec3(Math.Cos(a) * 14000, Math.Sin(a) * 14000, 0), new Vec3(Math.Cos(a) * 39000, Math.Sin(a) * 39000, 0) }), false,
+                    ("bikeLeft", ParamValue.Of(0.0)), ("bikeRight", ParamValue.Of(0.0))));
+            }
+
+            elements.Add(Street(new Ring(new List<Vec3> { new Vec3(14732.4, -24791.2, 0), new Vec3(7350.75, -12162.3, 0) }), false, ("bikeLeft", ParamValue.Of(1.5)), ("bikeRight", ParamValue.Of(1.5))));
+            RoadNetworkResult res = RoadElements.Network(elements, Cat, 1000)!;
+
+            var end = new Vec2(14.7324, -24.7912);
+            Vec2 dir = (end - new Vec2(7.35075, -12.1623)).Normalized();
+            void Check(string what, RoadLoop loop)
+            {
+                int n = loop.Points.Count;
+                for (int i = 0; i < n; i++)
+                {
+                    Vec2 p = loop.Points[i], q = loop.Points[(i + 1) % n];
+                    var probe = new List<Vec2> { p };
+                    double b = loop.Bulges[i];
+                    if (Math.Abs(b) > 1e-9)
+                    {
+                        Vec2 chord = q - p;
+                        Vec2 mid = p + (chord * 0.5);
+                        probe.Add(mid - (chord.Normalized().Perp() * (b * chord.Length / 2)));
+                    }
+
+                    foreach (Vec2 x in probe.Where(x => x.DistanceTo(end) < 10))
+                    {
+                        double along = (x - end).Dot(dir);
+                        Assert.True(along < 0.01, what + " reaches " + along.ToString("0.###") + " m past the dead end at " + x + " (bulge " + b.ToString("0.####") + ")");
+                    }
+                }
+            }
+
+            foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
+            {
+                foreach (RoadRegion region in band.Value)
+                {
+                    Check(band.Key + " band", region.Outer);
+                }
+            }
+
+            foreach (KeyValuePair<RoadLevel, List<RoadLoop>> level in res.Outlines)
+            {
+                foreach (RoadLoop loop in level.Value)
+                {
+                    Check(level.Key + " outline", loop);
+                }
+            }
+        }
+
+        [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {
             // crossing 4 m along the road (first edge) and 5,5 m across it: 6 bars of 0,50 m with 0,50 m gaps
