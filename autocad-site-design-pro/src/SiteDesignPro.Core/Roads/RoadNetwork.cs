@@ -317,8 +317,9 @@ namespace SiteDesignPro.Core.Roads
                     }
                 }
 
-                // pedestrian crossings away from the junctions: a ramp at both ends, centred on the crossing
-                PathsD done = new PathsD(result.Ramps.Select(l => Positive(l.Points.Select(q => q - origin))));
+                // pedestrian crossings: a ramp at both ends, centred on the crossing; it replaces a corner ramp on the
+                // same kerb nearby (one ramp where people actually cross)
+                var atCrossings = new HashSet<RoadLoop>();
                 foreach (IReadOnlyList<Vec2> area in crossings ?? Enumerable.Empty<IReadOnlyList<Vec2>>())
                 {
                     if (area.Count < 3)
@@ -326,15 +327,17 @@ namespace SiteDesignPro.Core.Roads
                         continue;
                     }
 
-                    foreach (PathD ramp in CrossingRamps(area.Select(q => q - origin).ToList(), roads, behindKerb, walk))
+                    foreach ((PathD ramp, Vec2 along) in CrossingRamps(area.Select(q => q - origin).ToList(), roads, behindKerb, walk))
                     {
-                        if (Clipper.Intersect(new PathsD { ramp }, done, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) > 0.1)
+                        Vec2 c = new Vec2(ramp.Average(q => q.x), ramp.Average(q => q.y)) + origin;
+                        result.Ramps.RemoveAll(r =>
                         {
-                            continue;
-                        }
-
-                        done.Add(ramp);
-                        result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
+                            Vec2 d = new Vec2(r.Points.Average(q => q.X), r.Points.Average(q => q.Y)) - c;
+                            return !atCrossings.Contains(r) && Math.Abs(d.Dot(along)) < CrossingRampReach && Math.Abs(d.Dot(along.Perp())) < 1.0;
+                        });
+                        var loop = new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList());
+                        atCrossings.Add(loop);
+                        result.Ramps.Add(loop);
                     }
                 }
             }
@@ -530,6 +533,9 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Width of an accessible kerb ramp along the kerb.</summary>
         public const double RampWidth = 1.2;
 
+        /// <summary>A corner ramp closer than this along the kerb to a crossing ramp is left out.</summary>
+        public const double CrossingRampReach = 10.0;
+
         /// <summary>
         /// Ramps at the two tangent points of a corner fillet: 1,20 m along the straight kerb, starting where the
         /// corner arc ends, across everything behind the kerb (kerb, bike lane, sidewalk).
@@ -672,7 +678,7 @@ namespace SiteDesignPro.Core.Roads
         /// Ramps (1,20 m wide) at the two ends of a pedestrian crossing: across the kerb, bike lane and sidewalk of the
         /// road the crossing lies on, on the sides with a sidewalk.
         /// </summary>
-        private static IEnumerable<PathD> CrossingRamps(List<Vec2> area, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
+        private static IEnumerable<(PathD Ramp, Vec2 Along)> CrossingRamps(List<Vec2> area, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
         {
             Vec2 c = new Vec2(area.Average(q => q.X), area.Average(q => q.Y));
             RoadSpec? road = null;
@@ -730,7 +736,7 @@ namespace SiteDesignPro.Core.Roads
                 {
                     if (Clipper.PointInPolygon(new PointD(probe.X, probe.Y), piece) != PointInPolygonResult.IsOutside)
                     {
-                        yield return piece;
+                        yield return (piece, along);
                     }
                 }
             }

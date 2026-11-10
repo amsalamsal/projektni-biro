@@ -157,6 +157,17 @@ namespace SiteDesignPro.Core.Tests
             Assert.Single(one.Ramps);
         }
 
+        [Fact]
+        public void CrossingNearAJunction_ReplacesTheCornerRampsOnItsKerbs()
+        {
+            // crossing on road A just after the corner (corner ramps of A at x 9,0–10,2 on both kerbs)
+            var box = new List<Vec2> { new Vec2(13, -3), new Vec2(17, -3), new Vec2(17, 3), new Vec2(13, 3) };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, new[] { box }, new[] { box });
+            Assert.Equal(8, res.Ramps.Count);
+            Assert.DoesNotContain(res.Ramps, r => r.Points.Average(p => p.X) > 8.5 && r.Points.Average(p => p.X) < 11);
+            Assert.Equal(2, res.Ramps.Count(r => Math.Abs(r.Points.Average(p => p.X) - 15) < 0.1));
+        }
+
         private static double Area(IReadOnlyList<Vec2> p)
         {
             double s = 0;
