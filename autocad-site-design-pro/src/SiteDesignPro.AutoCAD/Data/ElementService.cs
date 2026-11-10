@@ -401,7 +401,7 @@ namespace SiteDesignPro.AutoCAD.Data
             }
 
             EraseAux(element.Id, "edge");
-            if (Core.Roads.RoadElements.IsNetworkRoad(type))
+            if (Core.Roads.RoadElements.IsNetworkRoad(type) || type.Id == Core.Roads.GarageRamp.Type)
             {
                 // a road of the road network is its axis; carriageway, kerbs and sidewalks are drawn by the network
                 if (curve is Polyline axis)

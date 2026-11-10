@@ -102,7 +102,8 @@ namespace SiteDesignPro.AutoCAD.UI
                       Small("Pješački prijelaz", "SDPPJESACKIPRIJELAZ", "roads", "Bijele pruge 0,50 m s razmakom 0,50 m preko svih traka; na ulici se sam okrene i uzme trake."),
                       Small("Osvježi ceste", "SDPCESTEOSVJEZI", "reload", "Ponovo crta kolovoze, ivičnjake, trotoare i oznake svih ulica i cesta (radi se i samo).")),
                 Stack(Small("Kota saobraćajnice", "SDPKOTACESTE", "spotlevel", "Simbol visine na ulici: +/− u odnosu na osnovnu visinu saobraćajnica; između kota visina se mijenja linearno, nagib preko 10 % se odmah javlja."),
-                      Small("Visine saobraćajnica", "SDPVISINECESTA", "slope", "Ravan ili neravan teren i osnovna visina saobraćajnica (m n.v.).")),
+                      Small("Visine saobraćajnica", "SDPVISINECESTA", "slope", "Ravan ili neravan teren i osnovna visina saobraćajnica (m n.v.)."),
+                      Small("Garažna rampa", "SDPGARAZNARAMPA", "roads", "Pravolinijska, polukružna ili kružna (spiralna) rampa, jednosmjerna ili dvosmjerna: srednja linija, žute linije zaštitnog razmaka, strelice i L / h / nagib (najviše 17 %).")),
                 Stack(Small("Niz parking mjesta", "SDPPARKING", "parking", "Red parking mjesta uz ivicu prolaza."),
                       Small("Pretvori krive", "SDPCONVERT", "convert", "Postojeće linije ili krugove pretvara u elemente."))));
 

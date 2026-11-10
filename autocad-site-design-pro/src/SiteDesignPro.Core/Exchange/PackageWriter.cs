@@ -96,6 +96,7 @@ namespace SiteDesignPro.Core.Exchange
             // the road network adds its carriageway, bike lanes, kerbs, sidewalks, lane lines and arrows
             List<SiteElement> elementList = packageFrameElements.ToList();
             elementList.AddRange(Roads.RoadElements.Derived(elementList, catalog));
+            elementList.AddRange(Roads.GarageRamp.Derived(elementList, catalog));
             foreach (SiteElement e in elementList)
             {
                 ElementType? type = catalog.FindType(e.TypeId);
@@ -148,7 +149,7 @@ namespace SiteDesignPro.Core.Exchange
                     el["custom"] = e.Custom.ToJson();
                 }
 
-                if (Roads.RoadElements.IsNetworkRoad(type))
+                if (Roads.RoadElements.IsNetworkRoad(type) || type.Id == Roads.GarageRamp.Type)
                 {
                     // its surfaces are the generated network elements; SketchUp builds no strip of its own
                     // (added after the content hash, so it does not count as a change of the road)

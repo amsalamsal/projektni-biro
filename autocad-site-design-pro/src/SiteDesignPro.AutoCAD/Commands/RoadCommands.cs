@@ -26,7 +26,7 @@ namespace SiteDesignPro.AutoCAD.Commands
     /// lines and arrows are drawn together, so roads never overlap and every junction gets rounded kerbs. Pedestrian
     /// crossings are elements (road.pedestrian_crossing).
     /// </summary>
-    public sealed class RoadCommands
+    public sealed partial class RoadCommands
     {
         internal const string NetOwner = "roadnet";
         internal const string LayerName = "Saobraćajnice";
@@ -278,7 +278,11 @@ namespace SiteDesignPro.AutoCAD.Commands
             layerRecord.IsLocked = false;
             try
             {
-                return Redraw(ctx, managed.Select(m => m.Element!).ToList(), roads.Count, verbose);
+                List<SiteElement> elements = managed.Select(m => m.Element!).ToList();
+                RoadNetworkResult? res = Redraw(ctx, elements, roads.Count, verbose);
+                DrawLevels(ctx, elements);
+                DrawGarageRamps(ctx, elements);
+                return res;
             }
             finally
             {
@@ -464,6 +468,61 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
+            if (hatches.Count > 0)
+            {
+                var dot = (DrawOrderTable)ctx.Tr.GetObject(ms.DrawOrderTableId, OpenMode.ForWrite);
+                dot.MoveToBottom(hatches);
+            }
+
+            if (verbose)
+            {
+                foreach (string note in res.Notes)
+                {
+                    ctx.Write("  " + note);
+                }
+
+                int junctions = res.Outlines.TryGetValue(RoadLevel.Carriageway, out List<RoadLoop>? edges)
+                    ? edges.Sum(l => l.ArcRadii().Count(r => Math.Abs(r - res.EffectiveRadius) < 0.05))
+                    : 0;
+                ctx.Write(Bs.T("Ulice i ceste ({0}): kolovoz {1}, biciklističke staze {2}, trotoari {3}; {4} oznaka traka, {5} strelica; zaobljenih uglova raskrsnica: {6}; rampi za invalide: {7}.",
+                    roadCount, Bs.SquareMeters(res.Area(RoadLevel.Carriageway), 1), Bs.SquareMeters(res.Area(RoadLevel.Bike), 1),
+                    Bs.SquareMeters(res.Area(RoadLevel.Sidewalk), 1), res.Markings.Count, res.Arrows.Count, junctions, res.Ramps.Count));
+                ctx.Write("Radijus ivičnjaka (stvarni) " + Bs.Meters(res.ActualRadius) + " = efektivni radijus (ivičnjak je na ivici kolovoza)" +
+                          ". Radijus luka vidite kad kursor stoji na ivičnjaku. Nakon izmjene, pomjeranja ili brisanja ulice crtež se osvježava sam.");
+            }
+
+            if (failed > 0)
+            {
+                ctx.Write("Upozorenje: " + failed + " površina nije bilo moguće išrafirati (vjerovatno vrlo uske ili samopresijecajuće); provjerite osovine.");
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// Elevation marks: the symbol (quartered circle, line, relative height above, absolute height below) and the
+        /// longitudinal slope between consecutive marks of a road; slopes over 10 % are reported at once.
+        /// </summary>
+        internal static void DrawLevels(CommandContext ctx, List<SiteElement> elements)
+        {
+            double k = ctx.K;
+            int failed = 0;
+            ObjectId layer = RoadLayer(ctx);
+            var ms = (BlockTableRecord)ctx.Tr.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(ctx.Db), OpenMode.ForWrite);
+            void Add(Entity e, string role, Color? color, int transparency)
+            {
+                e.SetDatabaseDefaults(ctx.Db);
+                e.LayerId = layer;
+                if (color != null)
+                {
+                    e.Color = color;
+                }
+
+                ms.AppendEntity(e);
+                ctx.Tr.AddNewlyCreatedDBObject(e, true);
+                ElementStore.WriteAux(e, NetOwner, role, ctx.Tr);
+            }
+
             // elevation marks: the symbol (quartered circle, line, relative height above, absolute height below) and
             // the longitudinal slope between consecutive marks; slopes over 10 % are reported at once
             List<RoadLevelMark> marks = RoadElements.LevelMarks(elements, k);
@@ -473,43 +532,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 double th = 0.35 * k;
                 foreach (RoadLevelMark m in marks)
                 {
-                    Point3d p0 = new Point3d(m.Position.X * k, m.Position.Y * k, 0);
-                    double r = 0.25 * k;
-                    Add(new Circle(p0, Vector3d.ZAxis, r), "kota", null, 0);
-                    foreach (int q in new[] { 0, 2 })
-                    {
-                        var wedge = new Polyline();
-                        double a0 = (q * Math.PI / 2) + (Math.PI / 2);
-                        wedge.AddVertexAt(0, new Point2d(p0.X, p0.Y), 0, 0, 0);
-                        wedge.AddVertexAt(1, new Point2d(p0.X + (r * Math.Cos(a0)), p0.Y + (r * Math.Sin(a0))), Math.Tan(Math.PI / 8), 0, 0);
-                        wedge.AddVertexAt(2, new Point2d(p0.X + (r * Math.Cos(a0 + (Math.PI / 2))), p0.Y + (r * Math.Sin(a0 + (Math.PI / 2)))), 0, 0, 0);
-                        wedge.Closed = true;
-                        try
-                        {
-                            var hw = new Hatch();
-                            hw.SetDatabaseDefaults(ctx.Db);
-                            hw.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
-                            BlockTableRecord msp = (BlockTableRecord)ctx.Tr.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(ctx.Db), OpenMode.ForWrite);
-                            ObjectId wid = msp.AppendEntity(wedge);
-                            ctx.Tr.AddNewlyCreatedDBObject(wedge, true);
-                            hw.AppendLoop(HatchLoopTypes.Outermost, new ObjectIdCollection(new[] { wid }));
-                            hw.EvaluateHatch(true);
-                            wedge.Erase();
-                            Add(hw, "kota", null, 0);
-                        }
-                        catch (Autodesk.AutoCAD.Runtime.Exception)
-                        {
-                            failed++;
-                        }
-                    }
-
-                    var line = new Line(new Point3d(p0.X - (0.6 * k), p0.Y, 0), new Point3d(p0.X + (3.2 * k), p0.Y, 0));
-                    Add(line, "kota", null, 0);
-                    Add(new DBText { Position = new Point3d(p0.X + (0.5 * k), p0.Y + (0.1 * k), 0), Height = th, TextString = LevelText(m.Value) }, "kota", null, 0);
-                    if (levels.Defined)
-                    {
-                        Add(new DBText { Position = new Point3d(p0.X + (0.5 * k), p0.Y - (0.1 * k) - (th * 0.8), 0), Height = th * 0.7, TextString = Bs.Num(levels.Base + m.Value, 2) + " m n.v." }, "kota", null, 0);
-                    }
+                    failed += LevelSymbol(ctx, Add, m.Position, m.Value, levels);
                 }
 
                 List<RoadProfile> profiles = RoadElements.Profiles(elements, ctx.Catalog, k);
@@ -544,36 +567,53 @@ namespace SiteDesignPro.AutoCAD.Commands
                               Bs.Num(sl.Slope * 100, 2) + " % (dozvoljeno najviše 10 %; garažne rampe 17 %).");
                 }
             }
+        }
 
-            if (hatches.Count > 0)
+        /// <summary>The elevation symbol: quartered circle, line, relative height above and absolute height below.</summary>
+        internal static int LevelSymbol(CommandContext ctx, Action<Entity, string, Color?, int> add, Vec2 position, double value, RoadLevelSettings levels)
+        {
+            double k = ctx.K;
+            double th = 0.35 * k;
+            int failed = 0;
+            Point3d p0 = new Point3d(position.X * k, position.Y * k, 0);
+            double r = 0.25 * k;
+            add(new Circle(p0, Vector3d.ZAxis, r), "kota", null, 0);
+            foreach (int q in new[] { 0, 2 })
             {
-                var dot = (DrawOrderTable)ctx.Tr.GetObject(ms.DrawOrderTableId, OpenMode.ForWrite);
-                dot.MoveToBottom(hatches);
-            }
-
-            if (verbose)
-            {
-                foreach (string note in res.Notes)
+                var wedge = new Polyline();
+                double a0 = (q * Math.PI / 2) + (Math.PI / 2);
+                wedge.AddVertexAt(0, new Point2d(p0.X, p0.Y), 0, 0, 0);
+                wedge.AddVertexAt(1, new Point2d(p0.X + (r * Math.Cos(a0)), p0.Y + (r * Math.Sin(a0))), Math.Tan(Math.PI / 8), 0, 0);
+                wedge.AddVertexAt(2, new Point2d(p0.X + (r * Math.Cos(a0 + (Math.PI / 2))), p0.Y + (r * Math.Sin(a0 + (Math.PI / 2)))), 0, 0, 0);
+                wedge.Closed = true;
+                try
                 {
-                    ctx.Write("  " + note);
+                    var hw = new Hatch();
+                    hw.SetDatabaseDefaults(ctx.Db);
+                    hw.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
+                    BlockTableRecord msp = (BlockTableRecord)ctx.Tr.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(ctx.Db), OpenMode.ForWrite);
+                    ObjectId wid = msp.AppendEntity(wedge);
+                    ctx.Tr.AddNewlyCreatedDBObject(wedge, true);
+                    hw.AppendLoop(HatchLoopTypes.Outermost, new ObjectIdCollection(new[] { wid }));
+                    hw.EvaluateHatch(true);
+                    wedge.Erase();
+                    add(hw, "kota", null, 0);
                 }
-
-                int junctions = res.Outlines.TryGetValue(RoadLevel.Carriageway, out List<RoadLoop>? edges)
-                    ? edges.Sum(l => l.ArcRadii().Count(r => Math.Abs(r - res.EffectiveRadius) < 0.05))
-                    : 0;
-                ctx.Write(Bs.T("Ulice i ceste ({0}): kolovoz {1}, biciklističke staze {2}, trotoari {3}; {4} oznaka traka, {5} strelica; zaobljenih uglova raskrsnica: {6}; rampi za invalide: {7}.",
-                    roadCount, Bs.SquareMeters(res.Area(RoadLevel.Carriageway), 1), Bs.SquareMeters(res.Area(RoadLevel.Bike), 1),
-                    Bs.SquareMeters(res.Area(RoadLevel.Sidewalk), 1), res.Markings.Count, res.Arrows.Count, junctions, res.Ramps.Count));
-                ctx.Write("Radijus ivičnjaka (stvarni) " + Bs.Meters(res.ActualRadius) + " = efektivni radijus (ivičnjak je na ivici kolovoza)" +
-                          ". Radijus luka vidite kad kursor stoji na ivičnjaku. Nakon izmjene, pomjeranja ili brisanja ulice crtež se osvježava sam.");
+                catch (Autodesk.AutoCAD.Runtime.Exception)
+                {
+                    failed++;
+                }
             }
 
-            if (failed > 0)
+            var line = new Line(new Point3d(p0.X - (0.6 * k), p0.Y, 0), new Point3d(p0.X + (3.2 * k), p0.Y, 0));
+            add(line, "kota", null, 0);
+            add(new DBText { Position = new Point3d(p0.X + (0.5 * k), p0.Y + (0.1 * k), 0), Height = th, TextString = LevelText(value) }, "kota", null, 0);
+            if (levels.Defined)
             {
-                ctx.Write("Upozorenje: " + failed + " površina nije bilo moguće išrafirati (vjerovatno vrlo uske ili samopresijecajuće); provjerite osovine.");
+                add(new DBText { Position = new Point3d(p0.X + (0.5 * k), p0.Y - (0.1 * k) - (th * 0.8), 0), Height = th * 0.7, TextString = Bs.Num(levels.Base + value, 2) + " m n.v." }, "kota", null, 0);
             }
 
-            return res;
+            return failed;
         }
 
         private static int EraseNetwork(CommandContext ctx)
@@ -713,7 +753,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ drawing helpers
 
-        private static Hatch RegionHatch(RoadRegion region, double k)
+        internal static Hatch RegionHatch(RoadRegion region, double k)
         {
             var h = new Hatch();
             h.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
@@ -745,7 +785,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             return (v, b);
         }
 
-        private static Polyline LoopPolyline(RoadLoop loop, double k)
+        internal static Polyline LoopPolyline(RoadLoop loop, double k)
         {
             var pl = new Polyline();
             for (int i = 0; i < loop.Points.Count; i++)
@@ -757,7 +797,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             return pl;
         }
 
-        private static ObjectId RoadLayer(CommandContext ctx) => ctx.Svc.Layers.Ensure(new LayerDefinition
+        internal static ObjectId RoadLayer(CommandContext ctx) => ctx.Svc.Layers.Ensure(new LayerDefinition
         {
             Key = "roads_network",
             Name = LayerName,
@@ -881,7 +921,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// <summary>Relative height as written above the line of the symbol: +5,00 / −1,00 / ±0,00.</summary>
         internal static string LevelText(double v) => Math.Abs(v) < 0.005 ? "±0,00" : (v > 0 ? "+" : "−") + Bs.Num(Math.Abs(v), 2);
 
-        private static void Guarded(Action body)
+        internal static void Guarded(Action body)
         {
             try
             {
@@ -935,7 +975,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
                 (string Id, string Type)? key = ElementStore.ReadKey(ent);
-                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
+                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || key.Value.Type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
                 {
                     Dirty.Add(db);
                 }
