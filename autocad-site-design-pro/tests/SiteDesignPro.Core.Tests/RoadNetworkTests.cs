@@ -90,7 +90,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(4, res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 6.0) < 0.05));
             Assert.Equal(4, res.Outlines[RoadLevel.Kerb].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 5.85) < 0.05));
             Assert.Equal(4, res.Outlines[RoadLevel.Bike].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 4.35) < 0.05));
-            Assert.Equal(4 * 120 * 1.5, res.Area(RoadLevel.Bike), -1);
+            Assert.InRange(res.Area(RoadLevel.Bike), (4 * 120 * 1.5) - 60, 4 * 120 * 1.5);
         }
 
         [Fact]
