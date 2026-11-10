@@ -393,54 +393,40 @@ namespace SiteDesignPro.Core.Roads
 
         // ------------------------------------------------------------------ bands and closing
 
-        /// <summary>Area within <paramref name="left"/> metres left and <paramref name="right"/> metres right of the axis, square ends.</summary>
+        /// <summary>
+        /// Area within <paramref name="left"/> metres left and <paramref name="right"/> metres right of the axis, square
+        /// ends: the polygon between the two offset lines (mitred joints), so curved edges are clean offsets of the
+        /// axis without the small dents that pieces per segment leave.
+        /// </summary>
         internal static PathsD Band(List<Vec2> axis, bool closed, double left, double right)
         {
-            var paths = new PathsD();
-            int n = axis.Count;
-            int segs = closed ? n : n - 1;
-            for (int s = 0; s < segs; s++)
+            if (axis.Count < 2 || left + right < 1e-9)
             {
-                Vec2 p = axis[s], q = axis[(s + 1) % n];
-                Vec2 u = (q - p).Normalized();
-                Vec2 nrm = u.Perp();
-                paths.Add(Positive(new[] { p + (nrm * left), q + (nrm * left), q - (nrm * right), p - (nrm * right) }));
+                return new PathsD();
             }
 
-            // joints: a round fan on the outer side of each bend
-            for (int v = closed ? 0 : 1; v < (closed ? n : n - 1); v++)
+            if (!closed)
             {
-                Vec2 prev = axis[(v - 1 + n) % n], cur = axis[v], next = axis[(v + 1) % n];
-                Vec2 u1 = (cur - prev).Normalized(), u2 = (next - cur).Normalized();
-                double turn = u1.Cross(u2);
-                if (Math.Abs(turn) < 1e-9 && u1.Dot(u2) > 0)
+                List<Vec2> l = OffsetLine(axis, false, left);
+                List<Vec2> r = OffsetLine(axis, false, -right);
+                r.Reverse();
+                var poly = new PathD(l.Concat(r).Select(p => new PointD(p.X, p.Y)));
+                if (Clipper.Area(poly) < 0)
                 {
-                    continue;
+                    poly.Reverse();
                 }
 
-                bool outerRight = turn > 0;
-                double d = outerRight ? right : left;
-                if (d <= 0)
-                {
-                    continue;
-                }
-
-                Vec2 a1 = outerRight ? -u1.Perp() : u1.Perp();
-                Vec2 a2 = outerRight ? -u2.Perp() : u2.Perp();
-                double start = a1.Angle;
-                double sweep = Math.Atan2(a1.Cross(a2), a1.Dot(a2));
-                int steps = Math.Max(2, (int)Math.Ceiling(Math.Abs(sweep) / (Math.PI / 36)));
-                var fan = new List<Vec2> { cur };
-                for (int k = 0; k <= steps; k++)
-                {
-                    double ang = start + (sweep * k / steps);
-                    fan.Add(cur + (new Vec2(Math.Cos(ang), Math.Sin(ang)) * d));
-                }
-
-                paths.Add(Positive(fan));
+                // inverted lobes (an offset larger than the radius on the inside of a tight bend) are left out
+                return Clipper.BooleanOp(ClipType.Union, new PathsD { poly }, null, FillRule.Positive, Precision);
             }
 
-            return paths;
+            List<Vec2> outer = OffsetLine(axis, true, left);
+            List<Vec2> inner = OffsetLine(axis, true, -right);
+            outer.RemoveAt(outer.Count - 1);
+            inner.RemoveAt(inner.Count - 1);
+            PathsD a = Clipper.BooleanOp(ClipType.Union, new PathsD { Positive(outer) }, null, FillRule.Positive, Precision);
+            PathsD b = Clipper.BooleanOp(ClipType.Union, new PathsD { Positive(inner) }, null, FillRule.Positive, Precision);
+            return Clipper.BooleanOp(ClipType.Xor, a, b, FillRule.NonZero, Precision);
         }
 
         private static PathsD Union(PathsD paths) => Clipper.BooleanOp(ClipType.Union, paths, null, FillRule.NonZero, Precision);
