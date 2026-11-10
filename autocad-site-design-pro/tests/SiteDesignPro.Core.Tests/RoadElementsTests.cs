@@ -287,6 +287,10 @@ namespace SiteDesignPro.Core.Tests
             Assert.True(res.Area(RoadLevel.Carriageway) < (Math.PI * 14 * 14) - island + (36 * 6) + 30);
             Assert.Contains(res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()), x => Math.Abs(x - 6) < 0.1);
             Assert.True(res.Area(RoadLevel.Sidewalk) > 0);
+
+            // accessible ramps on both sides of the arm where its straight part starts (the ring side is curved)
+            Assert.Equal(2, res.Ramps.Count);
+            Assert.All(res.Ramps, r => Assert.All(r.Points, p => Assert.True(p.X > 14, "ramp at " + p)));
         }
 
         [Fact]

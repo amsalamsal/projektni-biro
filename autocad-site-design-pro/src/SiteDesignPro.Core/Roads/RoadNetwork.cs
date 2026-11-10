@@ -513,46 +513,82 @@ namespace SiteDesignPro.Core.Roads
 
             var pts = fillet.Select(q => new Vec2(q.x, q.y)).ToList();
 
-            // the corner point of the two kerb lines is the vertex between the two long straight edges; their other
-            // ends are the tangent points where the arc starts (the arc itself is made of short pieces)
-            double Len(int i) => (pts[(i + 1) % n] - pts[i]).Length;
-            int p = Enumerable.Range(0, n).OrderByDescending(i => Math.Min(Len((i - 1 + n) % n), Len(i))).First();
-            Vec2 corner = pts[p];
-            Vec2 Tip(int dir)
+            // straight edges of the fillet (runs of collinear pieces at least 0,5 m long) lie on straight kerb lines;
+            // the corner arc and a curved kerb (a roundabout ring) are made of short pieces
+            Vec2 Dir(int i) => (pts[(i + 1) % n] - pts[i]).Normalized();
+            var runs = new List<(int Start, int End, double Length)>();
+            var used = new bool[n];
+            for (int i0 = 0; i0 < n; i0++)
             {
-                // follow the straight edge from the corner point to its end (it may have points in between)
-                int j = (p + dir + n) % n;
-                Vec2 d = (pts[j] - corner).Normalized();
-                for (int guard = 0; guard < n; guard++)
+                if (used[i0] || (pts[(i0 + 1) % n] - pts[i0]).Length < 1e-9)
                 {
-                    int k = (j + dir + n) % n;
-                    Vec2 step = pts[k] - pts[j];
-                    if (k == p || step.Length < 1e-9 || Math.Abs(d.Cross(step.Normalized())) > 0.02 || d.Dot(step) < 0)
+                    continue;
+                }
+
+                // start a run at an edge whose previous edge turns
+                int prev = (i0 - 1 + n) % n;
+                if (Math.Abs(Dir(prev).Cross(Dir(i0))) < 0.02 && Dir(prev).Dot(Dir(i0)) > 0 && !used[prev] && prev != i0)
+                {
+                    continue;
+                }
+
+                int e = i0;
+                double len = (pts[(e + 1) % n] - pts[e]).Length;
+                used[e] = true;
+                while (true)
+                {
+                    int nx = (e + 1) % n;
+                    if (nx == i0 || used[nx] || Math.Abs(Dir(e).Cross(Dir(nx))) > 0.02 || Dir(e).Dot(Dir(nx)) < 0)
                     {
                         break;
                     }
 
-                    j = k;
+                    e = nx;
+                    used[e] = true;
+                    len += (pts[(e + 1) % n] - pts[e]).Length;
                 }
 
-                return pts[j];
+                if (len >= 0.5)
+                {
+                    runs.Add((i0, (e + 1) % n, len));
+                }
             }
 
-            // the tangent points lie at R / tan(angle / 2) from the corner point along the two kerb lines (the
-            // fillet's thin tips were trimmed with the slivers)
-            Vec2 d1 = (Tip(1) - corner).Normalized(), d2 = (Tip(-1) - corner).Normalized();
-            double angle = Math.Acos(Math.Max(-1, Math.Min(1, d1.Dot(d2))));
-            if (angle < 0.05 || angle > Math.PI - 0.05)
+            var starts = new List<(Vec2 Tip, Vec2 Along)>();
+            (int Start, int End, double Length)[] two = runs.OrderByDescending(x => x.Length).Take(2).ToArray();
+            int shared = two.Length == 2 ? (two[0].End == two[1].Start ? two[0].End : two[1].End == two[0].Start ? two[1].End : -1) : -1;
+            if (shared >= 0)
             {
-                yield break;
+                // two straight kerb lines meeting at the corner point: tangent points at R / tan(angle / 2)
+                Vec2 corner = pts[shared];
+                Vec2 d1 = (pts[two[0].End == shared ? two[0].Start : two[0].End] - corner).Normalized();
+                Vec2 d2 = (pts[two[1].End == shared ? two[1].Start : two[1].End] - corner).Normalized();
+                double angle = Math.Acos(Math.Max(-1, Math.Min(1, d1.Dot(d2))));
+                if (angle > 0.05 && angle < Math.PI - 0.05)
+                {
+                    double t = radius / Math.Tan(angle / 2);
+                    starts.Add((corner + (d1 * t), d1));
+                    starts.Add((corner + (d2 * t), d2));
+                }
+            }
+            else
+            {
+                // a straight kerb against a curved one: the arc starts at the end where the edge runs on smoothly;
+                // the thin tip trimmed with the slivers is about sqrt(0,04 R) long
+                foreach ((int st, int en, double _) in runs)
+                {
+                    Vec2 a0 = pts[st], b0 = pts[en];
+                    Vec2 d = (b0 - a0).Normalized();
+                    double turnA = Math.Abs(Dir((st - 1 + n) % n).Cross(d)) + (Dir((st - 1 + n) % n).Dot(d) < 0 ? 2 : 0);
+                    double turnB = Math.Abs(d.Cross(Dir(en))) + (d.Dot(Dir(en)) < 0 ? 2 : 0);
+                    (Vec2 tip, Vec2 along) = turnB <= turnA ? (b0, d) : (a0, -d);
+                    starts.Add((tip + (along * Math.Sqrt(0.04 * radius)), along));
+                }
             }
 
-            double t = radius / Math.Tan(angle / 2);
-            foreach (Vec2 tip in new[] { corner + (d1 * t), corner + (d2 * t) })
+            foreach ((Vec2 tip, Vec2 along) in starts)
             {
-
-                // along the kerb away from the corner, and across it away from the road
-                Vec2 along = (tip - corner).Normalized();
+                // across the kerb, away from the road
                 Vec2 across = along.Perp();
                 if (Inside(tip + (across * 0.3) + (along * 0.6), surface))
                 {
