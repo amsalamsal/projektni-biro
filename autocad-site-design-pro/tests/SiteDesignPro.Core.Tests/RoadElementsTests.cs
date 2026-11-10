@@ -340,7 +340,8 @@ namespace SiteDesignPro.Core.Tests
                     foreach (Vec2 x in probe.Where(x => x.DistanceTo(end) < 10))
                     {
                         double along = (x - end).Dot(dir);
-                        Assert.True(along < 0.01, what + " reaches " + along.ToString("0.###") + " m past the dead end at " + x + " (bulge " + b.ToString("0.####") + ")");
+                        Assert.True(along < 0.01, what + " reaches " + along.ToString("0.###") + " m past the dead end at " + x + " (bulge " + b.ToString("0.####") + ")\n" +
+                            string.Join("\n", loop.Points.Select((pp, j) => (pp, j)).Where(z => z.pp.DistanceTo(x) < 4).Select(z => z.pp.X.ToString("0.####") + " " + z.pp.Y.ToString("0.####") + " b=" + loop.Bulges[z.j].ToString("0.####"))));
                     }
                 }
             }
