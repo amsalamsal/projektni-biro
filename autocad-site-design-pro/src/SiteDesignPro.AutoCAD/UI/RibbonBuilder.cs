@@ -164,12 +164,19 @@ namespace SiteDesignPro.AutoCAD.UI
             Log.Info("Ribbon tab created with " + tab.Panels.Count + " panels.");
         }
 
-        /// <summary>Drop-down of all element types of the given categories; picking one starts placing or drawing it.</summary>
-        private static RibbonSplitButton Types(ElementCatalog cat, string title, string icon, params string[] categories)
+        /// <summary>Longest list shown at once; longer menus open sub-menus so every item fits on the screen.</summary>
+        private const int MaxMenuItems = 18;
+
+        /// <summary>
+        /// Drop-down of all element types of the given categories; picking one starts placing or drawing it. A long
+        /// list is split into sub-menus by category and, where a category is still too long, by subcategory.
+        /// </summary>
+        private static RibbonItem Types(ElementCatalog cat, string title, string icon, params string[] categories)
         {
             var names = categories.Select(c => CategoryName(cat, c)).ToList();
-            List<ElementType> types = cat.PlaceableTypes.Where(t => categories.Contains(t.Category) || t.ExtraPanels.Any(names.Contains)).ToList();
-            var split = new RibbonSplitButton
+            List<ElementType> types = cat.PlaceableTypes.Where(t => categories.Contains(t.Category) || t.ExtraPanels.Any(names.Contains))
+                .OrderBy(t => t.Subcategory).ThenBy(t => t.Name).ToList();
+            var menu = new RibbonMenuButton
             {
                 Text = title,
                 ShowText = true,
@@ -177,21 +184,66 @@ namespace SiteDesignPro.AutoCAD.UI
                 Size = RibbonItemSize.Standard,
                 Image = Icons.Get(icon, 16),
                 LargeImage = Icons.Get(icon, 32),
-                IsSplit = false,
-                IsSynchronizedWithCurrentItem = false,
-                ListStyle = RibbonSplitButtonListStyle.List,
                 ToolTip = new RibbonToolTip { Title = title, Content = "Odaberite element s liste: tačkasti se postavlja klikom, linijski i površinski se crtaju." },
             };
-            foreach (ElementType t in types.OrderBy(t => t.Subcategory).ThenBy(t => t.Name))
+
+            foreach (RibbonMenuItem item in MenuItems(cat, types, true))
             {
-                string command = t.Geometry == Core.Geometry.GeometryKind.Point ? "_SDPPLACE " : "_SDPDRAW ";
-                RibbonButton b = Small(t.Name, command, t.Category, PlacementTip(t));
-                b.CommandParameter = HintPrefix + t.Id + "|" + command;
-                b.Id = "SDP_TYPE_" + t.Id;
-                split.Items.Add(b);
+                menu.Items.Add(item);
             }
 
-            return split;
+            return menu;
+        }
+
+        private static List<RibbonMenuItem> MenuItems(ElementCatalog cat, List<ElementType> types, bool byCategory)
+        {
+            if (types.Count <= MaxMenuItems)
+            {
+                return types.Select(TypeItem).ToList();
+            }
+
+            var groups = types.GroupBy(t => byCategory ? t.Category : (string.IsNullOrWhiteSpace(t.Subcategory) ? "Ostalo" : t.Subcategory)).ToList();
+            if (byCategory && groups.Count == 1)
+            {
+                return MenuItems(cat, types, false);
+            }
+
+            var list = new List<RibbonMenuItem>();
+            foreach (IGrouping<string, ElementType> g in groups.OrderBy(g => byCategory ? CategoryName(cat, g.Key) : g.Key))
+            {
+                List<ElementType> members = g.ToList();
+                var sub = new RibbonMenuItem
+                {
+                    Text = (byCategory ? CategoryName(cat, g.Key) : g.Key) + " (" + members.Count + ")",
+                    ShowText = true,
+                    ShowImage = true,
+                    Image = Icons.Get(members[0].Category, 16),
+                };
+                foreach (RibbonMenuItem item in byCategory ? MenuItems(cat, members, false) : members.Select(TypeItem).ToList())
+                {
+                    sub.Items.Add(item);
+                }
+
+                list.Add(sub);
+            }
+
+            return list;
+        }
+
+        private static RibbonMenuItem TypeItem(ElementType t)
+        {
+            string command = t.Geometry == Core.Geometry.GeometryKind.Point ? "_SDPPLACE " : "_SDPDRAW ";
+            return new RibbonMenuItem
+            {
+                Text = t.Name,
+                ShowText = true,
+                ShowImage = true,
+                Image = Icons.Get(t.Category, 16),
+                CommandHandler = Handler,
+                CommandParameter = HintPrefix + t.Id + "|" + command,
+                Id = "SDP_TYPE_" + t.Id,
+                ToolTip = new RibbonToolTip { Title = t.Name, Content = PlacementTip(t), Command = command.Trim() },
+            };
         }
 
         /// <summary>Small drop-down grouping related commands.</summary>
