@@ -560,17 +560,45 @@ namespace SiteDesignPro.Core.Roads
             }
             else
             {
-                // a straight kerb against a curved one: the arc starts at the end where the edge runs on smoothly;
-                // the thin tip trimmed with the slivers is about sqrt(0,04 R) long
+                // a straight kerb against a curved one: at the tangent end the outline turns back sharply along the
+                // corner arc (the other end meets the curved kerb at an angle). The tangent point is the foot of the
+                // arc centre on the straight kerb (the thin tip itself was trimmed with the slivers).
                 foreach ((int st, int en, double _) in runs)
                 {
                     Vec2 a0 = pts[st], b0 = pts[en];
                     Vec2 d = (b0 - a0).Normalized();
                     Vec2 before = RealDir((st - 1 + n) % n, -1), after = RealDir(en, 1);
-                    double turnA = Math.Abs(before.Cross(d)) + (before.Dot(d) < 0 ? 2 : 0);
-                    double turnB = Math.Abs(d.Cross(after)) + (d.Dot(after) < 0 ? 2 : 0);
-                    (Vec2 tip, Vec2 along) = turnB <= turnA ? (b0, d) : (a0, -d);
-                    starts.Add((tip + (along * Math.Sqrt(0.04 * radius)), along));
+                    double angA = Math.Acos(Math.Max(-1, Math.Min(1, before.Dot(d))));
+                    double angB = Math.Acos(Math.Max(-1, Math.Min(1, d.Dot(after))));
+                    bool atB = angB >= angA;
+                    int tipIndex = atB ? en : st;
+                    int step = atB ? 1 : -1;
+                    Vec2 along = atB ? d : -d;
+
+                    // points of the corner arc next to the tip
+                    var arc = new List<Vec2>();
+                    Vec2 last = pts[tipIndex];
+                    for (int g = 1; g < n && arc.Count < 8; g++)
+                    {
+                        Vec2 q = pts[(tipIndex + (g * step) + n) % n];
+                        if ((q - last).Length > 0.05)
+                        {
+                            arc.Add(q);
+                            last = q;
+                        }
+                    }
+
+                    Vec2 tip = pts[tipIndex];
+                    if (arc.Count >= 3 && FitCircle(arc, 0, arc.Count - 1, out Vec2 centre, out double _))
+                    {
+                        Vec2 foot = a0 + (d * (centre - a0).Dot(d));
+                        if ((foot - tip).Dot(along) > -0.01 && (foot - tip).Length < radius)
+                        {
+                            tip = foot;
+                        }
+                    }
+
+                    starts.Add((tip, along));
                 }
             }
 
