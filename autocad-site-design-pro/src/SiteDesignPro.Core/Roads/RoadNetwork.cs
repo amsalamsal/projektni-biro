@@ -1049,6 +1049,12 @@ namespace SiteDesignPro.Core.Roads
                 return false;
             }
 
+            // a run that bulges less than a centimetre from its chord is a straight edge, not an arc
+            if (r * (1 - Math.Cos(Math.Abs(sweep) / 2)) < 0.01)
+            {
+                return false;
+            }
+
             bulge = Math.Tan(sweep / 4);
             return true;
         }
