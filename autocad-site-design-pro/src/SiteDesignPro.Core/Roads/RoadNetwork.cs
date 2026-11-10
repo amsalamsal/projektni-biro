@@ -795,7 +795,7 @@ namespace SiteDesignPro.Core.Roads
                 }
 
                 double a0 = (b.T1 - b.Centre).Angle;
-                int steps = Math.Max(2, (int)Math.Ceiling(Math.Abs(b.Turn) / (Math.PI / 36)));
+                int steps = Math.Max(2, (int)Math.Ceiling(Math.Abs(b.Turn) / (Math.PI / 90)));
                 for (int k = 0; k <= steps; k++)
                 {
                     double ang = a0 + (b.Turn * k / steps);
