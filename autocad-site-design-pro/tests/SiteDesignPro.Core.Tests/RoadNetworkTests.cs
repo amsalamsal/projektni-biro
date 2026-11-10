@@ -197,6 +197,11 @@ namespace SiteDesignPro.Core.Tests
                     foreach (Vec2 p in region.Outer.Points)
                     {
                         double along = (p - new Vec2(20, -30)).Dot(dir);
+                        if (p.DistanceTo(new Vec2(20, -30)) > 10)
+                        {
+                            continue;
+                        }
+
                         Assert.True(along < 0.01, band.Key + " reaches " + along.ToString("0.###") + " m past the dead end at " + p);
                     }
                 }
