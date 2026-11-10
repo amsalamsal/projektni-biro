@@ -2,6 +2,26 @@
 
 ## Neobjavljeno
 
+### Saobraćajnice 3: presjek, rampe, mini kružni tok, visine i garažne rampe
+* Redoslijed presjeka: kolovoz | ivičnjak 15 cm | biciklistička staza | trotoar | ivičnjak 10 cm. Kad postoji
+  biciklistička staza, ivičnjak 15 cm je samo između kolovoza i staze; staza i trotoar su na istoj visini (i u 3D).
+  Sve linije u DWG-u su na Z = 0,00; mjerilo 1 m = 100 cm.
+* **Rampe za invalide 120 cm** same se crtaju na svim ulazima i izlazima raskrsnica i kružnog toka, na početku
+  pravog dijela, s obje strane gdje postoji trotoar (rampa je i rampa za bicikliste).
+* **Mini kružni tok** (do 25 km/h): srednji otok poluprečnika 15–30 m (zelenilo), prijelazni prsten 1,20 m sa
+  šrafurom AR-B88, trake prstena kao ulazne trake krakova, isprekidane linije i strelice, razdjelni otoci 10 m
+  prekinuti na pješačkom prelazu i rampama, linije i trokuti „ustupi prednost“. Sve na sloju „Saobraćajnice“.
+* **Visine saobraćajnica** (`SDPVISINECESTA`): ravan teren na X m n.v. ili neravan s osnovnom visinom.
+  **Kota saobraćajnice** (`SDPKOTACESTE`): simbol (krug u četvrtinama, linija, ±0,00 iznad i m n.v. ispod) u odnosu
+  na osnovnu visinu, za cijelu širinu ulice s trotoarima i stazama. Između kota visina se mijenja linearno; uzdužni
+  nagib se ispisuje uz ulicu, a preko 10 % se odmah javlja upozorenje. U 3D (SketchUp) površine prate visine
+  (mreža 50 × 50 cm); lukovi imaju najmanje 30 segmenata na 10 m.
+* **Garažna rampa** (`SDPGARAZNARAMPA`, sloj „Garažna rampa“): pravolinijska (traka 2,5–3,5 m, srednje ostrvo
+  60 × 250 cm na dnu po izboru), polukružna (traka 3,5–5,0 m, zaštitni razmak 25–50 cm) ili kružna/spiralna;
+  jednosmjerna ili dvosmjerna. Crta se srednja linija, žute linije zaštitnog razmaka, strelice smjerova, kote
+  početka i kraja i tekst „L=…m, h=…m, …%“. Nagib preko 17 % se crveno označi i javi; zakrivljena rampa u 3D ima
+  poprečni nagib 3 % prema unutra.
+
 ### Ulice i ceste (dio alata, panel Crtanje)
 * **Ulica** (`SDPULICA`): novi element s punim poprečnim profilom. U prozoru profili (stambena, sabirna, bulevar,
   jednosmjerna, kolni prilaz), jednosmjerna ili dvosmjerna, 1–3 trake po smjeru, širina trake, trotoar lijevo/desno
