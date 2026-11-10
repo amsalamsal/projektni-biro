@@ -501,6 +501,10 @@ namespace SiteDesignPro.Core.Roads
                         continue;
                     }
 
+                    // a little wider than the ring it selects, so its edges never run along the ring's edges
+                    a = Math.Max(0, a - 0.05);
+                    b += 0.05;
+
                     PathsD outer = Union(Band(r.Axis, r.Closed, left ? b : 0, left ? 0 : b));
                     PathsD inner = Union(Band(r.Axis, r.Closed, left ? a : 0, left ? 0 : a));
                     all.AddRange(Clipper.Difference(outer, inner, FillRule.NonZero, Precision));
