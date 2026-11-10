@@ -799,6 +799,13 @@ namespace SiteDesignPro.Core.Roads
                 return false;
             }
 
+            // least squares over all points of the run: millimetre rounding of single points does not tilt the circle
+            if (FitCircle(ring, from, to, out Vec2 fc, out double fr) && fr < 300 && fr > 0.05)
+            {
+                c = fc;
+                r = fr;
+            }
+
             // the points come from round joins polygonised to a few millimetres: every point lies on the circle within
             // that, and no chord bulges away from the circle by more than that (a long straight edge next to an arc
             // would otherwise be swallowed into a flat, wrong arc)
@@ -839,6 +846,79 @@ namespace SiteDesignPro.Core.Roads
             }
 
             bulge = Math.Tan(sweep / 4);
+            return true;
+        }
+
+        /// <summary>Algebraic least-squares circle (Kåsa) through the points from..to.</summary>
+        private static bool FitCircle(List<Vec2> ring, int from, int to, out Vec2 centre, out double r)
+        {
+            centre = default;
+            r = 0;
+            Vec2 o = ring[from];
+            double sxx = 0, sxy = 0, syy = 0, sx = 0, sy = 0, sz = 0, sxz = 0, syz = 0;
+            int n = 0;
+            for (int i = from; i <= to; i++)
+            {
+                Vec2 p = ring[i] - o;
+                double z = (p.X * p.X) + (p.Y * p.Y);
+                sxx += p.X * p.X;
+                sxy += p.X * p.Y;
+                syy += p.Y * p.Y;
+                sx += p.X;
+                sy += p.Y;
+                sz += z;
+                sxz += p.X * z;
+                syz += p.Y * z;
+                n++;
+            }
+
+            // solve [sxx sxy sx; sxy syy sy; sx sy n] [D E F] = -[sxz syz sz]
+            double[,] m = { { sxx, sxy, sx, -sxz }, { sxy, syy, sy, -syz }, { sx, sy, n, -sz } };
+            for (int col = 0; col < 3; col++)
+            {
+                int piv = col;
+                for (int row = col + 1; row < 3; row++)
+                {
+                    if (Math.Abs(m[row, col]) > Math.Abs(m[piv, col]))
+                    {
+                        piv = row;
+                    }
+                }
+
+                if (Math.Abs(m[piv, col]) < 1e-12)
+                {
+                    return false;
+                }
+
+                for (int k = 0; k < 4; k++)
+                {
+                    (m[col, k], m[piv, k]) = (m[piv, k], m[col, k]);
+                }
+
+                for (int row = 0; row < 3; row++)
+                {
+                    if (row == col)
+                    {
+                        continue;
+                    }
+
+                    double f = m[row, col] / m[col, col];
+                    for (int k = col; k < 4; k++)
+                    {
+                        m[row, k] -= f * m[col, k];
+                    }
+                }
+            }
+
+            double d = m[0, 3] / m[0, 0], e = m[1, 3] / m[1, 1], ff = m[2, 3] / m[2, 2];
+            double rr = ((d * d) + (e * e)) / 4 - ff;
+            if (rr <= 0)
+            {
+                return false;
+            }
+
+            centre = o + new Vec2(-d / 2, -e / 2);
+            r = Math.Sqrt(rr);
             return true;
         }
 
