@@ -15,6 +15,7 @@ using SiteDesignPro.Core.Labels;
 using SiteDesignPro.Core.Layout;
 using SiteDesignPro.Core.Model;
 using SiteDesignPro.Core.Quantities;
+using SiteDesignPro.Core.Roads;
 using SiteDesignPro.Core.Text;
 
 namespace SiteDesignPro.AutoCAD.Commands
@@ -52,6 +53,8 @@ namespace SiteDesignPro.AutoCAD.Commands
             double first = arms > 0 ? ctx.Angle("Smjer prvog kraka (klik ili ugao)", c, 0) : 0;
             double armLength = arms > 0 ? ctx.Number("Dužina cesta krakova (m, 0 = bez)", 25, false, true) : 0;
             double armWidth = arms > 0 ? ctx.Number("Širina cesta krakova (m)", Math.Max(w, 5.5)) : 0;
+            double walk = ctx.Number("Širina trotoara oko kružnog toka i uz krakove (m, 0 = bez)", 1.6, false, true);
+            walk = Math.Min(walk, RoadSpec.MaxSidewalk);
 
             double k = ctx.K;
             List<SiteElement> existing = ctx.ExistingElements();
@@ -59,15 +62,28 @@ namespace SiteDesignPro.AutoCAD.Commands
             Ring Circle(double rMeters) => new Ring(new List<Vec3> { new Vec3(c.X + (rMeters * k), c.Y, c.Z), new Vec3(c.X - (rMeters * k), c.Y, c.Z) }, new List<double> { 1.0, 1.0 });
             ElementType T(string id) => ctx.Catalog.RequireType(id);
 
+            // the ring is a one-way street of the road network (counter-clockwise): kerbs on both sides, sidewalk
+            // outside; streets and arms joining it are cut in with rounded corners, nothing overlaps
             double ri = ro - w;
-            Make(ctx, existing, T("road.access_road"), new PathGeometry(Circle(ro - (w / 2)), true), w);
-            Make(ctx, existing, T("edge.kerb"), new PathGeometry(Circle(ro), true), null);
-            int n = 3;
+            ElementType street = T(RoadElements.StreetType);
+            int ringLanes = w >= 8 ? 2 : 1;
+            SiteElement ring = ctx.NewElement(street, new PathGeometry(Circle(ro - (w / 2)), true), existing);
+            ring.Parameters["direction"] = ParamValue.Of("one_way");
+            ring.Parameters["lanesRight"] = ParamValue.Of((double)ringLanes);
+            ring.Parameters["laneWidth"] = ParamValue.Of(Math.Max(2.5, Math.Min(4.5, w / ringLanes)));
+            ring.Parameters["sidewalkLeft"] = ParamValue.Of(0.0);
+            ring.Parameters["sidewalkRight"] = ParamValue.Of(walk);
+            ring.Parameters["bikeLeft"] = ParamValue.Of(0.0);
+            ring.Parameters["bikeRight"] = ParamValue.Of(0.0);
+            ring.Parameters["arrows"] = ParamValue.Of(false);
+            ring.Name = "Kružni tok";
+            ctx.Svc.Create(ring);
+            existing.Add(ring);
+            int n = 1;
             if (ri > 1.5)
             {
-                Make(ctx, existing, T("edge.kerb"), new PathGeometry(Circle(ri), true), null);
                 Make(ctx, existing, T("landscape.lawn_area"), new PolygonGeometry(Circle(ri - 0.2)), null);
-                n += 2;
+                n += 1;
                 if (ri > 4)
                 {
                     Make(ctx, existing, T("landscape.flower_bed"), new PolygonGeometry(Circle(ri * 0.4)), null);
@@ -88,7 +104,17 @@ namespace SiteDesignPro.AutoCAD.Commands
                 n++;
                 if (armLength > 0)
                 {
-                    Make(ctx, existing, T("road.access_road"), new PathGeometry(new Ring(new List<Vec3> { P(ro, 0), P(ro + armLength, 0) }), false), armWidth);
+                    SiteElement arm = ctx.NewElement(street, new PathGeometry(new Ring(new List<Vec3> { P(ro, 0), P(ro + armLength, 0) }), false), existing);
+                    arm.Parameters["direction"] = ParamValue.Of("two_way");
+                    arm.Parameters["lanesLeft"] = ParamValue.Of(1.0);
+                    arm.Parameters["lanesRight"] = ParamValue.Of(1.0);
+                    arm.Parameters["laneWidth"] = ParamValue.Of(Math.Max(2.5, Math.Min(4.5, armWidth / 2)));
+                    arm.Parameters["sidewalkLeft"] = ParamValue.Of(walk);
+                    arm.Parameters["sidewalkRight"] = ParamValue.Of(walk);
+                    arm.Parameters["bikeLeft"] = ParamValue.Of(0.0);
+                    arm.Parameters["bikeRight"] = ParamValue.Of(0.0);
+                    ctx.Svc.Create(arm);
+                    existing.Add(arm);
                     n++;
                     if (armLength >= islandEnd - ro + 5)
                     {
@@ -106,7 +132,9 @@ namespace SiteDesignPro.AutoCAD.Commands
                 n += 2;
             }
 
+            RoadCommands.RebuildNow(ctx);
             ctx.Write(Bs.T("Kružni tok: poluprečnik {0} m, prsten {1} m, krakova {2}; napravljeno elemenata: {3}.", CommandContext.F(ro, 2), CommandContext.F(w, 2), arms, n));
+            ctx.Write("Prsten je ulica u jednom smjeru s ivičnjacima; ulice i ceste koje do njega nacrtate same se spoje bez preklapanja.");
         });
 
         // ------------------------------------------------------------------ finished sheet

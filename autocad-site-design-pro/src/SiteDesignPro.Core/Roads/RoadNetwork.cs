@@ -553,6 +553,48 @@ namespace SiteDesignPro.Core.Roads
         internal static (List<int> Keep, List<BendArc> Bends) PlanBends(IReadOnlyList<Vec2> all, bool closed, Func<int, bool> isCornerAll, Func<bool, double> axisRadius)
         {
             List<int> keep = Simplify(all, closed, i => (closed || (i > 0 && i < all.Count - 1)) && isCornerAll(i), BendTolerance);
+
+            // a bend right before an open end whose last piece is too short for its radius (a stray last click) is
+            // left out: the road ends straight instead of with a tight curl
+            bool trimmed = true;
+            while (!closed && trimmed && keep.Count > 2)
+            {
+                trimmed = false;
+                foreach (bool atStart in new[] { true, false })
+                {
+                    if (keep.Count <= 2)
+                    {
+                        break;
+                    }
+
+                    int m = keep.Count;
+                    int end = atStart ? keep[0] : keep[m - 1], v = atStart ? keep[1] : keep[m - 2], other = atStart ? keep[2] : keep[m - 3];
+                    if (!isCornerAll(v))
+                    {
+                        continue;
+                    }
+
+                    Vec2 u1 = all[v] - all[other], u2 = all[end] - all[v];
+                    if (u1.Length < 1e-9 || u2.Length < 1e-9)
+                    {
+                        continue;
+                    }
+
+                    double turn = Math.Atan2(u1.Cross(u2), u1.Dot(u2));
+                    if (Math.Abs(turn) < 0.01)
+                    {
+                        continue;
+                    }
+
+                    bool turnLeft = atStart ? turn < 0 : turn > 0;
+                    double need = axisRadius(turnLeft) * Math.Tan(Math.Abs(turn) / 2);
+                    if (u2.Length * 0.98 < need * 0.5)
+                    {
+                        keep.RemoveAt(atStart ? 1 : m - 2);
+                        trimmed = true;
+                    }
+                }
+            }
             var a = keep.Select(i => all[i]).ToList();
             bool isCorner(int j) => isCornerAll(keep[j]);
             var list = new List<BendArc>();

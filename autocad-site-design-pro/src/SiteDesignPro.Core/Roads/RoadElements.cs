@@ -22,6 +22,7 @@ namespace SiteDesignPro.Core.Roads
         public const string CrossingType = "road.pedestrian_crossing";
         public const string MarkingType = "road.marking_line";
         public const string ArrowType = "road.arrow";
+        public const string HatchedAreaType = "road.hatched_area";
 
         /// <summary>Custom flag on exported roads whose surfaces come from the network (SketchUp builds no strip for them).</summary>
         public const string NetworkFlag = "networkSurface";
@@ -105,7 +106,7 @@ namespace SiteDesignPro.Core.Roads
             {
                 // a simple road is a carriageway of its width: two-way with a centre line from 5 m up, else one lane
                 double w = Math.Max(1.0, N("width", 5.5));
-                bool twoWay = w >= 5.0;
+                bool twoWay = w >= 5.0 && !path.Closed; // a closed road is a roundabout ring: one-way, no centre line
                 s = new RoadSpec
                 {
                     OneWay = !twoWay,
@@ -191,7 +192,7 @@ namespace SiteDesignPro.Core.Roads
             var list = new List<IReadOnlyList<Vec2>>();
             foreach (SiteElement e in elements)
             {
-                if (e.TypeId == CrossingType && e.Geometry is PolygonGeometry pg)
+                if ((e.TypeId == CrossingType || e.TypeId == HatchedAreaType) && e.Geometry is PolygonGeometry pg)
                 {
                     list.Add(GeometryMath.Tessellate(pg.Outer, true, 0.02 * unitsPerMeter).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList());
                 }

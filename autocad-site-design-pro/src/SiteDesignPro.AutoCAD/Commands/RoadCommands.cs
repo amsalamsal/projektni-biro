@@ -235,6 +235,20 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ network
 
+        /// <summary>Redraws the road network from another command (the watcher stays on afterwards).</summary>
+        internal static void RebuildNow(CommandContext ctx)
+        {
+            bool was = Busy;
+            try
+            {
+                Rebuild(ctx, false);
+            }
+            finally
+            {
+                Busy = was;
+            }
+        }
+
         internal static RoadNetworkResult? Rebuild(CommandContext ctx, bool verbose)
         {
             Busy = true;
@@ -746,7 +760,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
                 (string Id, string Type)? key = ElementStore.ReadKey(ent);
-                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
+                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
                 {
                     Dirty.Add(db);
                 }

@@ -253,6 +253,43 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void StrayLastClick_IsDropped_TheStreetEndsStraight()
+        {
+            var spec = new RoadSpec { LanesLeft = 1, LanesRight = 1, LaneWidth = 3, CornerRadius = 6, SidewalkLeft = 1.6, SidewalkRight = 1.6 };
+            var pts = new List<Vec2> { new Vec2(0, 0), new Vec2(50, 0), new Vec2(50.5, 0.3) };
+            var r = RoadElements.RoundedAxis(pts, new[] { 0.0, 0, 0 }, false, spec, 1)!.Value;
+            Assert.Equal(2, r.Points.Count);
+            Assert.All(r.Bulges, b => Assert.Equal(0, b, 9));
+            Assert.Equal(50.5, r.Points[1].X, 6);
+        }
+
+        [Fact]
+        public void RoundaboutRing_IsAOneWayStreet_AndAStreetJoinsItWithoutOverlap()
+        {
+            ElementType t = Cat.RequireType(RoadElements.StreetType);
+            var circle = new Ring(new List<Vec3> { new Vec3(11, 0, 0), new Vec3(-11, 0, 0) }, new List<double> { 1, 1 });
+            var ring = new SiteElement(Guid.NewGuid().ToString(), RoadElements.StreetType, new PathGeometry(circle, true)) { Parameters = t.CreateDefaultParameters(), Label = "U-001" };
+            ring.Parameters["direction"] = ParamValue.Of("one_way");
+            ring.Parameters["lanesRight"] = ParamValue.Of(1.0);
+            ring.Parameters["laneWidth"] = ParamValue.Of(6.0);
+            ring.Parameters["sidewalkLeft"] = ParamValue.Of(0.0);
+            ring.Parameters["arrows"] = ParamValue.Of(false);
+            SiteElement arm = Path(RoadElements.StreetType, 14, 0, 50, 0); // drawn up to the outer edge of the ring
+
+            RoadNetworkResult res = RoadElements.Network(new[] { ring, arm }, Cat)!;
+            Assert.Single(res.Bands[RoadLevel.Carriageway]);
+            Assert.Equal(11, res.Axes[arm.Id][0].Length, 2); // extended to the ring axis
+            Assert.DoesNotContain(res.Markings, m => m.RoadId == ring.Id); // one lane, no lines on the ring
+            Assert.All(res.Markings.Where(m => m.RoadId == arm.Id).SelectMany(m => m.Points), p => Assert.True(p.Length > 14, "lane line enters the ring at " + p));
+
+            // the carriageway is the ring and the arm without overlap: the island stays free, the corners are rounded
+            double island = Math.PI * 8 * 8;
+            Assert.True(res.Area(RoadLevel.Carriageway) < (Math.PI * 14 * 14) - island + (36 * 6) + 30);
+            Assert.Contains(res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()), x => Math.Abs(x - 6) < 0.1);
+            Assert.True(res.Area(RoadLevel.Sidewalk) > 0);
+        }
+
+        [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {
             // crossing 4 m along the road (first edge) and 5,5 m across it: 6 bars of 0,50 m with 0,50 m gaps
