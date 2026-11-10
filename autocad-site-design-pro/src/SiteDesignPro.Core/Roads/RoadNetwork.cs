@@ -206,11 +206,24 @@ namespace SiteDesignPro.Core.Roads
                 surface = Clipper.Union(raw, junctionCorners, FillRule.NonZero, Precision);
             }
 
-            // the corner fillets the rounding added; every level is concentric with them
+            // the corner fillets the rounding added; every level is concentric with them. A real fillet lies between
+            // two roads; pieces touching one road only (rounding remnants at a dead end) are left out of the surface
+            var bikeBands = bands[RoadLevel.Bike].Select(Union).ToList();
             List<PathsD> fillets = Clipper.Difference(surface, raw, FillRule.NonZero, Precision)
                 .Where(f => Clipper.Area(f) > 0.02 && Clipper.Area(f) / Perimeter(f) > 0.02) // no slivers along shared edges
                 .Select(f => new PathsD { f })
+                .Where(f => bikeBands.Count(b => Touches(f, b, 0.05)) >= 2)
                 .ToList();
+            if (junctionCorners.Count > 0)
+            {
+                var keepSurface = new PathsD(raw);
+                foreach (PathsD f in fillets)
+                {
+                    keepSurface.AddRange(f);
+                }
+
+                surface = Union(keepSurface);
+            }
 
             // bike lanes: the ring of their width inside the kerb line, along roads that have one and around the
             // corners next to them (tapering out where the other road has none)
