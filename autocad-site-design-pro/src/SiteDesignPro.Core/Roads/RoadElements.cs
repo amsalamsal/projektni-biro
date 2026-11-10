@@ -100,6 +100,7 @@ namespace SiteDesignPro.Core.Roads
                     CornerRadius = N("cornerRadius", RoadSpec.DefaultCornerRadius),
                     Arrows = B("arrows", true),
                     ArrowSpacing = N("arrowSpacing", 40),
+                    Median = N("median", 0),
                 };
                 s.Normalize();
             }

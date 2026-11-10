@@ -54,6 +54,14 @@ namespace SiteDesignPro.Core.Roads
 
         public double BikeRight { get; set; }
 
+        /// <summary>
+        /// Two-way roads: width of the median between the directions (splitter islands, hatched area); the lanes of
+        /// each direction start at half of it from the axis. 0 = none.
+        /// </summary>
+        public double Median { get; set; }
+
+        public const double MaxMedian = 6.0;
+
         /// <summary>15 cm kerb at the road edge (simple roads without a cross-section have none).</summary>
         public bool Kerbs { get; set; } = true;
 
@@ -76,9 +84,12 @@ namespace SiteDesignPro.Core.Roads
 
         public int TotalLanes => OneWay ? LanesRight : LanesLeft + LanesRight;
 
-        public double CarriagewayLeft => OneWay ? TotalLanes * LaneWidth / 2 : LanesLeft * LaneWidth;
+        public double CarriagewayLeft => OneWay ? TotalLanes * LaneWidth / 2 : (Median / 2) + (LanesLeft * LaneWidth);
 
-        public double CarriagewayRight => OneWay ? TotalLanes * LaneWidth / 2 : LanesRight * LaneWidth;
+        public double CarriagewayRight => OneWay ? TotalLanes * LaneWidth / 2 : (Median / 2) + (LanesRight * LaneWidth);
+
+        /// <summary>Half the median of a two-way road (0 for one-way roads).</summary>
+        public double HalfMedian => OneWay ? 0 : Median / 2;
 
         public double CarriagewayWidth => CarriagewayLeft + CarriagewayRight;
 
@@ -152,6 +163,7 @@ namespace SiteDesignPro.Core.Roads
             BikeRight = ClampD(BikeRight, 0, MaxBike, "Širina desne biciklističke staze");
             CornerRadius = ClampD(CornerRadius, 1, 30, "Radijus ivičnjaka");
             ArrowSpacing = ClampD(ArrowSpacing, 10, 200, "Razmak strelica");
+            Median = ClampD(Median, 0, MaxMedian, "Širina srednjeg ostrva");
             return notes;
         }
 
@@ -170,6 +182,7 @@ namespace SiteDesignPro.Core.Roads
             Kerbs = Kerbs,
             Markings = Markings,
             CornerRadius = CornerRadius,
+            Median = Median,
         };
 
         /// <summary>Compact text form stored on the axis in the drawing ("key=value;..." with invariant numbers).</summary>
@@ -178,7 +191,7 @@ namespace SiteDesignPro.Core.Roads
             string N(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
             return "v=1;oneway=" + (OneWay ? 1 : 0) + ";ll=" + LanesLeft + ";lr=" + LanesRight + ";lw=" + N(LaneWidth) +
                    ";sl=" + N(SidewalkLeft) + ";sr=" + N(SidewalkRight) + ";bl=" + N(BikeLeft) + ";br=" + N(BikeRight) +
-                   ";arrows=" + (Arrows ? 1 : 0) + ";as=" + N(ArrowSpacing) + ";r=" + N(CornerRadius);
+                   ";arrows=" + (Arrows ? 1 : 0) + ";as=" + N(ArrowSpacing) + ";r=" + N(CornerRadius) + ";med=" + N(Median);
         }
 
         public static RoadSpec FromParameterString(string text)
@@ -208,6 +221,7 @@ namespace SiteDesignPro.Core.Roads
                     case "arrows": s.Arrows = d > 0.5; break;
                     case "as": s.ArrowSpacing = d; break;
                     case "r": s.CornerRadius = d; break;
+                    case "med": s.Median = d; break;
                 }
             }
 

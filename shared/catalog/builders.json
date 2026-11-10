@@ -43,6 +43,7 @@
         { "key": "sidewalkRight", "label": "Trotoar desno (0 = nema)", "type": "length", "default": 1.6, "min": 0, "max": 5, "group": "Trotoari i staze", "labelEn": "Sidewalk right (0 = none)", "groupEn": "Sidewalks and bike lanes" },
         { "key": "bikeLeft", "label": "Biciklistička staza lijevo (0 = nema)", "type": "length", "default": 0, "min": 0, "max": 2, "group": "Trotoari i staze", "labelEn": "Bike lane left (0 = none)", "groupEn": "Sidewalks and bike lanes" },
         { "key": "bikeRight", "label": "Biciklistička staza desno (0 = nema)", "type": "length", "default": 0, "min": 0, "max": 2, "group": "Trotoari i staze", "labelEn": "Bike lane right (0 = none)", "groupEn": "Sidewalks and bike lanes" },
+        { "key": "median", "label": "Srednje ostrvo između smjerova (m, 0 = nema)", "type": "length", "default": 0, "min": 0, "max": 6, "group": "Kolovoz", "labelEn": "Median between the directions (m, 0 = none)", "groupEn": "Carriageway" },
         { "key": "cornerRadius", "label": "Radijus ivičnjaka na raskrsnicama (stvarni)", "type": "length", "default": 6.0, "min": 1, "max": 30, "group": "Raskrsnice", "labelEn": "Kerb radius at junctions (actual)", "groupEn": "Junctions" },
         { "key": "arrows", "label": "Strelice smjera kretanja", "type": "bool", "default": true, "group": "Oznake", "labelEn": "Direction arrows", "groupEn": "Markings" },
         { "key": "arrowSpacing", "label": "Razmak strelica", "type": "length", "default": 40, "min": 10, "max": 200, "group": "Oznake", "labelEn": "Arrow spacing", "groupEn": "Markings" },

@@ -1380,20 +1380,31 @@ namespace SiteDesignPro.Core.Roads
             }
             else if (r.Markings)
             {
-                lines.Add((0, true));
+                double m = r.HalfMedian;
+                if (m > 0)
+                {
+                    // the median is bordered by continuous lines on both sides
+                    lines.Add((m, true));
+                    lines.Add((-m, true));
+                }
+                else
+                {
+                    lines.Add((0, true));
+                }
+
                 for (int k = 1; k < r.LanesLeft; k++)
                 {
-                    lines.Add((k * lw, false));
+                    lines.Add((m + (k * lw), false));
                 }
 
                 for (int k = 1; k < r.LanesRight; k++)
                 {
-                    lines.Add((-k * lw, false));
+                    lines.Add((-m - (k * lw), false));
                 }
             }
 
-            // a two-way road with two or more lanes in each direction gets a continuous centre line
-            bool solidCentre = !r.OneWay && r.LanesLeft >= 2 && r.LanesRight >= 2;
+            // a two-way road with two or more lanes in each direction, or with a median, gets continuous centre lines
+            bool solidCentre = !r.OneWay && ((r.LanesLeft >= 2 && r.LanesRight >= 2) || r.Median > 0);
             foreach ((double offset, bool centre) in lines)
             {
                 List<Vec2> line = OffsetLine(r.Axis, r.Closed, offset);
@@ -1443,12 +1454,12 @@ namespace SiteDesignPro.Core.Roads
             {
                 for (int k = 0; k < r.LanesRight; k++)
                 {
-                    lanes.Add((-(k + 0.5) * lw, true));
+                    lanes.Add((-r.HalfMedian - ((k + 0.5) * lw), true));
                 }
 
                 for (int k = 0; k < r.LanesLeft; k++)
                 {
-                    lanes.Add(((k + 0.5) * lw, false));
+                    lanes.Add((r.HalfMedian + ((k + 0.5) * lw), false));
                 }
             }
 

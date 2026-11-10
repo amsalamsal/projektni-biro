@@ -42,99 +42,151 @@ namespace SiteDesignPro.AutoCAD.Commands
         // ------------------------------------------------------------------ roundabout
 
         /// <summary>A complete roundabout from its centre: ring, island, kerbs, splitter islands, crossings, arrows, signs, arms.</summary>
+        /// <summary>
+        /// Mini roundabout (up to 25 km/h): green central island (radius 15–30 m), truck apron 1,20 m (AR-B88), a
+        /// ring with as many lanes as enter from each arm (dashed lane lines, direction arrows), arms as streets with
+        /// a median, splitter islands 10 m long in the straight part interrupted at the pedestrian crossing and the
+        /// accessible ramps, hatched median, give-way line and triangles. Everything on the layer Saobraćajnice
+        /// (the island on the greenery layer); the ring and the arms join the road network.
+        /// </summary>
         [CommandMethod("SITEDESIGNPRO", "SDPKRUZNITOK", CommandFlags.Modal)]
         public void Roundabout() => CommandContext.RunMajor("SDPKRUZNITOK", "Kružni tok (SDPKRUZNITOK)", ctx =>
         {
             Point3d c = ctx.Point("Centar kružnog toka")!.Value;
-            double ro = ctx.Number("Vanjski poluprečnik (m)", 14);
-            double w = Math.Min(ctx.Number("Širina kolovoza prstena (m)", 6), ro * 0.8);
-            int arms = ctx.Integer("Broj krakova (0–8)", 4, 0);
-            arms = Math.Min(arms, 8);
+            double ri = ctx.Number("Poluprečnik srednjeg otoka – zelenilo (m, 15–30)", 15);
+            if (ri < 15 || ri > 30)
+            {
+                ri = Math.Max(15, Math.Min(30, ri));
+                ctx.Write("Poluprečnik srednjeg otoka je ograničen na " + CommandContext.F(ri, 2) + " m (mini kružni tok: 15–30 m).");
+            }
+
+            double apron = ctx.Number("Širina prijelaznog prstena (m)", 1.2);
+            int arms = Math.Min(ctx.Integer("Broj krakova (0–6)", 4, 0), 6);
             double first = arms > 0 ? ctx.Angle("Smjer prvog kraka (klik ili ugao)", c, 0) : 0;
-            double armLength = arms > 0 ? ctx.Number("Dužina cesta krakova (m, 0 = bez)", 25, false, true) : 0;
-            double armWidth = arms > 0 ? ctx.Number("Širina cesta krakova (m)", Math.Max(w, 5.5)) : 0;
-            double walk = ctx.Number("Širina trotoara oko kružnog toka i uz krakove (m, 0 = bez)", 1.6, false, true);
-            walk = Math.Min(walk, RoadSpec.MaxSidewalk);
+            double armLength = arms > 0 ? ctx.Number("Dužina krakova od vanjske ivice kružnog toka (m)", 40) : 0;
+
+            // cross-section of the arms (and the lanes of the ring): the same window as for a street
+            RoadSpec arm = RoadSpec.FromParameterString(UI.Preferences.Current.Default("roadSpec", new RoadSpec().ToParameterString()));
+            arm.OneWay = false;
+            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(arm, "Krakovi kružnog toka", ctx.K >= 99 ? "cm" : "m") : arm;
+            if (chosen == null)
+            {
+                ctx.Write("Kružni tok nije nacrtan.");
+                return;
+            }
+
+            arm = chosen;
+            arm.OneWay = false;
+            double median = arms > 0 ? Math.Max(1.8, Math.Min(RoadSpec.MaxMedian, ctx.Number("Širina razdjelnog otoka između smjerova (m, najmanje 1,8)", 2.0))) : 0;
+            arm.Median = median;
+            arm.Normalize();
 
             double k = ctx.K;
             List<SiteElement> existing = ctx.ExistingElements();
-            Vec3 center = new Vec3(c.X, c.Y, c.Z);
-            Ring Circle(double rMeters) => new Ring(new List<Vec3> { new Vec3(c.X + (rMeters * k), c.Y, c.Z), new Vec3(c.X - (rMeters * k), c.Y, c.Z) }, new List<double> { 1.0, 1.0 });
+            Ring Circle(double rMeters) => new Ring(new List<Vec3> { new Vec3(c.X + (rMeters * k), c.Y, 0), new Vec3(c.X - (rMeters * k), c.Y, 0) }, new List<double> { 1.0, 1.0 });
             ElementType T(string id) => ctx.Catalog.RequireType(id);
-
-            // the ring is a one-way street of the road network (counter-clockwise): kerbs on both sides, sidewalk
-            // outside; streets and arms joining it are cut in with rounded corners, nothing overlaps
-            double ri = ro - w;
-            ElementType street = T(RoadElements.StreetType);
-            int ringLanes = w >= 8 ? 2 : 1;
-            SiteElement ring = ctx.NewElement(street, new PathGeometry(Circle(ro - (w / 2)), true), existing);
-            ring.Parameters["direction"] = ParamValue.Of("one_way");
-            ring.Parameters["lanesRight"] = ParamValue.Of((double)ringLanes);
-            ring.Parameters["laneWidth"] = ParamValue.Of(Math.Max(2.5, Math.Min(4.5, w / ringLanes)));
-            ring.Parameters["sidewalkLeft"] = ParamValue.Of(0.0);
-            ring.Parameters["sidewalkRight"] = ParamValue.Of(walk);
-            ring.Parameters["bikeLeft"] = ParamValue.Of(0.0);
-            ring.Parameters["bikeRight"] = ParamValue.Of(0.0);
-            ring.Parameters["arrows"] = ParamValue.Of(false);
-            ring.Name = "Kružni tok";
-            ctx.Svc.Create(ring);
-            existing.Add(ring);
-            int n = 1;
-            if (ri > 1.5)
+            int n = 0;
+            SiteElement Add(string type, ElementGeometry g, Action<SiteElement>? set = null)
             {
-                Make(ctx, existing, T("landscape.lawn_area"), new PolygonGeometry(Circle(ri - 0.2)), null);
-                n += 1;
-                if (ri > 4)
+                SiteElement e = ctx.NewElement(T(type), g, existing);
+                set?.Invoke(e);
+                ctx.Svc.Create(e);
+                existing.Add(e);
+                n++;
+                return e;
+            }
+
+            // the ring: as many lanes as enter from an arm, lane width of the arms; kerb 15 cm against the apron
+            int lanes = Math.Max(1, arm.LanesLeft);
+            double lw = arm.LaneWidth;
+            double w = lanes * lw;
+            double inner = ri + apron + RoadSpec.KerbWidth;
+            double ro = inner + w;
+            Add(RoadElements.StreetType, new PathGeometry(Circle(inner + (w / 2)), true), e =>
+            {
+                var ring = new RoadSpec
                 {
-                    Make(ctx, existing, T("landscape.flower_bed"), new PolygonGeometry(Circle(ri * 0.4)), null);
-                    Make(ctx, existing, T("decorative.sculpture"), new PointGeometry(center, 0), null);
-                    n += 2;
+                    OneWay = true, LanesRight = lanes, LaneWidth = lw, SidewalkLeft = 0, BikeLeft = 0,
+                    SidewalkRight = arm.SidewalkRight, BikeRight = arm.BikeRight, CornerRadius = arm.CornerRadius, Arrows = true, ArrowSpacing = 20,
+                };
+                foreach (KeyValuePair<string, ParamValue> kv in RoadCommands.Params(ring))
+                {
+                    e.Parameters[kv.Key] = kv.Value;
                 }
+
+                e.Name = "Kružni tok";
+            });
+
+            // green island and the mountable apron around it
+            Add("landscape.lawn_area", new PolygonGeometry(Circle(ri)));
+            if (apron > 0.05)
+            {
+                Add("road.roundabout_apron", new PolygonGeometry(Circle(ri + apron), new List<Ring> { Circle(ri) }));
             }
 
             for (int i = 0; i < arms; i++)
             {
                 double a = first + (i * 2 * Math.PI / arms);
                 double ux = Math.Cos(a), uy = Math.Sin(a);
-                Vec3 P(double along, double left) => new Vec3(c.X + (((ux * along) - (uy * left)) * k), c.Y + (((uy * along) + (ux * left)) * k), c.Z);
+                Vec3 P(double along, double left) => new Vec3(c.X + (((ux * along) - (uy * left)) * k), c.Y + (((uy * along) + (ux * left)) * k), 0);
+                PolygonGeometry Box(double s0, double s1, double y0, double y1) => new PolygonGeometry(new Ring(new List<Vec3> { P(s0, y0), P(s1, y0), P(s1, y1), P(s0, y1) }));
 
-                // splitter island on the arm axis, separating the entry from the exit lane
-                double islandEnd = ro + Math.Min(12, Math.Max(4, armLength > 0 ? armLength - 6 : 10));
-                Make(ctx, existing, T("road.hatched_area"), new PolygonGeometry(new Ring(new List<Vec3> { P(ro + 1.5, -0.4), P(islandEnd, -1.2), P(islandEnd, 1.2), P(ro + 1.5, 0.4) })), null);
-                n++;
-                if (armLength > 0)
+                // the arm: a street with the median, from the ring outwards (it is joined to the ring axis)
+                Add(RoadElements.StreetType, new PathGeometry(new Ring(new List<Vec3> { P(ro - 0.5, 0), P(ro + armLength, 0) }), false), e =>
                 {
-                    SiteElement arm = ctx.NewElement(street, new PathGeometry(new Ring(new List<Vec3> { P(ro, 0), P(ro + armLength, 0) }), false), existing);
-                    arm.Parameters["direction"] = ParamValue.Of("two_way");
-                    arm.Parameters["lanesLeft"] = ParamValue.Of(1.0);
-                    arm.Parameters["lanesRight"] = ParamValue.Of(1.0);
-                    arm.Parameters["laneWidth"] = ParamValue.Of(Math.Max(2.5, Math.Min(4.5, armWidth / 2)));
-                    arm.Parameters["sidewalkLeft"] = ParamValue.Of(walk);
-                    arm.Parameters["sidewalkRight"] = ParamValue.Of(walk);
-                    arm.Parameters["bikeLeft"] = ParamValue.Of(0.0);
-                    arm.Parameters["bikeRight"] = ParamValue.Of(0.0);
-                    ctx.Svc.Create(arm);
-                    existing.Add(arm);
-                    n++;
-                    if (armLength >= islandEnd - ro + 5)
+                    foreach (KeyValuePair<string, ParamValue> kv in RoadCommands.Params(arm))
                     {
-                        double d0 = islandEnd + 1;
-                        Make(ctx, existing, T("road.pedestrian_crossing"), new PolygonGeometry(new Ring(new List<Vec3> { P(d0, -armWidth / 2), P(d0 + 4, -armWidth / 2), P(d0 + 4, armWidth / 2), P(d0, armWidth / 2) })), null);
-                        n++;
+                        e.Parameters[kv.Key] = kv.Value;
                     }
+                });
+
+                // where the straight part starts: the corner arc between the arm edge and the ring ends there
+                double R = arm.CornerRadius;
+                double hl = arm.Extent(RoadLevel.Carriageway, true), hr = arm.Extent(RoadLevel.Carriageway, false);
+                double h = Math.Max(hl, hr);
+                double st = Math.Sqrt(Math.Max(0, ((ro + R) * (ro + R)) - ((h + R) * (h + R))));
+                st = Math.Max(st, ro + 4);
+                double m2 = median / 2;
+
+                // pedestrian crossing over the whole carriageway at the ramps (start of the straight part), 3 m wide
+                Add(RoadElements.CrossingType, Box(st, st + 3, -hr, hl));
+
+                // splitter island 10 m long, interrupted at the crossing (the refuge is at road level)
+                double iw = Math.Max(0.6, median - 0.3) / 2;
+                Add("road.splitter_island", Box(Math.Max(ro + 0.8, st - 3), st, -iw, iw));
+                Add("road.splitter_island", Box(st + 3, st + 10, -iw, iw));
+
+                // hatched median between the ring and the island, and a taper behind the island
+                double hw = Math.Max(0.2, m2 - 0.6);
+                if (st - 3 > ro + 1.5)
+                {
+                    Add(RoadElements.HatchedAreaType, Box(ro + 0.8, Math.Max(ro + 0.8, st - 3) , -hw, hw));
                 }
 
-                // counter-clockwise traffic: arrow on the ring just past the arm, sign on the entry side
-                double ta = a + (15 * Math.PI / 180);
-                double ra = ro - (w / 2);
-                Make(ctx, existing, T("road.arrow"), new PointGeometry(new Vec3(c.X + (Math.Cos(ta) * ra * k), c.Y + (Math.Sin(ta) * ra * k), c.Z), ta + (Math.PI / 2)), null);
-                Make(ctx, existing, T("road.traffic_sign"), new PointGeometry(P(islandEnd, (armWidth / 2) + 1.0), a + Math.PI), null);
-                n += 2;
+                Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(st + 10, -hw), P(st + 16, 0), P(st + 10, hw) })));
+
+                // give-way line (broken, 30 cm) along the ring edge across the entry lanes (left of the arm axis:
+                // right-hand traffic drives towards the ring on that side), and a triangle in every entry lane
+                for (double y = m2 + 0.25; y + 0.5 <= hl - 0.1; y += 1.0)
+                {
+                    double s0 = Math.Sqrt(Math.Max(0, ((ro + 0.4) * (ro + 0.4)) - (y * y)));
+                    double s1 = Math.Sqrt(Math.Max(0, ((ro + 0.4) * (ro + 0.4)) - ((y + 0.5) * (y + 0.5))));
+                    Add(RoadElements.MarkingType, new PathGeometry(new Ring(new List<Vec3> { P(s0, y), P(s1, y + 0.5) }), false), e => e.Parameters["width"] = ParamValue.Of(0.3));
+                }
+
+                for (int l = 0; l < arm.LanesLeft; l++)
+                {
+                    double yc = m2 + ((l + 0.5) * lw);
+                    double sb = Math.Sqrt(Math.Max(0, (ro * ro) - (yc * yc))) + 1.5;
+                    double half = Math.Min(0.75, lw * 0.3);
+                    Add(RoadElements.MarkingType, new PathGeometry(new Ring(new List<Vec3> { P(sb, yc - half), P(sb, yc + half), P(sb + 3.0, yc) }), true), e => e.Parameters["width"] = ParamValue.Of(0.12));
+                }
             }
 
             RoadCommands.RebuildNow(ctx);
-            ctx.Write(Bs.T("Kružni tok: poluprečnik {0} m, prsten {1} m, krakova {2}; napravljeno elemenata: {3}.", CommandContext.F(ro, 2), CommandContext.F(w, 2), arms, n));
-            ctx.Write("Prsten je ulica u jednom smjeru s ivičnjacima; ulice i ceste koje do njega nacrtate same se spoje bez preklapanja.");
+            ctx.Write(Bs.T("Kružni tok: otok R {0} m, prijelazni prsten {1} m, prsten {2} × {3} m (vanjski poluprečnik {4} m), krakova {5}; elemenata: {6}.",
+                CommandContext.F(ri, 2), CommandContext.F(apron, 2), lanes, CommandContext.F(lw, 2), CommandContext.F(ro, 2), arms, n));
+            ctx.Write("Ulice i ceste koje nacrtate do vanjske ivice kružnog toka same se spoje bez preklapanja.");
         });
 
         // ------------------------------------------------------------------ finished sheet

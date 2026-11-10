@@ -549,7 +549,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
 
         /// <summary>The cross-section as parameters of a street element.</summary>
-        private static Dictionary<string, ParamValue> Params(RoadSpec s) => new Dictionary<string, ParamValue>(StringComparer.Ordinal)
+        internal static Dictionary<string, ParamValue> Params(RoadSpec s) => new Dictionary<string, ParamValue>(StringComparer.Ordinal)
         {
             ["direction"] = ParamValue.Of(s.OneWay ? "one_way" : "two_way"),
             ["lanesLeft"] = ParamValue.Of((double)s.LanesLeft),
@@ -562,6 +562,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             ["cornerRadius"] = ParamValue.Of(s.CornerRadius),
             ["arrows"] = ParamValue.Of(s.Arrows),
             ["arrowSpacing"] = ParamValue.Of(s.ArrowSpacing),
+            ["median"] = ParamValue.Of(s.Median),
         };
 
         /// <summary>The element as a street with the given cross-section (a simple road becomes a street; label and data stay).</summary>

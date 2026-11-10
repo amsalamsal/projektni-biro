@@ -94,6 +94,19 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void Median_SeparatesTheDirections_WithContinuousLines()
+        {
+            var r = Road("A", 0, 0, 100, 0, x => { x.Median = 2; });
+            Assert.Equal(4, r.CarriagewayLeft, 6);
+            RoadNetworkResult res = RoadNetwork.Build(new[] { r });
+            Assert.Equal(100 * 8, res.Area(RoadLevel.Carriageway), 0);
+            Assert.All(res.Markings, m => Assert.True(m.Centre));
+            Assert.Contains(res.Markings, m => Math.Abs(m.Points[0].Y - 1) < 1e-6);
+            Assert.Contains(res.Markings, m => Math.Abs(m.Points[0].Y + 1) < 1e-6);
+            Assert.All(res.Arrows, a => Assert.True(Math.Abs(Math.Abs(a.Position.Y) - 2.5) < 1e-6, "arrow at " + a.Position));
+        }
+
+        [Fact]
         public void Crossroads_GetAnAccessibleRampAtEveryCornerEnd()
         {
             var a = Road("A", -60, 0, 60, 0);
