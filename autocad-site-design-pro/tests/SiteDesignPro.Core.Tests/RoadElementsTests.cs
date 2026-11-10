@@ -319,6 +319,10 @@ namespace SiteDesignPro.Core.Tests
 
             elements.Add(Street(new Ring(new List<Vec3> { new Vec3(14732.4, -24791.2, 0), new Vec3(7350.75, -12162.3, 0) }), false, ("bikeLeft", ParamValue.Of(1.5)), ("bikeRight", ParamValue.Of(1.5))));
             RoadNetworkResult res = RoadElements.Network(elements, Cat, 1000)!;
+            string Boxes(RoadNetworkResult r) => string.Join("; ", r.Fillets.Select(f => f.Min(z => z.X).ToString("0.#") + ".." + f.Max(z => z.X).ToString("0.#") + "/" + f.Min(z => z.Y).ToString("0.#") + ".." + f.Max(z => z.Y).ToString("0.#")));
+            string subsets = "ring+street: " + Boxes(RoadElements.Network(new[] { elements[0], elements[4] }, Cat, 1000)!) +
+                "\nring+arm0+street: " + Boxes(RoadElements.Network(new[] { elements[0], elements[1], elements[4] }, Cat, 1000)!) +
+                "\narm0+street: " + Boxes(RoadElements.Network(new[] { elements[1], elements[4] }, Cat, 1000)!);
 
             var end = new Vec2(14.7324, -24.7912);
             Vec2 dir = (end - new Vec2(7.35075, -12.1623)).Normalized();
@@ -341,7 +345,7 @@ namespace SiteDesignPro.Core.Tests
                     {
                         double along = (x - end).Dot(dir);
                         Assert.True(along < 0.01, what + " reaches " + along.ToString("0.###") + " m past the dead end at " + x + " (bulge " + b.ToString("0.####") + ")\n" +
-                            "fillets:\n" + string.Join("\n", res.Fillets.Select(f => f.Count + " pts, nearest " + f.Min(z => z.DistanceTo(x)).ToString("0.###") + ", first " + f[0] + ", bbox " + f.Min(z => z.X).ToString("0.#") + ".." + f.Max(z => z.X).ToString("0.#") + " / " + f.Min(z => z.Y).ToString("0.#") + ".." + f.Max(z => z.Y).ToString("0.#"))));
+                            subsets + "\nfillets:\n" + string.Join("\n", res.Fillets.Select(f => f.Count + " pts, nearest " + f.Min(z => z.DistanceTo(x)).ToString("0.###") + ", first " + f[0] + ", bbox " + f.Min(z => z.X).ToString("0.#") + ".." + f.Max(z => z.X).ToString("0.#") + " / " + f.Min(z => z.Y).ToString("0.#") + ".." + f.Max(z => z.Y).ToString("0.#"))));
                     }
                 }
             }
