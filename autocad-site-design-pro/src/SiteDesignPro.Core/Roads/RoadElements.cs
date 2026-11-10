@@ -209,7 +209,8 @@ namespace SiteDesignPro.Core.Roads
         {
             List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
             List<RoadSpec> specs = Specs(all, catalog, unitsPerMeter);
-            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter));
+            List<IReadOnlyList<Vec2>> crossings = CrossingAreas(all.Where(e => e.TypeId == CrossingType), unitsPerMeter);
+            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings);
         }
 
         /// <summary>Cross-sections of all roads of the network among the elements (metres).</summary>

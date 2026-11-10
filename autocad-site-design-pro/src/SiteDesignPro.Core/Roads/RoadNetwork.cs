@@ -150,7 +150,13 @@ namespace SiteDesignPro.Core.Roads
         /// Builds the network; <paramref name="noMarking"/> are areas (pedestrian crossings, metres) where lane lines
         /// and arrows are left out.
         /// </summary>
-        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking)
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking) => Build(input, noMarking, null);
+
+        /// <summary>
+        /// Builds the network; <paramref name="crossings"/> are the pedestrian crossings (metres), which get an accessible
+        /// ramp on both ends where there is a sidewalk.
+        /// </summary>
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings)
         {
             var result = new RoadNetworkResult();
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
@@ -331,6 +337,27 @@ namespace SiteDesignPro.Core.Roads
                 {
                     foreach (PathD ramp in Ramps(f[0], radius, surface, behindKerb, walk))
                     {
+                        result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
+                    }
+                }
+
+                // pedestrian crossings away from the junctions: a ramp at both ends, centred on the crossing
+                PathsD done = new PathsD(result.Ramps.Select(l => Positive(l.Points.Select(q => q - origin))));
+                foreach (IReadOnlyList<Vec2> area in crossings ?? Enumerable.Empty<IReadOnlyList<Vec2>>())
+                {
+                    if (area.Count < 3)
+                    {
+                        continue;
+                    }
+
+                    foreach (PathD ramp in CrossingRamps(area.Select(q => q - origin).ToList(), roads, behindKerb, walk))
+                    {
+                        if (Clipper.Intersect(new PathsD { ramp }, done, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) > 0.1)
+                        {
+                            continue;
+                        }
+
+                        done.Add(ramp);
                         result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
                     }
                 }
@@ -630,6 +657,74 @@ namespace SiteDesignPro.Core.Roads
                 foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))
                 {
                     if (Clipper.PointInPolygon(new PointD(tip.X + (along.X * RampWidth / 2) + (across.X * 0.07), tip.Y + (along.Y * RampWidth / 2) + (across.Y * 0.07)), piece) != PointInPolygonResult.IsOutside)
+                    {
+                        yield return piece;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Ramps (1,20 m wide) at the two ends of a pedestrian crossing: across the kerb, bike lane and sidewalk of the
+        /// road the crossing lies on, on the sides with a sidewalk.
+        /// </summary>
+        private static IEnumerable<PathD> CrossingRamps(List<Vec2> area, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
+        {
+            Vec2 c = new Vec2(area.Average(q => q.X), area.Average(q => q.Y));
+            RoadSpec? road = null;
+            Vec2 foot = c, along = new Vec2(1, 0);
+            double best = double.MaxValue;
+            foreach (RoadSpec r in roads)
+            {
+                int m = r.Axis.Count;
+                for (int i = 0; i < (r.Closed ? m : m - 1); i++)
+                {
+                    Vec2 a = r.Axis[i], b = r.Axis[(i + 1) % m];
+                    Vec2 ab = b - a;
+                    double l2 = ab.Dot(ab);
+                    if (l2 < 1e-12)
+                    {
+                        continue;
+                    }
+
+                    double t = Math.Max(0, Math.Min(1, (c - a).Dot(ab) / l2));
+                    Vec2 f = a + (ab * t);
+                    double d = f.DistanceTo(c);
+                    if (d < best)
+                    {
+                        best = d;
+                        foot = f;
+                        along = ab.Normalized();
+                        road = r;
+                    }
+                }
+            }
+
+            if (road == null || best > Math.Max(road.Extent(RoadLevel.Carriageway, true), road.Extent(RoadLevel.Carriageway, false)))
+            {
+                yield break;
+            }
+
+            Vec2 across = along.Perp();
+            foreach (int side in new[] { 1, -1 })
+            {
+                bool left = side > 0;
+                double kerbLine = road.Extent(RoadLevel.Carriageway, left);
+                double outer = Math.Max(road.Extent(RoadLevel.Edge, left), kerbLine) + 0.5;
+                Vec2 s0 = foot + (across * (side * (kerbLine - 0.01)));
+                Vec2 s1 = foot + (across * (side * outer));
+                Vec2 h = along * (RampWidth / 2);
+                var rect = new[] { s0 - h, s0 + h, s1 + h, s1 - h };
+                PathsD ramp = Clipper.Intersect(new PathsD { Positive(rect) }, behindKerb, FillRule.NonZero, Precision);
+                if (Clipper.Intersect(ramp, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
+                {
+                    continue;
+                }
+
+                Vec2 probe = foot + (across * (side * (kerbLine + 0.07)));
+                foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))
+                {
+                    if (Clipper.PointInPolygon(new PointD(probe.X, probe.Y), piece) != PointInPolygonResult.IsOutside)
                     {
                         yield return piece;
                     }

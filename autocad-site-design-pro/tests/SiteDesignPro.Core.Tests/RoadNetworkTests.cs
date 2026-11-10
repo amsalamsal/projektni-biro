@@ -125,6 +125,27 @@ namespace SiteDesignPro.Core.Tests
             Assert.Empty(RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }), Road("B", 0, -60, 0, 60, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }) }).Ramps);
         }
 
+        [Fact]
+        public void PedestrianCrossing_GetsARampOnBothEnds()
+        {
+            // crossing 4 m wide across the middle of a straight street (carriageway 6 m, sidewalks 2 m)
+            var box = new List<Vec2> { new Vec2(48, -3), new Vec2(52, -3), new Vec2(52, 3), new Vec2(48, 3) };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, new[] { box }, new[] { box });
+            Assert.Equal(2, res.Ramps.Count);
+            foreach (RoadLoop ramp in res.Ramps)
+            {
+                Assert.InRange(Math.Abs(Area(ramp.Points)), (1.2 * 2.15) - 0.05, (1.2 * 2.15) + 0.05);
+                Assert.All(ramp.Points, p => Assert.InRange(p.X, 49.39, 50.61));
+            }
+
+            Assert.Contains(res.Ramps, r => r.Points.All(p => p.Y > 2.9));
+            Assert.Contains(res.Ramps, r => r.Points.All(p => p.Y < -2.9));
+
+            // no sidewalk on the right: only the left ramp
+            RoadNetworkResult one = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0, x => x.SidewalkRight = 0) }, new[] { box }, new[] { box });
+            Assert.Single(one.Ramps);
+        }
+
         private static double Area(IReadOnlyList<Vec2> p)
         {
             double s = 0;
