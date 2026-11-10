@@ -210,12 +210,12 @@ namespace SiteDesignPro.Core.Roads
             }
 
             // the corner fillets the rounding added; every level is concentric with them. A real fillet lies between
-            // two roads; pieces touching one road only (rounding remnants at a dead end) are left out of the surface
+            // two roads; pieces touching one road only are not used to guide the levels
             var bikeBands = bands[RoadLevel.Bike].Select(Union).ToList();
             // (an opening removes the millimetre slivers the rounding leaves along straight edges; attached to a
             // fillet they would carry the kerb and sidewalk to the far end of the road)
             PathsD added = Clipper.Difference(surface, raw, FillRule.NonZero, Precision);
-            added = Clipper.InflatePaths(Clipper.InflatePaths(added, -0.05, JoinType.Miter, EndType.Polygon, 10, Precision), 0.05, JoinType.Miter, EndType.Polygon, 10, Precision);
+            added = Clipper.InflatePaths(Clipper.InflatePaths(added, -0.01, JoinType.Miter, EndType.Polygon, 10, Precision), 0.01, JoinType.Miter, EndType.Polygon, 10, Precision);
             List<PathsD> fillets = Union(added)
                 .Where(f => Clipper.Area(f) > 0.02 && Clipper.Area(f) / Perimeter(f) > 0.02) // no slivers along shared edges
                 .Select(f => new PathsD { f })
@@ -224,17 +224,6 @@ namespace SiteDesignPro.Core.Roads
             foreach (PathsD f in fillets)
             {
                 result.Fillets.AddRange(f.Select(path => path.Select(q => new Vec2(q.x, q.y) + origin).ToList()));
-            }
-
-            if (junctionCorners.Count > 0 || fillets.Count > 0)
-            {
-                var keepSurface = new PathsD(raw);
-                foreach (PathsD f in fillets)
-                {
-                    keepSurface.AddRange(f);
-                }
-
-                surface = Union(keepSurface);
             }
 
             // bike lanes: the ring of their width inside the kerb line, along roads that have one and around the
