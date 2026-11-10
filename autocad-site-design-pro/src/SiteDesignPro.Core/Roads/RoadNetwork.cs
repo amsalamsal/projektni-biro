@@ -115,6 +115,9 @@ namespace SiteDesignPro.Core.Roads
 
         public List<string> Notes { get; } = new List<string>();
 
+        /// <summary>The rounded junction corners added to the road surface (metres), for checks.</summary>
+        public List<List<Vec2>> Fillets { get; } = new List<List<Vec2>>();
+
         /// <summary>Kerb radius used at junctions (kerb line between road level and sidewalk).</summary>
         public double ActualRadius { get; set; }
 
@@ -214,6 +217,11 @@ namespace SiteDesignPro.Core.Roads
                 .Select(f => new PathsD { f })
                 .Where(f => bikeBands.Count(b => Touches(f, b, 0.05)) >= 2)
                 .ToList();
+            foreach (PathsD f in fillets)
+            {
+                result.Fillets.AddRange(f.Select(path => path.Select(q => new Vec2(q.x, q.y) + origin).ToList()));
+            }
+
             if (junctionCorners.Count > 0)
             {
                 var keepSurface = new PathsD(raw);

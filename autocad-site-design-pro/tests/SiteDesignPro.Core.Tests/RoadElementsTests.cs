@@ -341,7 +341,7 @@ namespace SiteDesignPro.Core.Tests
                     {
                         double along = (x - end).Dot(dir);
                         Assert.True(along < 0.01, what + " reaches " + along.ToString("0.###") + " m past the dead end at " + x + " (bulge " + b.ToString("0.####") + ")\n" +
-                            string.Join("\n", loop.Points.Select((pp, j) => (pp, j)).Where(z => z.pp.DistanceTo(x) < 4).Select(z => z.pp.X.ToString("0.####") + " " + z.pp.Y.ToString("0.####") + " b=" + loop.Bulges[z.j].ToString("0.####"))));
+                            "fillets:\n" + string.Join("\n", res.Fillets.Select(f => f.Count + " pts, nearest " + f.Min(z => z.DistanceTo(x)).ToString("0.###") + ", first " + f[0] + ", bbox " + f.Min(z => z.X).ToString("0.#") + ".." + f.Max(z => z.X).ToString("0.#") + " / " + f.Min(z => z.Y).ToString("0.#") + ".." + f.Max(z => z.Y).ToString("0.#"))));
                     }
                 }
             }
