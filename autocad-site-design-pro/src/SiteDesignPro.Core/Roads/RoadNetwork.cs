@@ -329,7 +329,7 @@ namespace SiteDesignPro.Core.Roads
             {
                 foreach (PathsD f in fillets)
                 {
-                    foreach (PathD ramp in Ramps(f[0], surface, behindKerb, walk))
+                    foreach (PathD ramp in Ramps(f[0], radius, surface, behindKerb, walk))
                     {
                         result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
                     }
@@ -503,7 +503,7 @@ namespace SiteDesignPro.Core.Roads
         /// Ramps at the two tangent points of a corner fillet: 1,20 m along the straight kerb, starting where the
         /// corner arc ends, across everything behind the kerb (kerb, bike lane, sidewalk).
         /// </summary>
-        private static IEnumerable<PathD> Ramps(PathD fillet, PathsD surface, PathsD behindKerb, PathsD walk)
+        private static IEnumerable<PathD> Ramps(PathD fillet, double radius, PathsD surface, PathsD behindKerb, PathsD walk)
         {
             int n = fillet.Count;
             if (n < 3)
@@ -538,12 +538,18 @@ namespace SiteDesignPro.Core.Roads
                 return pts[j];
             }
 
-            foreach (Vec2 tip in new[] { Tip(1), Tip(-1) })
+            // the tangent points lie at R / tan(angle / 2) from the corner point along the two kerb lines (the
+            // fillet's thin tips were trimmed with the slivers)
+            Vec2 d1 = (Tip(1) - corner).Normalized(), d2 = (Tip(-1) - corner).Normalized();
+            double angle = Math.Acos(Math.Max(-1, Math.Min(1, d1.Dot(d2))));
+            if (angle < 0.05 || angle > Math.PI - 0.05)
             {
-                if ((corner - tip).Length < 0.5)
-                {
-                    continue;
-                }
+                yield break;
+            }
+
+            double t = radius / Math.Tan(angle / 2);
+            foreach (Vec2 tip in new[] { corner + (d1 * t), corner + (d2 * t) })
+            {
 
                 // along the kerb away from the corner, and across it away from the road
                 Vec2 along = (tip - corner).Normalized();
