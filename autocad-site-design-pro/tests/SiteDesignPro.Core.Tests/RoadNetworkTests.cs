@@ -102,9 +102,9 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(8, res.Ramps.Count);
             foreach (RoadLoop ramp in res.Ramps)
             {
-                // 1,20 m along the kerb, across the kerb (0,15) and the sidewalk (1,60), right after the corner arc
+                // 1,20 m along the kerb, across the kerb (0,15) and the sidewalk (2,00), right after the corner arc
                 double area = Math.Abs(Area(ramp.Points));
-                Assert.Equal(1.2 * 1.75, area, 1);
+                Assert.InRange(area, (1.2 * 2.15) - 0.05, (1.2 * 2.15) + 0.05);
                 Assert.All(ramp.Points, p => Assert.True(Math.Abs(p.X) >= 8.99 || Math.Abs(p.Y) >= 8.99, "ramp inside the corner at " + p));
             }
 
@@ -181,8 +181,8 @@ namespace SiteDesignPro.Core.Tests
             Assert.Contains(kerbLine, x => Math.Abs(x - 6.0) < 0.05);
             Assert.Contains(kerbLine, x => Math.Abs(x - 12.0) < 0.05);
 
-            // the sidewalk on the inner side follows the kerb concentrically: kerb back 5,85, sidewalk 4,25, edge 4,15
-            var allowed = new[] { 6.0, 12.0, 5.85, 12.15, 4.25, 13.75, 4.15, 13.85 };
+            // the sidewalk (2 m) on the inner side follows the kerb concentrically: kerb back 5,85, sidewalk 3,85, edge 3,75
+            var allowed = new[] { 6.0, 12.0, 5.85, 12.15, 3.85, 14.15, 3.75, 14.25 };
             foreach (RoadRegion region in res.Bands.Values.SelectMany(b => b))
             {
                 foreach (RoadLoop loop in new[] { region.Outer }.Concat(region.Holes))

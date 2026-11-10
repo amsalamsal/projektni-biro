@@ -513,22 +513,34 @@ namespace SiteDesignPro.Core.Roads
 
             var pts = fillet.Select(q => new Vec2(q.x, q.y)).ToList();
 
-            // the tips of the fillet are its two sharpest corners; from each tip the long straight edge leads to the
-            // corner point of the two kerb lines, the short ones follow the arc
-            var tips = Enumerable.Range(0, n).Select(i =>
+            // the corner point of the two kerb lines is the vertex between the two long straight edges; their other
+            // ends are the tangent points where the arc starts (the arc itself is made of short pieces)
+            double Len(int i) => (pts[(i + 1) % n] - pts[i]).Length;
+            int p = Enumerable.Range(0, n).OrderByDescending(i => Math.Min(Len((i - 1 + n) % n), Len(i))).First();
+            Vec2 corner = pts[p];
+            Vec2 Tip(int dir)
             {
-                Vec2 a = pts[(i - 1 + n) % n], b = pts[i], c = pts[(i + 1) % n];
-                Vec2 u = a - b, v = c - b;
-                double ang = u.Length < 1e-9 || v.Length < 1e-9 ? Math.PI : Math.Acos(Math.Max(-1, Math.Min(1, u.Dot(v) / (u.Length * v.Length))));
-                return (Index: i, Angle: ang);
-            }).OrderBy(x => x.Angle).Take(2).ToList();
+                // follow the straight edge from the corner point to its end (it may have points in between)
+                int j = (p + dir + n) % n;
+                Vec2 d = (pts[j] - corner).Normalized();
+                for (int guard = 0; guard < n; guard++)
+                {
+                    int k = (j + dir + n) % n;
+                    Vec2 step = pts[k] - pts[j];
+                    if (k == p || step.Length < 1e-9 || Math.Abs(d.Cross(step.Normalized())) > 0.02 || d.Dot(step) < 0)
+                    {
+                        break;
+                    }
 
-            foreach ((int i, double _) in tips)
+                    j = k;
+                }
+
+                return pts[j];
+            }
+
+            foreach (Vec2 tip in new[] { Tip(1), Tip(-1) })
             {
-                Vec2 tip = pts[i];
-                Vec2 prev = pts[(i - 1 + n) % n], next = pts[(i + 1) % n];
-                Vec2 corner = (prev - tip).Length > (next - tip).Length ? prev : next;
-                if ((corner - tip).Length < 1e-6)
+                if ((corner - tip).Length < 0.5)
                 {
                     continue;
                 }
