@@ -887,7 +887,24 @@ namespace SiteDesignPro.Core.Roads
                     }
 
                     PathsD overlap = Clipper.Intersect(perRoad[i], perRoad[j], FillRule.NonZero, Precision);
-                    if (overlap.Sum(p => Math.Abs(Clipper.Area(p))) < 0.01)
+                    double overlapArea = overlap.Sum(p => Math.Abs(Clipper.Area(p)));
+                    if (overlapArea < 0.01)
+                    {
+                        continue;
+                    }
+
+                    // two roads that overlap only inside a third one (two arms of a roundabout, both reaching the
+                    // ring axis) do not meet each other: their corners are the third road's
+                    var others = new PathsD();
+                    for (int o = 0; o < perRoad.Count; o++)
+                    {
+                        if (o != i && o != j && boxes[o].Intersects(boxes[i]) && boxes[o].Intersects(boxes[j]))
+                        {
+                            others.AddRange(perRoad[o]);
+                        }
+                    }
+
+                    if (others.Count > 0 && Clipper.Difference(overlap, others, FillRule.NonZero, Precision).Sum(p => Math.Abs(Clipper.Area(p))) < 0.02 * overlapArea)
                     {
                         continue;
                     }
