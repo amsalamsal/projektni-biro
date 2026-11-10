@@ -8,7 +8,9 @@
   Sve linije u DWG-u su na Z = 0,00; mjerilo 1 m = 100 cm.
 * **Rampe za invalide 120 cm** same se crtaju na svim ulazima i izlazima raskrsnica i kružnog toka, na početku
   pravog dijela, s obje strane gdje postoji trotoar (rampa je i rampa za bicikliste). Svaki pješački prelaz
-  dobija rampu 120 cm na oba kraja (na strani s trotoarom), poravnatu sa zebrom.
+  dobija rampu 120 cm na oba kraja (na strani s trotoarom), poravnatu sa zebrom; ona zamjenjuje rampu na kraju
+  krivine na istom ivičnjaku. Rampa je spušteni ivičnjak i 1,20 m kosine prema stazi ili trotoaru (u 3D od kolovoza
+  do visine trotoara).
 * **Mini kružni tok** (do 25 km/h): srednji otok poluprečnika 15–30 m (zelenilo), prijelazni prsten 1,20 m sa
   šrafurom AR-B88, trake prstena kao ulazne trake krakova, isprekidane linije i strelice, razdjelni otoci 10 m
   prekinuti na pješačkom prelazu i rampama, linije i trokuti „ustupi prednost“. Sve na sloju „Saobraćajnice“.

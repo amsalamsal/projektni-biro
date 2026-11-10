@@ -533,6 +533,12 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Width of an accessible kerb ramp along the kerb.</summary>
         public const double RampWidth = 1.2;
 
+        /// <summary>
+        /// Depth of a ramp behind the kerb line: the lowered kerb (0,15 m) and 1,20 m of slope up to the bike lane or
+        /// sidewalk (13 cm over 1,20 m, about 11 %), like a lowered kerb at a crossing.
+        /// </summary>
+        public const double RampDepth = RoadSpec.KerbWidth + 1.2;
+
         /// <summary>A corner ramp closer than this along the kerb to a crossing ramp is left out.</summary>
         public const double CrossingRampReach = 10.0;
 
@@ -656,13 +662,20 @@ namespace SiteDesignPro.Core.Roads
                     new PointD(tip.X + (along.X * RampWidth) + (across.X * depth), tip.Y + (along.Y * RampWidth) + (across.Y * depth)),
                     new PointD(tip.X + (across.X * depth), tip.Y + (across.Y * depth)),
                 };
-                PathsD ramp = Clipper.Intersect(new PathsD { Positive(rect.Select(q => new Vec2(q.x, q.y))) }, behindKerb, FillRule.NonZero, Precision);
+                PathsD reach = Clipper.Intersect(new PathsD { Positive(rect.Select(q => new Vec2(q.x, q.y))) }, behindKerb, FillRule.NonZero, Precision);
 
                 // only on a side with a sidewalk, and only the part connected to the kerb at the tip
-                if (Clipper.Intersect(ramp, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
+                if (Clipper.Intersect(reach, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
                 {
                     continue;
                 }
+
+                var shortRect = new[]
+                {
+                    tip - (across * 0.01), tip + (along * RampWidth) - (across * 0.01),
+                    tip + (along * RampWidth) + (across * RampDepth), tip + (across * RampDepth),
+                };
+                PathsD ramp = Clipper.Intersect(new PathsD { Positive(shortRect) }, behindKerb, FillRule.NonZero, Precision);
 
                 foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))
                 {
@@ -725,11 +738,14 @@ namespace SiteDesignPro.Core.Roads
                 Vec2 s1 = foot + (across * (side * outer));
                 Vec2 h = along * (RampWidth / 2);
                 var rect = new[] { s0 - h, s0 + h, s1 + h, s1 - h };
-                PathsD ramp = Clipper.Intersect(new PathsD { Positive(rect) }, behindKerb, FillRule.NonZero, Precision);
-                if (Clipper.Intersect(ramp, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
+                PathsD reach = Clipper.Intersect(new PathsD { Positive(rect) }, behindKerb, FillRule.NonZero, Precision);
+                if (Clipper.Intersect(reach, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
                 {
                     continue;
                 }
+
+                Vec2 s2 = foot + (across * (side * (kerbLine + RampDepth)));
+                PathsD ramp = Clipper.Intersect(new PathsD { Positive(new[] { s0 - h, s0 + h, s2 + h, s2 - h }) }, behindKerb, FillRule.NonZero, Precision);
 
                 Vec2 probe = foot + (across * (side * (kerbLine + 0.07)));
                 foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))

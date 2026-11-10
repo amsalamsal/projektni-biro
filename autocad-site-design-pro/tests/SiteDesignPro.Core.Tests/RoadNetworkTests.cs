@@ -115,9 +115,9 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(8, res.Ramps.Count);
             foreach (RoadLoop ramp in res.Ramps)
             {
-                // 1,20 m along the kerb, across the kerb (0,15) and the sidewalk (2,00), right after the corner arc
+                // 1,20 m along the kerb, the lowered kerb (0,15) and 1,20 m of slope into the sidewalk, right after the corner arc
                 double area = Math.Abs(Area(ramp.Points));
-                Assert.InRange(area, (1.2 * 2.15) - 0.05, (1.2 * 2.15) + 0.05);
+                Assert.InRange(area, (1.2 * 1.35) - 0.05, (1.2 * 1.35) + 0.05);
                 Assert.All(ramp.Points, p => Assert.True(Math.Abs(p.X) >= 8.99 || Math.Abs(p.Y) >= 8.99, "ramp inside the corner at " + p));
             }
 
@@ -134,7 +134,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(2, res.Ramps.Count);
             foreach (RoadLoop ramp in res.Ramps)
             {
-                Assert.InRange(Math.Abs(Area(ramp.Points)), (1.2 * 2.15) - 0.05, (1.2 * 2.15) + 0.05);
+                Assert.InRange(Math.Abs(Area(ramp.Points)), (1.2 * 1.35) - 0.05, (1.2 * 1.35) + 0.05);
                 Assert.All(ramp.Points, p => Assert.InRange(p.X, 49.39, 50.61));
             }
 
@@ -143,7 +143,7 @@ namespace SiteDesignPro.Core.Tests
 
             // the sidewalk and kerb are cut where the ramps are (they are lowered there)
             double walk = res.Bands[RoadLevel.Sidewalk].Sum(r => r.Area);
-            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 1.2 * 2.0) - 0.2, (2 * 100 * 2.0) - (2 * 1.2 * 2.0) + 0.2);
+            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 1.2 * 1.2) - 0.2, (2 * 100 * 2.0) - (2 * 1.2 * 1.2) + 0.2);
 
             // in 3D the ramp rises from the carriageway (0) to the sidewalk (0,13 above the ramp's own offset)
             List<List<Vec2>> kerbLines = res.Outlines[RoadLevel.Carriageway].Select(l => l.Points).ToList();
