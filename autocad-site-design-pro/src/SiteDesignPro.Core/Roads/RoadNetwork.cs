@@ -1127,7 +1127,7 @@ namespace SiteDesignPro.Core.Roads
         }
 
         /// <summary>
-        /// Removes millimetre back-steps (rounding where two offset boundaries meet) and zero-width spikes from a
+        /// Removes back-steps under 1 cm (rounding where two offset boundaries meet) and zero-width spikes from a
         /// closed loop, so its arcs are recognised whole.
         /// </summary>
         internal static List<Vec2> Despike(List<Vec2> pts)
@@ -1142,7 +1142,7 @@ namespace SiteDesignPro.Core.Roads
                     Vec2 a = list[(i - 1 + list.Count) % list.Count], b = list[i], c = list[(i + 1) % list.Count];
                     Vec2 ab = b - a, bc = c - b;
                     double la = ab.Length, lc = bc.Length;
-                    bool tiny = la < 0.0025;
+                    bool tiny = la < 0.01;
                     bool spike = la > 1e-9 && lc > 1e-9 && ab.Dot(bc) < 0 && Math.Abs(ab.Cross(bc)) / (la * lc) < 0.09;
                     if (tiny || spike)
                     {
