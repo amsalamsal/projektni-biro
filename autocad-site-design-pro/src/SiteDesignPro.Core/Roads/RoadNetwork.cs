@@ -163,6 +163,7 @@ namespace SiteDesignPro.Core.Roads
             foreach (RoadSpec r in roads)
             {
                 r.Axis = Clean(r.Axis.Select(p => p - origin).ToList());
+                r.Corners = r.Corners?.Select(p => p - origin).ToList();
                 if (r.Closed && r.Axis.Count > 2 && r.Axis[0].DistanceTo(r.Axis[r.Axis.Count - 1]) < 1e-6)
                 {
                     r.Axis.RemoveAt(r.Axis.Count - 1);
@@ -173,6 +174,7 @@ namespace SiteDesignPro.Core.Roads
             JoinEnds(roads, result.Notes);
             foreach (RoadSpec r in roads)
             {
+                r.Axis = Fillet(r);
                 result.Axes[r.Id] = r.Axis.Select(p => p + origin).ToList();
             }
 
@@ -182,52 +184,112 @@ namespace SiteDesignPro.Core.Roads
             result.ActualRadius = radius;
             result.EffectiveRadius = radius + bikeMax;
 
-            // concentric corner radii: inner levels further from the corner centre, outer levels closer
-            var radii = new Dictionary<RoadLevel, double>
+            // per-road carriageway and road surface up to the kerb line (lane lines and arrows use them)
+            var bands = new Dictionary<RoadLevel, List<PathsD>>
             {
-                [RoadLevel.Carriageway] = radius + bikeMax,
-                [RoadLevel.Bike] = radius,
-                [RoadLevel.Kerb] = Math.Max(0, radius - RoadSpec.KerbWidth),
-                [RoadLevel.Sidewalk] = Math.Max(0, radius - RoadSpec.KerbWidth - walkMax),
-                [RoadLevel.Edge] = Math.Max(0, radius - RoadSpec.KerbWidth - walkMax - RoadSpec.EdgeWidth),
+                [RoadLevel.Carriageway] = roads.Select(r => Band(r.Axis, r.Closed, r.Extent(RoadLevel.Carriageway, true), r.Extent(RoadLevel.Carriageway, false))).ToList(),
+                [RoadLevel.Bike] = roads.Select(r => Band(r.Axis, r.Closed, r.Extent(RoadLevel.Bike, true), r.Extent(RoadLevel.Bike, false))).ToList(),
             };
 
-            var levels = (RoadLevel[])Enum.GetValues(typeof(RoadLevel));
-            var bands = new Dictionary<RoadLevel, List<PathsD>>();
-            var outline = new Dictionary<RoadLevel, PathsD>();
-            PathsD? previous = null;
-            foreach (RoadLevel level in levels)
+            // the kerb line: road surface of all roads, inner junction corners rounded with the kerb radius
+            var allSurface = new PathsD();
+            foreach (PathsD p in bands[RoadLevel.Bike])
             {
-                var perRoad = roads.Select(r => Band(r.Axis, r.Closed, r.Extent(level, true), r.Extent(level, false))).ToList();
-                bands[level] = perRoad;
-                var all = new PathsD();
-                foreach (PathsD p in perRoad)
-                {
-                    all.AddRange(p);
-                }
-
-                PathsD closed = Union(all);
-                PathsD corners = JunctionCorners(perRoad, radii[level]);
-                if (corners.Count > 0)
-                {
-                    closed = Clipper.Union(closed, corners, FillRule.NonZero, Precision);
-                }
-
-                if (previous != null)
-                {
-                    closed = Clipper.Union(closed, previous, FillRule.NonZero, Precision);
-                }
-
-                outline[level] = closed;
-                previous = closed;
+                allSurface.AddRange(p);
             }
 
-            bool anyBike = bikeMax > 0;
-            bool anyWalk = walkMax > 0;
-            foreach (RoadLevel level in levels)
+            PathsD raw = Union(allSurface);
+            PathsD surface = raw;
+            PathsD junctionCorners = JunctionCorners(bands[RoadLevel.Bike], radius);
+            if (junctionCorners.Count > 0)
             {
-                PathsD region = level == RoadLevel.Carriageway ? outline[level] : Clipper.Difference(outline[level], outline[level - 1], FillRule.NonZero, Precision);
-                result.Bands[level] = Regions(region, origin);
+                surface = Clipper.Union(raw, junctionCorners, FillRule.NonZero, Precision);
+            }
+
+            // the corner fillets the rounding added; every level is concentric with them
+            List<PathsD> fillets = Clipper.Difference(surface, raw, FillRule.NonZero, Precision)
+                .Where(f => Clipper.Area(f) > 0.02 && Clipper.Area(f) / Perimeter(f) > 0.02) // no slivers along shared edges
+                .Select(f => new PathsD { f })
+                .ToList();
+
+            // bike lanes: the ring of their width inside the kerb line, along roads that have one and around the
+            // corners next to them (tapering out where the other road has none)
+            var bikePieces = new PathsD();
+            foreach (double b in Widths(roads, (r, left) => left ? r.BikeLeft : r.BikeRight))
+            {
+                PathsD strips = Strips(roads, (r, left) => (left ? r.BikeLeft : r.BikeRight) == b, (r, left) => r.Extent(RoadLevel.Carriageway, left), (r, left) => r.Extent(RoadLevel.Bike, left));
+                PathsD ring = Clipper.Difference(surface, Clipper.InflatePaths(surface, -b, JoinType.Round, EndType.Polygon, 2, Precision, ArcTolerance), FillRule.NonZero, Precision);
+                bikePieces.AddRange(Clipper.Intersect(ring, Zone(strips, fillets, 0.05, 0), FillRule.NonZero, Precision));
+            }
+
+            PathsD bike = Union(bikePieces);
+            PathsD carriageway = bike.Count > 0 ? Clipper.Difference(surface, bike, FillRule.NonZero, Precision) : surface;
+
+            // outside the kerb line: rings of the kerb, sidewalk and edge widths around the road surface, along the roads
+            // that have them and around their corners (concentric with the kerb line)
+            var grown = new Dictionary<long, PathsD>();
+            PathsD Grow(double d)
+            {
+                long key = (long)Math.Round(d * 1000);
+                if (key <= 0)
+                {
+                    return surface;
+                }
+
+                if (!grown.TryGetValue(key, out PathsD? g))
+                {
+                    g = Union(Clipper.InflatePaths(surface, d, JoinType.Round, EndType.Polygon, 2, Precision, ArcTolerance));
+                    grown[key] = g;
+                }
+
+                return g;
+            }
+
+            PathsD Ring(double from, double to) => Clipper.Difference(Grow(to), Grow(from), FillRule.NonZero, Precision);
+
+            double k = RoadSpec.KerbWidth;
+            PathsD kerbStrips = Strips(roads, (r, left) => r.Kerbs, (r, left) => r.Extent(RoadLevel.Bike, left), (r, left) => r.Extent(RoadLevel.Kerb, left));
+            PathsD kerb = kerbStrips.Count > 0 ? Union(Clipper.Intersect(Ring(0, k), Zone(kerbStrips, fillets, 0.05, k + 0.05), FillRule.NonZero, Precision)) : new PathsD();
+
+            var walkPieces = new PathsD();
+            var edgePieces = new PathsD();
+            foreach (double w in Widths(roads, (r, left) => r.Kerbs ? (left ? r.SidewalkLeft : r.SidewalkRight) : 0))
+            {
+                bool Has(RoadSpec r, bool left) => r.Kerbs && (left ? r.SidewalkLeft : r.SidewalkRight) == w;
+                PathsD walkStrips = Strips(roads, Has, (r, left) => r.Extent(RoadLevel.Kerb, left), (r, left) => r.Extent(RoadLevel.Sidewalk, left));
+                PathsD edgeStrips = Strips(roads, Has, (r, left) => r.Extent(RoadLevel.Sidewalk, left), (r, left) => r.Extent(RoadLevel.Edge, left));
+                List<PathsD> next = fillets.Where(f => Touches(f, walkStrips, k + 0.05)).ToList();
+                walkPieces.AddRange(Clipper.Intersect(Ring(k, k + w), Zone(walkStrips, next, -1, k + w + 0.05), FillRule.NonZero, Precision));
+                edgePieces.AddRange(Clipper.Intersect(Ring(k + w, k + w + RoadSpec.EdgeWidth), Zone(edgeStrips, next, -1, k + w + RoadSpec.EdgeWidth + 0.05), FillRule.NonZero, Precision));
+            }
+
+            PathsD inner = Clipper.Union(surface, kerb, FillRule.NonZero, Precision);
+            PathsD walk = walkPieces.Count > 0 ? Clipper.Difference(Union(walkPieces), inner, FillRule.NonZero, Precision) : new PathsD();
+            PathsD innerWalk = Clipper.Union(inner, walk, FillRule.NonZero, Precision);
+            PathsD edge = edgePieces.Count > 0 ? Clipper.Difference(Union(edgePieces), innerWalk, FillRule.NonZero, Precision) : new PathsD();
+
+            var region = new Dictionary<RoadLevel, PathsD>
+            {
+                [RoadLevel.Carriageway] = carriageway,
+                [RoadLevel.Bike] = bike,
+                [RoadLevel.Kerb] = kerb,
+                [RoadLevel.Sidewalk] = walk,
+                [RoadLevel.Edge] = edge,
+            };
+            var outline = new Dictionary<RoadLevel, PathsD>
+            {
+                [RoadLevel.Carriageway] = carriageway,
+                [RoadLevel.Bike] = surface,
+                [RoadLevel.Kerb] = inner,
+                [RoadLevel.Sidewalk] = innerWalk,
+                [RoadLevel.Edge] = Clipper.Union(innerWalk, edge, FillRule.NonZero, Precision),
+            };
+
+            bool anyBike = bike.Count > 0;
+            bool anyWalk = walk.Count > 0;
+            foreach (RoadLevel level in (RoadLevel[])Enum.GetValues(typeof(RoadLevel)))
+            {
+                result.Bands[level] = Regions(region[level], origin);
                 bool draw = level == RoadLevel.Carriageway || level == RoadLevel.Kerb || (level == RoadLevel.Bike && anyBike) || (level >= RoadLevel.Sidewalk && anyWalk);
                 result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
             }
@@ -404,6 +466,138 @@ namespace SiteDesignPro.Core.Roads
 
             PathsD grown = Clipper.InflatePaths(shape, r, JoinType.Miter, EndType.Polygon, 10, Precision);
             return Clipper.InflatePaths(grown, -r, JoinType.Round, EndType.Polygon, 2, Precision, ArcTolerance);
+        }
+
+        /// <summary>Distinct positive widths of one element of the cross-section over all road sides.</summary>
+        private static List<double> Widths(List<RoadSpec> roads, Func<RoadSpec, bool, double> width)
+        {
+            var list = new List<double>();
+            foreach (RoadSpec r in roads)
+            {
+                foreach (bool left in new[] { true, false })
+                {
+                    double w = width(r, left);
+                    if (w > 1e-6 && !list.Contains(w))
+                    {
+                        list.Add(w);
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>Strips between two offsets from the axis on the road sides selected by <paramref name="has"/> (square ends).</summary>
+        private static PathsD Strips(List<RoadSpec> roads, Func<RoadSpec, bool, bool> has, Func<RoadSpec, bool, double> from, Func<RoadSpec, bool, double> to)
+        {
+            var all = new PathsD();
+            foreach (RoadSpec r in roads)
+            {
+                foreach (bool left in new[] { true, false })
+                {
+                    double a = from(r, left), b = to(r, left);
+                    if (!has(r, left) || b - a < 1e-6)
+                    {
+                        continue;
+                    }
+
+                    PathsD outer = Union(Band(r.Axis, r.Closed, left ? b : 0, left ? 0 : b));
+                    PathsD inner = Union(Band(r.Axis, r.Closed, left ? a : 0, left ? 0 : a));
+                    all.AddRange(Clipper.Difference(outer, inner, FillRule.NonZero, Precision));
+                }
+            }
+
+            return Union(all);
+        }
+
+        private static bool Touches(PathsD piece, PathsD strips, double reach) =>
+            strips.Count > 0 && Clipper.Intersect(Clipper.InflatePaths(piece, reach, JoinType.Round, EndType.Polygon, 2, Precision, 0.02), strips, FillRule.NonZero, Precision).Sum(p => Math.Abs(Clipper.Area(p))) > 1e-4;
+
+        /// <summary>
+        /// Where a ring of the cross-section is drawn: the strips along the roads that have it, plus the corner fillets
+        /// next to them (found within <paramref name="touch"/>; a negative value takes all given fillets), grown by
+        /// <paramref name="grow"/> so a ring outside the kerb line follows the whole corner arc.
+        /// </summary>
+        private static PathsD Zone(PathsD strips, List<PathsD> fillets, double touch, double grow)
+        {
+            var zone = new PathsD(strips);
+            foreach (PathsD f in fillets)
+            {
+                if (touch >= 0 && !Touches(f, strips, touch))
+                {
+                    continue;
+                }
+
+                zone.AddRange(grow > 0 ? Clipper.InflatePaths(f, grow, JoinType.Round, EndType.Polygon, 2, Precision, 0.02) : f);
+            }
+
+            return Union(zone);
+        }
+
+        /// <summary>
+        /// Rounds the bends of an axis drawn with straight segments, so the inner kerb of the bend gets the kerb radius
+        /// and every edge of the cross-section is concentric (inner and outer side). Arcs drawn in the axis stay.
+        /// </summary>
+        internal static List<Vec2> Fillet(RoadSpec r)
+        {
+            List<Vec2> a = r.Axis;
+            int n = a.Count;
+            if (n < 3)
+            {
+                return a;
+            }
+
+            var result = new List<Vec2>(n * 4);
+            for (int v = 0; v < n; v++)
+            {
+                Vec2 cur = a[v];
+                bool interior = r.Closed || (v > 0 && v < n - 1);
+                if (!interior || (r.Corners != null && !r.Corners.Any(c => c.DistanceTo(cur) < 1e-3)))
+                {
+                    result.Add(cur);
+                    continue;
+                }
+
+                Vec2 prev = a[(v - 1 + n) % n], next = a[(v + 1) % n];
+                double l1 = (cur - prev).Length, l2 = (next - cur).Length;
+                if (l1 < 1e-6 || l2 < 1e-6)
+                {
+                    result.Add(cur);
+                    continue;
+                }
+
+                Vec2 u1 = (cur - prev) * (1 / l1), u2 = (next - cur) * (1 / l2);
+                double turn = Math.Atan2(u1.Cross(u2), u1.Dot(u2));
+                double th = Math.Abs(turn);
+                if (th < 0.01 || th > Math.PI - 0.01)
+                {
+                    result.Add(cur);
+                    continue;
+                }
+
+                bool left = turn > 0; // the inner side of the bend
+                double ra = r.CornerRadius + r.Extent(RoadLevel.Bike, left);
+                double t = ra * Math.Tan(th / 2);
+                bool prevEnd = !r.Closed && v - 1 == 0, nextEnd = !r.Closed && v + 1 == n - 1;
+                double tMax = Math.Min(l1 * (prevEnd ? 0.98 : 0.5), l2 * (nextEnd ? 0.98 : 0.5));
+                if (t > tMax)
+                {
+                    t = tMax;
+                    ra = t / Math.Tan(th / 2);
+                }
+
+                Vec2 t1 = cur - (u1 * t);
+                Vec2 centre = t1 + ((left ? u1.Perp() : -u1.Perp()) * ra);
+                double a0 = (t1 - centre).Angle;
+                int steps = Math.Max(2, (int)Math.Ceiling(th / (Math.PI / 36)));
+                for (int s = 0; s <= steps; s++)
+                {
+                    double ang = a0 + (turn * s / steps);
+                    result.Add(centre + (new Vec2(Math.Cos(ang), Math.Sin(ang)) * ra));
+                }
+            }
+
+            return Clean(result);
         }
 
         /// <summary>
@@ -945,6 +1139,7 @@ namespace SiteDesignPro.Core.Roads
             RoadSpec c = r.CloneParameters();
             c.Id = r.Id;
             c.Name = r.Name;
+            c.Corners = r.Corners == null ? null : new List<Vec2>(r.Corners);
             c.Axis = new List<Vec2>(r.Axis);
             c.Closed = r.Closed;
             return c;

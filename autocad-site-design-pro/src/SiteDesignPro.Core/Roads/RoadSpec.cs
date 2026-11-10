@@ -30,6 +30,12 @@ namespace SiteDesignPro.Core.Roads
 
         public bool Closed { get; set; }
 
+        /// <summary>
+        /// Axis vertices between two straight segments, which the network rounds (metres). Null: every vertex of the
+        /// axis is such a corner (axes built in code); vertices of arcs drawn in the axis are left out.
+        /// </summary>
+        public List<Vec2>? Corners { get; set; }
+
         public bool OneWay { get; set; }
 
         /// <summary>Two-way: lanes left of the axis (against the axis direction). Ignored for one-way roads.</summary>

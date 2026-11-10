@@ -135,6 +135,47 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void BendOfOneStreet_IsRoundedOnTheInnerAndOuterSide()
+        {
+            // L-shaped axis, 6 m carriageway, kerb radius 6: axis radius 9, inner kerb 6, outer kerb 12
+            var r = Road("A", 0, 0, 50, 0);
+            r.Axis.Add(new Vec2(50, 50));
+            RoadNetworkResult res = RoadNetwork.Build(new[] { r });
+            List<double> kerbLine = res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()).ToList();
+            Assert.Contains(kerbLine, x => Math.Abs(x - 6.0) < 0.05);
+            Assert.Contains(kerbLine, x => Math.Abs(x - 12.0) < 0.05);
+
+            // the sidewalk on the inner side follows the kerb concentrically: kerb back 5,85, sidewalk 3,85, edge 3,75
+            var allowed = new[] { 6.0, 12.0, 5.85, 12.15, 3.85, 14.15, 3.75, 14.25 };
+            foreach (RoadRegion region in res.Bands.Values.SelectMany(b => b))
+            {
+                foreach (double x in region.Outer.ArcRadii().Concat(region.Holes.SelectMany(h => h.ArcRadii())))
+                {
+                    Assert.True(allowed.Any(a => Math.Abs(a - x) < 0.05), "unexpected arc radius " + x);
+                }
+            }
+
+            Assert.Single(res.Bands[RoadLevel.Carriageway]);
+            Assert.Equal(2, res.Bands[RoadLevel.Sidewalk].Count);
+        }
+
+        [Fact]
+        public void StreetMeetingASimpleRoad_KeepsItsLevelsConcentricAtTheCorners()
+        {
+            var street = Road("A", -60, 0, 60, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.6; x.SidewalkRight = 1.6; });
+            var simple = Road("B", 0, -60, 0, 60, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; x.Kerbs = false; x.Markings = true; x.Arrows = false; x.LaneWidth = 2.75; });
+            RoadNetworkResult res = RoadNetwork.Build(new[] { street, simple });
+
+            // the kerb line has the kerb radius, the carriageway edge is concentric with it where the bike lane runs
+            Assert.All(res.Outlines[RoadLevel.Bike].SelectMany(l => l.ArcRadii()), x => Assert.True(Math.Abs(x - 6.0) < 0.05, "kerb line arc " + x));
+            Assert.All(res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()), x => Assert.True(Math.Abs(x - 6.0) < 0.05 || Math.Abs(x - 7.5) < 0.05, "carriageway arc " + x));
+
+            // no bike lane along the simple road: away from the corners its sides are carriageway up to the kerb line
+            Assert.All(res.Bands[RoadLevel.Bike], b => Assert.All(b.Outer.Points, p => Assert.True(Math.Abs(p.Y) < 40 || Math.Abs(p.X) > 10, "bike lane along the simple road at " + p)));
+            Assert.True(res.Area(RoadLevel.Sidewalk) > 4 * 50 * 1.6);
+        }
+
+        [Fact]
         public void ParallelStreetsCloseToEachOther_AreNotMerged()
         {
             var a = Road("A", 0, 0, 100, 0);

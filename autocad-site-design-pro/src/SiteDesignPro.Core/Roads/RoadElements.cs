@@ -125,6 +125,19 @@ namespace SiteDesignPro.Core.Roads
             s.Name = !string.IsNullOrWhiteSpace(e.Label) ? e.Label! : e.Name;
             s.Closed = path.Closed;
             s.Axis = GeometryMath.Tessellate(path.Ring, path.Closed, 0.02 * unitsPerMeter).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
+            var corners = new List<Vec2>();
+            int nv = path.Ring.Count;
+            for (int i = 0; i < nv; i++)
+            {
+                bool interior = path.Closed || (i > 0 && i < nv - 1);
+                if (interior && path.Ring.BulgeAt((i - 1 + nv) % nv) == 0 && path.Ring.BulgeAt(i) == 0)
+                {
+                    Vec3 v = path.Ring.Vertices[i];
+                    corners.Add(new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter));
+                }
+            }
+
+            s.Corners = corners;
             return s;
         }
 
