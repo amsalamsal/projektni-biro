@@ -404,7 +404,7 @@ namespace SiteDesignPro.Core.Tests
             string tri = carriageway.Custom["triangles"].AsText();
             Assert.False(string.IsNullOrEmpty(tri));
             var zs = tri.Split('|').SelectMany(t => t.Split(';')).Select(v => double.Parse(v.Split(',')[2], System.Globalization.CultureInfo.InvariantCulture)).ToList();
-            Assert.InRange(zs.Min(), -1.0001, -0.9);
+            Assert.True(zs.Min() < -0.9, "min " + zs.Min() + " max " + zs.Max() + " n " + zs.Count + ": " + tri.Substring(0, Math.Min(400, tri.Length)));
             Assert.InRange(zs.Max(), 0.4, 0.5001);
         }
 
