@@ -656,10 +656,11 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ input and units
 
-        /// <summary>A drawing without a project gets the road scale 1 m = 100 cm (drawing unit centimetre).</summary>
+        /// <summary>An empty drawing without a project gets the road scale 1 m = 100 cm (drawing unit centimetre).</summary>
         private static void EnsureUnits(CommandContext ctx)
         {
-            if (ProjectStore.Read(ctx.Db, ctx.Tr) != null)
+            // a drawing that already has elements keeps its scale (they were drawn in it)
+            if (ProjectStore.Read(ctx.Db, ctx.Tr) != null || ctx.Svc.ReadAll().Any(m => m.Element != null))
             {
                 return;
             }
