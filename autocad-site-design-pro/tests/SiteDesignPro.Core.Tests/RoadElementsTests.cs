@@ -216,6 +216,43 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void StreetWithAnArcInItsAxis_HasConcentricSmoothEdges()
+        {
+            // the axis of a street from a test drawing (cm): straight, arc of 10,5 m, straight
+            ElementType t = Cat.RequireType(RoadElements.StreetType);
+            var ring = new Ring(new List<Vec3> { new Vec3(56.6675, 3512.41, 0), new Vec3(1794.08, 3512.41, 0), new Vec3(2819.52, 2236.63, 0), new Vec3(2307.41, -89.3119, 0) }, new List<double> { 0, -0.479211, 0, 0 });
+            var e = new SiteElement(Guid.NewGuid().ToString(), RoadElements.StreetType, new PathGeometry(ring, false)) { Parameters = t.CreateDefaultParameters(), Label = "U-005" };
+            e.Parameters["bikeLeft"] = ParamValue.Of(1.5);
+            e.Parameters["bikeRight"] = ParamValue.Of(1.5);
+            RoadNetworkResult res = RoadElements.Network(new[] { e }, Cat, 100)!;
+            RoadSpec spec = RoadElements.Spec(e, t, 100)!;
+            var expected = new List<double>();
+            foreach (RoadLevel level in (RoadLevel[])Enum.GetValues(typeof(RoadLevel)))
+            {
+                foreach (bool left in new[] { true, false })
+                {
+                    double d = spec.Extent(level, left);
+                    expected.Add(10.5 - d);
+                    expected.Add(10.5 + d);
+                }
+            }
+
+            expected.Add(10.5 - spec.Extent(RoadLevel.Bike, true) + RoadSpec.KerbWidth); // kerb back, inner side
+            expected.Add(10.5 + spec.Extent(RoadLevel.Bike, false) + RoadSpec.KerbWidth);
+            foreach (KeyValuePair<RoadLevel, List<RoadLoop>> level in res.Outlines)
+            {
+                foreach (RoadLoop loop in level.Value)
+                {
+                    foreach (double r in loop.ArcRadii())
+                    {
+                        Assert.True(expected.Any(x => Math.Abs(Math.Abs(x) - r) < 0.08), level.Key + ": arc radius " + r + " expected one of " + string.Join(", ", expected.Select(x => x.ToString("0.##"))) + "\n" +
+                            string.Join("\n", loop.Points.Select((p, i) => p.X.ToString("0.###") + " " + p.Y.ToString("0.###") + " b=" + loop.Bulges[i].ToString("0.####"))));
+                    }
+                }
+            }
+        }
+
+        [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {
             // crossing 4 m along the road (first edge) and 5,5 m across it: 6 bars of 0,50 m with 0,50 m gaps
