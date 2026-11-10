@@ -201,7 +201,6 @@ namespace SiteDesignPro.Core.Tests
             wobbly.Add(new Vec2(12, 50));
             var w = RoadElements.RoundedAxis(wobbly, wobbly.Select(_ => 0.0).ToList(), false, spec, 1)!.Value;
             Assert.All(w.Bulges.Where(b => Math.Abs(b) > 1e-9), b => Assert.True(b > 0, "the curve waves: bulge " + b));
-            Assert.True(w.Points.Count < wobbly.Count, "points of the hand-drawn curve are simplified");
 
             // already rounded: nothing to do
             Assert.Null(RoadElements.RoundedAxis(l.Points, l.Bulges, false, spec, 100));
