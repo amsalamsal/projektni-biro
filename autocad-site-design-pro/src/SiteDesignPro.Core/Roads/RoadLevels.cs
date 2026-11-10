@@ -200,24 +200,81 @@ namespace SiteDesignPro.Core.Roads
         /// </summary>
         public static List<Vec3[]> Drape(RoadRegion region, IReadOnlyList<RoadProfile> profiles)
         {
-            var paths = new PathsD { Densify(region.Outer) };
-            foreach (RoadLoop hole in region.Holes)
+            var rings = new List<PathD> { Densify(region.Outer) };
+            rings.AddRange(region.Holes.Select(Densify));
+            var area = new PathsD(rings);
+
+            // points: the outline every 0,5 m and a 0,5 × 0,5 m grid inside; the outline constrains the triangles
+            var points = new List<Vec3>();
+            var constraints = new List<IReadOnlyList<Vec3>>();
+            foreach (PathD ring in rings)
             {
-                paths.Add(Densify(hole));
+                var c = ring.Select(q => new Vec3(q.x, q.y, 0)).ToList();
+                points.AddRange(c);
+                c.Add(c[0]);
+                constraints.Add(c);
+            }
+
+            RectD box = Clipper.GetBounds(area);
+            double g = GridSpacing;
+            for (double x = Math.Ceiling(box.left / g) * g; x < box.right; x += g)
+            {
+                for (double y = Math.Ceiling(box.top / g) * g; y < box.bottom; y += g)
+                {
+                    var q = new PointD(x, y);
+                    if (Inside(q, area, g * 0.3))
+                    {
+                        points.Add(new Vec3(x, y, 0));
+                    }
+                }
             }
 
             var list = new List<Vec3[]>();
-            if (Clipper.Triangulate(paths, 4, out PathsD tris) != TriangulateResult.success)
+            Terrain.Triangulation tin = Terrain.Triangulation.Build(points, constraints);
+            foreach ((int a, int b, int c) in tin.Triangles)
             {
-                return list;
-            }
+                Vec3 pa = tin.Vertices[a], pb = tin.Vertices[b], pc = tin.Vertices[c];
+                var centroid = new PointD((pa.X + pb.X + pc.X) / 3, (pa.Y + pb.Y + pc.Y) / 3);
+                if (!Inside(centroid, area, 0))
+                {
+                    continue; // outside the surface or in a hole
+                }
 
-            foreach (PathD t in tris.Where(t => t.Count == 3))
-            {
-                list.Add(t.Select(q => new Vec3(q.x, q.y, Height(profiles, new Vec2(q.x, q.y)))).ToArray());
+                list.Add(new[] { pa, pb, pc }.Select(v => new Vec3(v.X, v.Y, Height(profiles, new Vec2(v.X, v.Y)))).ToArray());
             }
 
             return list;
+        }
+
+        /// <summary>Inside the area (even-odd over its rings) and at least <paramref name="margin"/> from its edges.</summary>
+        private static bool Inside(PointD q, PathsD area, double margin)
+        {
+            int count = 0;
+            foreach (PathD ring in area)
+            {
+                if (Clipper.PointInPolygon(q, ring) != PointInPolygonResult.IsOutside)
+                {
+                    count++;
+                }
+
+                if (margin > 0)
+                {
+                    for (int i = 0; i < ring.Count; i++)
+                    {
+                        PointD a = ring[i], b = ring[(i + 1) % ring.Count];
+                        double dx = b.x - a.x, dy = b.y - a.y;
+                        double l2 = (dx * dx) + (dy * dy);
+                        double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (((q.x - a.x) * dx) + ((q.y - a.y) * dy)) / l2));
+                        double ex = a.x + (t * dx) - q.x, ey = a.y + (t * dy) - q.y;
+                        if ((ex * ex) + (ey * ey) < margin * margin)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return count % 2 == 1;
         }
 
         /// <summary>Triangles as text for the package (x,y,z;x,y,z;x,y,z|...) in invariant culture.</summary>
