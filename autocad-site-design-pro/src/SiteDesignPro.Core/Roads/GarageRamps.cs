@@ -84,7 +84,10 @@ namespace SiteDesignPro.Core.Roads
 
         public List<double> RingBulges { get; set; } = new List<double>();
 
-        public bool Curved => Kind != "straight";
+        public bool Combined => Kind == "combined";
+
+        /// <summary>A ramp with arcs (a combined ramp only when it has one).</summary>
+        public bool Curved => Combined ? Segments().Any(g => g.Arc) : Kind != "straight";
 
         public int Lanes => TwoWay ? 2 : 1;
 
@@ -106,22 +109,149 @@ namespace SiteDesignPro.Core.Roads
         /// </summary>
         public double Transition { get; set; }
 
+        /// <summary>
+        /// Length of the nearly level part at the top (the street end), where the slope is at most 5 %, so a car
+        /// stands almost level before it drives out (0: none).
+        /// </summary>
+        public double Flat { get; set; }
+
+        public const double FlatSlope = 0.05;
+
+        /// <summary>A slab above the ramp from this station on (0: none) with its underside at <see cref="CeilingLevel"/>.</summary>
+        public double CeilingFrom { get; set; }
+
+        /// <summary>Underside of the slab above the ramp, relative to the base elevation of the roads.</summary>
+        public double CeilingLevel { get; set; }
+
+        /// <summary>Clear height needed under the slab.</summary>
+        public double MinClearance { get; set; } = 2.10;
+
+        /// <summary>Line drain across the ramp: none, bottom or both.</summary>
+        public string Drain { get; set; } = "bottom";
+
+        /// <summary>Heated surface (hatched in the plan).</summary>
+        public bool Heated { get; set; }
+
+        /// <summary>Retaining walls with a railing along the part below the level of the top end (3D).</summary>
+        public bool Walls { get; set; } = true;
+
+        public const double WallThickness = 0.25;
+        public const double RailingHeight = 1.0;
+        public const double DrainWidth = 0.2;
+
+        /// <summary>The flat part actually used: none on a ramp too short for it.</summary>
+        public double FlatLength => Flat > 0.01 && Length >= Flat + 3 ? Flat : 0;
+
         /// <summary>The transition actually used: none on a ramp too short for two of them.</summary>
-        public double TransitionLength => Transition > 0.01 && Length >= (2 * Transition) + 1 ? Transition : 0;
+        public double TransitionLength => Transition > 0.01 && Length - FlatLength >= (2 * Transition) + 1 ? Transition : 0;
 
         /// <summary>Average slope (rise / length).</summary>
         public double AverageSlope => Length < 1e-9 ? 0 : Math.Abs(Rise) / Length;
 
-        /// <summary>Longitudinal slope through the middle; with transitions, the slope between them (the steepest).</summary>
-        public double Slope => Length < 1e-9 ? 0 : Math.Abs(Rise) / (Length - TransitionLength);
+        /// <summary>Slope of the flat part at the top (5 %, or the average slope of a gentler ramp).</summary>
+        public double FlatPartSlope => Math.Min(FlatSlope, AverageSlope);
 
-        /// <summary>Slope of the transitions (half of the slope between them).</summary>
+        /// <summary>
+        /// Longitudinal slope through the middle: with a flat part or transitions, the slope of the main part (the
+        /// steepest).
+        /// </summary>
+        public double Slope
+        {
+            get
+            {
+                double main = Length - FlatLength - TransitionLength;
+                return main < 1e-9 ? 0 : (Math.Abs(Rise) - (FlatPartSlope * FlatLength)) / main;
+            }
+        }
+
+        /// <summary>Slope of the transitions (half of the slope of the main part).</summary>
         public double TransitionSlope => Slope / 2;
+
+        /// <summary>True when the top of the ramp is its start.</summary>
+        public bool TopAtStart => (StartHeight ?? 0) >= (EndHeight ?? StartHeight ?? 0);
+
+        /// <summary>
+        /// The longitudinal profile: stations where the slope changes with the height there (flat part at the top,
+        /// transition, main part, transition).
+        /// </summary>
+        public List<(double Station, double Height)> Profile()
+        {
+            double total = Length, h0 = StartHeight ?? 0, h1 = EndHeight ?? h0;
+            double drop = Math.Abs(h1 - h0), f = FlatLength, t = TransitionLength, m = Slope, fs = FlatPartSlope;
+            var down = new List<(double U, double Drop)> { (0, 0) }; // from the top end
+            void Add(double u, double d)
+            {
+                if (u - down[down.Count - 1].U > 1e-6)
+                {
+                    down.Add((u, d));
+                }
+            }
+
+            Add(f, fs * f);
+            if (t > 0)
+            {
+                Add(f + t, (fs * f) + (m * t / 2));
+                Add(total - t, drop - (m * t / 2));
+            }
+
+            Add(total, drop);
+            down[down.Count - 1] = (total, drop);
+            bool topAtStart = TopAtStart;
+            double top = Math.Max(h0, h1);
+            List<(double, double)> list = down.Select(x => (topAtStart ? x.U : total - x.U, top - x.Drop)).ToList();
+            if (!topAtStart)
+            {
+                list.Reverse();
+            }
+
+            return list;
+        }
+
+        /// <summary>The parts of the profile: from, to, slope (positive number) and whether the part is the main one.</summary>
+        public List<(double From, double To, double Slope)> Parts()
+        {
+            List<(double Station, double Height)> p = Profile();
+            var list = new List<(double, double, double)>();
+            for (int i = 1; i < p.Count; i++)
+            {
+                double len = p[i].Station - p[i - 1].Station;
+                list.Add((p[i - 1].Station, p[i].Station, len < 1e-9 ? 0 : Math.Abs(p[i].Height - p[i - 1].Height) / len));
+            }
+
+            return list;
+        }
+
+        /// <summary>Clear height under the slab above the ramp at its lowest place (null: no slab) and the station of it.</summary>
+        public (double Clearance, double Station)? Clearance
+        {
+            get
+            {
+                double total = Length;
+                if (CeilingFrom <= 0.01 || CeilingFrom >= total - 0.01)
+                {
+                    return null;
+                }
+
+                double best = double.MaxValue, at = CeilingFrom;
+                foreach (double st in new[] { CeilingFrom, total }.Concat(Profile().Select(x => x.Station).Where(x => x > CeilingFrom)))
+                {
+                    double c = CeilingLevel - HeightAt(st, 0);
+                    if (c < best - 1e-9)
+                    {
+                        (best, at) = (c, st);
+                    }
+                }
+
+                return (best, at);
+            }
+        }
+
+        public bool TooLow => Clearance.HasValue && Clearance.Value.Clearance < MinClearance - 1e-9;
 
         public bool TooSteep => Slope > RoadLevels.MaxRampSlope + 1e-9;
 
         /// <summary>Allowed lane width range of the kind (straight 2,5–3,5 m, curved 3,5–5,0 m).</summary>
-        public (double Min, double Max) LaneRange => Curved ? (3.5, 5.0) : (2.5, 3.5);
+        public (double Min, double Max) LaneRange => Combined ? (2.5, 5.0) : Curved ? (3.5, 5.0) : (2.5, 3.5);
 
         public static GarageRamp? From(SiteElement e, double unitsPerMeter = 1.0)
         {
@@ -140,6 +270,13 @@ namespace SiteDesignPro.Core.Roads
                 Margin = e.Parameters.Number("margin", 0.25),
                 Island = e.Parameters.Bool("island", false),
                 Transition = Math.Max(0, Math.Min(8, e.Parameters.Number("transition", 0))),
+                Flat = Math.Max(0, Math.Min(10, e.Parameters.Number("flatLength", 0))),
+                CeilingFrom = Math.Max(0, e.Parameters.Number("ceilingFrom", 0)),
+                CeilingLevel = e.Parameters.Number("ceilingLevel", 0),
+                MinClearance = Math.Max(1.8, e.Parameters.Number("minClearance", 2.10)),
+                Drain = e.Parameters.Text("drain", "bottom"),
+                Heated = e.Parameters.Bool("heated", false),
+                Walls = e.Parameters.Bool("walls", true),
                 Axis = GeometryMath.Tessellate(path.Ring, false, 0.002 * unitsPerMeter, 1024).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList(),
             };
             r.RingPoints = path.Ring.Vertices.Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
@@ -356,18 +493,19 @@ namespace SiteDesignPro.Core.Roads
                 list.Add(to);
             }
 
-            // the ends of the transitions, where the slope changes
-            double t = TransitionLength;
-            if (t > 0)
+            // where the slope changes
+            bool added = false;
+            foreach (double brk in Profile().Select(x => x.Station))
             {
-                foreach (double brk in new[] { t, Length - t })
+                if (brk > from + 1e-6 && brk < to - 1e-6 && !list.Any(x => Math.Abs(x - brk) < 1e-6))
                 {
-                    if (brk > from + 1e-6 && brk < to - 1e-6 && !list.Any(x => Math.Abs(x - brk) < 1e-6))
-                    {
-                        list.Add(brk);
-                    }
+                    list.Add(brk);
+                    added = true;
                 }
+            }
 
+            if (added)
+            {
                 list.Sort();
             }
 
@@ -377,26 +515,44 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Height of the surface at a station, <paramref name="d"/> metres to the left of the centreline.</summary>
         public double HeightAt(double station, double d)
         {
-            double h0 = StartHeight ?? 0, h1 = EndHeight ?? h0;
-            double total = Length;
-            double s = Math.Max(0, Math.Min(total, station)), t = TransitionLength;
-            double part; // share of the rise reached at the station
-            if (total < 1e-9)
+            List<(double Station, double Height)> p = Profile();
+            double s = Math.Max(0, Math.Min(p[p.Count - 1].Station, station));
+            double z = p[p.Count - 1].Height;
+            for (int i = 1; i < p.Count; i++)
             {
-                part = 0;
-            }
-            else if (t <= 0)
-            {
-                part = s / total;
-            }
-            else
-            {
-                // half slope over t at both ends: the rise is slope × (total − t)
-                double run = s <= t ? s / 2 : s <= total - t ? s - (t / 2) : total - t - ((total - s) / 2);
-                part = run / (total - t);
+                if (s <= p[i].Station + 1e-9)
+                {
+                    double len = p[i].Station - p[i - 1].Station;
+                    z = len < 1e-9 ? p[i].Height : p[i - 1].Height + ((p[i].Height - p[i - 1].Height) * (s - p[i - 1].Station) / len);
+                    break;
+                }
             }
 
-            return h0 + ((h1 - h0) * part) - (CrossSlope * d * InnerSide);
+            return z - (CrossSlope * d * CrossSide(station));
+        }
+
+        /// <summary>
+        /// Which way the surface falls across at a station (+1 to the left, −1 to the right, 0 level): the inside of
+        /// the curve; on a combined ramp only in its arcs, growing over 3 m from each end of the arc.
+        /// </summary>
+        public double CrossSide(double station)
+        {
+            if (!Combined)
+            {
+                return InnerSide;
+            }
+
+            foreach (Seg g in Segments())
+            {
+                if (g.Arc && station >= g.Start && station <= g.Start + g.Length)
+                {
+                    double run = Math.Min(3.0, g.Length / 2);
+                    double f = run < 1e-9 ? 1 : Math.Min(1, Math.Min(station - g.Start, g.Start + g.Length - station) / run);
+                    return (g.Sweep > 0 ? 1 : -1) * f;
+                }
+            }
+
+            return 0;
         }
 
         private Vec3 P3(double station, double d, double lift) => PointAt(station, d).Point.WithZ(HeightAt(station, d) + lift);
@@ -421,7 +577,7 @@ namespace SiteDesignPro.Core.Roads
         {
             get
             {
-                if (!Curved || Axis.Count < 3)
+                if (Combined || !Curved || Axis.Count < 3)
                 {
                     return 0;
                 }
@@ -495,7 +651,7 @@ namespace SiteDesignPro.Core.Roads
             var list = new List<string> { "L=" + N(Length) + " m", "h=" + N(Math.Abs(Rise)) + " m", N(Slope * 100) + " %" + (TooSteep ? " > 17 %!" : string.Empty) };
             if (Curved)
             {
-                list.Add("popr. " + (CrossSlope * 100).ToString("0", System.Globalization.CultureInfo.InvariantCulture) + " % unutra");
+                list.Add("popr. " + (CrossSlope * 100).ToString("0", System.Globalization.CultureInfo.InvariantCulture) + (Combined ? " % u luku" : " % unutra"));
             }
 
             return list;
@@ -693,23 +849,97 @@ namespace SiteDesignPro.Core.Roads
                 list.Add(new RampShape { Role = "island", Points = box, Bulges = box.Select(_ => 0.0).ToList(), Closed = true, Fill = true });
             }
 
-            // transitions: a thin line across where the slope changes and the half slope written beside the right edge
-            double tr = TransitionLength;
-            if (tr > 0)
+            RampShape Note(string note, double station, double d, double height, bool warning = false)
             {
-                string label = Num(tr) + " m  " + Num(TransitionSlope * 100) + " %";
-                double th = 0.22, tl = label.Length * 0.68 * th;
-                double side = -(half - Margin - 0.45);
-                foreach ((double brk, double mid) in new[] { (tr, tr / 2), (total - tr, total - (tr / 2)) })
+                (Vec2 p, Vec2 dir) = PointAt(station, lay.Flip ? -d : d);
+                return new RampShape { Role = "text", Text = note, Position = p, Rotation = Math.Atan2(dir.Y, dir.X) + (lay.Flip ? Math.PI : 0), Height = height, Length = note.Length * 0.68 * height, Warning = warning };
+            }
+
+            RampShape Across(string role, double station, double from, double to) =>
+                new RampShape { Role = role, Points = new List<Vec2> { PointAt(station, from).Point, PointAt(station, to).Point }, Bulges = new List<double> { 0, 0 } };
+
+            double drive = half - Margin, beside = drive - 0.45;
+
+            // heated surface: the driving width, hatched
+            if (Heated)
+            {
+                (List<Vec2> hl, List<double> hlb) = Sub(drive, 0, total);
+                (List<Vec2> hr, List<double> hrb) = Sub(-drive, 0, total);
+                var hp = new List<Vec2>(hl);
+                var hb = new List<double>(hlb);
+                for (int i = hr.Count - 1; i >= 0; i--)
                 {
-                    list.Add(new RampShape { Role = "transition", Points = new List<Vec2> { PointAt(brk, half).Point, PointAt(brk, -half).Point }, Bulges = new List<double> { 0, 0 } });
-                    if (tl < tr - 0.3)
+                    hp.Add(hr[i]);
+                    hb.Add(i > 0 ? -hrb[i - 1] : 0);
+                }
+
+                list.Add(new RampShape { Role = "heated", Points = hp, Bulges = hb, Closed = true });
+                list.Add(Note("grijana rampa", total * 0.3, beside, 0.22));
+            }
+
+            // line drains across the driving width, 30 cm from the end
+            foreach ((double d0, double d1) in DrainSpans())
+            {
+                var grate = new List<Vec2> { PointAt(d0, -drive).Point, PointAt(d1, -drive).Point, PointAt(d1, drive).Point, PointAt(d0, drive).Point };
+                list.Add(new RampShape { Role = "drain", Points = grate, Bulges = grate.Select(_ => 0.0).ToList(), Closed = true, Fill = true });
+            }
+
+            // retaining walls: their outer faces along the part below the top
+            (double From, double To)? wallSpan = WallSpan();
+            if (wallSpan.HasValue)
+            {
+                foreach (double side in new[] { 1.0, -1.0 })
+                {
+                    (List<Vec2> wp, List<double> wb) = Sub(side * (half + WallThickness), wallSpan.Value.From, wallSpan.Value.To);
+                    list.Add(new RampShape { Role = "wall", Points = wp, Bulges = wb });
+                    list.Add(Across("wall", wallSpan.Value.From, side * half, side * (half + WallThickness)));
+                    list.Add(Across("wall", wallSpan.Value.To, side * half, side * (half + WallThickness)));
+                }
+            }
+
+            // the parts with a gentler slope (flat part at the top, transitions): a thin line across where the slope
+            // changes and "length  slope" beside the right edge
+            double mainSlope = Slope;
+            foreach ((double p0, double p1, double slope) in Parts())
+            {
+                if (p0 > 1e-6)
+                {
+                    list.Add(Across("transition", p0, half, -half));
+                }
+
+                if (slope < mainSlope - 1e-6)
+                {
+                    RampShape note = Note(Num(p1 - p0) + " m  " + Num(slope * 100) + " %", (p0 + p1) / 2, -beside, 0.22);
+                    if (note.Length < p1 - p0 - 0.3)
                     {
-                        (Vec2 p, Vec2 dir) = PointAt(mid, lay.Flip ? -side : side);
-                        list.Add(new RampShape { Role = "text", Text = label, Position = p, Rotation = Math.Atan2(dir.Y, dir.X) + (lay.Flip ? Math.PI : 0), Height = th, Length = tl });
+                        list.Add(note);
                     }
                 }
             }
+
+            // the slab above the ramp: its edge across and the clear height under it
+            (double Clearance, double Station)? clear = Clearance;
+            if (clear.HasValue)
+            {
+                list.Add(Across("ceiling", CeilingFrom, half + 0.6, -(half + 0.6)));
+                string ct = "svijetla visina " + Num(clear.Value.Clearance) + " m" + (TooLow ? " < " + Num(MinClearance) + " m!" : string.Empty);
+                list.Add(Note(ct, CeilingFrom + ((lay.Flip ? -1 : 1) * ((ct.Length * 0.68 * 0.22 / 2) + 0.3)), beside, 0.22, TooLow));
+            }
+
+            // the arrow of the slope (pointing uphill) beside the text in the middle
+            double arrowLength = Math.Min(3.0, total * 0.3), up = TopAtStart ? -1 : 1, lateral = (lay.Flip ? -1 : 1) * 0.55;
+            var slopeArrow = new List<Vec2>();
+            int arrowSteps = Curved ? 6 : 1;
+            for (int i = 0; i <= arrowSteps; i++)
+            {
+                slopeArrow.Add(PointAt((total / 2) + (up * arrowLength * ((i / (double)arrowSteps) - 0.5)), lateral).Point);
+            }
+
+            double tip = (total / 2) + (up * arrowLength / 2);
+            slopeArrow.Add(PointAt(tip - (up * 0.45), lateral + 0.14).Point);
+            slopeArrow.Add(PointAt(tip, lateral).Point);
+            slopeArrow.Add(PointAt(tip - (up * 0.45), lateral - 0.14).Point);
+            list.Add(new RampShape { Role = "slope", Points = slopeArrow, Bulges = slopeArrow.Select(_ => 0.0).ToList() });
 
             foreach ((double s, string text, double len) in lay.Texts)
             {
@@ -718,6 +948,243 @@ namespace SiteDesignPro.Core.Roads
                 list.Add(new RampShape { Role = "text", Text = text, Position = p, Rotation = rot, Height = lay.TextHeight, Length = len, Warning = TooSteep });
             }
 
+            return list;
+        }
+
+        /// <summary>
+        /// A centreline through the given points with its bends rounded by arcs of one radius (smaller where the
+        /// straight parts are too short): vertices and the bulge of the segment after each.
+        /// </summary>
+        public static (List<Vec2> Points, List<double> Bulges) FilletPath(IReadOnlyList<Vec2> points, double radius)
+        {
+            var pts = new List<Vec2> { points[0] };
+            var bulges = new List<double> { 0 };
+            for (int i = 1; i < points.Count - 1; i++)
+            {
+                Vec2 a = points[i - 1], b = points[i], c = points[i + 1];
+                Vec2 din = (b - a).Normalized(), dout = (c - b).Normalized();
+                double turn = Math.Atan2(din.Cross(dout), din.Dot(dout));
+                double room = Math.Min(a.DistanceTo(b) * (i == 1 ? 0.9 : 0.45), b.DistanceTo(c) * (i == points.Count - 2 ? 0.9 : 0.45));
+                double tangent = Math.Min(room, radius * Math.Tan(Math.Abs(turn) / 2));
+                if (radius < 0.1 || Math.Abs(turn) < 0.01 || Math.Abs(turn) > 3.0 || tangent < 0.05)
+                {
+                    pts.Add(b);
+                    bulges.Add(0);
+                    continue;
+                }
+
+                pts.Add(b - (din * tangent));
+                bulges.Add(Math.Tan(turn / 4));
+                pts.Add(b + (dout * tangent));
+                bulges.Add(0);
+            }
+
+            pts.Add(points[points.Count - 1]);
+            bulges.Add(0);
+            return (pts, bulges);
+        }
+
+        /// <summary>Line drains across the ramp: stations of the two edges of each (30 cm from the end).</summary>
+        public List<(double From, double To)> DrainSpans()
+        {
+            var list = new List<(double, double)>();
+            double total = Length;
+            if (total < 4 || (Drain != "bottom" && Drain != "both"))
+            {
+                return list;
+            }
+
+            (double, double) atStart = (0.3, 0.3 + DrainWidth), atEnd = (total - 0.3 - DrainWidth, total - 0.3);
+            list.Add(LowAtEnd ? atEnd : atStart);
+            if (Drain == "both")
+            {
+                list.Add(LowAtEnd ? atStart : atEnd);
+            }
+
+            return list;
+        }
+
+        /// <summary>Stations between which the ramp lies more than 5 cm below its top end (where the walls stand), or null.</summary>
+        public (double From, double To)? WallSpan()
+        {
+            double total = Length, top = Math.Max(StartHeight ?? 0, EndHeight ?? StartHeight ?? 0);
+            if (!Walls || total < 1 || Math.Abs(Rise) < 0.3)
+            {
+                return null;
+            }
+
+            // the height falls steadily from the top end: find where it is 5 cm below the top
+            double lo = 0, hi = total;
+            bool topAtStart = TopAtStart;
+            for (int i = 0; i < 40; i++)
+            {
+                double mid = (lo + hi) / 2;
+                bool below = top - HeightAt(topAtStart ? mid : total - mid, 0) > 0.05;
+                if (below)
+                {
+                    hi = mid;
+                }
+                else
+                {
+                    lo = mid;
+                }
+            }
+
+            return topAtStart ? (hi, total) : (0, total - hi);
+        }
+
+        /// <summary>
+        /// Retaining walls on both sides, from the surface up to the level of the top end, along the part below it, and a
+        /// railing 1,00 m high on them (3D): (walls, railing).
+        /// </summary>
+        public (List<Vec3[]> Walls, List<Vec3[]> Railing) Walls3()
+        {
+            var walls = new List<Vec3[]>();
+            var rail = new List<Vec3[]>();
+            (double From, double To)? span = WallSpan();
+            if (!span.HasValue)
+            {
+                return (walls, rail);
+            }
+
+            double half = Width / 2, top = Math.Max(StartHeight ?? 0, EndHeight ?? StartHeight ?? 0);
+            List<double> st = Stations(span.Value.From, span.Value.To);
+            void Quad(Vec3 a, Vec3 b, Vec3 c, Vec3 d, List<Vec3[]> to)
+            {
+                to.Add(new[] { a, b, c });
+                to.Add(new[] { a, c, d });
+            }
+
+            Vec3 At(double s, double d, double z) => PointAt(s, d).Point.WithZ(z);
+            foreach (double side in new[] { 1.0, -1.0 })
+            {
+                double inner = side * half, outer = side * (half + WallThickness), mid = side * (half + (WallThickness / 2));
+                for (int i = 1; i < st.Count; i++)
+                {
+                    double s0 = st[i - 1], s1 = st[i];
+                    double z0 = HeightAt(s0, inner) - SlabThickness, z1 = HeightAt(s1, inner) - SlabThickness;
+                    Quad(At(s0, inner, z0), At(s1, inner, z1), At(s1, inner, top), At(s0, inner, top), walls);
+                    Quad(At(s0, outer, z0), At(s1, outer, z1), At(s1, outer, top), At(s0, outer, top), walls);
+                    Quad(At(s0, inner, top), At(s1, inner, top), At(s1, outer, top), At(s0, outer, top), walls);
+
+                    // top rail 5 × 5 cm
+                    double r0 = top + RailingHeight - 0.05, r1 = top + RailingHeight, w = 0.025;
+                    Quad(At(s0, mid - w, r1), At(s1, mid - w, r1), At(s1, mid + w, r1), At(s0, mid + w, r1), rail);
+                    Quad(At(s0, mid - w, r0), At(s1, mid - w, r0), At(s1, mid - w, r1), At(s0, mid - w, r1), rail);
+                    Quad(At(s0, mid + w, r0), At(s1, mid + w, r0), At(s1, mid + w, r1), At(s0, mid + w, r1), rail);
+                }
+
+                // the two ends of the wall
+                foreach (double s in new[] { span.Value.From, span.Value.To })
+                {
+                    double z = HeightAt(s, inner) - SlabThickness;
+                    Quad(At(s, inner, z), At(s, outer, z), At(s, outer, top), At(s, inner, top), walls);
+                }
+
+                // posts about every 1,5 m
+                double length = span.Value.To - span.Value.From;
+                int posts = Math.Max(1, (int)Math.Round(length / 1.5));
+                for (int i = 0; i <= posts; i++)
+                {
+                    double s = span.Value.From + (length * i / posts);
+                    double a = Math.Max(span.Value.From, s - 0.025), b = Math.Min(span.Value.To, s + 0.025), w = 0.025, z1 = top + RailingHeight - 0.05;
+                    Quad(At(a, mid - w, top), At(b, mid - w, top), At(b, mid - w, z1), At(a, mid - w, z1), rail);
+                    Quad(At(a, mid + w, top), At(b, mid + w, top), At(b, mid + w, z1), At(a, mid + w, z1), rail);
+                    Quad(At(a, mid - w, top), At(a, mid + w, top), At(a, mid + w, z1), At(a, mid - w, z1), rail);
+                    Quad(At(b, mid - w, top), At(b, mid + w, top), At(b, mid + w, z1), At(b, mid - w, z1), rail);
+                }
+            }
+
+            return (walls, rail);
+        }
+
+        /// <summary>
+        /// The longitudinal section through the middle of the ramp, to be drawn beside the plan: x is the station, y the
+        /// height above a datum line at y = 0. The slab of the ramp, verticals at every change of slope with station and
+        /// height, "length  slope" on every part, the slab above with the clear height, and a title.
+        /// </summary>
+        public List<RampShape> Section()
+        {
+            var list = new List<RampShape>();
+            List<(double Station, double Height)> prof = Profile();
+            double total = Length;
+            if (total < 1e-6 || prof.Count < 2)
+            {
+                return list;
+            }
+
+            double low = prof.Min(x => x.Height), high = prof.Max(x => x.Height);
+            double Y(double z) => z - low + 2.0;
+            RampShape Text(string text, double x, double y, double height, double rotation = 0, bool warning = false) =>
+                new RampShape { Role = "text", Text = text, Position = new Vec2(x, y), Rotation = rotation, Height = height, Length = text.Length * 0.68 * height, Warning = warning };
+            RampShape Line(string role, params Vec2[] pts) => new RampShape { Role = role, Points = pts.ToList(), Bulges = pts.Select(_ => 0.0).ToList() };
+            string Level(double z) => Math.Abs(z) < 0.005 ? "±0,00" : (z > 0 ? "+" : "−") + Num(Math.Abs(z));
+
+            // the slab of the ramp
+            var slab = prof.Select(x => new Vec2(x.Station, Y(x.Height))).ToList();
+            slab.AddRange(Enumerable.Reverse(prof).Select(x => new Vec2(x.Station, Y(x.Height) - SlabThickness)));
+            list.Add(new RampShape { Role = "surface", Points = slab, Bulges = slab.Select(_ => 0.0).ToList(), Closed = true, Fill = true });
+            list.Add(new RampShape { Role = "edge", Points = slab, Bulges = slab.Select(_ => 0.0).ToList(), Closed = true });
+            RampShape top = Line("middle", prof.Select(x => new Vec2(x.Station, Y(x.Height))).ToArray());
+            top.Width = 0.06;
+            list.Add(top);
+
+            // datum line, verticals, stations below and heights above
+            list.Add(Line("thin", new Vec2(-0.5, 0), new Vec2(total + 0.5, 0)));
+            foreach ((double st, double z) in prof)
+            {
+                list.Add(Line("thin", new Vec2(st, -0.15), new Vec2(st, Y(z) - SlabThickness)));
+                list.Add(Text(Num(st), st, -0.45, 0.22));
+                list.Add(Text(Level(z), st, Y(z) + 0.45, 0.25));
+            }
+
+            // every part: its length and slope along it
+            foreach ((double from, double to, double slope) in Parts())
+            {
+                double z0 = HeightAt(from, 0), z1 = HeightAt(to, 0);
+                double rot = Math.Atan2(z1 - z0, to - from);
+                bool steep = slope > RoadLevels.MaxRampSlope + 1e-9;
+                RampShape t = Text("L=" + Num(to - from) + " m  " + Num(slope * 100) + " %" + (steep ? " > 17 %!" : string.Empty), (from + to) / 2, Y((z0 + z1) / 2) + 0.4, 0.22, rot, steep);
+                if (t.Length > to - from - 0.2)
+                {
+                    t.Height *= (to - from - 0.2) / t.Length;
+                    t.Length = to - from - 0.2;
+                }
+
+                if (t.Height >= 0.08)
+                {
+                    list.Add(t);
+                }
+            }
+
+            // the slab above the ramp and the clear height under it
+            (double Clearance, double Station)? clear = Clearance;
+            double head = Y(high) + 1.3;
+            if (clear.HasValue)
+            {
+                double c = Y(CeilingLevel);
+                var ceiling = new List<Vec2> { new Vec2(CeilingFrom, c), new Vec2(total, c), new Vec2(total, c + 0.3), new Vec2(CeilingFrom, c + 0.3) };
+                list.Add(new RampShape { Role = "surface", Points = ceiling, Bulges = ceiling.Select(_ => 0.0).ToList(), Closed = true, Fill = true });
+                list.Add(new RampShape { Role = "edge", Points = ceiling, Bulges = ceiling.Select(_ => 0.0).ToList(), Closed = true });
+                double x = clear.Value.Station, y0 = Y(HeightAt(x, 0));
+                bool lowClear = TooLow;
+                list.Add(Line(lowClear ? "warning" : "thin", new Vec2(x, y0), new Vec2(x, c)));
+                list.Add(Line(lowClear ? "warning" : "thin", new Vec2(x - 0.15, y0), new Vec2(x + 0.15, y0)));
+                list.Add(Line(lowClear ? "warning" : "thin", new Vec2(x - 0.15, c), new Vec2(x + 0.15, c)));
+                string text = "svijetla visina " + Num(clear.Value.Clearance) + " m" + (lowClear ? " < " + Num(MinClearance) + " m!" : string.Empty);
+                list.Add(Text(text, x + 0.3 + (text.Length * 0.68 * 0.22 / 2), (y0 + c) / 2, 0.22, 0, lowClear));
+                head = Math.Max(head, c + 1.0);
+            }
+
+            string title = "Uzdužni presjek rampe " + Name + ":  L=" + Num(total) + " m,  h=" + Num(Math.Abs(Rise)) + " m,  najveći nagib " + Num(Slope * 100) + " %";
+            RampShape tt = Text(title, total / 2, head, 0.3, 0, TooSteep);
+            if (tt.Length > Math.Max(total, 12))
+            {
+                tt.Height *= Math.Max(total, 12) / tt.Length;
+                tt.Length = Math.Max(total, 12);
+            }
+
+            list.Add(tt);
             return list;
         }
 
@@ -846,6 +1313,10 @@ namespace SiteDesignPro.Core.Roads
                 Add("Garažna rampa – bijele oznake", white, "line_paint_white");
                 Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow");
                 Add("Garažna rampa – srednje ostrvo", r.Island3(), null);
+                (List<Vec3[]> wall, List<Vec3[]> rail) = r.Walls3();
+                Add("Garažna rampa – potporni zidovi", wall, null);
+                Add("Garažna rampa – ograda", rail, "steel_dark");
+                Add("Garažna rampa – rešetka odvodnje", r.DrainSpans().SelectMany(x => r.Band3(-((r.Width / 2) - r.Margin), (r.Width / 2) - r.Margin, x.From, x.To, 0.004)).ToList(), "grate_steel");
             }
 
             return list;

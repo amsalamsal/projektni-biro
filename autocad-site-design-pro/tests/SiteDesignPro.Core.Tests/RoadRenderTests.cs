@@ -199,6 +199,21 @@ namespace SiteDesignPro.Core.Tests
             yield return new object[] { "R6_polukruzna_dvosmjerna_desno", R(new[] { -11.0, 0, 11, 0 }, new[] { -1.0, 0 }, "semicircular", true, 3.5, 0.25, false, 0, -3.5) };
             yield return new object[] { "R7_spiralna_1_5_kruga", R(new[] { 9.0, 0, -9, 0, 9, 0, -9, 0 }, new[] { 1.0, 1, 1, 0 }, "spiral", false, 4.0, 0.5, false, 0, -9) };
             yield return new object[] { "R9_prijelazne_dionice", R(new[] { 0.0, 0, 24, 0 }, null, "straight", true, 3.0, 0.25, true, 0, -3, 4) };
+            SiteElement With(SiteElement e, params (string Key, ParamValue Value)[] values)
+            {
+                foreach ((string key, ParamValue value) in values)
+                {
+                    e.Parameters[key] = value;
+                }
+
+                return e;
+            }
+
+            (List<Vec2> fp, List<double> fb) = GarageRamp.FilletPath(new[] { new Vec2(0, 0), new Vec2(18, 0), new Vec2(18, 20), new Vec2(40, 20) }, 8);
+            double[] fxy = fp.SelectMany(q => new[] { q.X, q.Y }).ToArray();
+            yield return new object[] { "RA_kombinovana_sve", With(R(fxy, fb.ToArray(), "combined", true, 3.5, 0.25, false, 0, -4.5, 4),
+                N("flatLength", 5), N("ceilingFrom", 30), N("ceilingLevel", -0.6), ("heated", ParamValue.Of(true)), ("drain", ParamValue.Of("both"))) };
+            yield return new object[] { "RB_ploca_preniska", With(R(new[] { 0.0, 0, 26, 0 }, null, "straight", false, 3.0, 0.25, false, 0, -3.2, 4), N("ceilingFrom", 9), N("ceilingLevel", -0.3)) };
             yield return new object[] { "R8_vertikalna_dvosmjerna", R(new[] { 0.0, 0, 0, -18 }, null, "straight", true, 2.5, 0, true, 0, -2.8) };
         }
 
@@ -224,7 +239,19 @@ namespace SiteDesignPro.Core.Tests
             }
 
             Directory.CreateDirectory(dir);
-            var all = plan.SelectMany(x => x.Points).ToList();
+            (Vec2 ls, Vec2 le) = r.LevelPoints();
+            File.WriteAllText(Path.Combine(dir, name + ".svg"), ShapesSvg(plan, name + "  " + string.Join("  ", r.Labels()), new[] { ls, le }));
+            File.WriteAllText(Path.Combine(dir, "S" + name.Substring(1) + "_presjek.svg"), ShapesSvg(r.Section(), name, new Vec2[0]));
+
+            // the profile adds up: the parts end at the heights of the two ends
+            List<(double Station, double Height)> prof = r.Profile();
+            Assert.InRange(prof[0].Height - (r.StartHeight ?? 0), -1e-6, 1e-6);
+            Assert.InRange(prof[prof.Count - 1].Height - (r.EndHeight ?? 0), -1e-6, 1e-6);
+        }
+
+        private static string ShapesSvg(List<RampShape> plan, string title, Vec2[] marks)
+        {
+            var all = plan.SelectMany(x => x.Role == "text" ? new List<Vec2> { x.Position } : x.Points).ToList();
             double x0 = all.Min(p => p.X) - 4, x1 = all.Max(p => p.X) + 4, y0 = all.Min(p => p.Y) - 4, y1 = all.Max(p => p.Y) + 4;
             var sb = new StringBuilder();
             sb.Append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='").Append(F(x0)).Append(' ').Append(F(-y1)).Append(' ').Append(F(x1 - x0)).Append(' ').Append(F(y1 - y0)).Append("'>");
@@ -238,23 +265,25 @@ namespace SiteDesignPro.Core.Tests
                     d = d.Substring(0, d.LastIndexOf(shape.Bulges.Count > 0 && Math.Abs(shape.Bulges[shape.Bulges.Count - 1]) > 1e-9 ? 'A' : 'L'));
                 }
 
-                string fill = !shape.Fill ? "none" : shape.Role == "surface" ? "#a9a9a9" : shape.Role == "island" ? "#6e6e6e" : "#fff";
-                string stroke = shape.Role == "margin" ? "#ffe000" : shape.Fill && shape.Role != "island" ? "none" : "#fff";
-                sb.Append("<path fill='").Append(fill).Append("' stroke='").Append(stroke).Append("' stroke-width='").Append(F(shape.Width > 0 ? shape.Width : 0.04)).Append("' d='").Append(d).Append("'/>");
+                string fill = !shape.Fill ? "none" : shape.Role == "surface" ? "#a9a9a9" : shape.Role == "island" ? "#6e6e6e" : shape.Role == "drain" ? "#3c3c3c" : "#fff";
+                string stroke = shape.Role == "margin" ? "#ffe000" : shape.Role == "heated" ? "#ff8c3c" : shape.Role == "warning" ? "#ff4040" : shape.Role == "ceiling" || shape.Role == "thin" ? "#aaa" : shape.Fill && shape.Role != "island" && shape.Role != "drain" ? "none" : "#fff";
+                sb.Append("<path fill='").Append(fill).Append("' stroke='").Append(stroke).Append("' stroke-width='").Append(F(shape.Width > 0 ? shape.Width : 0.04)).Append(shape.Role == "heated" ? "' stroke-dasharray='0.3 0.3" : string.Empty).Append("' d='").Append(d).Append("'/>");
             }
 
-            (Vec2 ls, Vec2 le) = r.LevelPoints();
-            sb.Append("<circle cx='").Append(F(ls.X)).Append("' cy='").Append(F(ls.Y)).Append("' r='0.3' fill='#ffe000'/>");
-            sb.Append("<circle cx='").Append(F(le.X)).Append("' cy='").Append(F(le.Y)).Append("' r='0.3' fill='#ff9000'/>");
+            foreach (Vec2 m in marks)
+            {
+                sb.Append("<circle cx='").Append(F(m.X)).Append("' cy='").Append(F(m.Y)).Append("' r='0.3' fill='#ffe000'/>");
+            }
+
             sb.Append("</g>");
             foreach (RampShape t in plan.Where(x => x.Role == "text"))
             {
                 sb.Append("<text text-anchor='middle' dominant-baseline='central' font-family='sans-serif' font-size='").Append(F(t.Height * 1.3)).Append("' textLength='").Append(F(t.Length)).Append("' lengthAdjust='spacingAndGlyphs' fill='").Append(t.Warning ? "#ff4040" : "#fff")
-                    .Append("' transform='translate(").Append(F(t.Position.X)).Append(' ').Append(F(-t.Position.Y)).Append(") rotate(").Append(F(-t.Rotation * 180 / Math.PI)).Append(")'>").Append(t.Text).Append("</text>");
+                    .Append("' transform='translate(").Append(F(t.Position.X)).Append(' ').Append(F(-t.Position.Y)).Append(") rotate(").Append(F(-t.Rotation * 180 / Math.PI)).Append(")'>").Append(t.Text!.Replace("<", "&lt;").Replace(">", "&gt;")).Append("</text>");
             }
 
-            sb.Append("<text x='").Append(F(x0 + 0.5)).Append("' y='").Append(F(-y1 + 1.2)).Append("' font-size='0.9' fill='#9cf' font-family='sans-serif'>").Append(name).Append("  ").Append(string.Join("  ", r.Labels()).Replace(">", "&gt;")).Append("</text>");
-            File.WriteAllText(Path.Combine(dir, name + ".svg"), sb.Append("</svg>").ToString());
+            sb.Append("<text x='").Append(F(x0 + 0.5)).Append("' y='").Append(F(-y1 + 1.2)).Append("' font-size='0.9' fill='#9cf' font-family='sans-serif'>").Append(title.Replace("<", "&lt;").Replace(">", "&gt;")).Append("</text>");
+            return sb.Append("</svg>").ToString();
         }
 
         private static string Fmt(Vec2 p) => p.X.ToString("0.##", CultureInfo.InvariantCulture) + "," + p.Y.ToString("0.##", CultureInfo.InvariantCulture);

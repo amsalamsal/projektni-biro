@@ -106,7 +106,8 @@ namespace SiteDesignPro.AutoCAD.UI
                       Small("Garažna rampa", "SDPGARAZNARAMPA", "roads", "Pravolinijska, polukružna ili kružna (spiralna) rampa, jednosmjerna ili dvosmjerna: srednja linija, žute linije zaštitnog razmaka, strelice i L / h / nagib (najviše 17 %).")),
                 Stack(Small("Niz parking mjesta", "SDPPARKING", "parking", "Red parking mjesta uz ivicu prolaza."),
                       Small("Pretvori krive", "SDPCONVERT", "convert", "Postojeće linije ili krugove pretvara u elemente."),
-                      Small("Rampa za invalide", "SDPRAMPAINVALIDI", "roads", "Rampa 120 cm (spušteni ivičnjak i kosina) gdje kliknete: na trotoaru s te strane, na kolovozu s obje strane. Briše se brisanjem plavog trougla."))));
+                      Small("Presjek rampe", "SDPRAMPAPRESJEK", "slope", "Uzdužni presjek garažne rampe pored tlocrta: nagibi i dužine dionica, kote, ploča iznad i svijetla visina. Prati izmjene rampe.")),
+                Stack(Small("Rampa za invalide", "SDPRAMPAINVALIDI", "roads", "Rampa 120 cm (spušteni ivičnjak i kosina) gdje kliknete: na trotoaru s te strane, na kolovozu s obje strane. Briše se brisanjem plavog trougla."))));
 
             tab.Panels.Add(Panel("Izmjena",
                 Large("Uredi element", "SDPEDIT", "edit", "Širina, visina i ostali podaci odabranih elemenata. Isto se može i u paleti, kartica Svojstva."),

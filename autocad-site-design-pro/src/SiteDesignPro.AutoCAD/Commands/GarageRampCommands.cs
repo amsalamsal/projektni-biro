@@ -30,10 +30,11 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             EnsureUnits(ctx);
             double k = ctx.K;
-            string kind = ctx.Keyword("Vrsta rampe [Pravolinijska/Polukruzna/Spiralna]", new[] { "straight|Pravolinijska", "semicircular|Polukruzna", "spiral|Spiralna" }, "straight");
+            string kind = ctx.Keyword("Vrsta rampe [Pravolinijska/Polukruzna/Spiralna/Kombinovana]", new[] { "straight|Pravolinijska", "semicircular|Polukruzna", "spiral|Spiralna", "combined|Kombinovana" }, "straight");
+            bool combined = kind == "combined";
             bool curved = kind != "straight";
             bool twoWay = ctx.Keyword("Smjer [Jednosmjerna/Dvosmjerna]", new[] { "one_way|Jednosmjerna", "two_way|Dvosmjerna" }, "one_way") == "two_way";
-            (double lo, double hi) = curved ? (3.5, 5.0) : (2.5, 3.5);
+            (double lo, double hi) = combined ? (2.5, 5.0) : curved ? (3.5, 5.0) : (2.5, 3.5);
             double lw = ctx.Number("Širina trake (m, " + Bs.Num(lo, 1) + "–" + Bs.Num(hi, 1) + ")", curved ? 4.0 : 3.0);
             if (lw < lo || lw > hi)
             {
@@ -65,6 +66,39 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 axis = new Ring(new List<Vec3> { new Vec3(a.Value.X, a.Value.Y, 0), new Vec3(b.Value.X, b.Value.Y, 0) });
                 axisLength = a.Value.DistanceTo(b.Value) / k;
+            }
+            else if (combined)
+            {
+                // straight parts joined by arcs: the points of the centreline and one radius for its bends
+                var clicked = new List<Vec2>();
+                Point3d? last = null;
+                while (true)
+                {
+                    Point3d? pt = ctx.Point(clicked.Count == 0 ? "Početak rampe (sredina, gornji kraj)" : "Sljedeća tačka srednje linije (Enter za kraj)", last, clicked.Count >= 2);
+                    if (!pt.HasValue)
+                    {
+                        break;
+                    }
+
+                    clicked.Add(new Vec2(pt.Value.X / k, pt.Value.Y / k));
+                    last = pt;
+                }
+
+                if (clicked.Count < 2)
+                {
+                    ctx.Write("Rampa nije nacrtana.");
+                    return;
+                }
+
+                double bend = clicked.Count > 2 ? ctx.Number("Poluprečnik srednje linije u krivinama (m)", Math.Max(8.0, (width / 2) + 5.0)) : 0;
+                (List<Vec2> fp, List<double> fb) = GarageRamp.FilletPath(clicked, bend);
+                axis = new Ring(fp.Select(v => new Vec3(v.X * k, v.Y * k, 0)).ToList(), fb);
+                var probe = new GarageRamp { Kind = "combined", RingPoints = fp, RingBulges = fb };
+                axisLength = probe.Length;
+                if (probe.AxisRadius > 0 && probe.AxisRadius - (width / 2) < 5.0)
+                {
+                    ctx.Write("UPOZORENJE: unutrašnji poluprečnik rampe je " + Bs.Num(probe.AxisRadius - (width / 2), 2) + " m (preporučeno najmanje 5 m).");
+                }
             }
             else
             {
@@ -130,6 +164,24 @@ namespace SiteDesignPro.AutoCAD.Commands
                 transition = Math.Max(0, Math.Min(Math.Min(8, (axisLength - 1) / 2), transition));
             }
 
+            // a nearly level part at the top, where the ramp meets the street
+            double flat = 0;
+            if (average > GarageRamp.FlatSlope + 1e-9 && axisLength >= 12)
+            {
+                flat = ctx.Number("Blagi dio pred ulicom na vrhu, najviše 5 % (m, 0 = bez; preporučeno 5 kad rampa izlazi na ulicu)", 0, false, true);
+                flat = Math.Max(0, Math.Min(Math.Min(10, axisLength - 3), flat));
+            }
+
+            // a slab above the ramp: the clear height under it is checked
+            double ceilingFrom = ctx.Number("Ploča iznad rampe počinje na (m od početka, 0 = nema ploče)", 0, false, true);
+            double ceilingLevel = 0;
+            if (ceilingFrom > 0.01)
+            {
+                ceilingLevel = ctx.Number("Donja ivica te ploče u odnosu na osnovnu visinu (npr. -0,30)", Math.Max(h0, h1) - 0.3, true, true);
+            }
+
+            bool heated = average > 0.10 + 1e-9 && ctx.Keyword("Grijana rampa [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "No") == "Yes";
+
             ElementType type = ctx.Catalog.RequireType(GarageRamp.Type);
             SiteElement e = ctx.NewElement(type, new PathGeometry(axis, false), ctx.ExistingElements());
             e.Parameters["kind"] = ParamValue.Of(kind);
@@ -138,6 +190,10 @@ namespace SiteDesignPro.AutoCAD.Commands
             e.Parameters["margin"] = ParamValue.Of(margin);
             e.Parameters["island"] = ParamValue.Of(island);
             e.Parameters["transition"] = ParamValue.Of(transition);
+            e.Parameters["flatLength"] = ParamValue.Of(flat);
+            e.Parameters["ceilingFrom"] = ParamValue.Of(ceilingFrom);
+            e.Parameters["ceilingLevel"] = ParamValue.Of(ceilingLevel);
+            e.Parameters["heated"] = ParamValue.Of(heated);
             e.Parameters["startLevel"] = ParamValue.Of(h0);
             e.Parameters["endLevel"] = ParamValue.Of(h1);
             e.Parameters["width"] = ParamValue.Of(width);
@@ -148,13 +204,59 @@ namespace SiteDesignPro.AutoCAD.Commands
             if (ramp != null)
             {
                 ctx.Write("Garažna rampa: " + RampText(ramp) + ", širina " + Bs.Num(ramp.Width, 2) + " m.");
-                if (ramp.TransitionLength > 0)
+                foreach ((double from, double to, double slope) in ramp.Parts())
                 {
-                    ctx.Write("  Prijelazne dionice: 2 × " + Bs.Num(ramp.TransitionLength, 2) + " m s nagibom " + Bs.Num(ramp.TransitionSlope * 100, 2) + " %; između njih " + Bs.Num(ramp.Slope * 100, 2) + " %.");
+                    ctx.Write("  " + Bs.Num(from, 2) + "–" + Bs.Num(to, 2) + " m: " + Bs.Num(slope * 100, 2) + " %");
                 }
+
+                ctx.Write("  Uzdužni presjek: Presjek rampe (SDPRAMPAPRESJEK).");
             }
 
             RebuildNow(ctx);
+        }));
+
+        /// <summary>
+        /// Presjek rampe: the longitudinal section of a garage ramp, placed where the user clicks; it follows the ramp
+        /// when the ramp changes and goes when its small mark is erased.
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPRAMPAPRESJEK", CommandFlags.Modal)]
+        public void RampSection() => Guarded(() => CommandContext.Run("SDPRAMPAPRESJEK", ctx =>
+        {
+            double k = ctx.K;
+            List<SiteElement> elements = ctx.ExistingElements();
+            List<GarageRamp> ramps = GarageRamp.All(elements, k);
+            if (ramps.Count == 0)
+            {
+                ctx.Write("U crtežu nema garažne rampe. Nova rampa: Garažna rampa (SDPGARAZNARAMPA).");
+                return;
+            }
+
+            GarageRamp ramp = ramps[0];
+            if (ramps.Count > 1)
+            {
+                Point3d? pick = ctx.Point("Kliknite rampu");
+                if (!pick.HasValue)
+                {
+                    return;
+                }
+
+                var at = new Vec2(pick.Value.X / k, pick.Value.Y / k);
+                ramp = ramps.OrderBy(r => r.Axis.Min(q => q.DistanceTo(at))).First();
+            }
+
+            Point3d? where = ctx.Point("Mjesto presjeka rampe " + ramp.Name + " (lijevi kraj donje linije)");
+            if (!where.HasValue)
+            {
+                return;
+            }
+
+            ElementType type = ctx.Catalog.RequireType(RoadElements.RampSectionType);
+            SiteElement e = ctx.NewElement(type, new PointGeometry(new Vec3(where.Value.X, where.Value.Y, 0), 0), elements);
+            e.Parameters["reference"] = ParamValue.Of(ramp.Name);
+            e.Name = "Uzdužni presjek rampe " + ramp.Name;
+            ctx.Svc.Create(e);
+            RebuildNow(ctx);
+            ctx.Write("Uzdužni presjek rampe " + ramp.Name + " je nacrtan; prati izmjene rampe, a uklanja se brisanjem njegove oznake.");
         }));
 
         /// <summary>"L=12,50 m, h=2,10 m, 16,80 %".</summary>
@@ -228,59 +330,95 @@ namespace SiteDesignPro.AutoCAD.Commands
             Color red = Color.FromRgb(230, 40, 40);
             RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
             var hatches = new ObjectIdCollection();
+            List<RoadSpec> specs = RoadElements.Specs(elements, ctx.Catalog, k);
+            void Draw(RampShape shape)
+            {
+                if (shape.Role == "text")
+                {
+                    // fitted between two points, so the text has exactly the length kept free for it in the middle line
+                    var dir = new Vec2(Math.Cos(shape.Rotation), Math.Sin(shape.Rotation));
+                    Vec2 baseLine = shape.Position - (dir.Perp() * (shape.Height / 2));
+                    Vec2 p0 = baseLine - (dir * (shape.Length / 2)), p1 = baseLine + (dir * (shape.Length / 2));
+                    var t = new DBText
+                    {
+                        Height = shape.Height * k,
+                        TextString = shape.Text ?? string.Empty,
+                        Rotation = shape.Rotation,
+                        HorizontalMode = TextHorizontalMode.TextFit,
+                        VerticalMode = TextVerticalMode.TextBase,
+                        Position = new Point3d(p0.X * k, p0.Y * k, 0),
+                        AlignmentPoint = new Point3d(p1.X * k, p1.Y * k, 0),
+                    };
+                    Add(t, shape.Warning ? "rampa:tekst:previse" : "rampa:tekst", shape.Warning ? red : white, 0);
+                    t.AdjustAlignment(ctx.Db);
+                    return;
+                }
+
+                if (shape.Fill)
+                {
+                    try
+                    {
+                        Hatch h = RegionHatch(new RoadRegion(new RoadLoop(shape.Points, shape.Bulges), new List<RoadLoop>(), 0), k);
+                        (Color color, int transparency) = shape.Role == "surface" ? (Color.FromRgb(196, 196, 196), 30) : shape.Role == "island" ? (Color.FromRgb(110, 110, 110), 0) : shape.Role == "drain" ? (Color.FromRgb(60, 60, 60), 0) : (white, 0);
+                        Add(h, "rampa:" + shape.Role, color, transparency);
+                        if (shape.Role == "surface")
+                        {
+                            hatches.Add(h.ObjectId);
+                        }
+                    }
+                    catch (Autodesk.AutoCAD.Runtime.Exception)
+                    {
+                        Add(Pl(shape), "rampa:" + shape.Role, white, 0);
+                    }
+
+                    if (shape.Role == "island" || shape.Role == "drain")
+                    {
+                        Add(Pl(shape), "rampa:" + shape.Role, white, 0);
+                    }
+
+                    return;
+                }
+
+                if (shape.Role == "heated")
+                {
+                    // the heated driving width: a line hatch about every 30 cm
+                    try
+                    {
+                        var h = new Hatch { PatternScale = 0.095 * k };
+                        h.SetHatchPattern(HatchPatternType.PreDefined, "ANSI31");
+                        h.Associative = false;
+                        var v = new Point2dCollection();
+                        var bl = new DoubleCollection();
+                        for (int i = 0; i <= shape.Points.Count; i++)
+                        {
+                            int j = i % shape.Points.Count;
+                            v.Add(new Point2d(shape.Points[j].X * k, shape.Points[j].Y * k));
+                            bl.Add(i < shape.Points.Count ? shape.Bulges[j] : 0);
+                        }
+
+                        h.AppendLoop(HatchLoopTypes.Polyline | HatchLoopTypes.External, v, bl);
+                        h.EvaluateHatch(true);
+                        Add(h, "rampa:grijanje", Color.FromRgb(255, 140, 60), 40);
+                    }
+                    catch (Autodesk.AutoCAD.Runtime.Exception)
+                    {
+                        // the note "grijana rampa" stays
+                    }
+
+                    return;
+                }
+
+                Color line = shape.Role == "margin" ? yellow : shape.Role == "warning" ? red : shape.Role == "ceiling" || shape.Role == "thin" ? Color.FromRgb(170, 170, 170) : white;
+                Add(Pl(shape), "rampa:" + shape.Role, line, 0);
+            }
+
             try
             {
                 foreach (GarageRamp r in ramps)
                 {
                     foreach (RampShape shape in r.Plan())
                     {
-                        if (shape.Role == "text")
-                        {
-                            // fitted between two points, so the text has exactly the length kept free for it in the middle line
-                            var dir = new Vec2(Math.Cos(shape.Rotation), Math.Sin(shape.Rotation));
-                            Vec2 baseLine = shape.Position - (dir.Perp() * (shape.Height / 2));
-                            Vec2 p0 = baseLine - (dir * (shape.Length / 2)), p1 = baseLine + (dir * (shape.Length / 2));
-                            var t = new DBText
-                            {
-                                Height = shape.Height * k,
-                                TextString = shape.Text ?? string.Empty,
-                                Rotation = shape.Rotation,
-                                HorizontalMode = TextHorizontalMode.TextFit,
-                                VerticalMode = TextVerticalMode.TextBase,
-                                Position = new Point3d(p0.X * k, p0.Y * k, 0),
-                                AlignmentPoint = new Point3d(p1.X * k, p1.Y * k, 0),
-                            };
-                            Add(t, shape.Warning ? "rampa:tekst:previse" : "rampa:tekst", shape.Warning ? red : white, 0);
-                            t.AdjustAlignment(ctx.Db);
-                            continue;
-                        }
-
-                        if (shape.Fill)
-                        {
-                            try
-                            {
-                                Hatch h = RegionHatch(new RoadRegion(new RoadLoop(shape.Points, shape.Bulges), new List<RoadLoop>(), 0), k);
-                                (Color color, int transparency) = shape.Role == "surface" ? (Color.FromRgb(196, 196, 196), 30) : shape.Role == "island" ? (Color.FromRgb(110, 110, 110), 0) : (white, 0);
-                                Add(h, "rampa:" + shape.Role, color, transparency);
-                                if (shape.Role == "surface")
-                                {
-                                    hatches.Add(h.ObjectId);
-                                }
-                            }
-                            catch (Autodesk.AutoCAD.Runtime.Exception)
-                            {
-                                Add(Pl(shape), "rampa:" + shape.Role, white, 0);
-                            }
-
-                            if (shape.Role == "island")
-                            {
-                                Add(Pl(shape), "rampa:ostrvo", white, 0);
-                            }
-
-                            continue;
-                        }
-
-                        Add(Pl(shape), "rampa:" + shape.Role, shape.Role == "margin" ? yellow : white, 0);
+                        Draw(shape);
                     }
 
                     // elevation symbols beside the two ends (on opposite sides, so a full circle does not overlap them)
@@ -303,6 +441,36 @@ namespace SiteDesignPro.AutoCAD.Commands
                     if (r.Curved && r.InnerRadius < 5.0)
                     {
                         ctx.Write("UPOZORENJE: unutrašnji poluprečnik garažne rampe " + r.Name + " je " + Bs.Num(r.InnerRadius, 2) + " m (preporučeno najmanje 5 m).");
+                    }
+
+                    if (r.TooLow)
+                    {
+                        ctx.Write("UPOZORENJE: svijetla visina pod pločom iznad rampe " + r.Name + " je " + Bs.Num(r.Clearance!.Value.Clearance, 2) + " m (potrebno " + Bs.Num(r.MinClearance, 2) + " m).");
+                    }
+
+                    if (r.FlatLength < 3 && r.Parts().First(x => r.TopAtStart ? x.From < 1e-6 : x.To > r.Length - 1e-6).Slope > GarageRamp.FlatSlope + 1e-9 && RoadElements.AtRoad(r, r.TopAtStart ? 0 : r.Length, specs))
+                    {
+                        ctx.Write("PREPORUKA: rampa " + r.Name + " izlazi na ulicu s nagibom većim od 5 %; dodajte blagi dio pred ulicom (oko 5 m, Svojstva).");
+                    }
+                }
+
+                // longitudinal sections placed in the drawing: each follows its ramp
+                foreach (SiteElement e in elements.Where(x => x.TypeId == RoadElements.RampSectionType && x.Geometry is PointGeometry))
+                {
+                    string name = e.Parameters.Text("reference", string.Empty);
+                    GarageRamp? r = ramps.FirstOrDefault(x => x.Name == name);
+                    if (r == null)
+                    {
+                        continue;
+                    }
+
+                    Vec3 at = ((PointGeometry)e.Geometry).Position;
+                    var origin = new Vec2(at.X / k, at.Y / k);
+                    foreach (RampShape shape in r.Section())
+                    {
+                        shape.Points = shape.Points.Select(q => q + origin).ToList();
+                        shape.Position += origin;
+                        Draw(shape);
                     }
                 }
 

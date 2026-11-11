@@ -29,6 +29,31 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>A point where the user wants an accessible kerb ramp (on the sidewalk: that side; on the carriageway: both).</summary>
         public const string RampMarkType = "road.curb_ramp_mark";
 
+        /// <summary>The place of the longitudinal section of a garage ramp (its "reference" names the ramp).</summary>
+        public const string RampSectionType = "road.ramp_section";
+
+        /// <summary>True when a station of a garage ramp lies at a road (within 1,5 m of its outer edge).</summary>
+        public static bool AtRoad(GarageRamp ramp, double station, IEnumerable<RoadSpec> roads)
+        {
+            Vec2 p = ramp.PointAt(station, 0).Point;
+            foreach (RoadSpec r in roads)
+            {
+                double reach = Math.Max(r.Extent(RoadLevel.Edge, true), r.Extent(RoadLevel.Edge, false)) + 1.5;
+                for (int i = 0; i + 1 < r.Axis.Count; i++)
+                {
+                    Vec2 a = r.Axis[i], b = r.Axis[i + 1], ab = b - a;
+                    double l2 = ab.Dot(ab);
+                    double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
+                    if ((a + (ab * t)).DistanceTo(p) <= reach)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>Custom flag on exported roads whose surfaces come from the network (SketchUp builds no strip for them).</summary>
         public const string NetworkFlag = "networkSurface";
 

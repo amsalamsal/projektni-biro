@@ -1004,7 +1004,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
                 (string Id, string Type)? key = ElementStore.ReadKey(ent);
-                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || key.Value.Type == RoadElements.RampMarkType || key.Value.Type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
+                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || key.Value.Type == RoadElements.RampMarkType || key.Value.Type == RoadElements.RampSectionType || key.Value.Type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
                 {
                     Dirty.Add(db);
                 }
