@@ -2,6 +2,15 @@
 
 ## Neobjavljeno
 
+### Spojevi ulica (provjera 40 situacija)
+* Ulica nastavljena drugom ulicom pod uglom (kraj na kraj) dobija krivinu kao jedna ulica: unutrašnja i vanjska
+  strana su zaobljene i koncentrične, bez izbočine i zasjeka na vanjskom uglu, i bez šava na trotoaru.
+* Gdje ulica sa stazom ili trotoarom dolazi na ulicu ili cestu koja ih nema (pristupna cesta, trotoar s jedne
+  strane, biciklistička staza samo na jednoj ulici, krak kružnog toka), staza i trotoar prate ugao i završavaju
+  ravno na kraju zaobljenja, umjesto nepravilnog „uha“.
+* U testovima je pregled 40 situacija spajanja (T, koso, Y, zvijezda, kružni tok, blok, krivine uz raskrsnicu…),
+  koji se pri svakoj izgradnji iscrtava u `ceste-pregled` na grani s gotovim paketima.
+
 ### Saobraćajnice 3: presjek, rampe, mini kružni tok, visine i garažne rampe
 * Redoslijed presjeka: kolovoz | ivičnjak 15 cm | biciklistička staza | trotoar | ivičnjak 10 cm. Kad postoji
   biciklistička staza, ivičnjak 15 cm je samo između kolovoza i staze; staza i trotoar su na istoj visini (i u 3D).
