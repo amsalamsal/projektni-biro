@@ -6,8 +6,9 @@
 * Redoslijed presjeka: kolovoz | ivičnjak 15 cm | biciklistička staza | trotoar | ivičnjak 10 cm. Kad postoji
   biciklistička staza, ivičnjak 15 cm je samo između kolovoza i staze; staza i trotoar su na istoj visini (i u 3D).
   Sve linije u DWG-u su na Z = 0,00; mjerilo 1 m = 100 cm.
-* **Rampe za invalide 120 cm** (spušteni ivičnjak i 1,20 m kosine prema stazi ili trotoaru, u 3D od kolovoza do
-  visine trotoara) ne crtaju se same uz ulice: dobija ih svaki pješački prelaz na oba kraja (gdje je trotoar), a
+* **Rampe za invalide 120 cm** (po modelu „Curb Ramp“: ivičnjak spušten do kolovoza na 1,20 m, sa svake strane
+  0,80 m prijelaza na punu visinu, površina se od spuštenog ivičnjaka penje do trotoara na dubini do 2,00 m;
+  ivičnjak rampe je žut) ne crtaju se same uz ulice: dobija ih svaki pješački prelaz na oba kraja (gdje je trotoar), a
   bilo gdje drugo dodaju se ručno naredbom **Rampa za invalide** (`SDPRAMPAINVALIDI`): klik na trotoar daje rampu
   s te strane, klik na kolovoz s obje strane. Rampa se uklanja brisanjem njene plave oznake.
 * **Mini kružni tok** (do 25 km/h): srednji otok poluprečnika 15–30 m (zelenilo), prijelazni prsten 1,20 m sa

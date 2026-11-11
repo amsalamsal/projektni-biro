@@ -116,8 +116,8 @@ namespace SiteDesignPro.Core.Tests
             // a mark on the upper sidewalk of A: one ramp on that side; a mark on the carriageway: both sides
             RoadNetworkResult one = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, null, null, new[] { new Vec2(20, 4.5) });
             Assert.Single(one.Ramps);
-            Assert.InRange(Math.Abs(Area(one.Ramps[0].Points)), (1.2 * 1.35) - 0.05, (1.2 * 1.35) + 0.05);
-            Assert.All(one.Ramps[0].Points, p => Assert.True(p.Y > 2.9 && Math.Abs(p.X - 20) <= 0.61, "ramp at " + p));
+            Assert.InRange(Math.Abs(Area(one.Ramps[0].Points)), 5.6975 - 0.05, 5.6975 + 0.05);
+            Assert.All(one.Ramps[0].Points, p => Assert.True(p.Y > 2.9 && Math.Abs(p.X - 20) <= 1.41, "ramp at " + p));
 
             RoadNetworkResult two = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, null, null, new[] { new Vec2(20, 1) });
             Assert.Equal(2, two.Ramps.Count);
@@ -135,8 +135,8 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(2, res.Ramps.Count);
             foreach (RoadLoop ramp in res.Ramps)
             {
-                Assert.InRange(Math.Abs(Area(ramp.Points)), (1.2 * 1.35) - 0.05, (1.2 * 1.35) + 0.05);
-                Assert.All(ramp.Points, p => Assert.InRange(p.X, 49.39, 50.61));
+                Assert.InRange(Math.Abs(Area(ramp.Points)), 5.6975 - 0.05, 5.6975 + 0.05);
+                Assert.All(ramp.Points, p => Assert.InRange(p.X, 48.59, 51.41));
             }
 
             Assert.Contains(res.Ramps, r => r.Points.All(p => p.Y > 2.9));
@@ -144,13 +144,14 @@ namespace SiteDesignPro.Core.Tests
 
             // the sidewalk and kerb are cut where the ramps are (they are lowered there)
             double walk = res.Bands[RoadLevel.Sidewalk].Sum(r => r.Area);
-            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 1.2 * 1.2) - 0.2, (2 * 100 * 2.0) - (2 * 1.2 * 1.2) + 0.2);
+            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 5.279) - 0.2, (2 * 100 * 2.0) - (2 * 5.279) + 0.2);
 
             // in 3D the ramp rises from the carriageway (0) to the sidewalk (0,13 above the ramp's own offset)
-            List<List<Vec2>> kerbLines = res.Outlines[RoadLevel.Carriageway].Select(l => l.Points).ToList();
-            List<Vec3[]> tris = RoadElements.RampTriangles(res.Ramps[0].Points, kerbLines, 0.13, _ => 0);
-            Assert.NotEmpty(tris);
+            (List<Vec3[]> surface, List<Vec3[]> kerb) = RoadElements.RampTriangles(res.RampFrames[0], 0.13, _ => 0);
+            List<Vec3[]> tris = surface.Concat(kerb).ToList();
+            Assert.Equal(4, surface.Count);
             Assert.InRange(tris.SelectMany(t => t).Min(v => v.Z), -0.001, 0.001);
+            Assert.InRange(surface.SelectMany(t => t).Min(v => v.Z), 0.019, 0.021); // 2 cm behind the lowered kerb
             Assert.InRange(tris.SelectMany(t => t).Max(v => v.Z), 0.129, 0.131);
 
             // no sidewalk on the right: only the left ramp

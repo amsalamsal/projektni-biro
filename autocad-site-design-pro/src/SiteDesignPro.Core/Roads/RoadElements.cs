@@ -310,17 +310,16 @@ namespace SiteDesignPro.Core.Roads
             // ramps in 3D: from the carriageway (kerb line) up to the sidewalk, across their whole depth
             double rampTop = catalog.FindType(RampType)?.CreateDefaultParameters().Number("topOffset", 0.02) ?? 0.02;
             double walkTop = catalog.FindType(LevelTypes[RoadLevel.Sidewalk].Type)?.CreateDefaultParameters().Number("topOffset", 0.15) ?? 0.15;
-            List<List<Vec2>> kerbLines = res.Outlines.TryGetValue(RoadLevel.Carriageway, out List<RoadLoop>? cw)
-                ? cw.Select(l => GeometryMath.Tessellate(ToRing(l, 0), true, 0.005).Select(v => v.XY).ToList()).ToList()
-                : new List<List<Vec2>>();
-            foreach (RoadLoop ramp in res.Ramps)
+            for (int i = 0; i < res.Ramps.Count && i < res.RampFrames.Count; i++)
             {
-                Add(RampType, "Rampa za invalide 120 cm", new PolygonGeometry(ToRing(ramp, z)));
-                List<Vec3[]> tris = RampTriangles(ramp.Points, kerbLines, walkTop - rampTop, p => z + (profiles != null ? RoadLevels.Height(profiles, p) : 0));
-                if (tris.Count > 0)
-                {
-                    list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(tris));
-                }
+                (List<Vec3[]> surface, List<Vec3[]> kerb) = RampTriangles(res.RampFrames[i], walkTop - rampTop, p => z + (profiles != null ? RoadLevels.Height(profiles, p) : 0));
+                Add(RampType, "Rampa za invalide 120 cm", new PolygonGeometry(ToRing(res.Ramps[i], z)));
+                list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(surface));
+
+                // the lowered kerb and its flares, painted yellow
+                Add(RampType, "Spušteni ivičnjak rampe", new PolygonGeometry(ToRing(res.Ramps[i], z)));
+                list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(kerb));
+                list[list.Count - 1].Parameters["material"] = ParamValue.Of("line_paint_yellow");
             }
 
             foreach (RoadMarking m in res.Markings)
@@ -383,60 +382,44 @@ namespace SiteDesignPro.Core.Roads
         }
 
         /// <summary>
-        /// Surface of a kerb ramp: at the carriageway on the side touching the kerb line, rising by <paramref name="rise"/>
-        /// to the far side (the sidewalk); a fan of triangles from the centre.
+        /// A kerb ramp in 3D, like a dropped kerb with flares: the kerb is lowered to the carriageway over 1,20 m and rises
+        /// back to its height over 0,80 m on both sides; the surface behind slopes from the lowered kerb up by
+        /// <paramref name="rise"/> to the sidewalk at the back and at the sides. Returns the surface and the kerb.
         /// </summary>
-        public static List<Vec3[]> RampTriangles(IReadOnlyList<Vec2> outline, List<List<Vec2>> kerbLines, double rise, Func<Vec2, double> baseHeight)
+        public static (List<Vec3[]> Surface, List<Vec3[]> Kerb) RampTriangles(RoadRampFrame f, double rise, Func<Vec2, double> baseHeight)
         {
-            var tris = new List<Vec3[]>();
-            if (outline.Count < 3 || kerbLines.Count == 0)
+            double a = RoadNetwork.RampWidth / 2, k = Math.Min(RoadSpec.KerbWidth, f.Depth / 2), d = f.Depth;
+            double a1 = a + 0.045, f0 = a + RoadNetwork.RampFlare, f1 = f0 - 0.045, b = a + RoadNetwork.RampBackFlare;
+            double zk = Math.Min(0.02, rise);
+            bool flip = f.Along.Cross(f.Inward) < 0;
+            Vec3 P(double u, double v, double z)
             {
-                return tris;
+                Vec2 p = f.Foot + (f.Along * u) + (f.Inward * v);
+                return p.WithZ(baseHeight(p) + z);
             }
 
-            // a plane: the height grows with the distance from the kerb line, measured square to it from the
-            // point of the kerb line nearest to the middle of the ramp
-            Vec2 c0 = new Vec2(outline.Average(p => p.X), outline.Average(p => p.Y));
-            Vec2 foot = c0;
-            double best = double.MaxValue;
-            foreach (List<Vec2> line in kerbLines)
+            Vec3[] T(Vec3 p, Vec3 q, Vec3 r) => flip ? new[] { p, r, q } : new[] { p, q, r };
+            var surface = new List<Vec3[]>
             {
-                for (int i = 0; i < line.Count; i++)
-                {
-                    Vec2 a = line[i], b = line[(i + 1) % line.Count];
-                    Vec2 ab = b - a;
-                    double l2 = ab.Dot(ab);
-                    double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (c0 - a).Dot(ab) / l2));
-                    Vec2 f = a + (ab * t);
-                    if (f.DistanceTo(c0) < best)
-                    {
-                        best = f.DistanceTo(c0);
-                        foot = f;
-                    }
-                }
-            }
-
-            if (best < 1e-6)
+                T(P(-a1, k, zk), P(a1, k, zk), P(b, d, rise)),
+                T(P(-a1, k, zk), P(b, d, rise), P(-b, d, rise)),
+                T(P(a1, k, zk), P(f1, k, rise), P(b, d, rise)),
+                T(P(-f1, k, rise), P(-a1, k, zk), P(-b, d, rise)),
+            };
+            var kerb = new List<Vec3[]>
             {
-                return tris;
-            }
+                T(P(-a, 0, 0), P(a, 0, 0), P(a1, k, zk)),
+                T(P(-a, 0, 0), P(a1, k, zk), P(-a1, k, zk)),
+                T(P(a, 0, 0), P(f0, 0, rise), P(f1, k, rise)),
+                T(P(a, 0, 0), P(f1, k, rise), P(a1, k, zk)),
+                T(P(-f0, 0, rise), P(-a, 0, 0), P(-a1, k, zk)),
+                T(P(-f0, 0, rise), P(-a1, k, zk), P(-f1, k, rise)),
 
-            Vec2 n = (c0 - foot).Normalized();
-            double Dist(Vec2 p) => Math.Max(0, (p - foot).Dot(n));
-            double depth = outline.Max(Dist);
-            if (depth < 0.1)
-            {
-                return tris;
-            }
-
-            Vec3 P(Vec2 p) => p.WithZ(baseHeight(p) + (rise * Math.Min(1, Dist(p) / depth)));
-            Vec3 pc = P(c0);
-            for (int i = 0; i < outline.Count; i++)
-            {
-                tris.Add(new[] { pc, P(outline[i]), P(outline[(i + 1) % outline.Count]) });
-            }
-
-            return tris;
+                // the face of the flares towards the carriageway
+                T(P(a, 0, 0), P(f0, 0, 0), P(f0, 0, rise)),
+                T(P(-f0, 0, 0), P(-a, 0, 0), P(-f0, 0, rise)),
+            };
+            return (surface, kerb);
         }
 
         private static Ring ToRing(RoadLoop loop, double z) => new Ring(loop.Points.Select(p => p.WithZ(z)).ToList(), loop.Bulges.ToList());

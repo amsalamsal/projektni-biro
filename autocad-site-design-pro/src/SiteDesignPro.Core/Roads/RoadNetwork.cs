@@ -7,6 +7,29 @@ using SiteDesignPro.Core.Geometry;
 namespace SiteDesignPro.Core.Roads
 {
     /// <summary>Closed loop of a region boundary; segment i runs from point i to point i+1 with bulge i (0 = straight).</summary>
+    /// <summary>
+    /// A kerb ramp on its kerb line: the middle of the lowered kerb, the direction along the kerb, the direction into the
+    /// sidewalk and the depth over which the surface rises to the sidewalk.
+    /// </summary>
+    public sealed class RoadRampFrame
+    {
+        public RoadRampFrame(Vec2 foot, Vec2 along, Vec2 inward, double depth)
+        {
+            Foot = foot;
+            Along = along;
+            Inward = inward;
+            Depth = depth;
+        }
+
+        public Vec2 Foot { get; }
+
+        public Vec2 Along { get; }
+
+        public Vec2 Inward { get; }
+
+        public double Depth { get; }
+    }
+
     public sealed class RoadLoop
     {
         public RoadLoop(List<Vec2> points, List<double> bulges)
@@ -117,6 +140,9 @@ namespace SiteDesignPro.Core.Roads
 
         /// <summary>Accessible kerb ramps 120 cm at the start of the straight part after each junction corner.</summary>
         public List<RoadLoop> Ramps { get; } = new List<RoadLoop>();
+
+        /// <summary>Position of each ramp of <see cref="Ramps"/> on its kerb line (same order).</summary>
+        public List<RoadRampFrame> RampFrames { get; } = new List<RoadRampFrame>();
 
         /// <summary>The rounded junction corners added to the road surface (metres), for checks.</summary>
         public List<List<Vec2>> Fillets { get; } = new List<List<Vec2>>();
@@ -317,9 +343,9 @@ namespace SiteDesignPro.Core.Roads
             if (walk.Count > 0)
             {
                 PathsD done = new PathsD();
-                void AddRamps(IEnumerable<(PathD Ramp, Vec2 Along)> found)
+                void AddRamps(IEnumerable<(PathD Ramp, RoadRampFrame Frame)> found)
                 {
-                    foreach ((PathD ramp, Vec2 _) in found)
+                    foreach ((PathD ramp, RoadRampFrame f) in found)
                     {
                         if (Clipper.Intersect(new PathsD { ramp }, done, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) > 0.1)
                         {
@@ -328,6 +354,7 @@ namespace SiteDesignPro.Core.Roads
 
                         done.Add(ramp);
                         result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
+                        result.RampFrames.Add(new RoadRampFrame(f.Foot + origin, f.Along, f.Inward, f.Depth));
                     }
                 }
 
@@ -536,17 +563,23 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Width of an accessible kerb ramp along the kerb.</summary>
         public const double RampWidth = 1.2;
 
+        /// <summary>Flare on each side of the lowered kerb, where the kerb rises back to its height (at the kerb line).</summary>
+        public const double RampFlare = 0.8;
+
+        /// <summary>The same at the back of the ramp.</summary>
+        public const double RampBackFlare = 0.65;
+
         /// <summary>
-        /// Depth of a ramp behind the kerb line: the lowered kerb (0,15 m) and 1,20 m of slope up to the bike lane or
-        /// sidewalk (13 cm over 1,20 m, about 11 %), like a lowered kerb at a crossing.
+        /// Depth of a ramp behind the kerb line: the kerb (0,15 m) and up to 2,00 m of slope to the sidewalk (about 6,5 %),
+        /// less if the sidewalk ends sooner.
         /// </summary>
-        public const double RampDepth = RoadSpec.KerbWidth + 1.2;
+        public const double RampDepth = RoadSpec.KerbWidth + 2.0;
 
         /// <summary>
         /// Ramps (1,20 m wide) at the two ends of a pedestrian crossing: across the kerb, bike lane and sidewalk of the
         /// road the crossing lies on, on the sides with a sidewalk.
         /// </summary>
-        private static IEnumerable<(PathD Ramp, Vec2 Along)> RampsAt(List<Vec2> area, bool mark, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
+        private static IEnumerable<(PathD Ramp, RoadRampFrame Frame)> RampsAt(List<Vec2> area, bool mark, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
         {
             Vec2 c = new Vec2(area.Average(q => q.X), area.Average(q => q.Y));
             RoadSpec? road = null;
@@ -608,15 +641,30 @@ namespace SiteDesignPro.Core.Roads
                     continue;
                 }
 
-                Vec2 s2 = foot + (across * (side * (kerbLine + RampDepth)));
-                PathsD ramp = Clipper.Intersect(new PathsD { Positive(new[] { s0 - h, s0 + h, s2 + h, s2 - h }) }, behindKerb, FillRule.NonZero, Precision);
+                // footprint like a dropped kerb with flares: the lowered kerb, 0,80 m of flare on both sides at the
+                // kerb, narrowing a little towards the back
+                double depth = Math.Min(RampDepth, road.Extent(RoadLevel.Sidewalk, left) - kerbLine);
+                if (depth < 0.5)
+                {
+                    continue;
+                }
+
+                Vec2 inward = across * side;
+                Vec2 k0 = foot + (inward * kerbLine);
+                double front = (RampWidth / 2) + RampFlare, back = (RampWidth / 2) + RampBackFlare;
+                var shape = new[]
+                {
+                    k0 - (along * front) - (inward * 0.01), k0 + (along * front) - (inward * 0.01),
+                    k0 + (along * back) + (inward * depth), k0 - (along * back) + (inward * depth),
+                };
+                PathsD ramp = Clipper.Intersect(new PathsD { Positive(shape) }, behindKerb, FillRule.NonZero, Precision);
 
                 Vec2 probe = foot + (across * (side * (kerbLine + 0.07)));
                 foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))
                 {
                     if (Clipper.PointInPolygon(new PointD(probe.X, probe.Y), piece) != PointInPolygonResult.IsOutside)
                     {
-                        yield return (piece, along);
+                        yield return (piece, new RoadRampFrame(k0, along, inward, depth));
                     }
                 }
             }
