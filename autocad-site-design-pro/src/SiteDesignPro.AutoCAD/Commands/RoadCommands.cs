@@ -918,6 +918,35 @@ namespace SiteDesignPro.AutoCAD.Commands
             Rebuild(ctx, false);
         }));
 
+        /// <summary>
+        /// Rampa za invalide: a 120 cm ramp where the user clicks (on the sidewalk: that side; on the carriageway: both
+        /// sides). The ramp is kept as a small blue mark; erasing the mark removes the ramp.
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPRAMPAINVALIDI", CommandFlags.Modal)]
+        public void AccessibleRamp() => Guarded(() => CommandContext.Run("SDPRAMPAINVALIDI", ctx =>
+        {
+            ElementType type = ctx.Catalog.RequireType(RoadElements.RampMarkType);
+            int n = 0;
+            while (true)
+            {
+                Point3d? at = ctx.Point("Sredina rampe: na trotoaru (ta strana) ili na kolovozu (obje strane), Enter za kraj", null, true);
+                if (!at.HasValue)
+                {
+                    break;
+                }
+
+                SiteElement e = ctx.NewElement(type, new PointGeometry(new Vec3(at.Value.X, at.Value.Y, 0), 0), ctx.ExistingElements());
+                ctx.Svc.Create(e);
+                n++;
+            }
+
+            if (n > 0)
+            {
+                RebuildNow(ctx);
+                ctx.Write("Dodano rampi za invalide: " + n + ". Rampa se uklanja brisanjem njene plave oznake.");
+            }
+        }));
+
         /// <summary>Relative height as written above the line of the symbol: +5,00 / −1,00 / ±0,00.</summary>
         internal static string LevelText(double v) => Math.Abs(v) < 0.005 ? "±0,00" : (v > 0 ? "+" : "−") + Bs.Num(Math.Abs(v), 2);
 
@@ -975,7 +1004,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
                 (string Id, string Type)? key = ElementStore.ReadKey(ent);
-                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || key.Value.Type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
+                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || key.Value.Type == RoadElements.RampMarkType || key.Value.Type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
                 {
                     Dirty.Add(db);
                 }

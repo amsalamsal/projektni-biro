@@ -90,7 +90,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(4, res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 6.0) < 0.05));
             Assert.Equal(4, res.Outlines[RoadLevel.Kerb].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 5.85) < 0.05));
             Assert.Equal(4, res.Outlines[RoadLevel.Bike].SelectMany(l => l.ArcRadii()).Count(r => Math.Abs(r - 4.35) < 0.05));
-            Assert.InRange(res.Area(RoadLevel.Bike), (4 * 120 * 1.5) - 60 - (8 * 1.2 * 1.5), 4 * 120 * 1.5); // less the corners and the 8 ramps
+            Assert.InRange(res.Area(RoadLevel.Bike), (4 * 120 * 1.5) - 60, 4 * 120 * 1.5); // less the corners
         }
 
         [Fact]
@@ -107,22 +107,23 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
-        public void Crossroads_GetAnAccessibleRampAtEveryCornerEnd()
+        public void Crossroads_GetNoRampUnlessAsked_AndAMarkPlacesOne()
         {
             var a = Road("A", -60, 0, 60, 0);
             var b = Road("B", 0, -60, 0, 60);
-            RoadNetworkResult res = RoadNetwork.Build(new[] { a, b });
-            Assert.Equal(8, res.Ramps.Count);
-            foreach (RoadLoop ramp in res.Ramps)
-            {
-                // 1,20 m along the kerb, the lowered kerb (0,15) and 1,20 m of slope into the sidewalk, right after the corner arc
-                double area = Math.Abs(Area(ramp.Points));
-                Assert.InRange(area, (1.2 * 1.35) - 0.05, (1.2 * 1.35) + 0.05);
-                Assert.All(ramp.Points, p => Assert.True(Math.Abs(p.X) >= 8.99 || Math.Abs(p.Y) >= 8.99, "ramp inside the corner at " + p));
-            }
+            Assert.Empty(RoadNetwork.Build(new[] { a, b }).Ramps);
+
+            // a mark on the upper sidewalk of A: one ramp on that side; a mark on the carriageway: both sides
+            RoadNetworkResult one = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, null, null, new[] { new Vec2(20, 4.5) });
+            Assert.Single(one.Ramps);
+            Assert.InRange(Math.Abs(Area(one.Ramps[0].Points)), (1.2 * 1.35) - 0.05, (1.2 * 1.35) + 0.05);
+            Assert.All(one.Ramps[0].Points, p => Assert.True(p.Y > 2.9 && Math.Abs(p.X - 20) <= 0.61, "ramp at " + p));
+
+            RoadNetworkResult two = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, null, null, new[] { new Vec2(20, 1) });
+            Assert.Equal(2, two.Ramps.Count);
 
             // no sidewalk: no ramp
-            Assert.Empty(RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }), Road("B", 0, -60, 0, 60, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }) }).Ramps);
+            Assert.Empty(RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0, x => { x.SidewalkLeft = 0; x.SidewalkRight = 0; }) }, null, null, new[] { new Vec2(20, 1) }).Ramps);
         }
 
         [Fact]
@@ -158,14 +159,12 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
-        public void CrossingNearAJunction_ReplacesTheCornerRampsOnItsKerbs()
+        public void CrossingNearAJunction_HasOnlyItsOwnRamps()
         {
-            // crossing on road A just after the corner (corner ramps of A at x 9,0–10,2 on both kerbs)
             var box = new List<Vec2> { new Vec2(13, -3), new Vec2(17, -3), new Vec2(17, 3), new Vec2(13, 3) };
             RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, new[] { box }, new[] { box });
-            Assert.Equal(8, res.Ramps.Count);
-            Assert.DoesNotContain(res.Ramps, r => r.Points.Average(p => p.X) > 8.5 && r.Points.Average(p => p.X) < 11);
-            Assert.Equal(2, res.Ramps.Count(r => Math.Abs(r.Points.Average(p => p.X) - 15) < 0.1));
+            Assert.Equal(2, res.Ramps.Count);
+            Assert.All(res.Ramps, r => Assert.InRange(r.Points.Average(p => p.X), 14.9, 15.1));
         }
 
         private static double Area(IReadOnlyList<Vec2> p)

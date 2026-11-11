@@ -156,7 +156,14 @@ namespace SiteDesignPro.Core.Roads
         /// Builds the network; <paramref name="crossings"/> are the pedestrian crossings (metres), which get an accessible
         /// ramp on both ends where there is a sidewalk.
         /// </summary>
-        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings)
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings) =>
+            Build(input, noMarking, crossings, null);
+
+        /// <summary>
+        /// Builds the network; <paramref name="rampMarks"/> are the points (metres) where the user placed an accessible ramp:
+        /// on a sidewalk, a ramp on that side; on the carriageway, a ramp on both sides.
+        /// </summary>
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks)
         {
             var result = new RoadNetworkResult();
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
@@ -304,41 +311,37 @@ namespace SiteDesignPro.Core.Roads
             PathsD toWalk = Clipper.Union(toBike, walk, FillRule.NonZero, Precision);
             PathsD edge = Clipper.Difference(Union(pieces[RoadLevel.Edge]), toWalk, FillRule.NonZero, Precision);
 
-            // accessible kerb ramps (120 cm) where the straight part starts after each junction corner, on the sides
-            // with a sidewalk; the ramp lowers the kerb and runs across the bike lane and the sidewalk
+            // accessible kerb ramps (120 cm) only where the user wants them: at the ends of each pedestrian crossing and at
+            // the ramp marks; the ramp lowers the kerb and slopes up to the bike lane or sidewalk
             PathsD behindKerb = Clipper.Union(Clipper.Union(kerb, bike, FillRule.NonZero, Precision), walk, FillRule.NonZero, Precision);
             if (walk.Count > 0)
             {
-                foreach (PathsD f in fillets)
+                PathsD done = new PathsD();
+                void AddRamps(IEnumerable<(PathD Ramp, Vec2 Along)> found)
                 {
-                    foreach (PathD ramp in Ramps(f[0], radius, surface, behindKerb, walk))
+                    foreach ((PathD ramp, Vec2 _) in found)
                     {
+                        if (Clipper.Intersect(new PathsD { ramp }, done, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) > 0.1)
+                        {
+                            continue;
+                        }
+
+                        done.Add(ramp);
                         result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
                     }
                 }
 
-                // pedestrian crossings: a ramp at both ends, centred on the crossing; it replaces a corner ramp on the
-                // same kerb nearby (one ramp where people actually cross)
-                var atCrossings = new HashSet<RoadLoop>();
                 foreach (IReadOnlyList<Vec2> area in crossings ?? Enumerable.Empty<IReadOnlyList<Vec2>>())
                 {
-                    if (area.Count < 3)
+                    if (area.Count >= 3)
                     {
-                        continue;
+                        AddRamps(RampsAt(area.Select(q => q - origin).ToList(), false, roads, behindKerb, walk));
                     }
+                }
 
-                    foreach ((PathD ramp, Vec2 along) in CrossingRamps(area.Select(q => q - origin).ToList(), roads, behindKerb, walk))
-                    {
-                        Vec2 c = new Vec2(ramp.Average(q => q.x), ramp.Average(q => q.y)) + origin;
-                        result.Ramps.RemoveAll(r =>
-                        {
-                            Vec2 d = new Vec2(r.Points.Average(q => q.X), r.Points.Average(q => q.Y)) - c;
-                            return !atCrossings.Contains(r) && Math.Abs(d.Dot(along)) < CrossingRampReach && Math.Abs(d.Dot(along.Perp())) < 1.0;
-                        });
-                        var loop = new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList());
-                        atCrossings.Add(loop);
-                        result.Ramps.Add(loop);
-                    }
+                foreach (Vec2 mark in rampMarks ?? Enumerable.Empty<Vec2>())
+                {
+                    AddRamps(RampsAt(new List<Vec2> { mark - origin }, true, roads, behindKerb, walk));
                 }
             }
 
@@ -539,159 +542,11 @@ namespace SiteDesignPro.Core.Roads
         /// </summary>
         public const double RampDepth = RoadSpec.KerbWidth + 1.2;
 
-        /// <summary>A corner ramp closer than this along the kerb to a crossing ramp is left out.</summary>
-        public const double CrossingRampReach = 10.0;
-
-        /// <summary>
-        /// Ramps at the two tangent points of a corner fillet: 1,20 m along the straight kerb, starting where the
-        /// corner arc ends, across everything behind the kerb (kerb, bike lane, sidewalk).
-        /// </summary>
-        private static IEnumerable<PathD> Ramps(PathD fillet, double radius, PathsD surface, PathsD behindKerb, PathsD walk)
-        {
-            int n = fillet.Count;
-            if (n < 3)
-            {
-                yield break;
-            }
-
-            var pts = fillet.Select(q => new Vec2(q.x, q.y)).ToList();
-
-            // straight edges of the fillet (at least 1,2 m long) lie on straight kerb lines;
-            // the corner arc and a curved kerb (a roundabout ring) are made of short pieces
-            Vec2 Dir(int i) => (pts[(i + 1) % n] - pts[i]).Normalized();
-
-            // direction of the first edge longer than 5 cm from edge i in direction step (+1 forward, -1 back)
-            Vec2 RealDir(int i, int step)
-            {
-                for (int g = 0, j = i; g < n; g++, j = (j + step + n) % n)
-                {
-                    if ((pts[(j + 1) % n] - pts[j]).Length > 0.05)
-                    {
-                        return Dir(j);
-                    }
-                }
-
-                return Dir(i);
-            }
-
-            var runs = new List<(int Start, int End, double Length)>();
-            for (int i0 = 0; i0 < n; i0++)
-            {
-                double len = (pts[(i0 + 1) % n] - pts[i0]).Length;
-                if (len >= 1.2)
-                {
-                    runs.Add((i0, (i0 + 1) % n, len));
-                }
-            }
-
-            var starts = new List<(Vec2 Tip, Vec2 Along)>();
-            (int Start, int End, double Length)[] two = runs.OrderByDescending(x => x.Length).Take(2).ToArray();
-            int shared = two.Length == 2 ? (two[0].End == two[1].Start ? two[0].End : two[1].End == two[0].Start ? two[1].End : -1) : -1;
-            if (shared >= 0)
-            {
-                // two straight kerb lines meeting at the corner point: tangent points at R / tan(angle / 2)
-                Vec2 corner = pts[shared];
-                Vec2 d1 = (pts[two[0].End == shared ? two[0].Start : two[0].End] - corner).Normalized();
-                Vec2 d2 = (pts[two[1].End == shared ? two[1].Start : two[1].End] - corner).Normalized();
-                double angle = Math.Acos(Math.Max(-1, Math.Min(1, d1.Dot(d2))));
-                if (angle > 0.05 && angle < Math.PI - 0.05)
-                {
-                    double t = radius / Math.Tan(angle / 2);
-                    starts.Add((corner + (d1 * t), d1));
-                    starts.Add((corner + (d2 * t), d2));
-                }
-            }
-            else
-            {
-                // a straight kerb against a curved one: at the tangent end the outline turns back sharply along the
-                // corner arc (the other end meets the curved kerb at an angle). The tangent point is the foot of the
-                // arc centre on the straight kerb (the thin tip itself was trimmed with the slivers).
-                foreach ((int st, int en, double _) in runs)
-                {
-                    Vec2 a0 = pts[st], b0 = pts[en];
-                    Vec2 d = (b0 - a0).Normalized();
-                    Vec2 before = RealDir((st - 1 + n) % n, -1), after = RealDir(en, 1);
-                    double angA = Math.Acos(Math.Max(-1, Math.Min(1, before.Dot(d))));
-                    double angB = Math.Acos(Math.Max(-1, Math.Min(1, d.Dot(after))));
-                    bool atB = angB >= angA;
-                    int tipIndex = atB ? en : st;
-                    int step = atB ? 1 : -1;
-                    Vec2 along = atB ? d : -d;
-
-                    // points of the corner arc next to the tip
-                    var arc = new List<Vec2>();
-                    Vec2 last = pts[tipIndex];
-                    for (int g = 1; g < n && arc.Count < 8; g++)
-                    {
-                        Vec2 q = pts[(tipIndex + (g * step) + n) % n];
-                        if ((q - last).Length > 0.05)
-                        {
-                            arc.Add(q);
-                            last = q;
-                        }
-                    }
-
-                    Vec2 tip = pts[tipIndex];
-                    if (arc.Count >= 3 && FitCircle(arc, 0, arc.Count - 1, out Vec2 centre, out double _))
-                    {
-                        Vec2 foot = a0 + (d * (centre - a0).Dot(d));
-                        if ((foot - tip).Dot(along) > -0.01 && (foot - tip).Length < radius)
-                        {
-                            tip = foot;
-                        }
-                    }
-
-                    starts.Add((tip, along));
-                }
-            }
-
-            foreach ((Vec2 tip, Vec2 along) in starts)
-            {
-                // across the kerb, away from the road
-                Vec2 across = along.Perp();
-                if (Inside(tip + (across * 0.3) + (along * 0.6), surface))
-                {
-                    across = -across;
-                }
-
-                double depth = 12;
-                var rect = new PathD
-                {
-                    new PointD(tip.X - (across.X * 0.01), tip.Y - (across.Y * 0.01)),
-                    new PointD(tip.X + (along.X * RampWidth) - (across.X * 0.01), tip.Y + (along.Y * RampWidth) - (across.Y * 0.01)),
-                    new PointD(tip.X + (along.X * RampWidth) + (across.X * depth), tip.Y + (along.Y * RampWidth) + (across.Y * depth)),
-                    new PointD(tip.X + (across.X * depth), tip.Y + (across.Y * depth)),
-                };
-                PathsD reach = Clipper.Intersect(new PathsD { Positive(rect.Select(q => new Vec2(q.x, q.y))) }, behindKerb, FillRule.NonZero, Precision);
-
-                // only on a side with a sidewalk, and only the part connected to the kerb at the tip
-                if (Clipper.Intersect(reach, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
-                {
-                    continue;
-                }
-
-                var shortRect = new[]
-                {
-                    tip - (across * 0.01), tip + (along * RampWidth) - (across * 0.01),
-                    tip + (along * RampWidth) + (across * RampDepth), tip + (across * RampDepth),
-                };
-                PathsD ramp = Clipper.Intersect(new PathsD { Positive(shortRect) }, behindKerb, FillRule.NonZero, Precision);
-
-                foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))
-                {
-                    if (Clipper.PointInPolygon(new PointD(tip.X + (along.X * RampWidth / 2) + (across.X * 0.07), tip.Y + (along.Y * RampWidth / 2) + (across.Y * 0.07)), piece) != PointInPolygonResult.IsOutside)
-                    {
-                        yield return piece;
-                    }
-                }
-            }
-        }
-
         /// <summary>
         /// Ramps (1,20 m wide) at the two ends of a pedestrian crossing: across the kerb, bike lane and sidewalk of the
         /// road the crossing lies on, on the sides with a sidewalk.
         /// </summary>
-        private static IEnumerable<(PathD Ramp, Vec2 Along)> CrossingRamps(List<Vec2> area, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
+        private static IEnumerable<(PathD Ramp, Vec2 Along)> RampsAt(List<Vec2> area, bool mark, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
         {
             Vec2 c = new Vec2(area.Average(q => q.X), area.Average(q => q.Y));
             RoadSpec? road = null;
@@ -723,13 +578,22 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
-            if (road == null || best > Math.Max(road.Extent(RoadLevel.Carriageway, true), road.Extent(RoadLevel.Carriageway, false)))
+            if (road == null)
             {
                 yield break;
             }
 
             Vec2 across = along.Perp();
-            foreach (int side in new[] { 1, -1 })
+            int at = (c - foot).Dot(across) >= 0 ? 1 : -1;
+            double reachOut = mark ? Math.Max(road.Extent(RoadLevel.Edge, at > 0), road.Extent(RoadLevel.Carriageway, at > 0)) + 0.5 : road.Extent(RoadLevel.Carriageway, at > 0);
+            if (best > Math.Max(reachOut, Math.Max(road.Extent(RoadLevel.Carriageway, true), road.Extent(RoadLevel.Carriageway, false))))
+            {
+                yield break;
+            }
+
+            // a mark behind the kerb line: only that side
+            bool oneSide = mark && best > road.Extent(RoadLevel.Carriageway, at > 0) - 0.05;
+            foreach (int side in oneSide ? new[] { at } : new[] { 1, -1 })
             {
                 bool left = side > 0;
                 double kerbLine = road.Extent(RoadLevel.Carriageway, left);
@@ -756,25 +620,6 @@ namespace SiteDesignPro.Core.Roads
                     }
                 }
             }
-        }
-
-        /// <summary>Distinct positive widths of one element of the cross-section over all road sides.</summary>
-        private static List<double> Widths(List<RoadSpec> roads, Func<RoadSpec, bool, double> width)
-        {
-            var list = new List<double>();
-            foreach (RoadSpec r in roads)
-            {
-                foreach (bool left in new[] { true, false })
-                {
-                    double w = width(r, left);
-                    if (w > 1e-6 && !list.Contains(w))
-                    {
-                        list.Add(w);
-                    }
-                }
-            }
-
-            return list;
         }
 
         /// <summary>Strips between two offsets from the axis on the road sides selected by <paramref name="has"/> (square ends).</summary>

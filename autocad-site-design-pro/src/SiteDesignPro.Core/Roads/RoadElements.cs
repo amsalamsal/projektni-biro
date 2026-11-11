@@ -26,6 +26,9 @@ namespace SiteDesignPro.Core.Roads
         public const string RampType = "road.curb_ramp";
         public const string LevelMarkType = "road.level_mark";
 
+        /// <summary>A point where the user wants an accessible kerb ramp (on the sidewalk: that side; on the carriageway: both).</summary>
+        public const string RampMarkType = "road.curb_ramp_mark";
+
         /// <summary>Custom flag on exported roads whose surfaces come from the network (SketchUp builds no strip for them).</summary>
         public const string NetworkFlag = "networkSurface";
 
@@ -210,7 +213,9 @@ namespace SiteDesignPro.Core.Roads
             List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
             List<RoadSpec> specs = Specs(all, catalog, unitsPerMeter);
             List<IReadOnlyList<Vec2>> crossings = CrossingAreas(all.Where(e => e.TypeId == CrossingType), unitsPerMeter);
-            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings);
+            List<Vec2> rampMarks = all.Where(e => e.TypeId == RampMarkType && e.Geometry is PointGeometry)
+                .Select(e => ((PointGeometry)e.Geometry).Position).Select(p => new Vec2(p.X / unitsPerMeter, p.Y / unitsPerMeter)).ToList();
+            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings, rampMarks);
         }
 
         /// <summary>Cross-sections of all roads of the network among the elements (metres).</summary>

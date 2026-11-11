@@ -288,10 +288,8 @@ namespace SiteDesignPro.Core.Tests
             Assert.Contains(res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()), x => Math.Abs(x - 6) < 0.1);
             Assert.True(res.Area(RoadLevel.Sidewalk) > 0);
 
-            // accessible ramps on both sides of the arm where its straight part starts (the ring side is curved)
-            string Edges(List<Vec2> f) => string.Join(" ", f.Select((p, i) => p.X.ToString("0.##") + "," + p.Y.ToString("0.##") + "[" + (f[(i + 1) % f.Count] - p).Length.ToString("0.##") + "]"));
-            Assert.True(res.Ramps.Count == 2, "ramps " + res.Ramps.Count + "; fillets:\n" + string.Join("\n", res.Fillets.Select(Edges)));
-            Assert.All(res.Ramps, r => Assert.All(r.Points, p => Assert.True(p.X > 14, "ramp at " + p)));
+            // no accessible ramps unless a crossing or a ramp mark asks for them
+            Assert.Empty(res.Ramps);
         }
 
         [Fact]
