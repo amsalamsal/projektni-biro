@@ -33,7 +33,13 @@ namespace SiteDesignPro.Core.Roads
         /// The street as it will look along an axis that is still being drawn (metres): the edges of the carriageway,
         /// kerbs, bike lanes and sidewalks with the bends rounded, and the lane lines. Null when it cannot be built yet.
         /// </summary>
-        public static RoadNetworkResult? Preview(IReadOnlyList<Vec2> axis, RoadSpec parameters)
+        public static RoadNetworkResult? Preview(IReadOnlyList<Vec2> axis, RoadSpec parameters) => Preview(axis, parameters, null);
+
+        /// <summary>
+        /// The same together with the roads already in the drawing that the new axis crosses, touches or comes near
+        /// (metres): the junctions that will appear are part of the preview.
+        /// </summary>
+        public static RoadNetworkResult? Preview(IReadOnlyList<Vec2> axis, RoadSpec parameters, IReadOnlyList<RoadSpec>? existing)
         {
             var pts = new List<Vec2>();
             foreach (Vec2 p in axis)
@@ -56,12 +62,58 @@ namespace SiteDesignPro.Core.Roads
                 spec.Axis = pts;
                 spec.Closed = false;
                 spec.Corners = null;
-                return RoadNetwork.Build(new[] { spec });
+                var roads = new List<RoadSpec> { spec };
+                double own = Math.Max(spec.Extent(RoadLevel.Edge, true), spec.Extent(RoadLevel.Edge, false));
+                foreach (RoadSpec other in existing ?? new List<RoadSpec>())
+                {
+                    double reach = own + Math.Max(other.Extent(RoadLevel.Edge, true), other.Extent(RoadLevel.Edge, false)) + 3;
+                    if (Near(pts, other.Axis, other.Closed, reach))
+                    {
+                        roads.Add(other);
+                    }
+                }
+
+                return RoadNetwork.Build(roads);
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+
+        /// <summary>True when two polylines come within a distance of each other (or cross).</summary>
+        private static bool Near(List<Vec2> a, List<Vec2> b, bool closedB, double distance)
+        {
+            static double ToSegment(Vec2 p, Vec2 s0, Vec2 s1)
+            {
+                Vec2 d = s1 - s0;
+                double l2 = d.Dot(d);
+                double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (p - s0).Dot(d) / l2));
+                return (s0 + (d * t)).DistanceTo(p);
+            }
+
+            int nb = closedB ? b.Count : b.Count - 1;
+            for (int i = 0; i + 1 < a.Count; i++)
+            {
+                for (int j = 0; j < nb; j++)
+                {
+                    Vec2 b0 = b[j], b1 = b[(j + 1) % b.Count];
+                    if (ToSegment(b0, a[i], a[i + 1]) <= distance || ToSegment(b1, a[i], a[i + 1]) <= distance || ToSegment(a[i], b0, b1) <= distance || ToSegment(a[i + 1], b0, b1) <= distance)
+                    {
+                        return true;
+                    }
+
+                    // crossing segments
+                    double d1 = (a[i + 1] - a[i]).Cross(b0 - a[i]), d2 = (a[i + 1] - a[i]).Cross(b1 - a[i]);
+                    double d3 = (b1 - b0).Cross(a[i] - b0), d4 = (b1 - b0).Cross(a[i + 1] - b0);
+                    if (d1 * d2 < 0 && d3 * d4 < 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>The place of the longitudinal section of a garage ramp (its "reference" names the ramp).</summary>

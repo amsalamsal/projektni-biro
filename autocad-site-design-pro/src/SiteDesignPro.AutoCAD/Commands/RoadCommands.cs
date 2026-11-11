@@ -76,7 +76,8 @@ namespace SiteDesignPro.AutoCAD.Commands
             if (how == "Draw")
             {
                 ctx.Write("Nacrtajte osovinu (sredinu kolovoza) u smjeru vožnje desnih traka. Ulica se sama spaja s ulicama i cestama koje dodiruje.");
-                axisId = PlacementCommands.DrawPolyline(ctx, false, StreetPreview(ctx.K, chosen));
+                List<RoadSpec> present = RoadElements.Specs(ctx.ExistingElements(), ctx.Catalog, ctx.K);
+                axisId = PlacementCommands.DrawPolyline(ctx, false, StreetPreview(ctx.K, chosen, present));
                 if (axisId.IsNull)
                 {
                     ctx.Write("Osovina nije nacrtana.");
@@ -113,10 +114,10 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// The live preview while the axis of a street is drawn: the edges of the carriageway, kerbs, bike lanes and
         /// sidewalks with the bends rounded, and the lane lines, as the street will be built.
         /// </summary>
-        internal static Func<List<Point3d>, List<PreviewShape>> StreetPreview(double k, RoadSpec spec) => pts =>
+        internal static Func<List<Point3d>, List<PreviewShape>> StreetPreview(double k, RoadSpec spec, IReadOnlyList<RoadSpec>? present = null) => pts =>
         {
             var shapes = new List<PreviewShape>();
-            RoadNetworkResult? res = RoadElements.Preview(pts.Select(p => new Vec2(p.X / k, p.Y / k)).ToList(), spec);
+            RoadNetworkResult? res = RoadElements.Preview(pts.Select(p => new Vec2(p.X / k, p.Y / k)).ToList(), spec, present);
             if (res == null)
             {
                 return shapes;

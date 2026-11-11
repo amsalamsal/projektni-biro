@@ -189,6 +189,19 @@ namespace SiteDesignPro.Core.Tests
             return e;
         }
 
+        [Fact]
+        public void Preview_ShowsTheJunctionWithARoadAlreadyThere()
+        {
+            List<RoadSpec> present = RoadElements.Specs(new[] { St(-60, 0, 60, 0), St(-60, 200, 60, 200) }, Cat);
+            var axis = new List<Vec2> { new Vec2(0, -50), new Vec2(0, 50) };
+
+            // alone: no corners; with the roads of the drawing: the four corners of the crossroads, the far road left out
+            Assert.Empty(RoadElements.Preview(axis, new RoadSpec())!.Fillets);
+            RoadNetworkResult res = RoadElements.Preview(axis, new RoadSpec(), present)!;
+            Assert.Equal(4, res.Fillets.Count);
+            Assert.Equal(2, res.Axes.Count);
+        }
+
         public static IEnumerable<object[]> Ramps()
         {
             yield return new object[] { "R1_pravolinijska_dvosmjerna_ostrvo", R(new[] { 0.0, 0, 22, 0 }, null, "straight", true, 3.0, 0.25, true, 0, -3) };

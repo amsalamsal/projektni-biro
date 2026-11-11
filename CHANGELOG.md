@@ -24,6 +24,8 @@
 ### Prikaz pri crtanju
 * Dok se klikaju tačke **ulice**, uz kursor se vidi cijela ulica kakva će nastati: ivice kolovoza, ivičnjaci,
   biciklističke staze, trotoari, zaobljene krivine i linije traka.
+* Prikaz ulice uključuje i **raskrsnice** s ulicama i cestama koje nova osovina siječe, dodiruje ili im priđe:
+  zaobljeni uglovi i prekinuti trotoari vide se prije nego što se ulica nacrta.
 * Dok se crta **garažna rampa** (sve četiri vrste), vide se njene ivice, žute linije, srednja linija, strelice i
   ostrvo. Kod polukružne i spiralne smjer okretanja se sada pita prije početne tačke, a kod kombinovane
   poluprečnik krivina prije tačaka, da prikaz bude tačan.
