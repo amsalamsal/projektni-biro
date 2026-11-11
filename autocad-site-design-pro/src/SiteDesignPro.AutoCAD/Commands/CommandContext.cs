@@ -294,6 +294,24 @@ namespace SiteDesignPro.AutoCAD.Commands
             return r.Value.TransformBy(Ed.CurrentUserCoordinateSystem);
         }
 
+        /// <summary>A point picked with a live preview of what it will make, drawn at the cursor.</summary>
+        public Point3d? PointPreview(string message, Point3d? basePoint, bool allowNone, Func<Point3d, List<Commands.PreviewShape>> preview)
+        {
+            var jig = new Commands.PreviewJig(message, basePoint, allowNone, preview);
+            PromptResult r = Ed.Drag(jig);
+            if (r.Status == PromptStatus.None && allowNone)
+            {
+                return null;
+            }
+
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return jig.Current;
+        }
+
         public double Angle(string message, Point3d basePoint, double defaultRadians)
         {
             var o = new PromptAngleOptions("\n" + message) { BasePoint = basePoint.TransformBy(Ed.CurrentUserCoordinateSystem.Inverse()), UseBasePoint = true, DefaultValue = defaultRadians, UseDefaultValue = true, AllowNone = true };

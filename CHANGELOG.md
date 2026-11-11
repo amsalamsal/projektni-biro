@@ -21,6 +21,13 @@
 * **Rampa uz ulicu**: kad rampa počinje ili završava uz ulicu (do 1,5 m od njene vanjske ivice), ivičnjak,
   biciklistička staza i trotoar se sami otvore u širini rampe, a kolovoz se produži do rampe.
 
+### Prikaz pri crtanju
+* Dok se klikaju tačke **ulice**, uz kursor se vidi cijela ulica kakva će nastati: ivice kolovoza, ivičnjaci,
+  biciklističke staze, trotoari, zaobljene krivine i linije traka.
+* Dok se crta **garažna rampa** (sve četiri vrste), vide se njene ivice, žute linije, srednja linija, strelice i
+  ostrvo. Kod polukružne i spiralne smjer okretanja se sada pita prije početne tačke, a kod kombinovane
+  poluprečnik krivina prije tačaka, da prikaz bude tačan.
+
 ### Garažne rampe – presjek, svijetla visina i ostalo
 * **Presjek rampe** (`SDPRAMPAPRESJEK`): uzdužni presjek pored tlocrta – ploča rampe, prelomi nagiba sa stacionažom
   i kotom, dužina i nagib svake dionice, ploča iznad rampe i svijetla visina. Prati izmjene rampe; uklanja se

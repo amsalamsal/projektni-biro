@@ -47,6 +47,32 @@ namespace SiteDesignPro.AutoCAD.Commands
             bool island = !curved && twoWay && ctx.Keyword("Srednje ostrvo 60 × 250 cm na dnu [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "Yes") == "Yes";
             double width = ((twoWay ? 2 : 1) * lw) + (2 * margin);
 
+            // while the points are picked, the ramp is shown at the cursor as it will be drawn
+            List<PreviewShape> Preview(List<Vec2> points, List<double> pointBulges)
+            {
+                var probe = new GarageRamp
+                {
+                    Kind = kind, TwoWay = twoWay, LaneWidth = lw, Margin = margin, Island = island, Walls = false, Drain = "none",
+                    RingPoints = points, RingBulges = pointBulges, Axis = points, StartHeight = 0, EndHeight = -1,
+                };
+                var shapes = new List<PreviewShape>();
+                foreach (RampShape x in probe.Plan().Where(x => x.Role == "edge" || x.Role == "margin" || x.Role == "middle" || x.Role == "arrow" || x.Role == "island"))
+                {
+                    var shape = new PreviewShape { Closed = x.Closed, Color = x.Role == "margin" ? (short)2 : (short)7 };
+                    for (int i = 0; i < x.Points.Count; i++)
+                    {
+                        shape.Points.Add(new Point2d(x.Points[i].X * k, x.Points[i].Y * k));
+                        shape.Bulges.Add(i < x.Bulges.Count ? x.Bulges[i] : 0);
+                    }
+
+                    shapes.Add(shape);
+                }
+
+                return shapes;
+            }
+
+            Vec2 M(Point3d p) => new Vec2(p.X / k, p.Y / k);
+
             Ring axis;
             double axisLength;
             if (!curved)
@@ -57,7 +83,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return;
                 }
 
-                Point3d? b = ctx.Point("Kraj rampe (sredina, donji kraj)", a.Value);
+                Point3d? b = ctx.PointPreview("Kraj rampe (sredina, donji kraj)", a.Value, false, cur => Preview(new List<Vec2> { M(a.Value), M(cur) }, new List<double> { 0, 0 }));
                 if (!b.HasValue || a.Value.DistanceTo(b.Value) < 0.5 * k)
                 {
                     ctx.Write("Rampa nije nacrtana.");
@@ -70,11 +96,18 @@ namespace SiteDesignPro.AutoCAD.Commands
             else if (combined)
             {
                 // straight parts joined by arcs: the points of the centreline and one radius for its bends
+                double bend = ctx.Number("Poluprečnik srednje linije u krivinama (m)", Math.Max(8.0, (width / 2) + 5.0));
                 var clicked = new List<Vec2>();
                 Point3d? last = null;
                 while (true)
                 {
-                    Point3d? pt = ctx.Point(clicked.Count == 0 ? "Početak rampe (sredina, gornji kraj)" : "Sljedeća tačka srednje linije (Enter za kraj)", last, clicked.Count >= 2);
+                    Point3d? pt = clicked.Count == 0
+                        ? ctx.Point("Početak rampe (sredina, gornji kraj)")
+                        : ctx.PointPreview("Sljedeća tačka srednje linije (Enter za kraj)", last, clicked.Count >= 2, cur =>
+                        {
+                            (List<Vec2> pp, List<double> pb) = GarageRamp.FilletPath(clicked.Concat(new[] { M(cur) }).ToList(), bend);
+                            return Preview(pp, pb);
+                        });
                     if (!pt.HasValue)
                     {
                         break;
@@ -90,7 +123,6 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return;
                 }
 
-                double bend = clicked.Count > 2 ? ctx.Number("Poluprečnik srednje linije u krivinama (m)", Math.Max(8.0, (width / 2) + 5.0)) : 0;
                 (List<Vec2> fp, List<double> fb) = GarageRamp.FilletPath(clicked, bend);
                 axis = new Ring(fp.Select(v => new Vec3(v.X * k, v.Y * k, 0)).ToList(), fb);
                 var probe = new GarageRamp { Kind = "combined", RingPoints = fp, RingBulges = fb };
@@ -108,7 +140,27 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return;
                 }
 
-                Point3d? s = ctx.Point("Početak rampe na srednjoj liniji", c.Value);
+                bool left = ctx.Keyword("Smjer okretanja [Lijevo/Desno]", new[] { "Left|Lijevo", "Right|Desno" }, "Left") == "Left";
+                int halves = 1;
+                if (kind == "spiral")
+                {
+                    double turns = ctx.Number("Broj punih krugova (npr. 1 ili 1,5)", 1.0);
+                    halves = Math.Max(2, (int)Math.Round(turns * 2));
+                }
+
+                Point3d? s = ctx.PointPreview("Početak rampe na srednjoj liniji", c.Value, false, cur =>
+                {
+                    Vec2 start = M(cur), opposite = (M(c.Value) * 2) - start;
+                    var pp = new List<Vec2>();
+                    var pb = new List<double>();
+                    for (int i = 0; i <= halves; i++)
+                    {
+                        pp.Add(i % 2 == 0 ? start : opposite);
+                        pb.Add(i == halves ? 0 : (left ? 1.0 : -1.0));
+                    }
+
+                    return Preview(pp, pb);
+                });
                 if (!s.HasValue || c.Value.DistanceTo(s.Value) < 1.0 * k)
                 {
                     ctx.Write("Rampa nije nacrtana.");
@@ -119,14 +171,6 @@ namespace SiteDesignPro.AutoCAD.Commands
                 if (radius - (width / 2) < 5.0)
                 {
                     ctx.Write("UPOZORENJE: unutrašnji poluprečnik rampe je " + Bs.Num(radius - (width / 2), 2) + " m (preporučeno najmanje 5 m).");
-                }
-
-                bool left = ctx.Keyword("Smjer okretanja [Lijevo/Desno]", new[] { "Left|Lijevo", "Right|Desno" }, "Left") == "Left";
-                int halves = 1;
-                if (kind == "spiral")
-                {
-                    double turns = ctx.Number("Broj punih krugova (npr. 1 ili 1,5)", 1.0);
-                    halves = Math.Max(2, (int)Math.Round(turns * 2));
                 }
 
                 var pts = new List<Vec3>();

@@ -76,7 +76,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             if (how == "Draw")
             {
                 ctx.Write("Nacrtajte osovinu (sredinu kolovoza) u smjeru vožnje desnih traka. Ulica se sama spaja s ulicama i cestama koje dodiruje.");
-                axisId = PlacementCommands.DrawPolyline(ctx, false);
+                axisId = PlacementCommands.DrawPolyline(ctx, false, StreetPreview(ctx.K, chosen));
                 if (axisId.IsNull)
                 {
                     ctx.Write("Osovina nije nacrtana.");
@@ -108,6 +108,45 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             Rebuild(ctx, true);
         }));
+
+        /// <summary>
+        /// The live preview while the axis of a street is drawn: the edges of the carriageway, kerbs, bike lanes and
+        /// sidewalks with the bends rounded, and the lane lines, as the street will be built.
+        /// </summary>
+        internal static Func<List<Point3d>, List<PreviewShape>> StreetPreview(double k, RoadSpec spec) => pts =>
+        {
+            var shapes = new List<PreviewShape>();
+            RoadNetworkResult? res = RoadElements.Preview(pts.Select(p => new Vec2(p.X / k, p.Y / k)).ToList(), spec);
+            if (res == null)
+            {
+                return shapes;
+            }
+
+            foreach (KeyValuePair<RoadLevel, List<RoadLoop>> kv in res.Outlines)
+            {
+                short color = kv.Key == RoadLevel.Carriageway ? (short)7 : kv.Key == RoadLevel.Bike ? (short)14 : kv.Key == RoadLevel.Sidewalk ? (short)9 : (short)8;
+                foreach (RoadLoop loop in kv.Value)
+                {
+                    var shape = new PreviewShape { Closed = true, Color = color };
+                    for (int i = 0; i < loop.Points.Count; i++)
+                    {
+                        shape.Points.Add(new Point2d(loop.Points[i].X * k, loop.Points[i].Y * k));
+                        shape.Bulges.Add(i < loop.Bulges.Count ? loop.Bulges[i] : 0);
+                    }
+
+                    shapes.Add(shape);
+                }
+            }
+
+            foreach (RoadMarking m in res.Markings)
+            {
+                var shape = new PreviewShape { Color = 7 };
+                shape.Points.AddRange(m.Points.Select(q => new Point2d(q.X * k, q.Y * k)));
+                shapes.Add(shape);
+            }
+
+            return shapes;
+        };
 
         /// <summary>Changes the cross-section of a street (or turns a simple road into a street) in the same window.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPULICAUREDI", CommandFlags.Modal)]

@@ -29,6 +29,41 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>A point where the user wants an accessible kerb ramp (on the sidewalk: that side; on the carriageway: both).</summary>
         public const string RampMarkType = "road.curb_ramp_mark";
 
+        /// <summary>
+        /// The street as it will look along an axis that is still being drawn (metres): the edges of the carriageway,
+        /// kerbs, bike lanes and sidewalks with the bends rounded, and the lane lines. Null when it cannot be built yet.
+        /// </summary>
+        public static RoadNetworkResult? Preview(IReadOnlyList<Vec2> axis, RoadSpec parameters)
+        {
+            var pts = new List<Vec2>();
+            foreach (Vec2 p in axis)
+            {
+                if (pts.Count == 0 || pts[pts.Count - 1].DistanceTo(p) > 0.05)
+                {
+                    pts.Add(p);
+                }
+            }
+
+            if (pts.Count < 2)
+            {
+                return null;
+            }
+
+            try
+            {
+                RoadSpec spec = parameters.CloneParameters();
+                spec.Id = "preview";
+                spec.Axis = pts;
+                spec.Closed = false;
+                spec.Corners = null;
+                return RoadNetwork.Build(new[] { spec });
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         /// <summary>The place of the longitudinal section of a garage ramp (its "reference" names the ramp).</summary>
         public const string RampSectionType = "road.ramp_section";
 

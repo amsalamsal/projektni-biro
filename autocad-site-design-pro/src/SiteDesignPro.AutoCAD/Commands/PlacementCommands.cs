@@ -59,17 +59,139 @@ namespace SiteDesignPro.AutoCAD.Commands
     }
 
     /// <summary>Rubber-band preview of a polyline being drawn point by point; keywords [Zatvori/Ponisti], Enter ends.</summary>
+    /// <summary>One line of a preview drawn while a point is being picked (drawing units; arcs as bulges).</summary>
+    internal sealed class PreviewShape
+    {
+        public List<Point2d> Points { get; } = new List<Point2d>();
+
+        public List<double> Bulges { get; } = new List<double>();
+
+        public bool Closed { get; set; }
+
+        public short Color { get; set; } = 7;
+
+        public static void Draw(Autodesk.AutoCAD.GraphicsInterface.WorldDraw draw, List<PreviewShape> shapes)
+        {
+            foreach (PreviewShape shape in shapes)
+            {
+                if (shape.Points.Count < 2)
+                {
+                    continue;
+                }
+
+                using (var pl = new Polyline())
+                {
+                    for (int i = 0; i < shape.Points.Count; i++)
+                    {
+                        pl.AddVertexAt(i, shape.Points[i], i < shape.Bulges.Count ? shape.Bulges[i] : 0, 0, 0);
+                    }
+
+                    pl.Closed = shape.Closed;
+                    pl.ColorIndex = shape.Color;
+                    draw.Geometry.Draw(pl);
+                }
+            }
+        }
+
+        /// <summary>The shapes for a cursor position; a preview that cannot be built is simply not shown.</summary>
+        public static List<PreviewShape> Build<T>(Func<T, List<PreviewShape>>? preview, T at)
+        {
+            if (preview == null)
+            {
+                return new List<PreviewShape>();
+            }
+
+            try
+            {
+                return preview(at) ?? new List<PreviewShape>();
+            }
+            catch (System.Exception)
+            {
+                return new List<PreviewShape>();
+            }
+        }
+    }
+
+    /// <summary>One point picked with a live preview of what it will make (the outline of a ramp, a street…).</summary>
+    internal sealed class PreviewJig : DrawJig
+    {
+        private readonly string message;
+        private readonly Point3d? basePoint;
+        private readonly bool allowNone;
+        private readonly Func<Point3d, List<PreviewShape>> preview;
+        private List<PreviewShape> shapes = new List<PreviewShape>();
+        private bool has;
+
+        public PreviewJig(string message, Point3d? basePoint, bool allowNone, Func<Point3d, List<PreviewShape>> preview)
+        {
+            this.message = message;
+            this.basePoint = basePoint;
+            this.allowNone = allowNone;
+            this.preview = preview;
+        }
+
+        public Point3d Current { get; private set; }
+
+        protected override SamplerStatus Sampler(JigPrompts prompts)
+        {
+            var o = new JigPromptPointOptions("\n" + message + ": ")
+            {
+                UserInputControls = UserInputControls.Accept3dCoordinates | (allowNone ? UserInputControls.NullResponseAccepted : 0),
+            };
+            if (basePoint.HasValue)
+            {
+                o.UseBasePoint = true;
+                o.BasePoint = basePoint.Value;
+            }
+
+            PromptPointResult r = prompts.AcquirePoint(o);
+            if (r.Status == PromptStatus.Cancel || r.Status == PromptStatus.Error)
+            {
+                return SamplerStatus.Cancel;
+            }
+
+            if (r.Status != PromptStatus.OK)
+            {
+                return SamplerStatus.OK;
+            }
+
+            if (has && r.Value.DistanceTo(Current) < 1e-9)
+            {
+                return SamplerStatus.NoChange;
+            }
+
+            Current = r.Value;
+            has = true;
+            shapes = PreviewShape.Build(preview, Current);
+            return SamplerStatus.OK;
+        }
+
+        protected override bool WorldDraw(Autodesk.AutoCAD.GraphicsInterface.WorldDraw draw)
+        {
+            if (basePoint.HasValue && has)
+            {
+                draw.Geometry.WorldLine(basePoint.Value, Current);
+            }
+
+            PreviewShape.Draw(draw, shapes);
+            return true;
+        }
+    }
+
     internal sealed class PolylineJig : DrawJig
     {
+        private readonly Func<List<Point3d>, List<PreviewShape>>? preview;
+        private List<PreviewShape> shapes = new List<PreviewShape>();
         private readonly List<Point3d> fixedPoints;
         private Point3d current;
         private bool snapped;
         private double snapSize;
 
-        public PolylineJig(List<Point3d> points)
+        public PolylineJig(List<Point3d> points, Func<List<Point3d>, List<PreviewShape>>? preview = null)
         {
             fixedPoints = points;
             current = points[points.Count - 1];
+            this.preview = preview;
         }
 
         public Point3d Current => current;
@@ -120,6 +242,12 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             current = value;
             snapped = snap;
+            if (preview != null)
+            {
+                var all = new List<Point3d>(fixedPoints) { current };
+                shapes = PreviewShape.Build(preview, all);
+            }
+
             return SamplerStatus.OK;
         }
 
@@ -147,6 +275,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             Point3d last = fixedPoints[fixedPoints.Count - 1];
             draw.Geometry.WorldLine(last, current);
+            PreviewShape.Draw(draw, shapes);
             if (snapped && snapSize > 0)
             {
                 double h = snapSize / 2;
@@ -227,7 +356,10 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
 
         /// <summary>Polyline by points: Enter ends, [Zatvori] closes, [Ponisti] removes the last point.</summary>
-        internal static ObjectId DrawPolyline(CommandContext ctx, bool closeArea)
+        internal static ObjectId DrawPolyline(CommandContext ctx, bool closeArea) => DrawPolyline(ctx, closeArea, null);
+
+        /// <summary>The same with a live preview of what the polyline will make (e.g. the street along it).</summary>
+        internal static ObjectId DrawPolyline(CommandContext ctx, bool closeArea, Func<List<Point3d>, List<PreviewShape>>? preview)
         {
             var pts = new List<Point3d>();
             bool closed = false;
@@ -242,7 +374,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             {
                 // A jig redraws the whole polyline on every refresh, so it survives zoom, pan and regen
                 // (Editor.DrawVector is transient graphics and disappears on the first regen).
-                var jig = new PolylineJig(pts);
+                var jig = new PolylineJig(pts, preview);
                 PromptResult r = ctx.Ed.Drag(jig);
                 if (r.Status == PromptStatus.Keyword && r.StringResult == "Close" && pts.Count >= 3)
                 {
