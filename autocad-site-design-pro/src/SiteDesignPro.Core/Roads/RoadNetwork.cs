@@ -847,7 +847,9 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
-            return Union(all);
+            // closed by 2 cm, so two strips that end on the same line (roads joined end to end) leave no seam
+            PathsD joined = Clipper.InflatePaths(Union(all), 0.02, JoinType.Miter, EndType.Polygon, 10, Precision);
+            return Clipper.InflatePaths(joined, -0.02, JoinType.Miter, EndType.Polygon, 10, Precision);
         }
 
         private static bool Touches(PathsD piece, PathsD strips, double reach) =>
@@ -972,13 +974,16 @@ namespace SiteDesignPro.Core.Roads
             foreach (Vec2 end in new[] { e0, e1 })
             {
                 Vec2 dir = (end - centre).Normalized();
-                if (InsideAny(strips, end - (dir * Math.Min(mid, radius * 0.9))) || InsideAny(strips, end + (dir * mid)))
-                {
-                    continue; // the ring goes on along this road
-                }
-
                 double side = dir.Cross(b - centre) >= 0 ? 1 : -1;
                 Vec2 perp = dir.Perp() * side;
+
+                // just past the end of the arc, at the middle of the ring: inside a strip, the ring goes on along that road
+                Vec2 past = end - (perp * 0.3);
+                if (InsideAny(strips, past - (dir * Math.Min(mid, radius * 0.9))) || InsideAny(strips, past + (dir * mid)))
+                {
+                    continue;
+                }
+
                 const double Far = 1000;
                 var half = new[] { centre - (dir * Far), centre + (dir * Far), centre + (dir * Far) + (perp * Far), centre - (dir * Far) + (perp * Far) };
                 zone = Clipper.Intersect(zone, new PathsD { Positive(half) }, FillRule.NonZero, Precision);
