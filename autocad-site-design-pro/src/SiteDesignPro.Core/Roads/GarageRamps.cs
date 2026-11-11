@@ -477,7 +477,7 @@ namespace SiteDesignPro.Core.Roads
             const double CharWidth = 0.68, Gap = 0.7;
             List<string> labels = Labels();
             List<string> pieces = Curved ? labels : new List<string> { string.Join(", ", labels) };
-            double h = 0.30;
+            double h = 0.35;
             double Need(double height) => pieces.Sum(t => t.Length * CharWidth * height) + (Gap * (pieces.Count - 1));
             while (h > 0.12 && Need(h) > total * 0.55)
             {
@@ -504,7 +504,17 @@ namespace SiteDesignPro.Core.Roads
             double scale = Math.Min(1.0, (free - 0.4) / 5.0);
             if (scale >= 0.15)
             {
-                foreach (double s in new[] { 0.5 + (free / 2), total - 0.5 - (free / 2) })
+                // on a long ramp an arrow about every 20 m
+                int count = Math.Max(1, (int)Math.Round(free / 20));
+                var stations = new List<double>();
+                for (int i = 0; i < count; i++)
+                {
+                    double s = 0.5 + (free * (i + 0.5) / count);
+                    stations.Add(s);
+                    stations.Add(total - s);
+                }
+
+                foreach (double s in stations)
                 {
                     if (TwoWay)
                     {
@@ -529,6 +539,31 @@ namespace SiteDesignPro.Core.Roads
             }
 
             return lay;
+        }
+
+        /// <summary>
+        /// The direction arrow in its own frame (along the lane, across it), scaled; on a curved ramp its shaft has more
+        /// points, so it follows the lane. Order: one long side of the shaft, the head (3 points), the other side back.
+        /// </summary>
+        private List<Vec2> ArrowShape(double scale)
+        {
+            IReadOnlyList<Vec2> shape = RoadArrow.Shape; // tail, shaft end, head (3), shaft end, tail
+            int n = Curved ? Math.Max(1, (int)Math.Ceiling((shape[1].X - shape[0].X) * scale / 0.5)) : 1;
+            var list = new List<Vec2>();
+            for (int i = 0; i <= n; i++)
+            {
+                list.Add(new Vec2(shape[0].X + ((shape[1].X - shape[0].X) * i / n), shape[0].Y) * scale);
+            }
+
+            list.Add(shape[2] * scale);
+            list.Add(shape[3] * scale);
+            list.Add(shape[4] * scale);
+            for (int i = n; i >= 0; i--)
+            {
+                list.Add(new Vec2(shape[0].X + ((shape[1].X - shape[0].X) * i / n), shape[6].Y) * scale);
+            }
+
+            return list;
         }
 
         /// <summary>The stretches of the middle line between the given interruptions.</summary>
@@ -597,8 +632,7 @@ namespace SiteDesignPro.Core.Roads
 
             foreach ((double s, double off, bool back, double scale) in lay.Arrows)
             {
-                double sign = back ? -1 : 1;
-                List<Vec2> a = RoadArrow.Shape.Select(p => PointAt(s + (p.X * scale * sign), off + (p.Y * scale * sign)).Point).ToList();
+                List<Vec2> a = ArrowShape(scale).Select(p => PointAt(s + (p.X * (back ? -1 : 1)), off + (p.Y * (back ? -1 : 1))).Point).ToList();
                 list.Add(new RampShape { Role = "arrow", Points = a, Bulges = a.Select(_ => 0.0).ToList(), Closed = true, Fill = true });
             }
 
@@ -647,10 +681,16 @@ namespace SiteDesignPro.Core.Roads
             foreach ((double s, double off, bool back, double scale) in lay.Arrows)
             {
                 double sign = back ? -1 : 1;
-                Vec3 Q(int i) => P3(s + (RoadArrow.Shape[i].X * scale * sign), off + (RoadArrow.Shape[i].Y * scale * sign), Lift);
-                white.Add(new[] { Q(0), Q(1), Q(5) });
-                white.Add(new[] { Q(0), Q(5), Q(6) });
-                white.Add(new[] { Q(2), Q(3), Q(4) });
+                List<Vec2> a = ArrowShape(scale);
+                Vec3 Q(int i) => P3(s + (a[i].X * sign), off + (a[i].Y * sign), Lift);
+                int m = (a.Count - 3) / 2; // points of each long side of the shaft
+                for (int i = 0; i + 1 < m; i++)
+                {
+                    white.Add(new[] { Q(i), Q(i + 1), Q(a.Count - 2 - i) });
+                    white.Add(new[] { Q(i), Q(a.Count - 2 - i), Q(a.Count - 1 - i) });
+                }
+
+                white.Add(new[] { Q(m), Q(m + 1), Q(m + 2) });
             }
 
             return (white, yellow);
