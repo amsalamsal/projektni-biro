@@ -43,7 +43,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             double margin = ctx.Number("Zaštitni razmak sa obje strane (m, " + (curved ? "0,25–0,50" : "0–0,50") + ")", curved ? 0.5 : 0.25, false, true);
             margin = Math.Max(curved ? 0.25 : 0, Math.Min(0.5, margin));
-            bool island = !curved && ctx.Keyword("Srednje ostrvo 60 × 250 cm na dnu [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, twoWay ? "Yes" : "No") == "Yes";
+            bool island = !curved && twoWay && ctx.Keyword("Srednje ostrvo 60 × 250 cm na dnu [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "Yes") == "Yes";
             double width = ((twoWay ? 2 : 1) * lw) + (2 * margin);
 
             Ring axis;
@@ -188,127 +188,110 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ElementStore.WriteAux(en, RampOwner, role, ctx.Tr);
             }
 
-            Polyline Pl(List<Vec2> pts, bool closed = false)
+            Polyline Pl(RampShape shape)
             {
                 var pl = new Polyline();
-                for (int i = 0; i < pts.Count; i++)
+                for (int i = 0; i < shape.Points.Count; i++)
                 {
-                    pl.AddVertexAt(i, new Point2d(pts[i].X * k, pts[i].Y * k), 0, 0, 0);
+                    pl.AddVertexAt(i, new Point2d(shape.Points[i].X * k, shape.Points[i].Y * k), i < shape.Bulges.Count ? shape.Bulges[i] : 0, 0, 0);
                 }
 
-                pl.Closed = closed;
+                pl.Closed = shape.Closed;
+                if (shape.Width > 0)
+                {
+                    pl.ConstantWidth = shape.Width * k;
+                }
+
                 return pl;
             }
 
             Color white = Color.FromColorIndex(ColorMethod.ByAci, 7);
             Color yellow = Color.FromColorIndex(ColorMethod.ByAci, 2);
+            Color red = Color.FromRgb(230, 40, 40);
             RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+            var hatches = new ObjectIdCollection();
             try
             {
                 foreach (GarageRamp r in ramps)
                 {
-                    double half = r.Width / 2;
-                    List<Vec2> left = r.Offset(half), right = r.Offset(-half);
-                    Add(Pl(left), "rampa:rub", white, 0);
-                    Add(Pl(right), "rampa:rub", white, 0);
-                    Add(Pl(new List<Vec2> { left[0], right[0] }), "rampa:rub", white, 0);
-                    Add(Pl(new List<Vec2> { left[left.Count - 1], right[right.Count - 1] }), "rampa:rub", white, 0);
-                    if (r.Margin > 0.01)
+                    foreach (RampShape shape in r.Plan())
                     {
-                        Add(Pl(r.Offset(half - r.Margin)), "rampa:zastita", yellow, 0);
-                        Add(Pl(r.Offset(-(half - r.Margin))), "rampa:zastita", yellow, 0);
-                    }
-
-                    Polyline mid = Pl(r.Axis);
-                    mid.ConstantWidth = 0.12 * k;
-                    Add(mid, "rampa:sredina", white, 0);
-
-                    // direction arrows: one lane in the middle, or the right lane forward and the left lane back
-                    double total = r.Length;
-                    double[] stations = total < 10 ? new[] { total / 2 } : new[] { total / 4, 3 * total / 4 };
-                    var lanes = r.TwoWay ? new[] { (-r.LaneWidth / 2, false), (r.LaneWidth / 2, true) } : new[] { (0.0, false) };
-                    foreach (double st in stations)
-                    {
-                        (Vec2 at, Vec2 dir) = r.At(st);
-                        foreach ((double off, bool back) in lanes)
+                        if (shape.Role == "text")
                         {
-                            Vec2 pos = at + (dir.Perp() * off);
-                            double ang = Math.Atan2(dir.Y, dir.X) + (back ? Math.PI : 0);
-                            var arrow = new RoadArrow(r.Id, pos, ang);
-                            List<Vec2> outline = arrow.Outline();
+                            // fitted between two points, so the text has exactly the length kept free for it in the middle line
+                            var dir = new Vec2(Math.Cos(shape.Rotation), Math.Sin(shape.Rotation));
+                            Vec2 baseLine = shape.Position - (dir.Perp() * (shape.Height / 2));
+                            Vec2 p0 = baseLine - (dir * (shape.Length / 2)), p1 = baseLine + (dir * (shape.Length / 2));
+                            var t = new DBText
+                            {
+                                Height = shape.Height * k,
+                                TextString = shape.Text ?? string.Empty,
+                                Rotation = shape.Rotation,
+                                HorizontalMode = TextHorizontalMode.TextFit,
+                                VerticalMode = TextVerticalMode.TextBase,
+                                Position = new Point3d(p0.X * k, p0.Y * k, 0),
+                                AlignmentPoint = new Point3d(p1.X * k, p1.Y * k, 0),
+                            };
+                            Add(t, shape.Warning ? "rampa:tekst:previse" : "rampa:tekst", shape.Warning ? red : white, 0);
+                            t.AdjustAlignment(ctx.Db);
+                            continue;
+                        }
+
+                        if (shape.Fill)
+                        {
                             try
                             {
-                                Hatch h = RegionHatch(new RoadRegion(new RoadLoop(outline, outline.Select(_ => 0.0).ToList()), new List<RoadLoop>(), 0), k);
-                                Add(h, "rampa:strelica", white, 0);
+                                Hatch h = RegionHatch(new RoadRegion(new RoadLoop(shape.Points, shape.Bulges), new List<RoadLoop>(), 0), k);
+                                (Color color, int transparency) = shape.Role == "surface" ? (Color.FromRgb(196, 196, 196), 30) : shape.Role == "island" ? (Color.FromRgb(110, 110, 110), 0) : (white, 0);
+                                Add(h, "rampa:" + shape.Role, color, transparency);
+                                if (shape.Role == "surface")
+                                {
+                                    hatches.Add(h.ObjectId);
+                                }
                             }
                             catch (Autodesk.AutoCAD.Runtime.Exception)
                             {
-                                Add(Pl(outline, true), "rampa:strelica", white, 0);
+                                Add(Pl(shape), "rampa:" + shape.Role, white, 0);
                             }
+
+                            if (shape.Role == "island")
+                            {
+                                Add(Pl(shape), "rampa:ostrvo", white, 0);
+                            }
+
+                            continue;
                         }
+
+                        Add(Pl(shape), "rampa:" + shape.Role, shape.Role == "margin" ? yellow : white, 0);
                     }
 
-                    // island 0,60 × 2,50 m in the middle at the lower end of a straight ramp
-                    if (r.Island && !r.Curved && total > 4)
-                    {
-                        bool atEnd = (r.EndHeight ?? 0) <= (r.StartHeight ?? 0);
-                        double s1 = atEnd ? total - 0.5 : 3.0, s0 = s1 - 2.5;
-                        (Vec2 a0, Vec2 d) = r.At(s0);
-                        (Vec2 a1, _) = r.At(s1);
-                        Vec2 n = d.Perp() * 0.3;
-                        var box = new List<Vec2> { a0 - n, a1 - n, a1 + n, a0 + n };
-                        Add(Pl(box, true), "rampa:ostrvo", white, 0);
-                        try
-                        {
-                            Hatch h = RegionHatch(new RoadRegion(new RoadLoop(box, box.Select(_ => 0.0).ToList()), new List<RoadLoop>(), 0), k);
-                            Add(h, "rampa:ostrvo", Color.FromRgb(150, 150, 150), 0);
-                        }
-                        catch (Autodesk.AutoCAD.Runtime.Exception)
-                        {
-                            // the outline is drawn
-                        }
-                    }
-
-                    // L / h / slope through the middle, readable from below or the right
-                    (Vec2 mp, Vec2 md) = r.At(total / 2);
-                    double rot = Math.Atan2(md.Y, md.X);
-                    if (rot > Math.PI / 2 || rot < -Math.PI / 2)
-                    {
-                        rot += Math.PI;
-                    }
-
-                    Vec2 tp = mp + (new Vec2(Math.Cos(rot), Math.Sin(rot)).Perp() * 0.35);
-                    string text = RampText(r) + (r.TooSteep ? " > 17 %!" : string.Empty) + (r.Curved ? ", poprečni nagib 3 % prema unutra" : string.Empty);
-                    var t = new DBText
-                    {
-                        Height = 0.3 * k,
-                        TextString = text,
-                        Rotation = rot,
-                        HorizontalMode = TextHorizontalMode.TextCenter,
-                        VerticalMode = TextVerticalMode.TextBottom,
-                        Position = new Point3d(tp.X * k, tp.Y * k, 0),
-                        AlignmentPoint = new Point3d(tp.X * k, tp.Y * k, 0),
-                    };
-                    Add(t, r.TooSteep ? "rampa:tekst:previse" : "rampa:tekst", r.TooSteep ? Color.FromRgb(230, 40, 40) : white, 0);
-                    t.AdjustAlignment(ctx.Db);
-
-                    // elevation symbols beside the two ends (outside the ramp, so a full spiral does not overlap them)
+                    // elevation symbols beside the two ends (on opposite sides, so a full circle does not overlap them)
+                    (Vec2 start, Vec2 end) = r.LevelPoints();
                     if (r.StartHeight.HasValue)
                     {
-                        Vec2 a = r.Offset(half + 0.8)[0];
-                        LevelSymbol(ctx, (en, role, color, tr) => Add(en, "rampa:" + role, color, tr), a, r.StartHeight.Value, levels);
+                        LevelSymbol(ctx, (en, role, color, tr) => Add(en, "rampa:" + role, color, tr), start, r.StartHeight.Value, levels);
                     }
 
                     if (r.EndHeight.HasValue)
                     {
-                        List<Vec2> outside = r.Offset(-(half + 0.8));
-                        LevelSymbol(ctx, (en, role, color, tr) => Add(en, "rampa:" + role, color, tr), outside[outside.Count - 1], r.EndHeight.Value, levels);
+                        LevelSymbol(ctx, (en, role, color, tr) => Add(en, "rampa:" + role, color, tr), end, r.EndHeight.Value, levels);
                     }
 
                     if (r.TooSteep)
                     {
                         ctx.Write("UPOZORENJE: uzdužni nagib garažne rampe " + r.Name + " je " + Bs.Num(r.Slope * 100, 2) + " % (dozvoljeno najviše 17 %).");
                     }
+
+                    if (r.Curved && r.InnerRadius < 5.0)
+                    {
+                        ctx.Write("UPOZORENJE: unutrašnji poluprečnik garažne rampe " + r.Name + " je " + Bs.Num(r.InnerRadius, 2) + " m (preporučeno najmanje 5 m).");
+                    }
+                }
+
+                if (hatches.Count > 0)
+                {
+                    var dot = (DrawOrderTable)ctx.Tr.GetObject(ms.DrawOrderTableId, OpenMode.ForWrite);
+                    dot.MoveToBottom(hatches);
                 }
             }
             finally

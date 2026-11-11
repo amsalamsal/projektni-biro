@@ -163,6 +163,96 @@ namespace SiteDesignPro.Core.Tests
             }
         }
 
+        public static IEnumerable<object[]> Ramps()
+        {
+            SiteElement R(double[] xy, double[]? bulges, string kind, bool twoWay, double lane, double margin, bool island, double h0, double h1)
+            {
+                var pts = new List<Vec3>();
+                for (int i = 0; i + 1 < xy.Length; i += 2)
+                {
+                    pts.Add(new Vec3(xy[i], xy[i + 1], 0));
+                }
+
+                var e = new SiteElement(Guid.NewGuid().ToString(), GarageRamp.Type, new PathGeometry(bulges == null ? new Ring(pts) : new Ring(pts, bulges), false))
+                {
+                    Parameters = Cat.RequireType(GarageRamp.Type).CreateDefaultParameters(),
+                    Label = "GR",
+                };
+                e.Parameters["kind"] = ParamValue.Of(kind);
+                e.Parameters["direction"] = ParamValue.Of(twoWay ? "two_way" : "one_way");
+                e.Parameters["laneWidth"] = ParamValue.Of(lane);
+                e.Parameters["margin"] = ParamValue.Of(margin);
+                e.Parameters["island"] = ParamValue.Of(island);
+                e.Parameters["startLevel"] = ParamValue.Of(h0);
+                e.Parameters["endLevel"] = ParamValue.Of(h1);
+                return e;
+            }
+
+            yield return new object[] { "R1_pravolinijska_dvosmjerna_ostrvo", R(new[] { 0.0, 0, 22, 0 }, null, "straight", true, 3.0, 0.25, true, 0, -3) };
+            yield return new object[] { "R2_pravolinijska_jednosmjerna", R(new[] { 0.0, 0, 20, 0 }, null, "straight", false, 3.0, 0.25, false, 0, -3) };
+            yield return new object[] { "R3_pravolinijska_kosa_nalijevo", R(new[] { 20.0, 10, 0, 0 }, null, "straight", true, 3.5, 0.25, true, -3, 0) };
+            yield return new object[] { "R4_kratka_prestrma", R(new[] { 0.0, 0, 9, 0 }, null, "straight", false, 2.5, 0.25, false, 0, -2) };
+            yield return new object[] { "R5_polukruzna_jednosmjerna", R(new[] { 8.0, 0, -8, 0 }, new[] { 1.0, 0 }, "semicircular", false, 4.0, 0.5, false, 0, -3) };
+            yield return new object[] { "R6_polukruzna_dvosmjerna_desno", R(new[] { -11.0, 0, 11, 0 }, new[] { -1.0, 0 }, "semicircular", true, 3.5, 0.25, false, 0, -3.5) };
+            yield return new object[] { "R7_spiralna_1_5_kruga", R(new[] { 9.0, 0, -9, 0, 9, 0, -9, 0 }, new[] { 1.0, 1, 1, 0 }, "spiral", false, 4.0, 0.5, false, 0, -9) };
+            yield return new object[] { "R8_vertikalna_dvosmjerna", R(new[] { 0.0, 0, 0, -18 }, null, "straight", true, 2.5, 0, true, 0, -2.8) };
+        }
+
+        [Theory]
+        [MemberData(nameof(Ramps))]
+        public void Ramp(string name, SiteElement element)
+        {
+            GarageRamp r = GarageRamp.All(new[] { element })[0];
+            List<RampShape> plan = r.Plan();
+            Assert.Contains(plan, x => x.Role == "surface");
+            Assert.Contains(plan, x => x.Role == "middle");
+            Assert.Contains(plan, x => x.Role == "arrow");
+            Assert.Contains(plan, x => x.Role == "text" && x.Text!.Contains("L="));
+            Assert.NotEmpty(r.Triangles());
+            (List<Vec3[]> white, List<Vec3[]> yellow) = r.Paint3();
+            Assert.NotEmpty(white);
+            Assert.Equal(r.Margin > 0.01, yellow.Count > 0);
+
+            string? dir = Environment.GetEnvironmentVariable("SDP_ROAD_RENDER");
+            if (string.IsNullOrEmpty(dir))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(dir);
+            var all = plan.SelectMany(x => x.Points).ToList();
+            double x0 = all.Min(p => p.X) - 4, x1 = all.Max(p => p.X) + 4, y0 = all.Min(p => p.Y) - 4, y1 = all.Max(p => p.Y) + 4;
+            var sb = new StringBuilder();
+            sb.Append("<svg xmlns='http://www.w3.org/2000/svg' viewBox='").Append(F(x0)).Append(' ').Append(F(-y1)).Append(' ').Append(F(x1 - x0)).Append(' ').Append(F(y1 - y0)).Append("'>");
+            sb.Append("<rect x='").Append(F(x0)).Append("' y='").Append(F(-y1)).Append("' width='").Append(F(x1 - x0)).Append("' height='").Append(F(y1 - y0)).Append("' fill='#1d2530'/>");
+            sb.Append("<g transform='scale(1,-1)'>");
+            foreach (RampShape shape in plan.Where(x => x.Role != "text"))
+            {
+                string d = PathOf(new RoadLoop(shape.Points, shape.Bulges));
+                if (!shape.Closed)
+                {
+                    d = d.Substring(0, d.LastIndexOf(shape.Bulges.Count > 0 && Math.Abs(shape.Bulges[shape.Bulges.Count - 1]) > 1e-9 ? 'A' : 'L'));
+                }
+
+                string fill = !shape.Fill ? "none" : shape.Role == "surface" ? "#a9a9a9" : shape.Role == "island" ? "#6e6e6e" : "#fff";
+                string stroke = shape.Role == "margin" ? "#ffe000" : shape.Fill && shape.Role != "island" ? "none" : "#fff";
+                sb.Append("<path fill='").Append(fill).Append("' stroke='").Append(stroke).Append("' stroke-width='").Append(F(shape.Width > 0 ? shape.Width : 0.04)).Append("' d='").Append(d).Append("'/>");
+            }
+
+            (Vec2 ls, Vec2 le) = r.LevelPoints();
+            sb.Append("<circle cx='").Append(F(ls.X)).Append("' cy='").Append(F(ls.Y)).Append("' r='0.3' fill='#ffe000'/>");
+            sb.Append("<circle cx='").Append(F(le.X)).Append("' cy='").Append(F(le.Y)).Append("' r='0.3' fill='#ff9000'/>");
+            sb.Append("</g>");
+            foreach (RampShape t in plan.Where(x => x.Role == "text"))
+            {
+                sb.Append("<text text-anchor='middle' dominant-baseline='central' font-family='sans-serif' font-size='").Append(F(t.Height * 1.3)).Append("' textLength='").Append(F(t.Length)).Append("' lengthAdjust='spacingAndGlyphs' fill='").Append(t.Warning ? "#ff4040" : "#fff")
+                    .Append("' transform='translate(").Append(F(t.Position.X)).Append(' ').Append(F(-t.Position.Y)).Append(") rotate(").Append(F(-t.Rotation * 180 / Math.PI)).Append(")'>").Append(t.Text).Append("</text>");
+            }
+
+            sb.Append("<text x='").Append(F(x0 + 0.5)).Append("' y='").Append(F(-y1 + 1.2)).Append("' font-size='0.9' fill='#9cf' font-family='sans-serif'>").Append(name).Append("  ").Append(string.Join("  ", r.Labels()).Replace(">", "&gt;")).Append("</text>");
+            File.WriteAllText(Path.Combine(dir, name + ".svg"), sb.Append("</svg>").ToString());
+        }
+
         private static string Fmt(Vec2 p) => p.X.ToString("0.##", CultureInfo.InvariantCulture) + "," + p.Y.ToString("0.##", CultureInfo.InvariantCulture);
 
         private static string F(double v) => v.ToString("0.###", CultureInfo.InvariantCulture);
