@@ -202,6 +202,17 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(2, res.Axes.Count);
         }
 
+        [Fact]
+        public void Preview_FromInsideARoadDrawnInCentimetres()
+        {
+            List<RoadSpec> present = RoadElements.Specs(new[] { St(0, 0, 8000, 0) }, Cat, 100);
+            Assert.Single(present);
+            Assert.InRange(present[0].Axis.Max(p => p.X), 79.9, 80.1);
+            RoadNetworkResult res = RoadElements.Preview(new List<Vec2> { new Vec2(30, -4.5), new Vec2(34, 40) }, new RoadSpec(), present)!;
+            Assert.Equal(2, res.Axes.Count);
+            Assert.NotEmpty(res.Fillets);
+        }
+
         public static IEnumerable<object[]> Ramps()
         {
             yield return new object[] { "R1_pravolinijska_dvosmjerna_ostrvo", R(new[] { 0.0, 0, 22, 0 }, null, "straight", true, 3.0, 0.25, true, 0, -3) };
