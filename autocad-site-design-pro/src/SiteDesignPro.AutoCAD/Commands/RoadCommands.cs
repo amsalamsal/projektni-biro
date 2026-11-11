@@ -73,11 +73,12 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Write("Ulica: " + Describe(chosen) + ".");
             string how = ctx.Keyword("Osovina ulice [Nacrtaj/Odaberi]", new[] { "Draw|Nacrtaj", "Select|Odaberi" }, "Draw");
             ObjectId axisId;
+            var heights = new List<(Point3d Point, double Height)>();
             if (how == "Draw")
             {
                 ctx.Write("Nacrtajte osovinu (sredinu kolovoza) u smjeru vožnje desnih traka. Ulica se sama spaja s ulicama i cestama koje dodiruje.");
                 List<RoadSpec> present = RoadElements.Specs(ctx.ExistingElements(), ctx.Catalog, ctx.K);
-                axisId = PlacementCommands.DrawPolyline(ctx, false, StreetPreview(ctx.K, chosen, present));
+                axisId = DrawAxisWithHeights(ctx, StreetPreview(ctx.K, chosen, present), out heights);
                 if (axisId.IsNull)
                 {
                     ctx.Write("Osovina nije nacrtana.");
@@ -107,8 +108,128 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
+            // the height written at every point of the axis: an elevation mark there
+            if (heights.Count > 0)
+            {
+                ElementType mark = ctx.Catalog.RequireType(RoadElements.LevelMarkType);
+                foreach ((Point3d at, double height) in heights)
+                {
+                    SiteElement e = ctx.NewElement(mark, new PointGeometry(new Vec3(at.X, at.Y, 0), 0), ctx.ExistingElements());
+                    e.Parameters["level"] = ParamValue.Of(height);
+                    ctx.Svc.Create(e);
+                }
+            }
+
             Rebuild(ctx, true);
         }));
+
+        /// <summary>
+        /// The axis of a street drawn point by point with the height of every point: the height of the first point is
+        /// asked (relative to the base elevation of the roads), then whether the other points have the same height or
+        /// each its own; with different heights, the height is asked after every point. Enter ends, [Zatvori] closes,
+        /// [Ponisti] takes the last point back.
+        /// </summary>
+        private static ObjectId DrawAxisWithHeights(CommandContext ctx, Func<List<Point3d>, List<PreviewShape>> preview, out List<(Point3d Point, double Height)> heights)
+        {
+            heights = new List<(Point3d, double)>();
+            Point3d? first = ctx.Point("Prva tačka");
+            if (first == null)
+            {
+                return ObjectId.Null;
+            }
+
+            RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+            if (!levels.Defined)
+            {
+                ctx.Write("Osnovna (nulta) visina saobraćajnica još nije zadana; zadajte je sada (može se promijeniti s Visine saobraćajnica).");
+                levels.Flat = false;
+                levels.Base = ctx.Number("Osnovna visina saobraćajnica (m n.v.)", 0, true, true);
+                levels.Write(ctx.Db, ctx.Tr);
+            }
+            else if (levels.Flat)
+            {
+                levels.Flat = false;
+                levels.Write(ctx.Db, ctx.Tr);
+            }
+
+            // at an existing road the new one starts at its height
+            double? there = RoadElements.LevelNear(ctx.ExistingElements(), ctx.Catalog, ctx.K, new Vec2(first.Value.X / ctx.K, first.Value.Y / ctx.K));
+            string prompt = "Visina tačke u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (+X,XX ili -X,XX)";
+            double height = ctx.Number(prompt, there ?? 0, true, true);
+            bool same = ctx.Keyword("Ostale tačke [Iste/Razlicite] visine", new[] { "Same|Iste", "Different|Razlicite" }, "Same") == "Same";
+            var pts = new List<Point3d> { first.Value };
+            var values = new List<double> { height };
+            bool closed = false;
+            while (true)
+            {
+                var jig = new PolylineJig(pts, preview);
+                PromptResult r = ctx.Ed.Drag(jig);
+                if (r.Status == PromptStatus.Keyword && r.StringResult == "Close" && pts.Count >= 3)
+                {
+                    closed = true;
+                    break;
+                }
+
+                if (r.Status == PromptStatus.Keyword && r.StringResult == "Undo")
+                {
+                    if (pts.Count > 1)
+                    {
+                        pts.RemoveAt(pts.Count - 1);
+                        values.RemoveAt(values.Count - 1);
+                    }
+
+                    continue;
+                }
+
+                if (r.Status == PromptStatus.None)
+                {
+                    break;
+                }
+
+                if (r.Status != PromptStatus.OK)
+                {
+                    throw new CommandCancelled();
+                }
+
+                Point3d p = jig.Current;
+                if (pts.Count >= 3 && p.DistanceTo(pts[0]) < 1e-6)
+                {
+                    closed = true;
+                    break;
+                }
+
+                if (p.DistanceTo(pts[pts.Count - 1]) > 1e-9)
+                {
+                    double last = values[values.Count - 1];
+                    double value = last;
+                    if (!same)
+                    {
+                        value = ctx.Number(prompt, last, true, true);
+                        double run = p.DistanceTo(pts[pts.Count - 1]) / ctx.K;
+                        if (run > 1e-6 && Math.Abs(value - last) / run > RoadLevels.MaxRoadSlope + 1e-9)
+                        {
+                            ctx.Write("UPOZORENJE: uzdužni nagib do ove tačke je " + Bs.Num(Math.Abs(value - last) / run * 100, 2) + " % (dozvoljeno najviše 10 %).");
+                        }
+                    }
+
+                    pts.Add(p);
+                    values.Add(value);
+                }
+            }
+
+            if (pts.Count < 2)
+            {
+                ctx.Write("Za trasu su potrebne najmanje 2 tačke.");
+                return ObjectId.Null;
+            }
+
+            for (int i = 0; i < pts.Count; i++)
+            {
+                heights.Add((pts[i], values[i]));
+            }
+
+            return PlacementCommands.AddPolyline(ctx, pts, closed);
+        }
 
         /// <summary>
         /// The live preview while the axis of a street is drawn: the edges of the carriageway, kerbs, bike lanes and

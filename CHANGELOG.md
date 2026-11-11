@@ -21,6 +21,15 @@
 * **Rampa uz ulicu**: kad rampa počinje ili završava uz ulicu (do 1,5 m od njene vanjske ivice), ivičnjak,
   biciklistička staza i trotoar se sami otvore u širini rampe, a kolovoz se produži do rampe.
 
+### Inputi 11.11.2026 – ulica s visinama
+* U prozoru **Ulica** jedina vrsta je „Saobraćajnica unutar naselja“; stari izbor profila je uklonjen, sva ostala
+  polja (smjer, trake, širine, trotoari, staze, radijus, strelice) ostaju.
+* **Visine pri crtanju osovine**: nakon prve tačke upisuje se njena visina u odnosu na osnovnu (+X,XX ili −X,XX),
+  zatim se bira jesu li ostale tačke iste ili različite visine. Kod različitih se visina pita nakon svake tačke
+  (nagib preko 10 % odmah se javlja). Uz svaku tačku se crta simbol kote s visinom iznad linije, i kad su sve iste.
+  Ulica koja počinje na postojećoj saobraćajnici nudi njenu visinu na tom mjestu.
+* Garažna rampa koja počinje uz saobraćajnicu nudi visinu saobraćajnice na tom mjestu kao visinu početka.
+
 ### Prikaz pri crtanju
 * Dok se klikaju tačke **ulice**, uz kursor se vidi cijela ulica kakva će nastati: ivice kolovoza, ivičnjaci,
   biciklističke staze, trotoari, zaobljene krivine i linije traka.

@@ -459,7 +459,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             return AddPolyline(ctx, pts, true);
         }
 
-        private static ObjectId AddPolyline(CommandContext ctx, List<Point3d> pts, bool closed)
+        internal static ObjectId AddPolyline(CommandContext ctx, List<Point3d> pts, bool closed)
         {
             var pl = new Polyline();
             pl.SetDatabaseDefaults();

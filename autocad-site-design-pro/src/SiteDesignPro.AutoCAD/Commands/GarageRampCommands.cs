@@ -195,7 +195,15 @@ namespace SiteDesignPro.AutoCAD.Commands
                 levels.Write(ctx.Db, ctx.Tr);
             }
 
-            double h0 = ctx.Number("Visina početka rampe u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (npr. 0,00)", 0, true, true);
+            // a ramp that starts at a road starts at the height of the road there
+            Vec3 startAt = axis.Vertices[0];
+            double? roadLevel = RoadElements.LevelNear(ctx.ExistingElements(), ctx.Catalog, k, new Vec2(startAt.X / k, startAt.Y / k));
+            if (roadLevel.HasValue)
+            {
+                ctx.Write("Rampa počinje uz saobraćajnicu koja je tu na " + LevelText(roadLevel.Value) + ".");
+            }
+
+            double h0 = ctx.Number("Visina početka rampe u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (npr. 0,00)", roadLevel ?? 0, true, true);
             double h1 = ctx.Number("Visina kraja rampe u odnosu na osnovnu (npr. -3,00)", h0 - 3, true, true);
 
             // steeper than 10 %: transitions with half the slope at the top and bottom

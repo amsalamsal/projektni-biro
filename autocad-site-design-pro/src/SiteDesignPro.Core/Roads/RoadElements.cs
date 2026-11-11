@@ -81,6 +81,30 @@ namespace SiteDesignPro.Core.Roads
             }
         }
 
+        /// <summary>
+        /// The height of the roads (relative to their base elevation) at a point on or beside a road (metres), from the
+        /// elevation marks; null when no road is there or the roads have no marks.
+        /// </summary>
+        public static double? LevelNear(IEnumerable<SiteElement> elements, ElementCatalog catalog, double unitsPerMeter, Vec2 point)
+        {
+            List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
+            List<RoadSpec> specs = Specs(all, catalog, unitsPerMeter);
+            bool near = false;
+            foreach (RoadSpec r in specs)
+            {
+                double reach = Math.Max(r.Extent(RoadLevel.Edge, true), r.Extent(RoadLevel.Edge, false)) + 1.5;
+                near |= Near(new List<Vec2> { point, point + new Vec2(0.01, 0) }, r.Axis, r.Closed, reach);
+            }
+
+            if (!near || LevelMarks(all, unitsPerMeter).Count == 0)
+            {
+                return null;
+            }
+
+            List<RoadProfile> profiles = Profiles(all, catalog, unitsPerMeter);
+            return profiles.Count == 0 ? (double?)null : RoadLevels.Height(profiles, point);
+        }
+
         /// <summary>True when two polylines come within a distance of each other (or cross).</summary>
         private static bool Near(List<Vec2> a, List<Vec2> b, bool closedB, double distance)
         {
