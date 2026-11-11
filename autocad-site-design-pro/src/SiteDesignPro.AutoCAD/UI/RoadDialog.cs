@@ -111,7 +111,7 @@ namespace SiteDesignPro.AutoCAD.UI
             panel.Children.Add(eff);
             panel.Children.Add(arrowRow);
             var foot = new StackPanel { Margin = new Thickness(14, 6, 14, 14) };
-            summary.Text = "Uz kolovoz se crta ivičnjak 15 cm (između kolovoza i biciklističke staze), a uz vanjsku ivicu trotoara ivičnjak 10 cm. Na početku ravnog dijela iza svake raskrsnice crta se rampa za invalide 120 cm. Isprekidane linije traka, " +
+            summary.Text = "Uz kolovoz se crta ivičnjak 15 cm (između kolovoza i biciklističke staze), a uz vanjsku ivicu trotoara ivičnjak 10 cm. Rampa za invalide dodaje se posebno (Rampa za invalide), a uz pješački prelaz crta se sama. Visine tačaka unose se pri crtanju osovine. Isprekidane linije traka, " +
                            "spajanje s drugim ulicama i cestama i zaobljeni uglovi raskrsnica rade se automatski. Rasvjeta se dodaje posebno (Rasvjeta ili Duž linije). " +
                            "Jedinice crteža: " + units + ".";
             foot.Children.Add(summary);
