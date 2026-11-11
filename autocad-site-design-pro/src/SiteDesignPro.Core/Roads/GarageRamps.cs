@@ -100,8 +100,23 @@ namespace SiteDesignPro.Core.Roads
 
         public double Rise => (EndHeight ?? 0) - (StartHeight ?? 0);
 
-        /// <summary>Longitudinal slope through the middle (rise / length).</summary>
-        public double Slope => Length < 1e-9 ? 0 : Math.Abs(Rise) / Length;
+        /// <summary>
+        /// Length of the transition at the top and at the bottom, where the slope is half of the slope between them
+        /// (0: the height rises evenly from end to end).
+        /// </summary>
+        public double Transition { get; set; }
+
+        /// <summary>The transition actually used: none on a ramp too short for two of them.</summary>
+        public double TransitionLength => Transition > 0.01 && Length >= (2 * Transition) + 1 ? Transition : 0;
+
+        /// <summary>Average slope (rise / length).</summary>
+        public double AverageSlope => Length < 1e-9 ? 0 : Math.Abs(Rise) / Length;
+
+        /// <summary>Longitudinal slope through the middle; with transitions, the slope between them (the steepest).</summary>
+        public double Slope => Length < 1e-9 ? 0 : Math.Abs(Rise) / (Length - TransitionLength);
+
+        /// <summary>Slope of the transitions (half of the slope between them).</summary>
+        public double TransitionSlope => Slope / 2;
 
         public bool TooSteep => Slope > RoadLevels.MaxRampSlope + 1e-9;
 
@@ -124,6 +139,7 @@ namespace SiteDesignPro.Core.Roads
                 LaneWidth = e.Parameters.Number("laneWidth", 3.0),
                 Margin = e.Parameters.Number("margin", 0.25),
                 Island = e.Parameters.Bool("island", false),
+                Transition = Math.Max(0, Math.Min(8, e.Parameters.Number("transition", 0))),
                 Axis = GeometryMath.Tessellate(path.Ring, false, 0.002 * unitsPerMeter, 1024).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList(),
             };
             r.RingPoints = path.Ring.Vertices.Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
@@ -340,6 +356,21 @@ namespace SiteDesignPro.Core.Roads
                 list.Add(to);
             }
 
+            // the ends of the transitions, where the slope changes
+            double t = TransitionLength;
+            if (t > 0)
+            {
+                foreach (double brk in new[] { t, Length - t })
+                {
+                    if (brk > from + 1e-6 && brk < to - 1e-6 && !list.Any(x => Math.Abs(x - brk) < 1e-6))
+                    {
+                        list.Add(brk);
+                    }
+                }
+
+                list.Sort();
+            }
+
             return list;
         }
 
@@ -348,8 +379,24 @@ namespace SiteDesignPro.Core.Roads
         {
             double h0 = StartHeight ?? 0, h1 = EndHeight ?? h0;
             double total = Length;
-            double z = total < 1e-9 ? h0 : h0 + ((h1 - h0) * Math.Max(0, Math.Min(1, station / total)));
-            return z - (CrossSlope * d * InnerSide);
+            double s = Math.Max(0, Math.Min(total, station)), t = TransitionLength;
+            double part; // share of the rise reached at the station
+            if (total < 1e-9)
+            {
+                part = 0;
+            }
+            else if (t <= 0)
+            {
+                part = s / total;
+            }
+            else
+            {
+                // half slope over t at both ends: the rise is slope × (total − t)
+                double run = s <= t ? s / 2 : s <= total - t ? s - (t / 2) : total - t - ((total - s) / 2);
+                part = run / (total - t);
+            }
+
+            return h0 + ((h1 - h0) * part) - (CrossSlope * d * InnerSide);
         }
 
         private Vec3 P3(double station, double d, double lift) => PointAt(station, d).Point.WithZ(HeightAt(station, d) + lift);
@@ -439,10 +486,12 @@ namespace SiteDesignPro.Core.Roads
             }
         }
 
+        private static string Num(double v) => v.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture).Replace('.', ',');
+
         /// <summary>"L=12,50 m", "h=2,10 m", "16,80 %" and, on a curved ramp, the cross slope.</summary>
         public List<string> Labels()
         {
-            string N(double v) => v.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture).Replace('.', ',');
+            string N(double v) => Num(v);
             var list = new List<string> { "L=" + N(Length) + " m", "h=" + N(Math.Abs(Rise)) + " m", N(Slope * 100) + " %" + (TooSteep ? " > 17 %!" : string.Empty) };
             if (Curved)
             {
@@ -642,6 +691,24 @@ namespace SiteDesignPro.Core.Roads
                 double w = IslandWidth / 2;
                 var box = new List<Vec2> { PointAt(island.Value.From, -w).Point, PointAt(island.Value.To, -w).Point, PointAt(island.Value.To, w).Point, PointAt(island.Value.From, w).Point };
                 list.Add(new RampShape { Role = "island", Points = box, Bulges = box.Select(_ => 0.0).ToList(), Closed = true, Fill = true });
+            }
+
+            // transitions: a thin line across where the slope changes and the half slope written beside the right edge
+            double tr = TransitionLength;
+            if (tr > 0)
+            {
+                string label = Num(tr) + " m  " + Num(TransitionSlope * 100) + " %";
+                double th = 0.22, tl = label.Length * 0.68 * th;
+                double side = -(half - Margin - 0.45);
+                foreach ((double brk, double mid) in new[] { (tr, tr / 2), (total - tr, total - (tr / 2)) })
+                {
+                    list.Add(new RampShape { Role = "transition", Points = new List<Vec2> { PointAt(brk, half).Point, PointAt(brk, -half).Point }, Bulges = new List<double> { 0, 0 } });
+                    if (tl < tr - 0.3)
+                    {
+                        (Vec2 p, Vec2 dir) = PointAt(mid, lay.Flip ? -side : side);
+                        list.Add(new RampShape { Role = "text", Text = label, Position = p, Rotation = Math.Atan2(dir.Y, dir.X) + (lay.Flip ? Math.PI : 0), Height = th, Length = tl });
+                    }
+                }
             }
 
             foreach ((double s, string text, double len) in lay.Texts)

@@ -47,6 +47,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             double width = ((twoWay ? 2 : 1) * lw) + (2 * margin);
 
             Ring axis;
+            double axisLength;
             if (!curved)
             {
                 Point3d? a = ctx.Point("Početak rampe (sredina, gornji kraj)");
@@ -63,6 +64,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
 
                 axis = new Ring(new List<Vec3> { new Vec3(a.Value.X, a.Value.Y, 0), new Vec3(b.Value.X, b.Value.Y, 0) });
+                axisLength = a.Value.DistanceTo(b.Value) / k;
             }
             else
             {
@@ -103,6 +105,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
 
                 axis = new Ring(pts, bulges);
+                axisLength = Math.PI * radius * halves;
             }
 
             RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
@@ -117,6 +120,16 @@ namespace SiteDesignPro.AutoCAD.Commands
             double h0 = ctx.Number("Visina početka rampe u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (npr. 0,00)", 0, true, true);
             double h1 = ctx.Number("Visina kraja rampe u odnosu na osnovnu (npr. -3,00)", h0 - 3, true, true);
 
+            // steeper than 10 %: transitions with half the slope at the top and bottom
+            double transition = 0;
+            double average = axisLength < 1e-9 ? 0 : Math.Abs(h1 - h0) / axisLength;
+            if (average > 0.10 + 1e-9 && axisLength >= 9)
+            {
+                ctx.Write("Prosječni nagib je " + Bs.Num(average * 100, 2) + " % (preko 10 %): preporučene su prijelazne dionice s pola nagiba na vrhu i dnu.");
+                transition = ctx.Number("Dužina prijelazne dionice na vrhu i dnu (m, 0 = bez)", 4.0, false, true);
+                transition = Math.Max(0, Math.Min(Math.Min(8, (axisLength - 1) / 2), transition));
+            }
+
             ElementType type = ctx.Catalog.RequireType(GarageRamp.Type);
             SiteElement e = ctx.NewElement(type, new PathGeometry(axis, false), ctx.ExistingElements());
             e.Parameters["kind"] = ParamValue.Of(kind);
@@ -124,6 +137,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             e.Parameters["laneWidth"] = ParamValue.Of(lw);
             e.Parameters["margin"] = ParamValue.Of(margin);
             e.Parameters["island"] = ParamValue.Of(island);
+            e.Parameters["transition"] = ParamValue.Of(transition);
             e.Parameters["startLevel"] = ParamValue.Of(h0);
             e.Parameters["endLevel"] = ParamValue.Of(h1);
             e.Parameters["width"] = ParamValue.Of(width);
@@ -134,6 +148,10 @@ namespace SiteDesignPro.AutoCAD.Commands
             if (ramp != null)
             {
                 ctx.Write("Garažna rampa: " + RampText(ramp) + ", širina " + Bs.Num(ramp.Width, 2) + " m.");
+                if (ramp.TransitionLength > 0)
+                {
+                    ctx.Write("  Prijelazne dionice: 2 × " + Bs.Num(ramp.TransitionLength, 2) + " m s nagibom " + Bs.Num(ramp.TransitionSlope * 100, 2) + " %; između njih " + Bs.Num(ramp.Slope * 100, 2) + " %.");
+                }
             }
 
             RebuildNow(ctx);

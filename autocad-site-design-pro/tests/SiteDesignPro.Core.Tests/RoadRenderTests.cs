@@ -127,6 +127,8 @@ namespace SiteDesignPro.Core.Tests
                 ("37_ostar_zavoj", new[] { St(-60, 0, 0, 0, -40, 25) }),
                 ("38_T_na_kraju_ulice", new[] { St(-60, 0, 0, 0), St(0, -40, 0, 40) }),
                 ("39_kraj_blizu_ali_ne_dodiruje", new[] { St(-60, 0, 60, 0), St(0, 8, 0, 50) }),
+                ("41_rampa_okomito_na_ulicu", new[] { St(-40, 0, 40, 0), R(new[] { 0.0, -4.85, 0, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3) }),
+                ("42_rampa_koso_staza", new[] { St(bike, -40, 0, 40, 0), R(new[] { -5.0, 3, 5, 22 }, null, "straight", false, 3.0, 0.25, false, 0, -3), R(new[] { 22.0, 14, 22, 5.5 }, null, "straight", false, 3.0, 0.25, false, -3, 0) }),
                 ("40_cetiri_kraka_iz_tacke", new[] { St(0, 0, 50, 0), St(0, 0, -50, 0), St(0, 0, 0, 50), St(0, 0, 0, -50) }),
             };
             return list.Select(x => new object[] { x.Item1, x.Item2 });
@@ -163,31 +165,32 @@ namespace SiteDesignPro.Core.Tests
             }
         }
 
-        public static IEnumerable<object[]> Ramps()
+        private static SiteElement R(double[] xy, double[]? bulges, string kind, bool twoWay, double lane, double margin, bool island, double h0, double h1, double transition = 0)
         {
-            SiteElement R(double[] xy, double[]? bulges, string kind, bool twoWay, double lane, double margin, bool island, double h0, double h1)
+            var pts = new List<Vec3>();
+            for (int i = 0; i + 1 < xy.Length; i += 2)
             {
-                var pts = new List<Vec3>();
-                for (int i = 0; i + 1 < xy.Length; i += 2)
-                {
-                    pts.Add(new Vec3(xy[i], xy[i + 1], 0));
-                }
-
-                var e = new SiteElement(Guid.NewGuid().ToString(), GarageRamp.Type, new PathGeometry(bulges == null ? new Ring(pts) : new Ring(pts, bulges), false))
-                {
-                    Parameters = Cat.RequireType(GarageRamp.Type).CreateDefaultParameters(),
-                    Label = "GR",
-                };
-                e.Parameters["kind"] = ParamValue.Of(kind);
-                e.Parameters["direction"] = ParamValue.Of(twoWay ? "two_way" : "one_way");
-                e.Parameters["laneWidth"] = ParamValue.Of(lane);
-                e.Parameters["margin"] = ParamValue.Of(margin);
-                e.Parameters["island"] = ParamValue.Of(island);
-                e.Parameters["startLevel"] = ParamValue.Of(h0);
-                e.Parameters["endLevel"] = ParamValue.Of(h1);
-                return e;
+                pts.Add(new Vec3(xy[i], xy[i + 1], 0));
             }
 
+            var e = new SiteElement(Guid.NewGuid().ToString(), GarageRamp.Type, new PathGeometry(bulges == null ? new Ring(pts) : new Ring(pts, bulges), false))
+            {
+                Parameters = Cat.RequireType(GarageRamp.Type).CreateDefaultParameters(),
+                Label = "GR",
+            };
+            e.Parameters["kind"] = ParamValue.Of(kind);
+            e.Parameters["direction"] = ParamValue.Of(twoWay ? "two_way" : "one_way");
+            e.Parameters["laneWidth"] = ParamValue.Of(lane);
+            e.Parameters["margin"] = ParamValue.Of(margin);
+            e.Parameters["island"] = ParamValue.Of(island);
+            e.Parameters["transition"] = ParamValue.Of(transition);
+            e.Parameters["startLevel"] = ParamValue.Of(h0);
+            e.Parameters["endLevel"] = ParamValue.Of(h1);
+            return e;
+        }
+
+        public static IEnumerable<object[]> Ramps()
+        {
             yield return new object[] { "R1_pravolinijska_dvosmjerna_ostrvo", R(new[] { 0.0, 0, 22, 0 }, null, "straight", true, 3.0, 0.25, true, 0, -3) };
             yield return new object[] { "R2_pravolinijska_jednosmjerna", R(new[] { 0.0, 0, 20, 0 }, null, "straight", false, 3.0, 0.25, false, 0, -3) };
             yield return new object[] { "R3_pravolinijska_kosa_nalijevo", R(new[] { 20.0, 10, 0, 0 }, null, "straight", true, 3.5, 0.25, true, -3, 0) };
@@ -195,6 +198,7 @@ namespace SiteDesignPro.Core.Tests
             yield return new object[] { "R5_polukruzna_jednosmjerna", R(new[] { 8.0, 0, -8, 0 }, new[] { 1.0, 0 }, "semicircular", false, 4.0, 0.5, false, 0, -3) };
             yield return new object[] { "R6_polukruzna_dvosmjerna_desno", R(new[] { -11.0, 0, 11, 0 }, new[] { -1.0, 0 }, "semicircular", true, 3.5, 0.25, false, 0, -3.5) };
             yield return new object[] { "R7_spiralna_1_5_kruga", R(new[] { 9.0, 0, -9, 0, 9, 0, -9, 0 }, new[] { 1.0, 1, 1, 0 }, "spiral", false, 4.0, 0.5, false, 0, -9) };
+            yield return new object[] { "R9_prijelazne_dionice", R(new[] { 0.0, 0, 24, 0 }, null, "straight", true, 3.0, 0.25, true, 0, -3, 4) };
             yield return new object[] { "R8_vertikalna_dvosmjerna", R(new[] { 0.0, 0, 0, -18 }, null, "straight", true, 2.5, 0, true, 0, -2.8) };
         }
 
@@ -324,6 +328,12 @@ namespace SiteDesignPro.Core.Tests
             foreach (RoadLoop ramp in res.Ramps)
             {
                 sb.Append("<polygon fill='#4a90e2' points='").Append(string.Join(" ", ramp.Points.Select(Fmt))).Append("'/>");
+            }
+
+            foreach (GarageRamp ramp in GarageRamp.All(elements))
+            {
+                RampShape surface = ramp.Plan().First(x => x.Role == "surface");
+                sb.Append("<path fill='#c9b458' fill-opacity='0.6' stroke='#ffe000' stroke-width='0.06' d='").Append(PathOf(new RoadLoop(surface.Points, surface.Bulges))).Append("'/>");
             }
 
             foreach (SiteElement e in elements)

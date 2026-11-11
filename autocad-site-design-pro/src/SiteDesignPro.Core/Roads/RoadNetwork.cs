@@ -30,6 +30,21 @@ namespace SiteDesignPro.Core.Roads
         public double Depth { get; }
     }
 
+    /// <summary>
+    /// A driveway through the kerb and sidewalk (the end of a garage ramp at a road): the point where it starts, its
+    /// direction away from the road, its width and the outline it leads to (left out of the driveway surface).
+    /// </summary>
+    public sealed class RoadDriveway
+    {
+        public Vec2 Point { get; set; }
+
+        public Vec2 Direction { get; set; }
+
+        public double Width { get; set; }
+
+        public List<Vec2> Exclude { get; set; } = new List<Vec2>();
+    }
+
     public sealed class RoadLoop
     {
         public RoadLoop(List<Vec2> points, List<double> bulges)
@@ -139,6 +154,9 @@ namespace SiteDesignPro.Core.Roads
         public List<string> Notes { get; } = new List<string>();
 
         /// <summary>Accessible kerb ramps 120 cm at the start of the straight part after each junction corner.</summary>
+        /// <summary>Number of driveways opened through the kerb and sidewalk.</summary>
+        public int Driveways { get; set; }
+
         public List<RoadLoop> Ramps { get; } = new List<RoadLoop>();
 
         /// <summary>Position of each ramp of <see cref="Ramps"/> on its kerb line (same order).</summary>
@@ -189,7 +207,14 @@ namespace SiteDesignPro.Core.Roads
         /// Builds the network; <paramref name="rampMarks"/> are the points (metres) where the user placed an accessible ramp:
         /// on a sidewalk, a ramp on that side; on the carriageway, a ramp on both sides.
         /// </summary>
-        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks)
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks) =>
+            Build(input, noMarking, crossings, rampMarks, null);
+
+        /// <summary>
+        /// Builds the network; at each of the <paramref name="driveways"/> (metres) the kerb, bike lane and sidewalk of
+        /// the road beside it are opened over its width and the carriageway runs through to it.
+        /// </summary>
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks, IEnumerable<RoadDriveway>? driveways)
         {
             var result = new RoadNetworkResult();
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
@@ -344,6 +369,31 @@ namespace SiteDesignPro.Core.Roads
             PathsD walk = Clipper.Difference(Union(pieces[RoadLevel.Sidewalk]), toBike, FillRule.NonZero, Precision);
             PathsD toWalk = Clipper.Union(toBike, walk, FillRule.NonZero, Precision);
             PathsD edge = Clipper.Difference(Union(pieces[RoadLevel.Edge]), toWalk, FillRule.NonZero, Precision);
+
+            // driveways (garage ramps that start at a road): the kerb, bike lane, sidewalk and edging are opened over the
+            // width of the driveway and the carriageway runs through the opening up to the ramp
+            foreach (RoadDriveway dw in driveways ?? Enumerable.Empty<RoadDriveway>())
+            {
+                PathD? strip = DrivewayStrip(dw, roads, origin);
+                if (strip == null)
+                {
+                    continue;
+                }
+
+                var opening = new PathsD { strip };
+                PathsD tab = opening;
+                if (dw.Exclude.Count >= 3)
+                {
+                    tab = Clipper.Difference(opening, new PathsD { Positive(dw.Exclude.Select(q => q - origin)) }, FillRule.NonZero, Precision);
+                }
+
+                kerb = Clipper.Difference(kerb, opening, FillRule.NonZero, Precision);
+                bike = Clipper.Difference(bike, opening, FillRule.NonZero, Precision);
+                walk = Clipper.Difference(walk, opening, FillRule.NonZero, Precision);
+                edge = Clipper.Difference(edge, opening, FillRule.NonZero, Precision);
+                carriageway = Clipper.Union(carriageway, tab, FillRule.NonZero, Precision);
+                result.Driveways++;
+            }
 
             // accessible kerb ramps (120 cm) only where the user wants them: at the ends of each pedestrian crossing and at
             // the ramp marks; the ramp lowers the kerb and slopes up to the bike lane or sidewalk
@@ -821,6 +871,71 @@ namespace SiteDesignPro.Core.Roads
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// The strip of a driveway across the side of the nearest road: from the kerb line out past the outer edge (and
+        /// up to the point the driveway starts at), as wide as the driveway. Null when no road is beside it.
+        /// </summary>
+        private static PathD? DrivewayStrip(RoadDriveway dw, List<RoadSpec> roads, Vec2 origin)
+        {
+            Vec2 p = dw.Point - origin;
+            RoadSpec? road = null;
+            Vec2 foot = p, along = new Vec2(1, 0);
+            double best = double.MaxValue;
+            foreach (RoadSpec r in roads)
+            {
+                int m = r.Axis.Count;
+                for (int i = 0; i < (r.Closed ? m : m - 1); i++)
+                {
+                    Vec2 a = r.Axis[i], b = r.Axis[(i + 1) % m];
+                    Vec2 ab = b - a;
+                    double l2 = ab.Dot(ab);
+                    if (l2 < 1e-12)
+                    {
+                        continue;
+                    }
+
+                    double t = (p - a).Dot(ab) / l2;
+                    if (t < 0 || t > 1)
+                    {
+                        continue; // beside the road, not beyond its end
+                    }
+
+                    Vec2 f = a + (ab * t);
+                    double d = f.DistanceTo(p);
+                    if (d < best)
+                    {
+                        (best, foot, along, road) = (d, f, ab.Normalized(), r);
+                    }
+                }
+            }
+
+            if (road == null)
+            {
+                return null;
+            }
+
+            Vec2 normal = along.Perp();
+            bool left = (p - foot).Dot(normal) >= 0;
+            if (!left)
+            {
+                normal = -normal;
+            }
+
+            double kerbLine = road.Extent(RoadLevel.Carriageway, left), outer = road.Extent(RoadLevel.Edge, left);
+            Vec2 dir = dw.Direction.Normalized();
+            double cos = dir.Dot(normal);
+            if (best > outer + 1.5 || cos < 0.3)
+            {
+                return null; // too far, or not leading away from the road
+            }
+
+            // along the driveway: from just inside the kerb line to past the outer edge or the start of the driveway
+            double from = (kerbLine - 0.02 - best) / cos, to = Math.Max((outer + 0.1 - best) / cos, 0.01);
+            Vec2 side = dir.Perp() * (dw.Width / 2);
+            Vec2 s0 = p + (dir * from), s1 = p + (dir * to);
+            return Positive(new[] { s0 - side, s1 - side, s1 + side, s0 + side });
         }
 
         /// <summary>Strips between two offsets from the axis on the road sides selected by <paramref name="has"/> (square ends).</summary>

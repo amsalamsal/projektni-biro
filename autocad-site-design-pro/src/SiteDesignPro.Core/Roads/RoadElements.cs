@@ -215,7 +215,26 @@ namespace SiteDesignPro.Core.Roads
             List<IReadOnlyList<Vec2>> crossings = CrossingAreas(all.Where(e => e.TypeId == CrossingType), unitsPerMeter);
             List<Vec2> rampMarks = all.Where(e => e.TypeId == RampMarkType && e.Geometry is PointGeometry)
                 .Select(e => ((PointGeometry)e.Geometry).Position).Select(p => new Vec2(p.X / unitsPerMeter, p.Y / unitsPerMeter)).ToList();
-            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings, rampMarks);
+            // garage ramps that start or end at a road open its kerb and sidewalk
+            var driveways = new List<RoadDriveway>();
+            foreach (GarageRamp ramp in GarageRamp.All(all, unitsPerMeter))
+            {
+                double total = ramp.Length;
+                if (total < 1)
+                {
+                    continue;
+                }
+
+                List<Vec2> outline = ramp.Plan().FirstOrDefault(x => x.Role == "surface") is RampShape surface
+                    ? GeometryMath.Tessellate(new Ring(surface.Points.Select(q => q.WithZ(0)).ToList(), surface.Bulges), true, 0.005).Select(v => v.XY).ToList()
+                    : new List<Vec2>();
+                (Vec2 p0, Vec2 d0) = ramp.PointAt(0, 0);
+                (Vec2 p1, Vec2 d1) = ramp.PointAt(total, 0);
+                driveways.Add(new RoadDriveway { Point = p0, Direction = d0, Width = ramp.Width, Exclude = outline });
+                driveways.Add(new RoadDriveway { Point = p1, Direction = -d1, Width = ramp.Width, Exclude = outline });
+            }
+
+            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings, rampMarks, driveways);
         }
 
         /// <summary>Cross-sections of all roads of the network among the elements (metres).</summary>
