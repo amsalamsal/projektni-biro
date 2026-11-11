@@ -38,6 +38,7 @@ jobs:
         run: bash tools/build_and_test.sh
         env:
           SDP_SYMBOL_PREVIEW: ${{ github.workspace }}/simboli.json
+          SDP_ROAD_RENDER: ${{ github.workspace }}/ceste-pregled
 
       - name: AutoCAD paket
         uses: actions/upload-artifact@v4
@@ -58,6 +59,7 @@ jobs:
           out=$(mktemp -d)
           cp -r dist/SiteDesignPro.bundle dist/pb_site_design_pro.rbz "$out"/
           cp simboli.json "$out"/ 2>/dev/null || true
+          cp -r ceste-pregled "$out"/ 2>/dev/null || true
           cp -r shared/samples "$out"/samples
           cd "$out"
           printf 'Izgradnja %s (%s), %s\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$(date -u +%FT%TZ)" > IZGRADNJA.txt
