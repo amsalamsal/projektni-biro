@@ -501,8 +501,8 @@ namespace SiteDesignPro.Core.Roads
 
             // one arrow per lane in each half, in the middle of the free length beside the text
             double free = t0 - 0.5;
-            double scale = Math.Max(0.35, Math.Min(1.0, (free - 0.6) / 5.0));
-            if (free > 2.2)
+            double scale = Math.Min(1.0, (free - 0.4) / 5.0);
+            if (scale >= 0.15)
             {
                 foreach (double s in new[] { 0.5 + (free / 2), total - 0.5 - (free / 2) })
                 {
@@ -514,7 +514,7 @@ namespace SiteDesignPro.Core.Roads
                     else
                     {
                         lay.Arrows.Add((s, 0, false, scale));
-                        (double, double) gap = (s - (2.5 * scale) - 0.4, s + (2.5 * scale) + 0.4);
+                        (double, double) gap = (s - (2.5 * scale) - 0.2, s + (2.5 * scale) + 0.2);
                         lay.Gaps.Add(gap);
                         lay.Gaps3.Add(gap);
                     }
@@ -539,7 +539,7 @@ namespace SiteDesignPro.Core.Roads
             foreach ((double from, double to) in gaps.OrderBy(g => g.From).Concat(new[] { (total, total) }))
             {
                 double end = Math.Min(from, total);
-                if (end - at > 0.3)
+                if (end - at > 0.2)
                 {
                     list.Add((at, end));
                 }
