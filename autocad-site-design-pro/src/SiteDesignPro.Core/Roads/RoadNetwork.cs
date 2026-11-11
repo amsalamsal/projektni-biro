@@ -217,6 +217,7 @@ namespace SiteDesignPro.Core.Roads
 
             roads = roads.Where(r => r.Axis.Count >= 2).ToList();
             JoinEnds(roads, result.Notes);
+            JoinCorners(roads);
             foreach (RoadSpec r in roads)
             {
                 r.Axis = Fillet(r);
@@ -287,6 +288,7 @@ namespace SiteDesignPro.Core.Roads
             }
 
             PathsD Ring(double from, double to) => Clipper.Difference(Grow(to), Grow(from), FillRule.NonZero, Precision);
+            PathsD innerSurface = Clipper.InflatePaths(surface, -0.03, JoinType.Round, EndType.Polygon, 2, Precision, ArcTolerance);
 
             // one ring per level and distinct distance from the kerb line: (level, from, to) for each road side
             var pieces = new Dictionary<RoadLevel, PathsD>
@@ -324,7 +326,13 @@ namespace SiteDesignPro.Core.Roads
 
                     PathsD strips = Strips(roads, Has, (r, left) => r.Extent(Inner(level), left), (r, left) => r.Extent(level, left));
                     List<PathsD> next = fillets.Where(f => Touches(f, strips, from + 0.05)).ToList();
-                    pieces[level].AddRange(Clipper.Intersect(Ring(from, to), Zone(strips, next, -1, to + 0.05), FillRule.NonZero, Precision));
+                    var zone = new PathsD(strips);
+                    foreach (PathsD f in next)
+                    {
+                        zone.AddRange(FilletZone(f, to + 0.05, strips, surface, innerSurface, (from + to) / 2));
+                    }
+
+                    pieces[level].AddRange(Clipper.Intersect(Ring(from, to), Union(zone), FillRule.NonZero, Precision));
                 }
             }
 
@@ -479,6 +487,151 @@ namespace SiteDesignPro.Core.Roads
                         notes.Add("Cesta " + r.DisplayName + " je produžena " + Fmt(best) + " m do osovine ceste " + target.DisplayName + ".");
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Two roads that meet end to end at an angle (a street continued by another one) get a bend like the bend of
+        /// one street: each axis ends on half of the arc, so the kerbs and every edge of the cross-section run smoothly
+        /// through the joint and both roads end square on the same line.
+        /// </summary>
+        private static void JoinCorners(List<RoadSpec> roads)
+        {
+            const double Snap = 0.25;
+            var ends = new List<(RoadSpec Road, bool AtStart)>();
+            foreach (RoadSpec r in roads.Where(r => !r.Closed && r.Axis.Count >= 2))
+            {
+                ends.Add((r, true));
+                ends.Add((r, false));
+            }
+
+            Vec2 End(RoadSpec r, bool atStart) => atStart ? r.Axis[0] : r.Axis[r.Axis.Count - 1];
+            Vec2 Prev(RoadSpec r, bool atStart) => atStart ? r.Axis[1] : r.Axis[r.Axis.Count - 2];
+            var used = new HashSet<(RoadSpec, bool)>();
+            for (int i = 0; i < ends.Count; i++)
+            {
+                (RoadSpec a, bool aStart) = ends[i];
+                if (used.Contains(ends[i]))
+                {
+                    continue;
+                }
+
+                Vec2 joint = End(a, aStart);
+                var here = ends.Where(e => End(e.Road, e.AtStart).DistanceTo(joint) <= Snap).ToList();
+                if (here.Count != 2 || here[0].Road == here[1].Road)
+                {
+                    continue;
+                }
+
+                (RoadSpec b, bool bStart) = here.First(e => e.Road != a);
+
+                // no third road through the joint
+                bool third = false;
+                foreach (RoadSpec o in roads)
+                {
+                    if (o == a || o == b)
+                    {
+                        continue;
+                    }
+
+                    double reach = Math.Max(o.Extent(RoadLevel.Edge, true), o.Extent(RoadLevel.Edge, false)) + Math.Max(a.Extent(RoadLevel.Edge, true), a.Extent(RoadLevel.Edge, false));
+                    int segs = o.Closed ? o.Axis.Count : o.Axis.Count - 1;
+                    for (int k = 0; k < segs && !third; k++)
+                    {
+                        Vec2 p = o.Axis[k], q = o.Axis[(k + 1) % o.Axis.Count];
+                        Vec2 pq = q - p;
+                        double l2 = pq.Dot(pq);
+                        double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (joint - p).Dot(pq) / l2));
+                        third = (p + (pq * t)).DistanceTo(joint) < reach;
+                    }
+                }
+
+                if (third)
+                {
+                    continue;
+                }
+
+                joint = (End(a, aStart) + End(b, bStart)) * 0.5;
+                Vec2 pa = Prev(a, aStart), pb = Prev(b, bStart);
+                double la = pa.DistanceTo(joint), lb = pb.DistanceTo(joint);
+                if (la < 0.5 || lb < 0.5)
+                {
+                    continue;
+                }
+
+                Vec2 din = (joint - pa).Normalized(), dout = (pb - joint).Normalized();
+                double turn = Math.Atan2(din.Cross(dout), din.Dot(dout));
+                if (Math.Abs(turn) < 0.5 * Math.PI / 180 || Math.Abs(turn) > 150 * Math.PI / 180)
+                {
+                    continue;
+                }
+
+                // the inner side of the bend, in each road's own direction (a arrives at the joint, b leaves it)
+                bool leftTurn = turn > 0;
+                bool aInnerLeft = leftTurn != aStart, bInnerLeft = leftTurn == bStart;
+                double radius = Math.Max(AxisRadius(a, aInnerLeft), AxisRadius(b, bInnerLeft));
+                double tangent = radius * Math.Tan(Math.Abs(turn) / 2);
+                double room = Math.Min(a.Axis.Count == 2 ? la * 0.9 : la * 0.5, b.Axis.Count == 2 ? lb * 0.9 : lb * 0.5);
+                if (tangent > room)
+                {
+                    tangent = room;
+                    radius = tangent / Math.Tan(Math.Abs(turn) / 2);
+                }
+
+                if (radius < 0.5)
+                {
+                    continue;
+                }
+
+                double sign = leftTurn ? 1 : -1;
+                Vec2 t1 = joint - (din * tangent);
+                Vec2 centre = t1 + (din.Perp() * (sign * radius));
+                double a0 = Math.Atan2(t1.Y - centre.Y, t1.X - centre.X);
+                Vec2 At(double f) => centre + (new Vec2(Math.Cos(a0 + (turn * f)), Math.Sin(a0 + (turn * f))) * radius);
+                Vec2 mid = At(0.5);
+                Vec2 tan = new Vec2(Math.Cos(a0 + (turn * 0.5)), Math.Sin(a0 + (turn * 0.5))).Perp() * sign;
+                int steps = Math.Max(1, (int)Math.Ceiling(Math.Abs(turn) / 2 / (Math.PI / 90)));
+                const double Stub = 0.05;
+
+                // first half for a (towards the joint), second half for b (away from it); both end square at the middle
+                var first = new List<Vec2>();
+                var second = new List<Vec2>();
+                for (int k = 0; k < steps; k++)
+                {
+                    Vec2 p = At(0.5 * k / steps), q = At(1 - (0.5 * k / steps));
+                    if (p.DistanceTo(mid) > 2 * Stub)
+                    {
+                        first.Add(p);
+                        second.Add(q);
+                    }
+                }
+
+                first.Add(mid - (tan * Stub));
+                first.Add(mid);
+                second.Add(mid + (tan * Stub));
+                second.Add(mid);
+                second.Reverse(); // mid ... t2
+
+                void Apply(RoadSpec r, bool atStart, List<Vec2> towardsJoint)
+                {
+                    // the vertices drawn so far stay the corners that get rounded; the arc is final
+                    r.Corners ??= r.Axis.Skip(1).Take(r.Axis.Count - 2).ToList();
+                    if (atStart)
+                    {
+                        r.Axis.RemoveAt(0);
+                        r.Axis.InsertRange(0, Enumerable.Reverse(towardsJoint));
+                    }
+                    else
+                    {
+                        r.Axis.RemoveAt(r.Axis.Count - 1);
+                        r.Axis.AddRange(towardsJoint);
+                    }
+                }
+
+                Apply(a, aStart, first);
+                Apply(b, bStart, Enumerable.Reverse(second).ToList());
+                used.Add((a, aStart));
+                used.Add((b, bStart));
             }
         }
 
@@ -700,25 +853,138 @@ namespace SiteDesignPro.Core.Roads
         private static bool Touches(PathsD piece, PathsD strips, double reach) =>
             strips.Count > 0 && Clipper.Intersect(Clipper.InflatePaths(piece, reach, JoinType.Round, EndType.Polygon, 2, Precision, 0.02), strips, FillRule.NonZero, Precision).Sum(p => Math.Abs(Clipper.Area(p))) > 1e-4;
 
-        /// <summary>
-        /// Where a ring of the cross-section is drawn: the strips along the roads that have it, plus the corner fillets
-        /// next to them (found within <paramref name="touch"/>; a negative value takes all given fillets), grown by
-        /// <paramref name="grow"/> so a ring outside the kerb line follows the whole corner arc.
-        /// </summary>
-        private static PathsD Zone(PathsD strips, List<PathsD> fillets, double touch, double grow)
+        private static bool InsideAny(PathsD paths, Vec2 p)
         {
-            var zone = new PathsD(strips);
-            foreach (PathsD f in fillets)
+            int n = 0;
+            var pt = new PointD(p.X, p.Y);
+            foreach (PathD path in paths)
             {
-                if (touch >= 0 && !Touches(f, strips, touch))
+                if (Clipper.PointInPolygon(pt, path) != PointInPolygonResult.IsOutside)
+                {
+                    n++;
+                }
+            }
+
+            return (n & 1) == 1;
+        }
+
+        /// <summary>
+        /// Where a ring of the cross-section may follow a corner fillet: around the fillet, grown by <paramref name="grow"/>,
+        /// but cut square (radially) at an end of the corner arc where the road beyond does not have that ring, so the
+        /// ring ends on the line where the arc ends instead of spilling along the other road.
+        /// </summary>
+        private static PathsD FilletZone(PathsD fillet, double grow, PathsD strips, PathsD surface, PathsD innerSurface, double mid)
+        {
+            PathsD zone = Clipper.InflatePaths(fillet, grow, JoinType.Round, EndType.Polygon, 2, Precision, 0.02);
+            if (fillet.Count != 1 || fillet[0].Count < 6)
+            {
+                return zone;
+            }
+
+            // the corner arc: the vertices of the fillet on the edge of the surface (the others lie inside it)
+            List<Vec2> ring = fillet[0].Select(q => new Vec2(q.x, q.y)).ToList();
+            int n = ring.Count;
+            bool[] onArc = ring.Select(q => !InsideAny(innerSurface, q)).ToArray();
+            int start = -1, length = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (!onArc[i] || onArc[(i + n - 1) % n])
                 {
                     continue;
                 }
 
-                zone.AddRange(grow > 0 ? Clipper.InflatePaths(f, grow, JoinType.Round, EndType.Polygon, 2, Precision, 0.02) : f);
+                int l = 0;
+                while (l < n && onArc[(i + l) % n])
+                {
+                    l++;
+                }
+
+                if (l > length)
+                {
+                    (start, length) = (i, l);
+                }
             }
 
-            return Union(zone);
+            if (start < 0 || length < 5)
+            {
+                return zone;
+            }
+
+            List<Vec2> arc = Enumerable.Range(0, length).Select(k => ring[(start + k) % n]).ToList();
+            Vec2 a = arc[length / 4], b = arc[length / 2], c = arc[(3 * length) / 4];
+            double d = 2 * ((a.X * (b.Y - c.Y)) + (b.X * (c.Y - a.Y)) + (c.X * (a.Y - b.Y)));
+            if (Math.Abs(d) < 1e-9)
+            {
+                return zone;
+            }
+
+            double a2 = a.Dot(a), b2 = b.Dot(b), c2 = c.Dot(c);
+            var centre = new Vec2(((a2 * (b.Y - c.Y)) + (b2 * (c.Y - a.Y)) + (c2 * (a.Y - b.Y))) / d, ((a2 * (c.X - b.X)) + (b2 * (a.X - c.X)) + (c2 * (b.X - a.X))) / d);
+            double radius = centre.DistanceTo(b);
+            if (radius > 200)
+            {
+                return zone;
+            }
+
+            List<Vec2> on = arc.Where(q => Math.Abs(q.DistanceTo(centre) - radius) < 0.01).ToList();
+            if (on.Count < 3)
+            {
+                return zone;
+            }
+
+            // the exact ends of the arc are on the edge of the surface itself (the fillet piece is cut a little short)
+            Vec2 e0 = on[0], e1 = on[on.Count - 1];
+            foreach (PathD path in surface)
+            {
+                int m = path.Count, at = -1;
+                double best = 0.05;
+                for (int i = 0; i < m; i++)
+                {
+                    double dist = new Vec2(path[i].x, path[i].y).DistanceTo(b);
+                    if (dist < best)
+                    {
+                        (best, at) = (dist, i);
+                    }
+                }
+
+                if (at < 0)
+                {
+                    continue;
+                }
+
+                bool OnCircle(int i) => Math.Abs(new Vec2(path[((i % m) + m) % m].x, path[((i % m) + m) % m].y).DistanceTo(centre) - radius) < 0.005;
+                int lo = at, hi = at;
+                while (at - lo < m && OnCircle(lo - 1))
+                {
+                    lo--;
+                }
+
+                while (hi - at < m && OnCircle(hi + 1))
+                {
+                    hi++;
+                }
+
+                e0 = new Vec2(path[((lo % m) + m) % m].x, path[((lo % m) + m) % m].y);
+                e1 = new Vec2(path[((hi % m) + m) % m].x, path[((hi % m) + m) % m].y);
+                break;
+            }
+
+            foreach (Vec2 end in new[] { e0, e1 })
+            {
+                Vec2 dir = (end - centre).Normalized();
+                if (InsideAny(strips, end - (dir * Math.Min(mid, radius * 0.9))) || InsideAny(strips, end + (dir * mid)))
+                {
+                    continue; // the ring goes on along this road
+                }
+
+                double side = dir.Cross(b - centre) >= 0 ? 1 : -1;
+                Vec2 perp = dir.Perp() * side;
+                const double Far = 1000;
+                var half = new[] { centre - (dir * Far), centre + (dir * Far), centre + (dir * Far) + (perp * Far), centre - (dir * Far) + (perp * Far) };
+                zone = Clipper.Intersect(zone, new PathsD { Positive(half) }, FillRule.NonZero, Precision);
+            }
+
+            return zone;
         }
 
         /// <summary>One rounded bend of an axis: vertices First..Last replaced by an arc from T1 to T2.</summary>
