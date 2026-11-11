@@ -21,6 +21,20 @@
 * **Rampa uz ulicu**: kad rampa počinje ili završava uz ulicu (do 1,5 m od njene vanjske ivice), ivičnjak,
   biciklistička staza i trotoar se sami otvore u širini rampe, a kolovoz se produži do rampe.
 
+### Garažne rampe – presjek, svijetla visina i ostalo
+* **Presjek rampe** (`SDPRAMPAPRESJEK`): uzdužni presjek pored tlocrta – ploča rampe, prelomi nagiba sa stacionažom
+  i kotom, dužina i nagib svake dionice, ploča iznad rampe i svijetla visina. Prati izmjene rampe; uklanja se
+  brisanjem svoje oznake.
+* **Svijetla visina**: zada se gdje počinje ploča iznad rampe i njena donja ivica; najmanja visina ispod nje se
+  ispisuje u tlocrtu i presjeku, a ispod potrebne (zadano 2,10 m) je crvena uz UPOZORENJE.
+* **Blagi dio pred ulicom**: dionica na vrhu s najviše 5 %; preporuka se ispisuje kad rampa izlazi na ulicu strmije.
+* **Zaobljeni uglovi** otvora u ivičnjaku gdje rampa izlazi na ulicu (R = 1,50 m).
+* **Kombinovana rampa**: prave dionice spojene lukovima jednog poluprečnika, jedan nagib i jedan tekst; poprečni
+  nagib 3 % samo u lukovima.
+* **Odvodnja**: linijska rešetka na dnu (ili na dnu i vrhu), u tlocrtu i 3D. **Grijana rampa**: šrafura vozne
+  površine. **Strelica nagiba** (nagore) uz tekst.
+* **3D**: potporni zidovi uz dio rampe ispod nivoa vrha i ograda 1,00 m na njima.
+
 ### Spojevi ulica (provjera 40 situacija)
 * Ulica nastavljena drugom ulicom pod uglom (kraj na kraj) dobija krivinu kao jedna ulica: unutrašnja i vanjska
   strana su zaobljene i koncentrične, bez izbočine i zasjeka na vanjskom uglu, i bez šava na trotoaru.

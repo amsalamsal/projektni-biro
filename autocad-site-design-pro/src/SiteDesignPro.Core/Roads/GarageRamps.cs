@@ -923,7 +923,7 @@ namespace SiteDesignPro.Core.Roads
             {
                 list.Add(Across("ceiling", CeilingFrom, half + 0.6, -(half + 0.6)));
                 string ct = "svijetla visina " + Num(clear.Value.Clearance) + " m" + (TooLow ? " < " + Num(MinClearance) + " m!" : string.Empty);
-                list.Add(Note(ct, CeilingFrom + ((lay.Flip ? -1 : 1) * ((ct.Length * 0.68 * 0.22 / 2) + 0.3)), beside, 0.22, TooLow));
+                list.Add(Note(ct, CeilingFrom + ((lay.Flip ? -1 : 1) * ((ct.Length * 0.68 * 0.22 / 2) + 0.3)), half + WallThickness + 0.4, 0.22, TooLow));
             }
 
             // the arrow of the slope (pointing uphill) beside the text in the middle

@@ -392,6 +392,22 @@ namespace SiteDesignPro.Core.Roads
                 walk = Clipper.Difference(walk, opening, FillRule.NonZero, Precision);
                 edge = Clipper.Difference(edge, opening, FillRule.NonZero, Precision);
                 carriageway = Clipper.Union(carriageway, tab, FillRule.NonZero, Precision);
+
+                // the two corners where the driveway leaves the carriageway are rounded, within the kerb and sidewalk
+                PathsD beside = Clipper.Union(Clipper.Union(kerb, bike, FillRule.NonZero, Precision), Clipper.Union(walk, edge, FillRule.NonZero, Precision), FillRule.NonZero, Precision);
+                PathsD near = Clipper.InflatePaths(opening, DrivewayRadius * 2.5, JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
+                PathsD corners = Clipper.Difference(Close(carriageway, DrivewayRadius), carriageway, FillRule.NonZero, Precision);
+                corners = Clipper.Intersect(Clipper.Intersect(corners, near, FillRule.NonZero, Precision), beside, FillRule.NonZero, Precision);
+                corners = new PathsD(corners.Where(c => Math.Abs(Clipper.Area(c)) > 0.02));
+                if (corners.Count > 0)
+                {
+                    kerb = Clipper.Difference(kerb, corners, FillRule.NonZero, Precision);
+                    bike = Clipper.Difference(bike, corners, FillRule.NonZero, Precision);
+                    walk = Clipper.Difference(walk, corners, FillRule.NonZero, Precision);
+                    edge = Clipper.Difference(edge, corners, FillRule.NonZero, Precision);
+                    carriageway = Clipper.Union(carriageway, corners, FillRule.NonZero, Precision);
+                }
+
                 result.Driveways++;
             }
 
@@ -762,6 +778,9 @@ namespace SiteDesignPro.Core.Roads
             PathsD grown = Clipper.InflatePaths(shape, r, JoinType.Miter, EndType.Polygon, 10, Precision);
             return Clipper.InflatePaths(grown, -r, JoinType.Round, EndType.Polygon, 2, Precision, ArcTolerance);
         }
+
+        /// <summary>Radius of the corners where a driveway leaves the carriageway.</summary>
+        public const double DrivewayRadius = 1.5;
 
         /// <summary>Width of an accessible kerb ramp along the kerb.</summary>
         public const double RampWidth = 1.2;
