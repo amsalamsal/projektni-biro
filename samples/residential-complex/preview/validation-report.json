@@ -1,0 +1,130 @@
+{
+  "createdUtc": "2026-01-01T00:00:00Z",
+  "elementCount": 139,
+  "errors": 0,
+  "warnings": 0,
+  "reviews": 12,
+  "disclaimer": "Automatske provjere služe samo za koordinaciju projekta. Provjere razmaka, sigurnosti, pristupačnosti i kapaciteta koriste vrijednosti koje je unio korisnik; nisu ovjerena provjera usklađenosti s propisima i ne zamjenjuju stručni pregled.",
+  "issues": [
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "3bde59e8-63db-43d2-8595-5a06d18a798e",
+      "relatedElementId": null,
+      "label": "UW-001",
+      "message": "'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "3bde59e8-63db-43d2-8595-5a06d18a798e",
+      "relatedElementId": null,
+      "label": "UW-001",
+      "message": "'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "25bba43c-cc19-426d-87b9-b4f91bb790e1",
+      "relatedElementId": null,
+      "label": "UW-002",
+      "message": "'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "25bba43c-cc19-426d-87b9-b4f91bb790e1",
+      "relatedElementId": null,
+      "label": "UW-002",
+      "message": "'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "4f99498f-f2b9-43f2-9ba3-b42e4cc45498",
+      "relatedElementId": null,
+      "label": "UW-003",
+      "message": "'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "4f99498f-f2b9-43f2-9ba3-b42e4cc45498",
+      "relatedElementId": null,
+      "label": "UW-003",
+      "message": "'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "f6b1ee82-777f-4c46-9a0b-2ef0c63ad748",
+      "relatedElementId": null,
+      "label": "UW-004",
+      "message": "'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 3 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "f6b1ee82-777f-4c46-9a0b-2ef0c63ad748",
+      "relatedElementId": null,
+      "label": "UW-004",
+      "message": "'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 3 m³. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "208bc87e-b349-45c8-a258-19e837f23b48",
+      "relatedElementId": null,
+      "label": "PE-001",
+      "message": "'Sigurnosni razmak (prema proizvođaču / standardu)' nije definisano za Ljuljačka. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "208bc87e-b349-45c8-a258-19e837f23b48",
+      "relatedElementId": null,
+      "label": "PE-001",
+      "message": "'Oznaka proizvoda / model' nije definisano za Ljuljačka. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "99313b5b-e07c-4d71-bf33-a9c06cd87afd",
+      "relatedElementId": null,
+      "label": "PE-002",
+      "message": "'Servisni / sigurnosni razmak' nije definisano za Dječija igračka sprava. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    },
+    {
+      "severity": "review",
+      "kind": "ProfessionalReview",
+      "code": "SDP-R001",
+      "elementId": "99313b5b-e07c-4d71-bf33-a9c06cd87afd",
+      "relatedElementId": null,
+      "label": "PE-002",
+      "message": "'Oznaka proizvoda / model' nije definisano za Dječija igračka sprava. Zadane dimenzije i razmaci su samo orijentacioni.",
+      "resolution": "Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor."
+    }
+  ]
+}

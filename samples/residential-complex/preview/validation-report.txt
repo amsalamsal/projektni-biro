@@ -1,0 +1,31 @@
+Vanjsko uređenje PRO – izvještaj provjere
+Izrađeno (UTC): 2026-01-01 00:00:00
+Elemenata: 139  Greške: 0  Upozorenja: 0  Za pregled: 12
+
+ZA STRUČNI PREGLED
+  SDP-R001  UW-001: 'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-001: 'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-002: 'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-002: 'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-003: 'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-003: 'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 5 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-004: 'Izvor dimenzija (dokument proizvođača)' nije definisano za Podzemni kontejner za otpad 3 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  UW-004: 'Prostor za vozilo / podizanje kontejnera' nije definisano za Podzemni kontejner za otpad 3 m³. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  PE-001: 'Sigurnosni razmak (prema proizvođaču / standardu)' nije definisano za Ljuljačka. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  PE-001: 'Oznaka proizvoda / model' nije definisano za Ljuljačka. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  PE-002: 'Servisni / sigurnosni razmak' nije definisano za Dječija igračka sprava. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+  SDP-R001  PE-002: 'Oznaka proizvoda / model' nije definisano za Dječija igračka sprava. Zadane dimenzije i razmaci su samo orijentacioni.
+      -> Unesite vrijednost prema proizvođaču, botaničkom izvoru ili primjenjivom standardu i zabilježite izvor.
+
+Automatske provjere služe samo za koordinaciju projekta. Provjere razmaka, sigurnosti, pristupačnosti i kapaciteta koriste vrijednosti koje je unio korisnik; nisu ovjerena provjera usklađenosti s propisima i ne zamjenjuju stručni pregled.

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://site-design-pro.local/schema/1.0/geometry.schema.json",
+  "title": "Site Design Pro package geometry",
+  "description": "Element geometry of a Site Design Pro exchange package (schema 1.x). Coordinates are metres relative to manifest.coordinateSystem.origin. Arcs are encoded as AutoCAD-style bulges: bulges[i] applies to the segment from vertex i to vertex i+1 (closing segment last for closed rings) and equals tan(sweep/4), positive counter-clockwise.",
+  "type": "object",
+  "required": ["schemaVersion", "lengthUnit", "elements"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
+    "lengthUnit": { "const": "m" },
+    "elements": { "type": "array", "items": { "$ref": "#/$defs/elementGeometry" } }
+  },
+  "$defs": {
+    "vec3": { "type": "array", "items": { "type": "number" }, "minItems": 3, "maxItems": 3 },
+    "ring": {
+      "type": "object",
+      "required": ["vertices"],
+      "additionalProperties": false,
+      "properties": {
+        "vertices": { "type": "array", "items": { "$ref": "#/$defs/vec3" }, "minItems": 2 },
+        "bulges": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "elementGeometry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["id", "kind", "position", "rotation"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "point" },
+            "position": { "$ref": "#/$defs/vec3" },
+            "rotation": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["id", "kind", "vertices", "closed"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "path" },
+            "vertices": { "type": "array", "items": { "$ref": "#/$defs/vec3" }, "minItems": 2 },
+            "bulges": { "type": "array", "items": { "type": "number" } },
+            "closed": { "type": "boolean" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["id", "kind", "outer"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "string" },
+            "kind": { "const": "polygon" },
+            "outer": { "$ref": "#/$defs/ring" },
+            "holes": { "type": "array", "items": { "$ref": "#/$defs/ring" } }
+          }
+        }
+      ]
+    }
+  }
+}
