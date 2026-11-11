@@ -211,8 +211,8 @@ namespace SiteDesignPro.AutoCAD.Commands
             double average = axisLength < 1e-9 ? 0 : Math.Abs(h1 - h0) / axisLength;
             if (average > 0.10 + 1e-9 && axisLength >= 9)
             {
-                ctx.Write("Prosječni nagib je " + Bs.Num(average * 100, 2) + " % (preko 10 %): preporučene su prijelazne dionice s pola nagiba na vrhu i dnu.");
-                transition = ctx.Number("Dužina prijelazne dionice na vrhu i dnu (m, 0 = bez)", 4.0, false, true);
+                ctx.Write("Prosječni nagib je " + Bs.Num(average * 100, 2) + " % (preko 10 %). Rampa ima jedan nagib od početka do kraja; po želji se na vrhu i dnu mogu dodati blaže prijelazne dionice s pola nagiba.");
+                transition = ctx.Number("Dužina blaže prijelazne dionice na vrhu i dnu (m, 0 = bez, jedan nagib cijelom dužinom)", 0, false, true);
                 transition = Math.Max(0, Math.Min(Math.Min(8, (axisLength - 1) / 2), transition));
             }
 
@@ -220,7 +220,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             double flat = 0;
             if (average > GarageRamp.FlatSlope + 1e-9 && axisLength >= 12)
             {
-                flat = ctx.Number("Blagi dio pred ulicom na vrhu, najviše 5 % (m, 0 = bez; preporučeno 5 kad rampa izlazi na ulicu)", 0, false, true);
+                flat = ctx.Number("Blagi dio pred ulicom na vrhu, najviše 5 % (m, 0 = bez, jedan nagib cijelom dužinom)", 0, false, true);
                 flat = Math.Max(0, Math.Min(Math.Min(10, axisLength - 3), flat));
             }
 
