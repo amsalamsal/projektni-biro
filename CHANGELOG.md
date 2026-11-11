@@ -15,6 +15,11 @@
 * Širina trake i zaštitni razmak drže se dozvoljenih granica i kad se promijene u Svojstvima; upozorenje kad je
   unutrašnji poluprečnik manji od 5 m.
 * U 3D (SketchUp): ploča rampe s bokovima, žute i bijele linije i strelice na kosini, ostrvo kao uzdignut blok.
+* **Prijelazne dionice**: kad je prosječni nagib preko 10 %, naredba nudi dionice na vrhu i dnu (zadano 4,00 m)
+  s pola nagiba. Na rampi su označene poprečnom linijom i tekstom „4,00 m 7,50 %“; nagib u sredini (najveći) se
+  ispisuje i provjerava prema 17 %. Dužina se mijenja u Svojstvima (0 = bez), a 3D prati prelome nagiba.
+* **Rampa uz ulicu**: kad rampa počinje ili završava uz ulicu (do 1,5 m od njene vanjske ivice), ivičnjak,
+  biciklistička staza i trotoar se sami otvore u širini rampe, a kolovoz se produži do rampe.
 
 ### Spojevi ulica (provjera 40 situacija)
 * Ulica nastavljena drugom ulicom pod uglom (kraj na kraj) dobija krivinu kao jedna ulica: unutrašnja i vanjska
