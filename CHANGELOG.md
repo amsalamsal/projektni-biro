@@ -2,6 +2,20 @@
 
 ## Neobjavljeno
 
+### Garažne rampe – dorada
+* Ivice, žute linije i srednja linija zakrivljenih rampi su pravi lukovi (ne izlomljene linije), a rampa ima sivu
+  površinu kao kolovoz.
+* Tekst „L=…, h=…, …%“ stoji tačno na srednjoj liniji, koja je na tom mjestu prekinuta; na zakrivljenoj rampi
+  tekst je podijeljen u dijelove koji prate luk i uvijek se čita slijeva nadesno. Na kratkoj rampi tekst i strelice
+  se smanje da stanu.
+* Strelice prate krivinu trake; na jednosmjernoj rampi srednja linija je prekinuta oko strelica; duge rampe
+  dobijaju strelicu otprilike svakih 20 m.
+* Srednje ostrvo 60 × 250 cm samo na dvosmjernoj pravolinijskoj rampi, 50 cm od donjeg kraja, sa prekidom
+  srednje linije.
+* Širina trake i zaštitni razmak drže se dozvoljenih granica i kad se promijene u Svojstvima; upozorenje kad je
+  unutrašnji poluprečnik manji od 5 m.
+* U 3D (SketchUp): ploča rampe s bokovima, žute i bijele linije i strelice na kosini, ostrvo kao uzdignut blok.
+
 ### Spojevi ulica (provjera 40 situacija)
 * Ulica nastavljena drugom ulicom pod uglom (kraj na kraj) dobija krivinu kao jedna ulica: unutrašnja i vanjska
   strana su zaobljene i koncentrične, bez izbočine i zasjeka na vanjskom uglu, i bez šava na trotoaru.
