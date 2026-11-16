@@ -14,12 +14,21 @@ namespace SiteDesignPro.Core.Roads
     public sealed class RoadRampFrame
     {
         public RoadRampFrame(Vec2 foot, Vec2 along, Vec2 inward, double depth)
+            : this(foot, along, inward, depth, RoadNetwork.RampWidth)
+        {
+        }
+
+        public RoadRampFrame(Vec2 foot, Vec2 along, Vec2 inward, double depth, double width)
         {
             Foot = foot;
             Along = along;
             Inward = inward;
             Depth = depth;
+            Width = width;
         }
+
+        /// <summary>Width of the lowered kerb (1,20 m; 2,00 m at a crossing with a bike strip).</summary>
+        public double Width { get; }
 
         public Vec2 Foot { get; }
 
@@ -41,6 +50,9 @@ namespace SiteDesignPro.Core.Roads
         public Vec2 Direction { get; set; }
 
         public double Width { get; set; }
+
+        /// <summary>Radius of the two corners where the driveway leaves the carriageway (at least 1,00 m).</summary>
+        public double Radius { get; set; } = RoadNetwork.DrivewayRadius;
 
         public List<Vec2> Exclude { get; set; } = new List<Vec2>();
     }
@@ -157,6 +169,9 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Number of driveways opened through the kerb and sidewalk.</summary>
         public int Driveways { get; set; }
 
+        /// <summary>Number of places where the bike lane goes around an accessible ramp.</summary>
+        public int BikeDetours { get; set; }
+
         public List<RoadLoop> Ramps { get; } = new List<RoadLoop>();
 
         /// <summary>Position of each ramp of <see cref="Ramps"/> on its kerb line (same order).</summary>
@@ -214,7 +229,14 @@ namespace SiteDesignPro.Core.Roads
         /// Builds the network; at each of the <paramref name="driveways"/> (metres) the kerb, bike lane and sidewalk of
         /// the road beside it are opened over its width and the carriageway runs through to it.
         /// </summary>
-        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks, IEnumerable<RoadDriveway>? driveways)
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks, IEnumerable<RoadDriveway>? driveways) =>
+            Build(input, noMarking, crossings, rampMarks, driveways, null);
+
+        /// <summary>
+        /// Builds the network; <paramref name="crossingRampWidths"/> gives the width of the ramps of each crossing (same
+        /// order as <paramref name="crossings"/>; 1,20 m when missing).
+        /// </summary>
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks, IEnumerable<RoadDriveway>? driveways, IReadOnlyList<double>? crossingRampWidths)
         {
             var result = new RoadNetworkResult();
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
@@ -395,8 +417,9 @@ namespace SiteDesignPro.Core.Roads
 
                 // the two corners where the driveway leaves the carriageway are rounded, within the kerb and sidewalk
                 PathsD beside = Clipper.Union(Clipper.Union(kerb, bike, FillRule.NonZero, Precision), Clipper.Union(walk, edge, FillRule.NonZero, Precision), FillRule.NonZero, Precision);
-                PathsD near = Clipper.InflatePaths(opening, DrivewayRadius * 2.5, JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
-                PathsD corners = Clipper.Difference(Close(carriageway, DrivewayRadius), carriageway, FillRule.NonZero, Precision);
+                double dr = Math.Max(DrivewayRadius, Math.Min(MaxDrivewayRadius, dw.Radius));
+                PathsD near = Clipper.InflatePaths(opening, dr * 2.5, JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
+                PathsD corners = Clipper.Difference(Close(carriageway, dr), carriageway, FillRule.NonZero, Precision);
                 corners = Clipper.Intersect(Clipper.Intersect(corners, near, FillRule.NonZero, Precision), beside, FillRule.NonZero, Precision);
                 corners = new PathsD(corners.Where(c => Math.Abs(Clipper.Area(c)) > 0.02));
                 if (corners.Count > 0)
@@ -412,37 +435,69 @@ namespace SiteDesignPro.Core.Roads
             }
 
             // accessible kerb ramps (120 cm) only where the user wants them: at the ends of each pedestrian crossing and at
-            // the ramp marks; the ramp lowers the kerb and slopes up to the bike lane or sidewalk
+            // the ramp marks; the ramp lowers the kerb and slopes up to the sidewalk. A bike lane goes around the ramp
+            // where the sidewalk has room for it.
             PathsD behindKerb = Clipper.Union(Clipper.Union(kerb, bike, FillRule.NonZero, Precision), walk, FillRule.NonZero, Precision);
+            var bikeIslands = new PathsD();
+            PathsD bikeOuter = new PathsD();
             if (walk.Count > 0)
             {
                 PathsD done = new PathsD();
-                void AddRamps(IEnumerable<(PathD Ramp, RoadRampFrame Frame)> found)
+                PathsD bike0 = bike, walk0 = walk;
+                void AddRamps(IEnumerable<RampPlace> found)
                 {
-                    foreach ((PathD ramp, RoadRampFrame f) in found)
+                    foreach (RampPlace place in found)
                     {
-                        if (Clipper.Intersect(new PathsD { ramp }, done, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) > 0.1)
+                        if (Clipper.Intersect(new PathsD { place.Ramp }, done, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) > 0.1)
                         {
                             continue;
                         }
 
-                        done.Add(ramp);
-                        result.Ramps.Add(new RoadLoop(ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), ramp.Select(_ => 0.0).ToList()));
-                        result.RampFrames.Add(new RoadRampFrame(f.Foot + origin, f.Along, f.Inward, f.Depth));
+                        done.Add(place.Ramp);
+                        RoadRampFrame f = place.Frame;
+                        result.Ramps.Add(new RoadLoop(place.Ramp.Select(q => new Vec2(q.x, q.y) + origin).ToList(), place.Ramp.Select(_ => 0.0).ToList()));
+                        result.RampFrames.Add(new RoadRampFrame(f.Foot + origin, f.Along, f.Inward, f.Depth, f.Width));
+                        if (place.FromBike == null || place.ToBike == null)
+                        {
+                            continue;
+                        }
+
+                        // the bike lane moves outwards around the ramp: what it leaves becomes sidewalk, what it takes
+                        // from the sidewalk becomes bike lane
+                        PathsD toWalkPart = Clipper.Intersect(new PathsD { place.FromBike }, bike0, FillRule.NonZero, Precision);
+                        PathsD toBikePart = Clipper.Intersect(new PathsD { place.ToBike }, walk0, FillRule.NonZero, Precision);
+                        if (toWalkPart.Sum(q => Math.Abs(Clipper.Area(q))) < 0.05 || toBikePart.Sum(q => Math.Abs(Clipper.Area(q))) < 0.05)
+                        {
+                            continue;
+                        }
+
+                        bike = Clipper.Union(Clipper.Difference(bike, toWalkPart, FillRule.NonZero, Precision), toBikePart, FillRule.NonZero, Precision);
+                        walk = Clipper.Union(Clipper.Difference(walk, toBikePart, FillRule.NonZero, Precision), toWalkPart, FillRule.NonZero, Precision);
+                        bikeIslands.AddRange(toWalkPart);
+                        bikeOuter.AddRange(toBikePart);
+                        result.BikeDetours++;
                     }
                 }
 
+                int ci = 0;
                 foreach (IReadOnlyList<Vec2> area in crossings ?? Enumerable.Empty<IReadOnlyList<Vec2>>())
                 {
+                    double rw = crossingRampWidths != null && ci < crossingRampWidths.Count && crossingRampWidths[ci] > RampWidth ? crossingRampWidths[ci] : RampWidth;
+                    ci++;
                     if (area.Count >= 3)
                     {
-                        AddRamps(RampsAt(area.Select(q => q - origin).ToList(), false, roads, behindKerb, walk));
+                        AddRamps(RampsAt(area.Select(q => q - origin).ToList(), false, roads, behindKerb, walk0, rw));
                     }
                 }
 
                 foreach (Vec2 mark in rampMarks ?? Enumerable.Empty<Vec2>())
                 {
-                    AddRamps(RampsAt(new List<Vec2> { mark - origin }, true, roads, behindKerb, walk));
+                    AddRamps(RampsAt(new List<Vec2> { mark - origin }, true, roads, behindKerb, walk0, RampWidth));
+                }
+
+                if (bikeOuter.Count > 0)
+                {
+                    toBike = Clipper.Union(toBike, bikeOuter, FillRule.NonZero, Precision);
                 }
             }
 
@@ -472,6 +527,12 @@ namespace SiteDesignPro.Core.Roads
                 result.Bands[level] = Regions(region[level], origin);
                 bool draw = level == RoadLevel.Carriageway || region[level].Count > 0;
                 result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
+            }
+
+            // the inner edge of a bike lane that goes around a ramp
+            foreach (PathD island in bikeIslands)
+            {
+                result.Outlines[RoadLevel.Bike].Add(new RoadLoop(island.Select(q => new Vec2(q.x, q.y) + origin).ToList(), island.Select(_ => 0.0).ToList()));
             }
 
             var gaps = new PathsD();
@@ -779,8 +840,13 @@ namespace SiteDesignPro.Core.Roads
             return Clipper.InflatePaths(grown, -r, JoinType.Round, EndType.Polygon, 2, Precision, ArcTolerance);
         }
 
-        /// <summary>Radius of the corners where a driveway leaves the carriageway.</summary>
-        public const double DrivewayRadius = 1.5;
+        /// <summary>
+        /// Smallest radius of the corners where a driveway leaves the carriageway: the arc that cuts 1,00 m off both
+        /// edges of a right corner (the arc in a 1,00 × 1,00 m chamfer at 45°).
+        /// </summary>
+        public const double DrivewayRadius = 1.0;
+
+        public const double MaxDrivewayRadius = 10.0;
 
         /// <summary>Width of an accessible kerb ramp along the kerb.</summary>
         public const double RampWidth = 1.2;
@@ -791,21 +857,60 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>The same at the back of the ramp.</summary>
         public const double RampBackFlare = 0.65;
 
-        /// <summary>
-        /// Depth of a ramp behind the kerb line: the kerb (0,15 m) and up to 2,00 m of slope to the sidewalk (about 6,5 %),
-        /// less if the sidewalk ends sooner.
-        /// </summary>
-        public const double RampDepth = RoadSpec.KerbWidth + 2.0;
+        /// <summary>Largest depth a ramp may cut into the sidewalk.</summary>
+        public const double RampMaxCut = 1.0;
+
+        /// <summary>Sidewalk width that must stay beside a bike lane that goes around a ramp.</summary>
+        public const double MinWalkBesideDetour = 0.9;
 
         /// <summary>
-        /// Ramps (1,20 m wide) at the two ends of a pedestrian crossing: across the kerb, bike lane and sidewalk of the
-        /// road the crossing lies on, on the sides with a sidewalk.
+        /// How deep an accessible ramp cuts into a sidewalk of a given width: 0,40 m for a sidewalk up to 1,20 m, 5 cm more
+        /// for every 10 cm of width over 1,20 m, never more than 1,00 m (nor more than the sidewalk itself).
         /// </summary>
-        private static IEnumerable<(PathD Ramp, RoadRampFrame Frame)> RampsAt(List<Vec2> area, bool mark, List<RoadSpec> roads, PathsD behindKerb, PathsD walk)
+        public static double RampCut(double sidewalk)
+        {
+            if (sidewalk <= 1.2 + 1e-9)
+            {
+                return Math.Max(0, Math.Min(0.40, sidewalk));
+            }
+
+            int steps = (int)Math.Floor(((sidewalk - 1.2) / 0.10) + 1e-6);
+            return Math.Min(RampMaxCut, 0.40 + (0.05 * steps));
+        }
+
+        /// <summary>A ramp with its place on the kerb line and, where the bike lane goes around it, the two areas that change hands.</summary>
+        private sealed class RampPlace
+        {
+            public RampPlace(PathD ramp, RoadRampFrame frame, PathD? fromBike, PathD? toBike)
+            {
+                Ramp = ramp;
+                Frame = frame;
+                FromBike = fromBike;
+                ToBike = toBike;
+            }
+
+            public PathD Ramp { get; }
+
+            public RoadRampFrame Frame { get; }
+
+            /// <summary>Between the old and the new inner edge of the bike lane (becomes sidewalk).</summary>
+            public PathD? FromBike { get; }
+
+            /// <summary>Between the old and the new outer edge of the bike lane (becomes bike lane).</summary>
+            public PathD? ToBike { get; }
+        }
+
+        /// <summary>
+        /// Ramps at the two ends of a pedestrian crossing (or at a ramp mark): across the kerb of the road the crossing
+        /// lies on and into the sidewalk by <see cref="RampCut"/>, on the sides with a sidewalk. A bike lane between the
+        /// kerb and the sidewalk goes gently around the ramp where the road is straight there and the sidewalk keeps
+        /// <see cref="MinWalkBesideDetour"/>; else the ramp crosses the bike lane.
+        /// </summary>
+        private static IEnumerable<RampPlace> RampsAt(List<Vec2> area, bool mark, List<RoadSpec> roads, PathsD behindKerb, PathsD walk, double width)
         {
             Vec2 c = new Vec2(area.Average(q => q.X), area.Average(q => q.Y));
             RoadSpec? road = null;
-            Vec2 foot = c, along = new Vec2(1, 0);
+            Vec2 foot = c, along = new Vec2(1, 0), segA = c, segB = c;
             double best = double.MaxValue;
             foreach (RoadSpec r in roads)
             {
@@ -829,6 +934,8 @@ namespace SiteDesignPro.Core.Roads
                         foot = f;
                         along = ab.Normalized();
                         road = r;
+                        segA = a;
+                        segB = b;
                     }
                 }
             }
@@ -855,7 +962,7 @@ namespace SiteDesignPro.Core.Roads
                 double outer = Math.Max(road.Extent(RoadLevel.Edge, left), kerbLine) + 0.5;
                 Vec2 s0 = foot + (across * (side * (kerbLine - 0.01)));
                 Vec2 s1 = foot + (across * (side * outer));
-                Vec2 h = along * (RampWidth / 2);
+                Vec2 h = along * (width / 2);
                 var rect = new[] { s0 - h, s0 + h, s1 + h, s1 - h };
                 PathsD reach = Clipper.Intersect(new PathsD { Positive(rect) }, behindKerb, FillRule.NonZero, Precision);
                 if (Clipper.Intersect(reach, walk, FillRule.NonZero, Precision).Sum(q => Math.Abs(Clipper.Area(q))) < 0.1)
@@ -863,17 +970,27 @@ namespace SiteDesignPro.Core.Roads
                     continue;
                 }
 
-                // footprint like a dropped kerb with flares: the lowered kerb, 0,80 m of flare on both sides at the
-                // kerb, narrowing a little towards the back
-                double depth = Math.Min(RampDepth, road.Extent(RoadLevel.Sidewalk, left) - kerbLine);
-                if (depth < 0.5)
+                double kw = road.Extent(RoadLevel.Kerb, left) - kerbLine;
+                double bw = road.Extent(RoadLevel.Bike, left) - road.Extent(RoadLevel.Kerb, left);
+                double ww = road.Extent(RoadLevel.Sidewalk, left) - road.Extent(RoadLevel.Bike, left);
+                if (ww < 0.5)
                 {
                     continue;
                 }
 
+                // footprint like a dropped kerb with flares: the lowered kerb, 0,80 m of flare on both sides at the
+                // kerb, narrowing a little towards the back
+                double cut = RampCut(ww);
+                double front = (width / 2) + RampFlare, back = (width / 2) + RampBackFlare;
+
+                // the bike lane goes around: full shift beside the ramp, eased in and out over a gentle length
+                double u0 = front + 0.3, ease = Math.Max(2.5, 6 * cut), u1 = u0 + ease;
+                bool around = bw > 0.01 && ww - cut >= MinWalkBesideDetour - 1e-9
+                    && (foot - segA).Dot(along) >= u1 && (segB - foot).Dot(along) >= u1;
+                double depth = kw + (around ? 0 : bw) + cut;
+
                 Vec2 inward = across * side;
                 Vec2 k0 = foot + (inward * kerbLine);
-                double front = (RampWidth / 2) + RampFlare, back = (RampWidth / 2) + RampBackFlare;
                 var shape = new[]
                 {
                     k0 - (along * front) - (inward * 0.01), k0 + (along * front) - (inward * 0.01),
@@ -881,12 +998,44 @@ namespace SiteDesignPro.Core.Roads
                 };
                 PathsD ramp = Clipper.Intersect(new PathsD { Positive(shape) }, behindKerb, FillRule.NonZero, Precision);
 
+                PathD? fromBike = null, toBike = null;
+                if (around)
+                {
+                    double Shift(double u)
+                    {
+                        double t = (Math.Abs(u) - u0) / ease;
+                        return t <= 0 ? cut : t >= 1 ? 0 : cut * (1 + Math.Cos(Math.PI * t)) / 2;
+                    }
+
+                    var us = new List<double>();
+                    for (double u = -u1; u < u1 - 1e-9; u += 0.1)
+                    {
+                        us.Add(u);
+                    }
+
+                    us.Add(u1);
+                    PathD Lens(double v0)
+                    {
+                        // from 3 cm below the old edge (so the old boundary itself is the lower side) up to the shifted edge
+                        var pts = new List<Vec2> { k0 + (along * -u1) + (inward * (v0 - 0.03)), k0 + (along * u1) + (inward * (v0 - 0.03)) };
+                        for (int i = us.Count - 1; i >= 0; i--)
+                        {
+                            pts.Add(k0 + (along * us[i]) + (inward * (v0 + Shift(us[i]))));
+                        }
+
+                        return Positive(pts);
+                    }
+
+                    fromBike = Lens(kw);
+                    toBike = Lens(kw + bw);
+                }
+
                 Vec2 probe = foot + (across * (side * (kerbLine + 0.07)));
                 foreach (PathD piece in ramp.Where(q => Clipper.Area(q) > 0.05))
                 {
                     if (Clipper.PointInPolygon(new PointD(probe.X, probe.Y), piece) != PointInPolygonResult.IsOutside)
                     {
-                        yield return (piece, new RoadRampFrame(k0, along, inward, depth));
+                        yield return new RampPlace(piece, new RoadRampFrame(k0, along, inward, depth, width), fromBike, toBike);
                     }
                 }
             }

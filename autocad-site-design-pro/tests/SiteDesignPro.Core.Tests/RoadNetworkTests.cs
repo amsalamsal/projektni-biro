@@ -116,7 +116,7 @@ namespace SiteDesignPro.Core.Tests
             // a mark on the upper sidewalk of A: one ramp on that side; a mark on the carriageway: both sides
             RoadNetworkResult one = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, null, null, new[] { new Vec2(20, 4.5) });
             Assert.Single(one.Ramps);
-            Assert.InRange(Math.Abs(Area(one.Ramps[0].Points)), 5.6975 - 0.05, 5.6975 + 0.05);
+            Assert.InRange(Math.Abs(Area(one.Ramps[0].Points)), 2.516 - 0.05, 2.516 + 0.05); // sidewalk 2,00 m: 0,80 m into it
             Assert.All(one.Ramps[0].Points, p => Assert.True(p.Y > 2.9 && Math.Abs(p.X - 20) <= 1.41, "ramp at " + p));
 
             RoadNetworkResult two = RoadNetwork.Build(new[] { Road("A", -60, 0, 60, 0), Road("B", 0, -60, 0, 60) }, null, null, new[] { new Vec2(20, 1) });
@@ -135,7 +135,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(2, res.Ramps.Count);
             foreach (RoadLoop ramp in res.Ramps)
             {
-                Assert.InRange(Math.Abs(Area(ramp.Points)), 5.6975 - 0.05, 5.6975 + 0.05);
+                Assert.InRange(Math.Abs(Area(ramp.Points)), 2.516 - 0.05, 2.516 + 0.05);
                 Assert.All(ramp.Points, p => Assert.InRange(p.X, 48.59, 51.41));
             }
 
@@ -144,7 +144,7 @@ namespace SiteDesignPro.Core.Tests
 
             // the sidewalk and kerb are cut where the ramps are (they are lowered there)
             double walk = res.Bands[RoadLevel.Sidewalk].Sum(r => r.Area);
-            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 5.279) - 0.2, (2 * 100 * 2.0) - (2 * 5.279) + 0.2);
+            Assert.InRange(walk, (2 * 100 * 2.0) - (2 * 2.10) - 0.2, (2 * 100 * 2.0) - (2 * 2.10) + 0.2);
 
             // in 3D the ramp rises from the carriageway (0) to the sidewalk (0,13 above the ramp's own offset)
             (List<Vec3[]> surface, List<Vec3[]> kerb) = RoadElements.RampTriangles(res.RampFrames[0], 0.13, _ => 0);
@@ -157,6 +157,71 @@ namespace SiteDesignPro.Core.Tests
             // no sidewalk on the right: only the left ramp
             RoadNetworkResult one = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0, x => x.SidewalkRight = 0) }, new[] { box }, new[] { box });
             Assert.Single(one.Ramps);
+        }
+
+        [Fact]
+        public void Ramp_CutsIntoTheSidewalk_ByItsWidth()
+        {
+            // 0,40 m up to 1,20 m of sidewalk, 5 cm more for every 10 cm over it, 1,00 m at most
+            Assert.Equal(0.40, RoadNetwork.RampCut(1.0), 6);
+            Assert.Equal(0.40, RoadNetwork.RampCut(1.2), 6);
+            Assert.Equal(0.45, RoadNetwork.RampCut(1.3), 6);
+            Assert.Equal(0.60, RoadNetwork.RampCut(1.6), 6);
+            Assert.Equal(0.80, RoadNetwork.RampCut(2.0), 6);
+            Assert.Equal(1.00, RoadNetwork.RampCut(2.4), 6);
+            Assert.Equal(1.00, RoadNetwork.RampCut(4.0), 6);
+
+            var box = new List<Vec2> { new Vec2(48, -3), new Vec2(52, -3), new Vec2(52, 3), new Vec2(48, 3) };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0, x => { x.SidewalkLeft = 1.2; x.SidewalkRight = 3.0; }) }, new[] { box }, new[] { box });
+            Assert.Equal(2, res.Ramps.Count);
+            Assert.Contains(res.RampFrames, f => Math.Abs(f.Depth - 0.55) < 1e-6); // kerb 0,15 + 0,40
+            Assert.Contains(res.RampFrames, f => Math.Abs(f.Depth - 1.15) < 1e-6); // kerb 0,15 + 1,00
+        }
+
+        [Fact]
+        public void BikeLane_GoesAroundTheRamp_WhereTheSidewalkHasRoom()
+        {
+            var box = new List<Vec2> { new Vec2(48, -3), new Vec2(52, -3), new Vec2(52, 3), new Vec2(48, 3) };
+            RoadSpec wide = Road("A", 0, 0, 100, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; });
+            RoadNetworkResult plain = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; }) });
+            RoadNetworkResult res = RoadNetwork.Build(new[] { wide }, new[] { box }, new[] { box });
+            Assert.Equal(2, res.Ramps.Count);
+            Assert.Equal(2, res.BikeDetours);
+
+            // the ramp stays in front of the bike lane (kerb 0,15 + 0,80), the bike lane keeps its area around it
+            Assert.All(res.RampFrames, f => Assert.Equal(0.95, f.Depth, 6));
+            Assert.InRange(res.Area(RoadLevel.Bike), plain.Area(RoadLevel.Bike) - 0.3, plain.Area(RoadLevel.Bike) + 0.3);
+            Assert.InRange(res.Area(RoadLevel.Sidewalk), plain.Area(RoadLevel.Sidewalk) - (2 * 2.10) - 0.3, plain.Area(RoadLevel.Sidewalk) - (2 * 2.10) + 0.3);
+
+            // the bike lane is one piece on each side and reaches 0,80 m further out beside the ramp
+            Assert.Equal(2, res.Bands[RoadLevel.Bike].Count);
+            double far = res.Bands[RoadLevel.Bike].SelectMany(r => r.Outer.Points).Max(q => Math.Abs(q.Y));
+            Assert.InRange(far, 3.0 + 0.15 + 1.5 + 0.80 - 0.02, 3.0 + 0.15 + 1.5 + 0.80 + 0.02);
+
+            // a sidewalk of 1,20 m has no room (0,80 m would stay): the ramp crosses the bike lane
+            RoadNetworkResult narrow = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; x.SidewalkLeft = 1.2; x.SidewalkRight = 1.2; }) }, new[] { box }, new[] { box });
+            Assert.Equal(0, narrow.BikeDetours);
+            Assert.All(narrow.RampFrames, f => Assert.Equal(0.15 + 1.5 + 0.40, f.Depth, 6));
+        }
+
+        [Fact]
+        public void CrossingWithABikeStrip_HasWiderRamps()
+        {
+            var box = new List<Vec2> { new Vec2(48, -3), new Vec2(52, -3), new Vec2(52, 3), new Vec2(48, 3) };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, new[] { box }, new[] { box }, null, null, new[] { 2.0 });
+            Assert.Equal(2, res.Ramps.Count);
+            Assert.All(res.RampFrames, f => Assert.Equal(2.0, f.Width, 6));
+            Assert.All(res.Ramps, r => Assert.InRange(r.Points.Max(q => q.X) - r.Points.Min(q => q.X), 3.55, 3.61)); // 2,00 + 2 × 0,80
+        }
+
+        [Fact]
+        public void Driveway_CornersAreRounded_WithItsRadius()
+        {
+            RoadDriveway At(double radius) => new RoadDriveway { Point = new Vec2(50, 5.6), Direction = new Vec2(0, 1), Width = 6.5, Radius = radius };
+            RoadNetworkResult small = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, null, null, null, new[] { At(1.0) });
+            RoadNetworkResult large = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, null, null, null, new[] { At(3.0) });
+            Assert.Equal(1, small.Driveways);
+            Assert.True(large.Area(RoadLevel.Carriageway) > small.Area(RoadLevel.Carriageway) + 0.5);
         }
 
         [Fact]

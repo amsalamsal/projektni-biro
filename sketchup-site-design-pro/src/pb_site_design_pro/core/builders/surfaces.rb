@@ -30,7 +30,8 @@ module ProjektniBiro
             end
           end
           polys.select! { |t| t.length == 3 }
-          c.mesh(polys, material: mat(e, 'material'), name: 'Površina') unless polys.empty?
+          # triangles of one curved or sloped surface: the edges between them are softened, corners stay sharp
+          c.mesh(polys, material: mat(e, 'material'), name: 'Površina', smooth: true, solid: false) unless polys.empty?
         end
       end
       register('slab', Slab)

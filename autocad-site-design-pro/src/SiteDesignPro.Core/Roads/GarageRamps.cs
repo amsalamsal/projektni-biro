@@ -135,6 +135,9 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Retaining walls with a railing along the part below the level of the top end (3D).</summary>
         public bool Walls { get; set; } = true;
 
+        /// <summary>Radius of the corners where the ramp joins a road (at least 1,00 m).</summary>
+        public double JoinRadius { get; set; } = RoadNetwork.DrivewayRadius;
+
         public const double WallThickness = 0.25;
         public const double RailingHeight = 1.0;
         public const double DrainWidth = 0.2;
@@ -277,6 +280,7 @@ namespace SiteDesignPro.Core.Roads
                 Drain = e.Parameters.Text("drain", "bottom"),
                 Heated = e.Parameters.Bool("heated", false),
                 Walls = e.Parameters.Bool("walls", true),
+                JoinRadius = Math.Max(RoadNetwork.DrivewayRadius, Math.Min(RoadNetwork.MaxDrivewayRadius, e.Parameters.Number("joinRadius", RoadNetwork.DrivewayRadius))),
                 Axis = GeometryMath.Tessellate(path.Ring, false, 0.002 * unitsPerMeter, 1024).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList(),
             };
             r.RingPoints = path.Ring.Vertices.Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
@@ -1033,9 +1037,82 @@ namespace SiteDesignPro.Core.Roads
             return topAtStart ? (hi, total) : (0, total - hi);
         }
 
+        /// <summary>Adds a quadrilateral as two triangles turned away from an inner point (the outside of a closed body).</summary>
+        private static void QuadAway(Vec3 a, Vec3 b, Vec3 c, Vec3 d, Vec3 inside, List<Vec3[]> to)
+        {
+            Vec3 u = b - a, v = d - a;
+            double nx = (u.Y * v.Z) - (u.Z * v.Y), ny = (u.Z * v.X) - (u.X * v.Z), nz = (u.X * v.Y) - (u.Y * v.X);
+            Vec3 w = a - inside;
+            if ((nx * w.X) + (ny * w.Y) + (nz * w.Z) < 0)
+            {
+                (b, d) = (d, b);
+            }
+
+            to.Add(new[] { a, b, c });
+            to.Add(new[] { a, c, d });
+        }
+
         /// <summary>
-        /// Retaining walls on both sides, from the surface up to the level of the top end, along the part below it, and a
-        /// railing 1,00 m high on them (3D): (walls, railing).
+        /// The slab of the ramp as a closed body (3D): the driving surface, the underside, the two sides and the two
+        /// ends, every face turned outwards. The same model as the SketchUp extension "Garažne rampe" builds.
+        /// </summary>
+        public List<Vec3[]> Slab3()
+        {
+            double half = Width / 2, total = Length;
+            List<Vec3[]> list = Band3(-half, half, 0, total, 0);
+            if (total < 1e-6)
+            {
+                return list;
+            }
+
+            List<double> st = Stations(0, total);
+            for (int i = 1; i < st.Count; i++)
+            {
+                double s0 = st[i - 1], s1 = st[i];
+                Vec3 c = P3((s0 + s1) / 2, 0, -SlabThickness / 2);
+                QuadAway(P3(s0, -half, -SlabThickness), P3(s1, -half, -SlabThickness), P3(s1, half, -SlabThickness), P3(s0, half, -SlabThickness), c, list);
+                foreach (double d in new[] { half, -half })
+                {
+                    QuadAway(P3(s0, d, 0), P3(s1, d, 0), P3(s1, d, -SlabThickness), P3(s0, d, -SlabThickness), c, list);
+                }
+            }
+
+            foreach (double s in new[] { 0.0, total })
+            {
+                double step = Math.Min(0.1, total / 2);
+                Vec3 c = P3(s < total / 2 ? step : total - step, 0, -SlabThickness / 2);
+                QuadAway(P3(s, -half, 0), P3(s, half, 0), P3(s, half, -SlabThickness), P3(s, -half, -SlabThickness), c, list);
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Top of the retaining wall at a station: the level of the top end; on a spiral ramp not higher than the
+        /// underside of the turn above.
+        /// </summary>
+        public double WallTop(double station)
+        {
+            double top = Math.Max(StartHeight ?? 0, EndHeight ?? StartHeight ?? 0);
+            double radius = AxisRadius;
+            if (Kind != "spiral" || radius <= 0)
+            {
+                return top;
+            }
+
+            double turn = 2 * Math.PI * radius;
+            double above = TopAtStart ? station - turn : station + turn;
+            if (above < -1e-6 || above > Length + 1e-6)
+            {
+                return top;
+            }
+
+            return Math.Min(top, HeightAt(above, 0) - SlabThickness);
+        }
+
+        /// <summary>
+        /// Retaining walls on both sides as closed bodies, from under the slab up to the level of the top end, along the
+        /// part below it, and a railing 1,00 m high on them where the wall reaches that level (3D): (walls, railing).
         /// </summary>
         public (List<Vec3[]> Walls, List<Vec3[]> Railing) Walls3()
         {
@@ -1048,14 +1125,11 @@ namespace SiteDesignPro.Core.Roads
             }
 
             double half = Width / 2, top = Math.Max(StartHeight ?? 0, EndHeight ?? StartHeight ?? 0);
-            List<double> st = Stations(span.Value.From, span.Value.To);
-            void Quad(Vec3 a, Vec3 b, Vec3 c, Vec3 d, List<Vec3[]> to)
-            {
-                to.Add(new[] { a, b, c });
-                to.Add(new[] { a, c, d });
-            }
-
+            double sFrom = span.Value.From, sTo = span.Value.To;
+            List<double> st = Stations(sFrom, sTo);
             Vec3 At(double s, double d, double z) => PointAt(s, d).Point.WithZ(z);
+            bool OnTop(double s) => WallTop(s) >= top - 1e-6;
+            const double w = 0.025;
             foreach (double side in new[] { 1.0, -1.0 })
             {
                 double inner = side * half, outer = side * (half + WallThickness), mid = side * (half + (WallThickness / 2));
@@ -1063,35 +1137,61 @@ namespace SiteDesignPro.Core.Roads
                 {
                     double s0 = st[i - 1], s1 = st[i];
                     double z0 = HeightAt(s0, inner) - SlabThickness, z1 = HeightAt(s1, inner) - SlabThickness;
-                    Quad(At(s0, inner, z0), At(s1, inner, z1), At(s1, inner, top), At(s0, inner, top), walls);
-                    Quad(At(s0, outer, z0), At(s1, outer, z1), At(s1, outer, top), At(s0, outer, top), walls);
-                    Quad(At(s0, inner, top), At(s1, inner, top), At(s1, outer, top), At(s0, outer, top), walls);
+                    double t0 = WallTop(s0), t1 = WallTop(s1);
+                    if (t0 - z0 < 0.01 && t1 - z1 < 0.01)
+                    {
+                        continue; // no wall where the turn above leaves no room for one
+                    }
+
+                    Vec3 cw = At((s0 + s1) / 2, mid, (((z0 + z1) / 2) + ((t0 + t1) / 2)) / 2);
+                    QuadAway(At(s0, inner, z0), At(s1, inner, z1), At(s1, inner, t1), At(s0, inner, t0), cw, walls);
+                    QuadAway(At(s0, outer, z0), At(s1, outer, z1), At(s1, outer, t1), At(s0, outer, t0), cw, walls);
+                    QuadAway(At(s0, inner, t0), At(s1, inner, t1), At(s1, outer, t1), At(s0, outer, t0), cw, walls);
+                    QuadAway(At(s0, inner, z0), At(s1, inner, z1), At(s1, outer, z1), At(s0, outer, z0), cw, walls);
+                    if (!OnTop(s0) || !OnTop(s1))
+                    {
+                        continue;
+                    }
 
                     // top rail 5 × 5 cm
-                    double r0 = top + RailingHeight - 0.05, r1 = top + RailingHeight, w = 0.025;
-                    Quad(At(s0, mid - w, r1), At(s1, mid - w, r1), At(s1, mid + w, r1), At(s0, mid + w, r1), rail);
-                    Quad(At(s0, mid - w, r0), At(s1, mid - w, r0), At(s1, mid - w, r1), At(s0, mid - w, r1), rail);
-                    Quad(At(s0, mid + w, r0), At(s1, mid + w, r0), At(s1, mid + w, r1), At(s0, mid + w, r1), rail);
+                    double r0 = top + RailingHeight - 0.05, r1 = top + RailingHeight;
+                    Vec3 cr = At((s0 + s1) / 2, mid, r1 - 0.025);
+                    QuadAway(At(s0, mid - w, r1), At(s1, mid - w, r1), At(s1, mid + w, r1), At(s0, mid + w, r1), cr, rail);
+                    QuadAway(At(s0, mid - w, r0), At(s1, mid - w, r0), At(s1, mid + w, r0), At(s0, mid + w, r0), cr, rail);
+                    QuadAway(At(s0, mid - w, r0), At(s1, mid - w, r0), At(s1, mid - w, r1), At(s0, mid - w, r1), cr, rail);
+                    QuadAway(At(s0, mid + w, r0), At(s1, mid + w, r0), At(s1, mid + w, r1), At(s0, mid + w, r1), cr, rail);
                 }
 
                 // the two ends of the wall
-                foreach (double s in new[] { span.Value.From, span.Value.To })
+                foreach ((double s, double inwards) in new[] { (sFrom, 1.0), (sTo, -1.0) })
                 {
-                    double z = HeightAt(s, inner) - SlabThickness;
-                    Quad(At(s, inner, z), At(s, outer, z), At(s, outer, top), At(s, inner, top), walls);
+                    double z = HeightAt(s, inner) - SlabThickness, t = WallTop(s);
+                    if (t - z < 0.01)
+                    {
+                        continue;
+                    }
+
+                    Vec3 cw = At(s + (inwards * 0.01), mid, (z + t) / 2);
+                    QuadAway(At(s, inner, z), At(s, outer, z), At(s, outer, t), At(s, inner, t), cw, walls);
                 }
 
                 // posts about every 1,5 m
-                double length = span.Value.To - span.Value.From;
+                double length = sTo - sFrom;
                 int posts = Math.Max(1, (int)Math.Round(length / 1.5));
                 for (int i = 0; i <= posts; i++)
                 {
-                    double s = span.Value.From + (length * i / posts);
-                    double a = Math.Max(span.Value.From, s - 0.025), b = Math.Min(span.Value.To, s + 0.025), w = 0.025, z1 = top + RailingHeight - 0.05;
-                    Quad(At(a, mid - w, top), At(b, mid - w, top), At(b, mid - w, z1), At(a, mid - w, z1), rail);
-                    Quad(At(a, mid + w, top), At(b, mid + w, top), At(b, mid + w, z1), At(a, mid + w, z1), rail);
-                    Quad(At(a, mid - w, top), At(a, mid + w, top), At(a, mid + w, z1), At(a, mid - w, z1), rail);
-                    Quad(At(b, mid - w, top), At(b, mid + w, top), At(b, mid + w, z1), At(b, mid - w, z1), rail);
+                    double s = sFrom + (length * i / posts);
+                    if (!OnTop(s))
+                    {
+                        continue;
+                    }
+
+                    double a = Math.Max(sFrom, s - 0.025), b = Math.Min(sTo, s + 0.025), z1 = top + RailingHeight - 0.05;
+                    Vec3 cp = At((a + b) / 2, mid, (top + z1) / 2);
+                    QuadAway(At(a, mid - w, top), At(b, mid - w, top), At(b, mid - w, z1), At(a, mid - w, z1), cp, rail);
+                    QuadAway(At(a, mid + w, top), At(b, mid + w, top), At(b, mid + w, z1), At(a, mid + w, z1), cp, rail);
+                    QuadAway(At(a, mid - w, top), At(a, mid + w, top), At(a, mid + w, z1), At(a, mid - w, z1), cp, rail);
+                    QuadAway(At(b, mid - w, top), At(b, mid + w, top), At(b, mid + w, z1), At(b, mid - w, z1), cp, rail);
                 }
             }
 
@@ -1309,7 +1409,7 @@ namespace SiteDesignPro.Core.Roads
                 }
 
                 (List<Vec3[]> white, List<Vec3[]> yellow) = r.Paint3();
-                Add("Garažna rampa", r.Triangles().Concat(r.Sides()).ToList(), null);
+                Add("Garažna rampa", r.Slab3(), null);
                 Add("Garažna rampa – bijele oznake", white, "line_paint_white");
                 Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow");
                 Add("Garažna rampa – srednje ostrvo", r.Island3(), null);

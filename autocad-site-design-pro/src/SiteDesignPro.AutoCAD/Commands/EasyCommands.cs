@@ -41,28 +41,32 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ roundabout
 
+        /// <summary>Median of the arms of a roundabout: the splitter island 1,20 m at its widest and 15 cm on both sides.</summary>
+        internal const double SplitterMedian = 1.5;
+
         /// <summary>A complete roundabout from its centre: ring, island, kerbs, splitter islands, crossings, arrows, signs, arms.</summary>
         /// <summary>
-        /// Mini roundabout (up to 25 km/h): green central island (radius 15–30 m), truck apron 1,20 m (AR-B88), a
+        /// Mini roundabout (up to 25 km/h): green central island (radius 10–30 m), truck apron 1,20 m (AR-B88), a
         /// ring with as many lanes as enter from each arm (dashed lane lines, direction arrows), arms as streets with
-        /// a median, splitter islands 10 m long in the straight part interrupted at the pedestrian crossing and the
-        /// accessible ramps, hatched median, give-way line and triangles. Everything on the layer Saobraćajnice
+        /// a median 1,50 m, two splitter islands of a fixed shape on both sides of the pedestrian crossing (3 m): towards
+        /// the ring 2,00 m long, 1,00 m wide at the crossing and 1,20 m at the rounded end; behind the crossing 1,00 m
+        /// long, 0,60 m wide at the crossing and 0,40 m at the round end; hatched median, give-way line and triangles. Everything on the layer Saobraćajnice
         /// (the island on the greenery layer); the ring and the arms join the road network.
         /// </summary>
         [CommandMethod("SITEDESIGNPRO", "SDPKRUZNITOK", CommandFlags.Modal)]
         public void Roundabout() => CommandContext.RunMajor("SDPKRUZNITOK", "Kružni tok (SDPKRUZNITOK)", ctx =>
         {
             Point3d c = ctx.Point("Centar kružnog toka")!.Value;
-            double ri = ctx.Number("Poluprečnik srednjeg otoka – zelenilo (m, 15–30)", 15);
-            if (ri < 15 || ri > 30)
+            double ri = ctx.Number("Poluprečnik srednjeg otoka – zelenilo (m, 10–30)", 15);
+            if (ri < 10 || ri > 30)
             {
-                ri = Math.Max(15, Math.Min(30, ri));
-                ctx.Write("Poluprečnik srednjeg otoka je ograničen na " + CommandContext.F(ri, 2) + " m (mini kružni tok: 15–30 m).");
+                ri = Math.Max(10, Math.Min(30, ri));
+                ctx.Write("Poluprečnik srednjeg otoka je ograničen na " + CommandContext.F(ri, 2) + " m (mini kružni tok: 10–30 m).");
             }
 
             double apron = ctx.Number("Širina prijelaznog prstena (m)", 1.2);
             int arms = Math.Min(ctx.Integer("Broj krakova (0–6)", 4, 0), 6);
-            double first = arms > 0 ? ctx.Angle("Smjer prvog kraka (klik ili ugao)", c, 0) : 0;
+            double first = 0; // the first arm points along +X; the roundabout is turned afterwards like any drawing
             double armLength = arms > 0 ? ctx.Number("Dužina krakova od vanjske ivice kružnog toka (m)", 40) : 0;
 
             // cross-section of the arms (and the lanes of the ring): the same window as for a street
@@ -77,7 +81,8 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             arm = chosen;
             arm.OneWay = false;
-            double median = arms > 0 ? Math.Max(1.8, Math.Min(RoadSpec.MaxMedian, ctx.Number("Širina razdjelnog otoka između smjerova (m, najmanje 1,8)", 2.0))) : 0;
+            // the splitter islands always have the same shape and size, so the median between the directions is fixed
+            double median = arms > 0 ? SplitterMedian : 0;
             arm.Median = median;
             arm.Normalize();
 
@@ -151,19 +156,39 @@ namespace SiteDesignPro.AutoCAD.Commands
                 // pedestrian crossing over the whole carriageway at the ramps (start of the straight part), 3 m wide
                 Add(RoadElements.CrossingType, Box(st, st + 3, -hr, hl));
 
-                // splitter island 10 m long, interrupted at the crossing (the refuge is at road level)
-                double iw = Math.Max(0.6, median - 0.3) / 2;
-                Add("road.splitter_island", Box(Math.Max(ro + 0.8, st - 3), st, -iw, iw));
-                Add("road.splitter_island", Box(st + 3, st + 10, -iw, iw));
-
-                // hatched median between the ring and the island, and a taper behind the island
-                double hw = Math.Max(0.2, m2 - 0.6);
-                if (st - 3 > ro + 1.5)
+                // splitter islands of a fixed shape on both sides of the crossing (the refuge between them is at road
+                // level): towards the ring 2,00 m long, 1,00 m wide at the crossing, 1,20 m at the end with rounded
+                // corners; behind the crossing 1,00 m long, 0,60 m wide at the crossing, 0,40 m at the round end
+                double bigFrom = st - 2.0;
                 {
-                    Add(RoadElements.HatchedAreaType, Box(ro + 0.8, Math.Max(ro + 0.8, st - 3) , -hw, hw));
+                    const double cornerR = 0.25;
+                    double slope = Math.Atan2(0.1, 2.0);            // the long edges open by 10 cm over 2 m
+                    double corner = (Math.PI / 2) - slope;           // inner angle at the wide end
+                    double tl = cornerR / Math.Tan(corner / 2);      // tangent length of the rounding
+                    double bulge = Math.Tan((Math.PI - corner) / 4);
+                    double cx = Math.Cos(slope), sy = Math.Sin(slope);
+                    Add("road.splitter_island", new PolygonGeometry(new Ring(
+                        new List<Vec3>
+                        {
+                            P(st, -0.5), P(st, 0.5),
+                            P(bigFrom + (tl * cx), 0.6 - (tl * sy)), P(bigFrom, 0.6 - tl),
+                            P(bigFrom, -0.6 + tl), P(bigFrom + (tl * cx), -0.6 + (tl * sy)),
+                        },
+                        new List<double> { 0, 0, bulge, 0, bulge, 0 })));
                 }
 
-                Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(st + 10, -hw), P(st + 16, 0), P(st + 10, hw) })));
+                Add("road.splitter_island", new PolygonGeometry(new Ring(
+                    new List<Vec3> { P(st + 3, -0.3), P(st + 3.8, -0.2), P(st + 3.8, 0.2), P(st + 3, 0.3) },
+                    new List<double> { 0, 1.0, 0, 0 })));
+
+                // hatched median between the ring and the island, and a taper behind the small island
+                double hw = Math.Max(0.2, m2 - 0.6);
+                if (bigFrom > ro + 1.5)
+                {
+                    Add(RoadElements.HatchedAreaType, Box(ro + 0.8, bigFrom, -hw, hw));
+                }
+
+                Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(st + 4.0, -hw), P(st + 10, 0), P(st + 4.0, hw) })));
 
                 // give-way line (broken, 30 cm) along the ring edge across the entry lanes (left of the arm axis:
                 // right-hand traffic drives towards the ring on that side), and a triangle in every entry lane

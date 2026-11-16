@@ -336,7 +336,9 @@ namespace SiteDesignPro.Core.Roads
             {
                 if ((e.TypeId == CrossingType || e.TypeId == HatchedAreaType) && e.Geometry is PolygonGeometry pg)
                 {
-                    list.Add(GeometryMath.Tessellate(pg.Outer, true, 0.02 * unitsPerMeter).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList());
+                    // a crossing with a cycle strip: the strip belongs to it (lane lines stop there too)
+                    List<Vec2> outer = Outer(pg, unitsPerMeter);
+                    list.Add(HasBikeStrip(e) && outer.Count >= 3 ? CrossingBox(outer, -BikeStripWidth, null) : outer);
                 }
             }
 
@@ -348,7 +350,18 @@ namespace SiteDesignPro.Core.Roads
         {
             List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
             List<RoadSpec> specs = Specs(all, catalog, unitsPerMeter);
-            List<IReadOnlyList<Vec2>> crossings = CrossingAreas(all.Where(e => e.TypeId == CrossingType), unitsPerMeter);
+            // the ramps of a crossing: 1,20 m in its middle; with a cycle strip 2,00 m, over the strip and the first
+            // 1,20 m of the crossing beside it
+            var crossings = new List<IReadOnlyList<Vec2>>();
+            var rampWidths = new List<double>();
+            foreach (SiteElement e in all.Where(x => x.TypeId == CrossingType && x.Geometry is PolygonGeometry))
+            {
+                List<Vec2> outer = Outer((PolygonGeometry)e.Geometry, unitsPerMeter);
+                bool strip = HasBikeStrip(e) && outer.Count >= 3;
+                crossings.Add(strip ? CrossingBox(outer, -BikeStripWidth, RoadNetwork.RampWidth) : outer);
+                rampWidths.Add(strip ? RoadNetwork.RampWidth + BikeStripWidth : RoadNetwork.RampWidth);
+            }
+
             List<Vec2> rampMarks = all.Where(e => e.TypeId == RampMarkType && e.Geometry is PointGeometry)
                 .Select(e => ((PointGeometry)e.Geometry).Position).Select(p => new Vec2(p.X / unitsPerMeter, p.Y / unitsPerMeter)).ToList();
             // garage ramps that start or end at a road open its kerb and sidewalk
@@ -366,11 +379,57 @@ namespace SiteDesignPro.Core.Roads
                     : new List<Vec2>();
                 (Vec2 p0, Vec2 d0) = ramp.PointAt(0, 0);
                 (Vec2 p1, Vec2 d1) = ramp.PointAt(total, 0);
-                driveways.Add(new RoadDriveway { Point = p0, Direction = d0, Width = ramp.Width, Exclude = outline });
-                driveways.Add(new RoadDriveway { Point = p1, Direction = -d1, Width = ramp.Width, Exclude = outline });
+                driveways.Add(new RoadDriveway { Point = p0, Direction = d0, Width = ramp.Width, Radius = ramp.JoinRadius, Exclude = outline });
+                driveways.Add(new RoadDriveway { Point = p1, Direction = -d1, Width = ramp.Width, Radius = ramp.JoinRadius, Exclude = outline });
             }
 
-            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings, rampMarks, driveways);
+            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings, rampMarks, driveways, rampWidths);
+        }
+
+        /// <summary>Width of the cycle strip beside a pedestrian crossing.</summary>
+        public const double BikeStripWidth = 0.8;
+
+        /// <summary>Generated element type of the cycle strip beside a pedestrian crossing.</summary>
+        public const string BikeCrossingType = "road.bike_crossing";
+
+        /// <summary>True for a pedestrian crossing with a cycle strip beside it.</summary>
+        public static bool HasBikeStrip(SiteElement e) => e.TypeId == CrossingType && e.Parameters.Bool("bikeLane", false);
+
+        /// <summary>
+        /// The oriented rectangle of a crossing outline (metres) between two distances along its first edge, measured
+        /// from the start of the crossing (negative: before it, on the side of the cycle strip).
+        /// </summary>
+        private static List<Vec2> CrossingBox(IReadOnlyList<Vec2> outer, double from, double? to)
+        {
+            Vec2 o = outer[0];
+            Vec2 d = outer[1] - outer[0];
+            Vec2 u = d.Length < 1e-9 ? new Vec2(1, 0) : d.Normalized();
+            Vec2 v = u.Perp();
+            double minU = outer.Min(p => (p - o).Dot(u)), maxU = outer.Max(p => (p - o).Dot(u));
+            double minV = outer.Min(p => (p - o).Dot(v)), maxV = outer.Max(p => (p - o).Dot(v));
+            double u0 = minU + from, u1 = to.HasValue ? minU + to.Value : maxU;
+            return new List<Vec2> { o + (u * u0) + (v * minV), o + (u * u1) + (v * minV), o + (u * u1) + (v * maxV), o + (u * u0) + (v * maxV) };
+        }
+
+        private static List<Vec2> Outer(PolygonGeometry pg, double unitsPerMeter) =>
+            GeometryMath.Tessellate(pg.Outer, true, 0.02 * unitsPerMeter).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
+
+        /// <summary>
+        /// The cycle strips (0,80 m, metres) of the pedestrian crossings that have one: beside the crossing, on the side
+        /// its outline starts at (the left side when the road runs to the right), as long as the stripes are wide.
+        /// </summary>
+        public static List<List<Vec2>> BikeStrips(IEnumerable<SiteElement> elements, double unitsPerMeter = 1.0)
+        {
+            var list = new List<List<Vec2>>();
+            foreach (SiteElement e in elements)
+            {
+                if (HasBikeStrip(e) && e.Geometry is PolygonGeometry pg && pg.Outer.Count >= 3)
+                {
+                    list.Add(CrossingBox(Outer(pg, unitsPerMeter), -BikeStripWidth, 0));
+                }
+            }
+
+            return list;
         }
 
         /// <summary>Cross-sections of all roads of the network among the elements (metres).</summary>
@@ -468,13 +527,34 @@ namespace SiteDesignPro.Core.Roads
             for (int i = 0; i < res.Ramps.Count && i < res.RampFrames.Count; i++)
             {
                 (List<Vec3[]> surface, List<Vec3[]> kerb) = RampTriangles(res.RampFrames[i], walkTop - rampTop, p => z + (profiles != null ? RoadLevels.Height(profiles, p) : 0));
-                Add(RampType, "Rampa za invalide 120 cm", new PolygonGeometry(ToRing(res.Ramps[i], z)));
+                Add(RampType, "Rampa za invalide", new PolygonGeometry(ToRing(res.Ramps[i], z)));
                 list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(surface));
 
                 // the lowered kerb and its flares, painted yellow
                 Add(RampType, "Spušteni ivičnjak rampe", new PolygonGeometry(ToRing(res.Ramps[i], z)));
                 list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(kerb));
                 list[list.Count - 1].Parameters["material"] = ParamValue.Of("line_paint_yellow");
+            }
+
+            // cycle strips beside the pedestrian crossings (blue, a little above the carriageway)
+            foreach (List<Vec2> strip in BikeStrips(all))
+            {
+                Add(BikeCrossingType, "Biciklistička staza uz pješački prijelaz", new PolygonGeometry(new Ring(strip.Select(p => p.WithZ(z)).ToList())));
+                if (profiles != null)
+                {
+                    var tris = new List<Vec3[]>();
+                    int parts = Math.Max(1, (int)Math.Ceiling(strip[1].DistanceTo(strip[2]) / 0.5));
+                    Vec3 H(Vec2 p) => p.WithZ(z + RoadLevels.Height(profiles, p));
+                    for (int i = 0; i < parts; i++)
+                    {
+                        Vec2 a0 = strip[0] + ((strip[3] - strip[0]) * ((double)i / parts)), a1 = strip[0] + ((strip[3] - strip[0]) * ((double)(i + 1) / parts));
+                        Vec2 b0 = strip[1] + ((strip[2] - strip[1]) * ((double)i / parts)), b1 = strip[1] + ((strip[2] - strip[1]) * ((double)(i + 1) / parts));
+                        tris.Add(new[] { H(a0), H(b0), H(b1) });
+                        tris.Add(new[] { H(a0), H(b1), H(a1) });
+                    }
+
+                    list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(tris));
+                }
             }
 
             foreach (RoadMarking m in res.Markings)
@@ -543,7 +623,7 @@ namespace SiteDesignPro.Core.Roads
         /// </summary>
         public static (List<Vec3[]> Surface, List<Vec3[]> Kerb) RampTriangles(RoadRampFrame f, double rise, Func<Vec2, double> baseHeight)
         {
-            double a = RoadNetwork.RampWidth / 2, k = Math.Min(RoadSpec.KerbWidth, f.Depth / 2), d = f.Depth;
+            double a = f.Width / 2, k = Math.Min(RoadSpec.KerbWidth, f.Depth / 2), d = f.Depth;
             double a1 = a + 0.045, f0 = a + RoadNetwork.RampFlare, f1 = f0 - 0.045, b = a + RoadNetwork.RampBackFlare;
             double zk = Math.Min(0.02, rise);
             bool flip = f.Along.Cross(f.Inward) < 0;

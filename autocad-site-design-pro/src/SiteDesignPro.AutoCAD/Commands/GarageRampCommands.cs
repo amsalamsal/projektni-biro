@@ -232,7 +232,20 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ceilingLevel = ctx.Number("Donja ivica te ploče u odnosu na osnovnu visinu (npr. -0,30)", Math.Max(h0, h1) - 0.3, true, true);
             }
 
-            bool heated = average > 0.10 + 1e-9 && ctx.Keyword("Grijana rampa [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "No") == "Yes";
+            // the joint with the road: both corners rounded, at least the arc of a 1,00 × 1,00 m chamfer at 45°
+            double joinRadius = RoadNetwork.DrivewayRadius;
+            List<RoadSpec> roadSpecs = RoadElements.Specs(ctx.ExistingElements(), ctx.Catalog, k);
+            if (roadSpecs.Count > 0)
+            {
+                var joint = new GarageRamp { Kind = kind, RingPoints = axis.Vertices.Select(vv => new Vec2(vv.X / k, vv.Y / k)).ToList(), RingBulges = Enumerable.Range(0, axis.Count).Select(ii => ii < axis.Count - 1 ? axis.BulgeAt(ii) : 0.0).ToList() };
+                joint.Axis = joint.RingPoints;
+                if (RoadElements.AtRoad(joint, 0, roadSpecs) || RoadElements.AtRoad(joint, joint.Length, roadSpecs))
+                {
+                    joinRadius = ctx.Number("Radijus spoja rampe sa saobraćajnicom (m, najmanje 1,00 – zakošenje 1,00 × 1,00 pod 45°)", RoadNetwork.DrivewayRadius, false, true);
+                    joinRadius = Math.Max(RoadNetwork.DrivewayRadius, Math.Min(RoadNetwork.MaxDrivewayRadius, joinRadius));
+                }
+            }
+
 
             ElementType type = ctx.Catalog.RequireType(GarageRamp.Type);
             SiteElement e = ctx.NewElement(type, new PathGeometry(axis, false), ctx.ExistingElements());
@@ -245,7 +258,8 @@ namespace SiteDesignPro.AutoCAD.Commands
             e.Parameters["flatLength"] = ParamValue.Of(flat);
             e.Parameters["ceilingFrom"] = ParamValue.Of(ceilingFrom);
             e.Parameters["ceilingLevel"] = ParamValue.Of(ceilingLevel);
-            e.Parameters["heated"] = ParamValue.Of(heated);
+            e.Parameters["heated"] = ParamValue.Of(false);
+            e.Parameters["joinRadius"] = ParamValue.Of(joinRadius);
             e.Parameters["startLevel"] = ParamValue.Of(h0);
             e.Parameters["endLevel"] = ParamValue.Of(h1);
             e.Parameters["width"] = ParamValue.Of(width);

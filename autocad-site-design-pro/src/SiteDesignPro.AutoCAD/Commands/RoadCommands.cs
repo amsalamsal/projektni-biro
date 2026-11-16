@@ -364,6 +364,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             lanes = Math.Min(6, ctx.Integer("Broj traka", lanes, 1));
             lw = ctx.Number("Širina saobraćajne trake (m)", lw);
             double length = ctx.Number("Širina prijelaza – dužina pruga (m)", 4.0);
+            bool bikeStrip = ctx.Keyword("Vrsta prijelaza – samo pješački ili s biciklističkom stazom 80 cm [Pjesacki/Biciklisticki]", new[] { "Plain|Pjesacki", "Bike|Biciklisticki" }, "Plain") == "Bike";
             if (lw < 1 || length < 1)
             {
                 ctx.Write("Širina trake i prijelaza moraju biti najmanje 1 m.");
@@ -384,6 +385,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             SiteElement crossing = ctx.NewElement(type, new PolygonGeometry(ring), ctx.ExistingElements());
             crossing.Parameters["stripeWidth"] = ParamValue.Of(0.5);
             crossing.Parameters["gapWidth"] = ParamValue.Of(0.5);
+            crossing.Parameters["bikeLane"] = ParamValue.Of(bikeStrip);
             ctx.Svc.Create(crossing);
             if (roads.Count > 0)
             {
@@ -391,7 +393,8 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             ctx.Write("Pješački prijelaz " + crossing.Label + ": " + bars + " pruga 0,50 m s razmakom 0,50 m preko " + Bs.Num(lanes * lw, 2) + " m kolovoza, dužina pruga " + Bs.Num(length, 2) + " m" +
-                      (onRoad ? string.Empty : " (slobodno postavljen)") + ". Pomjera se i uređuje kao svaki element; linije traka se na njemu prekidaju.");
+                      (onRoad ? string.Empty : " (slobodno postavljen)") +
+                      (bikeStrip ? "; biciklistička staza 0,80 m lijevo od prijelaza (plava, RAL 5010), rampe za invalide šire za 0,80 m (2,00 m)" : string.Empty) + ". Pomjera se i uređuje kao svaki element; linije traka se na njemu prekidaju.");
         }));
 
         // ------------------------------------------------------------------ network
@@ -622,6 +625,22 @@ namespace SiteDesignPro.AutoCAD.Commands
                     Hatch h = RegionHatch(new RoadRegion(ramp, new List<RoadLoop>(), 0), k);
                     Add(h, "rampa", Color.FromRgb(90, 140, 210), 20);
                     Add(LoopPolyline(ramp, k), "rampa:rub", null, 0);
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception)
+                {
+                    failed++;
+                }
+            }
+
+            // cycle strips beside the pedestrian crossings: RAL 5010, 30 % transparent
+            foreach (List<Vec2> strip in RoadElements.BikeStrips(elements, k))
+            {
+                try
+                {
+                    var loop = new RoadLoop(strip, strip.Select(_ => 0.0).ToList());
+                    Hatch h = RegionHatch(new RoadRegion(loop, new List<RoadLoop>(), 0), k);
+                    Add(h, "prijelaz:bicikl", Color.FromRgb(0, 79, 124), 30);
+                    Add(LoopPolyline(loop, k), "prijelaz:bicikl:rub", Color.FromRgb(0, 79, 124), 0);
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception)
                 {

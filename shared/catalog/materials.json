@@ -68,6 +68,7 @@
     { "key": "line_paint_white", "name": "Boja za oznake (bijela)", "color": [240, 240, 236], "nameEn": "Line paint (white)" },
     { "key": "line_paint_yellow", "name": "Boja za oznake (žuta)", "color": [236, 196, 40], "nameEn": "Line paint (yellow)" },
     { "key": "line_paint_blue", "name": "Boja za oznake (plava)", "color": [40, 96, 180], "nameEn": "Line paint (blue)" },
+    { "key": "bike_crossing_blue", "name": "Biciklistički prijelaz (RAL 5010, 30 % providno)", "color": [0, 79, 124], "alpha": 0.7, "nameEn": "Cycle crossing (RAL 5010, 30 % transparent)" },
     { "key": "marking_green", "name": "Biciklistička površina (zelena)", "color": [70, 150, 90], "nameEn": "Cycle box (green)" },
     { "key": "acrylic_court", "name": "Akrilna podloga terena", "color": [64, 112, 150], "nameEn": "Sports court acrylic", "texture": "acrylic_court.jpg", "textureSize": [1.0, 1.0] },
     { "key": "sign_plate", "name": "Ploča znaka", "color": [232, 232, 228], "nameEn": "Sign plate" },

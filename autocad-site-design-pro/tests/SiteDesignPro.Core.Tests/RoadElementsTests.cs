@@ -417,5 +417,79 @@ namespace SiteDesignPro.Core.Tests
             Assert.All(bars, b => Assert.Equal(0.5, b[1].DistanceTo(b[2]), 6));
             Assert.Equal(5.0, bars[5][0].Y, 6);
         }
+
+        [Fact]
+        public void CrossingWithACycleStrip_GetsTheStripAndWiderRamps()
+        {
+            SiteElement street = Path(RoadElements.StreetType, 0, 0, 100, 0);
+            ElementType ct = Cat.RequireType(RoadElements.CrossingType);
+            var crossing = new SiteElement(Guid.NewGuid().ToString(), RoadElements.CrossingType, new PolygonGeometry(new Ring(new List<Vec3>
+            {
+                new Vec3(48, -3, 0), new Vec3(52, -3, 0), new Vec3(52, 3, 0), new Vec3(48, 3, 0),
+            })))
+            {
+                Parameters = ct.CreateDefaultParameters(),
+            };
+            var elements = new List<SiteElement> { street, crossing };
+            Assert.False(RoadElements.HasBikeStrip(crossing));
+            Assert.Empty(RoadElements.BikeStrips(elements));
+            Assert.All(RoadElements.Network(elements, Cat)!.RampFrames, f => Assert.Equal(1.2, f.Width, 6));
+            Assert.DoesNotContain(RoadElements.Derived(elements, Cat), e => e.TypeId == RoadElements.BikeCrossingType);
+
+            crossing.Parameters["bikeLane"] = ParamValue.Of(true);
+            List<Vec2> strip = Assert.Single(RoadElements.BikeStrips(elements));
+            Assert.InRange(strip.Min(q => q.X), 47.2 - 1e-6, 47.2 + 1e-6); // 0,80 m before the crossing
+            Assert.InRange(strip.Max(q => q.X), 48 - 1e-6, 48 + 1e-6);
+            Assert.InRange(strip.Max(q => q.Y) - strip.Min(q => q.Y), 6 - 1e-6, 6 + 1e-6);
+
+            // the ramps: 2,00 m wide, over the strip and the first 1,20 m of the crossing
+            RoadNetworkResult res = RoadElements.Network(elements, Cat)!;
+            Assert.Equal(2, res.Ramps.Count);
+            Assert.All(res.RampFrames, f => Assert.Equal(2.0, f.Width, 6));
+            Assert.All(res.RampFrames, f => Assert.Equal(48.2, f.Foot.X, 3));
+            Assert.Single(RoadElements.Derived(elements, Cat), e => e.TypeId == RoadElements.BikeCrossingType);
+        }
+
+        [Fact]
+        public void GarageRampModel_IsAClosedBody()
+        {
+            ElementType t = Cat.RequireType(GarageRamp.Type);
+            var e = new SiteElement(Guid.NewGuid().ToString(), GarageRamp.Type, new PathGeometry(new Ring(new List<Vec3> { new Vec3(0, 0, 0), new Vec3(20, 0, 0) }), false))
+            {
+                Parameters = t.CreateDefaultParameters(),
+                Label = "GR-001",
+            };
+            e.Parameters["startLevel"] = ParamValue.Of(0.0);
+            e.Parameters["endLevel"] = ParamValue.Of(-3.0);
+            GarageRamp r = GarageRamp.From(e)!;
+            foreach (List<Vec3[]> body in new[] { r.Slab3(), r.Walls3().Walls })
+            {
+                Assert.NotEmpty(body);
+
+                // closed and turned outwards: every edge is used once in each direction, the volume is positive
+                var edges = new Dictionary<string, int>();
+                string K(Vec3 p) => Math.Round(p.X, 4) + "," + Math.Round(p.Y, 4) + "," + Math.Round(p.Z, 4);
+                double volume = 0;
+                foreach (Vec3[] tri in body)
+                {
+                    for (int i = 0; i < 3; i++)
+                    {
+                        string key = K(tri[i]) + ">" + K(tri[(i + 1) % 3]);
+                        edges[key] = edges.TryGetValue(key, out int n) ? n + 1 : 1;
+                    }
+
+                    Vec3 a = tri[0], b = tri[1], c = tri[2];
+                    volume += ((a.X * ((b.Y * c.Z) - (b.Z * c.Y))) - (a.Y * ((b.X * c.Z) - (b.Z * c.X))) + (a.Z * ((b.X * c.Y) - (b.Y * c.X)))) / 6;
+                }
+
+                Assert.True(volume > 0.5, "volume " + volume);
+                Assert.All(edges, kv =>
+                {
+                    string[] ends = kv.Key.Split('>');
+                    Assert.Equal(1, kv.Value);
+                    Assert.True(edges.ContainsKey(ends[1] + ">" + ends[0]), "open edge " + kv.Key);
+                });
+            }
+        }
     }
 }
