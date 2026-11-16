@@ -2,6 +2,29 @@
 
 ## Neobjavljeno
 
+### Inputi 16.11.2026 – rampe, pješački prijelaz, kružni tok
+* **Spoj garažne rampe sa saobraćajnicom** je uvijek u radijusu: najmanje luk koji na oba kraka odsijeca 1,00 m
+  (luk u zakošenju 1,00 × 1,00 m pod 45°). Naredba pita radijus kad rampa počinje ili završava uz ulicu; mijenja se
+  i u Svojstvima („Radijus spoja sa saobraćajnicom“, 1,00–10,00 m).
+* **Rampa za invalide** se usijeca u trotoar 40 cm kad je trotoar širok do 120 cm, 5 cm više za svakih 10 cm širine
+  preko 120 cm, a najviše 100 cm (npr. trotoar 160 cm → 60 cm, 200 cm → 80 cm, 240 cm i više → 100 cm).
+* **Biciklistička staza obilazi rampu**: na pravom dijelu ulice staza se kod rampe blago pomjeri prema trotoaru i
+  vrati (prijelaz dužine najmanje 2,5 m sa svake strane), ako trotoaru pored nje ostaje najmanje 90 cm. Gdje
+  mjesta nema ili je ulica u krivini, rampa prelazi preko staze kao i do sada.
+* **Pješački prijelaz** ima izbor: samo pješački ili **s biciklističkom stazom 80 cm** lijevo od prijelaza (strana
+  na kojoj prijelaz počinje u smjeru osovine). Staza je plava (RAL 5010, 30 % providno), u tlocrtu i u 3D; rampe
+  za invalide su tada široke 2,00 m (1,20 + 0,80) i pokrivaju stazu i prvih 1,20 m prijelaza. Uključuje se i u
+  Svojstvima prijelaza.
+* **Garažna rampa**: pitanje „grijana rampa“ je izbačeno iz naredbe.
+* **Kružni tok**: poluprečnik srednjeg otoka 10–30 m; pitanje „Smjer prvog kraka“ je uklonjeno (prvi krak ide
+  udesno); pitanje o širini razdjelnog otoka je uklonjeno – razdjelni otoci su uvijek istog oblika: prema prstenu
+  2,00 m dug, 1,00 m širok uz prijelaz i 1,20 m na zaobljenom kraju, zatim prijelaz 3,00 m, pa otok dug 1,00 m,
+  širok 0,60 m uz prijelaz i 0,40 m na okruglom kraju (razdjelni pojas kraka 1,50 m).
+* **3D model garažne rampe** (SketchUp) je isti kao u dodatku „Garažne rampe“: ploča je zatvoreno tijelo (gornja i
+  donja površina, bokovi, čela), potporni zidovi su zatvorena tijela s dnom, na spiralnoj rampi zid ne ulazi u
+  zavoj iznad, a ograda stoji samo gdje zid izlazi na vrh. Ivice između trouglova na kosim i zakrivljenim
+  površinama (rampe i ulice s visinama) su omekšane, pa površina izgleda glatko kao kod ulice.
+
 ### Garažne rampe – dorada
 * Ivice, žute linije i srednja linija zakrivljenih rampi su pravi lukovi (ne izlomljene linije), a rampa ima sivu
   površinu kao kolovoz.
