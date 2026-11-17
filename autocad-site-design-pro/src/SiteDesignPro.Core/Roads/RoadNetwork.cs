@@ -2145,9 +2145,41 @@ namespace SiteDesignPro.Core.Roads
 
                     // the corner's own sidewalk and edging at the end: measured across, outwards from the bike lane
                     // (just inside the corner, off the end line itself)
-                    Vec2 c0 = p0 - (t * 0.02);
-                    bw = Math.Max(bw, Across(bike, c0, w, 4));
-                    double sw0 = Across(walk, c0 + (w * bw), w, 6), ew0 = Across(edge, c0 + (w * (bw + sw0)), w, 0.5);
+                    // the cross-section of the corner: that of the road side whose bike lane it carries (the corner
+                    // rings are concentric with it)
+                    RoadSpec? src = null;
+                    bool fromLeft = false;
+                    double fromBest = double.MaxValue;
+                    Vec2 inside = p0 - (t * 1.0) + (w * (bw / 2));
+                    foreach (RoadSpec r in roads)
+                    {
+                        for (int k = 0; k + 1 < r.Axis.Count; k++)
+                        {
+                            Vec2 a = r.Axis[k], ab = r.Axis[k + 1] - a;
+                            double l2 = ab.Dot(ab);
+                            if (l2 < 1e-12)
+                            {
+                                continue;
+                            }
+
+                            double u = Math.Max(0, Math.Min(1, (inside - a).Dot(ab) / l2));
+                            Vec2 f = a + (ab * u);
+                            bool l = ab.Cross(inside - a) > 0;
+                            if ((l ? r.BikeLeft : r.BikeRight) > 0.01 && f.DistanceTo(inside) < fromBest)
+                            {
+                                (fromBest, src, fromLeft) = (f.DistanceTo(inside), r, l);
+                            }
+                        }
+                    }
+
+                    if (src == null)
+                    {
+                        continue;
+                    }
+
+                    bw = fromLeft ? src.BikeLeft : src.BikeRight;
+                    double sw0 = fromLeft ? src.SidewalkLeft : src.SidewalkRight;
+                    double ew0 = RoadSpec.EdgeWidth;
                     double len = BikeTaperLength;
 
                     // the sidewalk beyond must go on for the whole transition
@@ -2219,18 +2251,6 @@ namespace SiteDesignPro.Core.Roads
             walk = Clipper.Union(Clipper.Difference(walk, clear, FillRule.NonZero, Precision), new PathsD(tapers.Select(x => x.Walk)), FillRule.NonZero, Precision);
             edge = Clipper.Union(Clipper.Difference(edge, clear, FillRule.NonZero, Precision), new PathsD(tapers.Where(x => x.Edge.Count > 0).Select(x => x.Edge)), FillRule.NonZero, Precision);
             return true;
-        }
-
-        /// <summary>How far a surface reaches from <paramref name="p"/> in direction <paramref name="dir"/> (to 2 mm, at most <paramref name="max"/>).</summary>
-        private static double Across(PathsD paths, Vec2 p, Vec2 dir, double max)
-        {
-            double d = 0;
-            while (d < max && InsideAny(paths, p + (dir * (d + 0.001))))
-            {
-                d += 0.002;
-            }
-
-            return d < 0.02 ? 0 : d;
         }
 
         private static double DistanceTo(PathsD paths, Vec2 p)
