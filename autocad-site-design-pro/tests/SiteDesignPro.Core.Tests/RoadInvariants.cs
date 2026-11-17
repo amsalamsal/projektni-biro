@@ -37,9 +37,9 @@ namespace SiteDesignPro.Core.Tests
             {
                 for (int j = i + 1; j < layers.Count; j++)
                 {
-                    PathsD both = Clipper.Intersect(layers[i].Paths, layers[j].Paths, FillRule.NonZero, Precision);
+                    PathsD both = Solid(Clipper.Intersect(layers[i].Paths, layers[j].Paths, FillRule.NonZero, Precision));
                     double a = Area(both);
-                    if (a > 0.02)
+                    if (a > 0.01)
                     {
                         issues.Add("overlap " + layers[i].Name + "/" + layers[j].Name + " " + F(a) + " m2 at " + At(both));
                     }
@@ -49,20 +49,32 @@ namespace SiteDesignPro.Core.Tests
             // within one layer the regions do not overlap either
             foreach ((string name, PathsD paths) in layers)
             {
-                double sum = paths.Sum(p => Clipper.Area(p));
-                double union = Area(Clipper.Union(paths, FillRule.NonZero));
-                if (sum - union > 0.02)
+                var own = new PathsD();
+                for (int i = 0; i < paths.Count; i++)
                 {
-                    issues.Add("self-overlap " + name + " " + F(sum - union) + " m2");
+                    for (int j = i + 1; j < paths.Count; j++)
+                    {
+                        if (!Clipper.IsPositive(paths[i]) || !Clipper.IsPositive(paths[j]))
+                        {
+                            continue;
+                        }
+
+                        own.AddRange(Clipper.Intersect(new PathsD { paths[i] }, new PathsD { paths[j] }, FillRule.NonZero, Precision));
+                    }
+                }
+
+                own = Solid(own);
+                if (Area(own) > 0.01)
+                {
+                    issues.Add("self-overlap " + name + " " + F(Area(own)) + " m2 at " + At(own));
                 }
             }
 
-            // 2. no thin seams (narrower than 6 cm) between the surfaces
+            // 2. no seams (2 to 10 cm wide) between the surfaces; the arcs of the outlines may differ by a few mm
             PathsD all = Clipper.Union(new PathsD(layers.SelectMany(l => l.Paths)), FillRule.NonZero);
-            PathsD closed = Clipper.InflatePaths(Clipper.InflatePaths(all, 0.03, JoinType.Miter, EndType.Polygon, 3, Precision), -0.03, JoinType.Miter, EndType.Polygon, 3, Precision);
-            PathsD seams = Clipper.Difference(closed, all, FillRule.NonZero, Precision);
-            seams = new PathsD(seams.Where(p => Math.Abs(Clipper.Area(p)) > 0.005));
-            if (Area(seams) > 0.02)
+            PathsD closed = Clipper.InflatePaths(Clipper.InflatePaths(all, 0.05, JoinType.Miter, EndType.Polygon, 3, Precision), -0.05, JoinType.Miter, EndType.Polygon, 3, Precision);
+            PathsD seams = Solid(Clipper.Difference(closed, all, FillRule.NonZero, Precision));
+            if (Area(seams) > 0.01)
             {
                 issues.Add("seam " + F(Area(seams)) + " m2 at " + At(seams));
             }
@@ -98,8 +110,8 @@ namespace SiteDesignPro.Core.Tests
                 var outline = new PathsD { Tess(surface.Points, surface.Bulges) };
                 foreach ((string name, PathsD paths) in layers)
                 {
-                    double a = Area(Clipper.Intersect(paths, outline, FillRule.NonZero, Precision));
-                    if (a > 0.02)
+                    double a = Area(Solid(Clipper.Intersect(paths, outline, FillRule.NonZero, Precision)));
+                    if (a > 0.01)
                     {
                         issues.Add("on ramp " + ramp.Name + ": " + name + " " + F(a) + " m2");
                     }
@@ -173,6 +185,9 @@ namespace SiteDesignPro.Core.Tests
 
             return issues;
         }
+
+        /// <summary>What is left of an area after 1 cm is taken off all round: the few mm by which fitted arcs differ vanish.</summary>
+        private static PathsD Solid(PathsD p) => Clipper.InflatePaths(Clipper.Union(p, FillRule.NonZero), -0.01, JoinType.Miter, EndType.Polygon, 3, Precision);
 
         private static bool Finite(Vec3 v) => !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z) && !double.IsInfinity(v.X) && !double.IsInfinity(v.Y);
 
