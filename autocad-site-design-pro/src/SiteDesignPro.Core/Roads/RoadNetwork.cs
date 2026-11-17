@@ -507,7 +507,7 @@ namespace SiteDesignPro.Core.Roads
                 across = new PathsD(across.Where(x => Math.Abs(Clipper.Area(x)) > 0.05));
                 if (across.Count > 0)
                 {
-                    PathsD reach = Clipper.InflatePaths(across, BikeRampLength, JoinType.Round, EndType.Polygon, 2, Precision, 0.02);
+                    PathsD reach = Clipper.InflatePaths(across, BikeRampLength, JoinType.Miter, EndType.Polygon, 3, Precision);
                     PathsD slopeBike = Clipper.Intersect(bike, reach, FillRule.NonZero, Precision);
                     PathsD slopeKerb = Clipper.Intersect(kerb, reach, FillRule.NonZero, Precision);
                     bike = Clipper.Difference(bike, reach, FillRule.NonZero, Precision);
