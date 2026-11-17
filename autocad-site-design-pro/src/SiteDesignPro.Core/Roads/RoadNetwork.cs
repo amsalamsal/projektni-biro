@@ -2154,18 +2154,35 @@ namespace SiteDesignPro.Core.Roads
                         room &= InsideAny(walk, p0 + (t * s) + (w * Math.Min(0.3, sw1 / 2)));
                     }
 
-                    if (!room || sw1 < 0.3)
+                    // a straight transition only where the road beyond runs straight (not along a roundabout ring)
+                    var single = new List<RoadSpec> { road };
+                    Vec2 d0 = LaneDirection(single, p0 + (t * 0.5)), d1 = LaneDirection(single, p0 + (t * len));
+                    if (!room || sw1 < 0.3 || road.Closed || Math.Abs(d0.Dot(d1)) < Math.Cos(5 * Math.PI / 180))
                     {
                         continue;
                     }
 
                     PathD Local(params (double S, double W)[] pts) => Positive(pts.Select(x => p0 + (t * x.S) + (w * x.W)));
                     double far = bw + sw0 + ew0 + 0.05;
-                    tapers.Add((
-                        Local((0, -0.01), (len, -0.01), (len, far), (0, far)),
-                        Local((0, 0), (0, bw), (len, 0)),
-                        Local((0, bw), (0, bw + sw0), (len, sw1), (len, 0)),
-                        ew0 > 0.01 || ew1 > 0.01 ? Local((0, bw + sw0), (0, bw + sw0 + ew0), (len, sw1 + ew1), (len, sw1)) : new PathD()));
+                    PathD box = Local((0, -0.01), (len, -0.01), (len, far), (0, far));
+                    PathD tb = Local((0, 0), (0, bw), (len, 0));
+                    PathD tw = Local((0, bw), (0, bw + sw0), (len, sw1), (len, 0));
+                    PathD te = ew0 > 0.01 || ew1 > 0.01 ? Local((0, bw + sw0), (0, bw + sw0 + ew0), (len, sw1 + ew1), (len, sw1)) : new PathD();
+
+                    // it may not reach onto anything else (another bike lane, the carriageway)
+                    PathsD others = Clipper.Union(Clipper.Difference(bike, new PathsD { box }, FillRule.NonZero, Precision), surface, FillRule.NonZero, Precision);
+                    PathsD mine = new PathsD { tb, tw };
+                    if (te.Count > 0)
+                    {
+                        mine.Add(te);
+                    }
+
+                    if (Clipper.Intersect(others, mine, FillRule.NonZero, Precision).Sum(x => Math.Abs(Clipper.Area(x))) > 0.005)
+                    {
+                        continue;
+                    }
+
+                    tapers.Add((box, tb, tw, te));
                 }
             }
 
