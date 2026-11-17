@@ -2212,9 +2212,6 @@ namespace SiteDesignPro.Core.Roads
             return d < 0.02 ? 0 : d;
         }
 
-            return d < 0.02 ? 0 : Math.Round(d / 0.05) * 0.05;
-        }
-
         private static double DistanceTo(PathsD paths, Vec2 p)
         {
             double best = double.MaxValue;
