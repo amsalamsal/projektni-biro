@@ -2,6 +2,15 @@
 
 ## Neobjavljeno
 
+### Izvoz u SketchUp: izmjenjive plohe, SketchUp 2014–2027 (17.11.)
+* **Sve plohe se mogu uređivati** (Push/Pull i ostali alati): ivice se više ne omekšavaju niti zaglađuju (Soften
+  Edges 0°, bez Smooth normals). Trouglovi u istoj ravni kod pojedinačno građenih tijela spajaju se u jednu plohu;
+  površine ulica s visinama ostaju trouglovi, svaki zasebna ploha.
+* **Oznake** (5 mm) sežu 1 mm u podlogu, tako da im dno nije u ravni asfalta (nema treperenja).
+* **Podrška za SketchUp 2014–2027**: kod radi na Ruby 2.0 (SketchUp 2014–2016), 2.2, 2.5, 2.7 i novijim; na
+  SketchUp 2014–2016 dijalozi rade u WebDialog prozoru (HtmlDialog postoji tek od 2017), ikone su PNG (vektorske od
+  2016), a folderi oznaka (tagova) koriste se tek od 2021. Automatska provjera na Ruby 2.0/2.2/2.5/2.7 pri svakoj izgradnji.
+
 ### Inputi 17.11.2026 16:00 – biciklistička staza preko prilaza, krakovi kružnog toka, oznake 5 mm, spojevi
 * **Biciklistička staza preko kolnog prilaza / garažne rampe**: gdje prilaz presijeca trotoar i biciklističku stazu,
   staza ide preko prilaza u nivou kolovoza, označena **tamnim bordo** (kao rampa za invalide), i spušta se do njega
