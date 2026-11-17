@@ -257,7 +257,10 @@ namespace SiteDesignPro.Core.Tests
         [MemberData(nameof(Scenarios))]
         public void Scenario(string name, SiteElement[] elements)
         {
+            var raw = new Dictionary<RoadLevel, List<List<Vec2>>>();
+            RoadNetwork.RawBand = (l, p) => raw[l] = p;
             RoadNetworkResult res = RoadElements.Network(elements, Cat)!;
+            RoadNetwork.RawBand = null;
             Assert.NotNull(res);
             var issues = new List<string>();
             foreach (RoadLevel level in res.Bands.Keys)
@@ -286,6 +289,30 @@ namespace SiteDesignPro.Core.Tests
                 if (broken.Count > 0)
                 {
                     File.AppendAllText(Path.Combine(dir, "pravila.txt"), name + ": " + string.Join("; ", broken) + "\n");
+
+                    // the raw outlines (before the arcs are fitted) near each place, to see where it comes from
+                    var sbr = new StringBuilder();
+                    foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(string.Join(" ", broken), @"\((-?[0-9.]+); (-?[0-9.]+)\)"))
+                    {
+                        var at = new Vec2(double.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture), double.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture));
+                        sbr.Append("@ ").Append(Fmt(at)).Append('\n');
+                        foreach (KeyValuePair<RoadLevel, List<List<Vec2>>> kv in raw)
+                        {
+                            foreach (List<Vec2> path in kv.Value)
+                            {
+                                List<int> near = Enumerable.Range(0, path.Count).Where(i => path[i].DistanceTo(at) < 6).ToList();
+                                if (near.Count == 0)
+                                {
+                                    continue;
+                                }
+
+                                int i0 = Math.Max(0, near.Min() - 2), i1 = Math.Min(path.Count - 1, near.Max() + 2);
+                                sbr.Append("  ").Append(kv.Key).Append(": ").Append(string.Join(" ", Enumerable.Range(i0, i1 - i0 + 1).Select(i => "(" + path[i].X.ToString("0.####", CultureInfo.InvariantCulture) + "," + path[i].Y.ToString("0.####", CultureInfo.InvariantCulture) + ")"))).Append('\n');
+                            }
+                        }
+                    }
+
+                    File.AppendAllText(Path.Combine(dir, "pravila_" + name + ".txt"), sbr.ToString());
                 }
             }
 

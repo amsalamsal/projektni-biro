@@ -511,6 +511,12 @@ namespace SiteDesignPro.Core.Roads
                 result.Driveways++;
             }
 
+            // the rounded corners of a driveway never reach onto the ramp itself
+            if (onRamps.Count > 0)
+            {
+                carriageway = Clipper.Difference(carriageway, Union(onRamps), FillRule.NonZero, Precision);
+            }
+
             // where a driveway crosses a bike lane, the bike lane goes on across it at the level of the carriageway
             // (marked dark bordo, like an accessible ramp) and slopes down to it over 2 m on both sides, the kerb
             // beside it with it
@@ -671,6 +677,7 @@ namespace SiteDesignPro.Core.Roads
 
             foreach (RoadLevel level in (RoadLevel[])Enum.GetValues(typeof(RoadLevel)))
             {
+                RawBand?.Invoke(level, region[level].Select(path => path.Select(q => new Vec2(q.x, q.y) + origin).ToList()).ToList());
                 result.Bands[level] = Regions(region[level], origin);
                 bool draw = level == RoadLevel.Carriageway || region[level].Count > 0;
                 result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
@@ -1067,6 +1074,16 @@ namespace SiteDesignPro.Core.Roads
 
         /// <summary>Length over which a bike lane slopes down to a driveway that crosses it.</summary>
         public const double BikeRampLength = 2.0;
+
+        [ThreadStatic]
+        private static Action<RoadLevel, List<List<Vec2>>>? rawBand;
+
+        /// <summary>For checks: receives each band before its arcs are fitted (world coordinates), on this thread.</summary>
+        public static Action<RoadLevel, List<List<Vec2>>>? RawBand
+        {
+            get => rawBand;
+            set => rawBand = value;
+        }
 
         public const double MaxDrivewayRadius = 10.0;
 
