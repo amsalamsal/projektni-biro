@@ -443,12 +443,12 @@ namespace SiteDesignPro.Core.Roads
                 PathsD clear = opening;
                 if (dw.Exclude.Count >= 3)
                 {
-                    var rampArea = new PathsD { Positive(dw.Exclude.Select(q => q - origin)) };
-                    tab = Clipper.Difference(opening, rampArea, FillRule.NonZero, Precision);
+                    var onRamp = new PathsD { Positive(dw.Exclude.Select(q => q - origin)) };
+                    tab = Clipper.Difference(opening, onRamp, FillRule.NonZero, Precision);
 
                     // nothing of the road (kerb, bike lane, sidewalk, edging) lies on the ramp itself: a ramp at an
                     // angle to the road reaches into the sidewalk with its corner
-                    clear = Clipper.Union(opening, rampArea, FillRule.NonZero, Precision);
+                    clear = Clipper.Union(opening, onRamp, FillRule.NonZero, Precision);
                 }
 
                 kerb = Clipper.Difference(kerb, clear, FillRule.NonZero, Precision);
