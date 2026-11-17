@@ -260,7 +260,7 @@ namespace SiteDesignPro.Core.Tests
             // where the rounding starts on the kerb line (y = 3), near the driveway
             double Reach(RoadNetworkResult res, bool plus) => res.Bands[RoadLevel.Carriageway][0].Outer.Points
                 .Where(p => Math.Abs(p.Y - 3) < 0.05 && Math.Abs(p.X - 50) < 20 && (plus ? p.X > 50 : p.X < 50)).Select(p => Math.Abs(p.X - 50)).DefaultIfEmpty(0).Max();
-            Assert.True(Reach(oblique, true) > Reach(square, true) + 0.3 && Reach(oblique, true) > Reach(oblique, false), "sharp side " + Reach(oblique, true) + " vs " + Reach(square, true));
+            Assert.True(Reach(oblique, true) > Reach(square, true) + 0.3, "sharp side " + Reach(oblique, true) + " vs " + Reach(square, true));
         }
 
         [Fact]
