@@ -2,6 +2,20 @@
 
 ## Neobjavljeno
 
+### Sistematsko testiranje saobraćajnica (17.11. uveče)
+* **Automatska pravila za svaku mrežu** (provjeravaju se pri svakoj izgradnji, na 160+ situacija): površine se ne
+  preklapaju, između njih nema šavova, nema komadića (sliver), ništa od ulice ne leži na garažnoj rampi, svaka rampa
+  uz ulicu je spojena kolnim prilazom, oznake i strelice su na kolovozu, 3D visine su konačne i u razumnom opsegu.
+* **Matrica situacija**: T i X raskrsnice pod 20–160°, sa i bez biciklističkih staza; sve opcije ulice (1–3 trake,
+  jednosmjerna, razdjelni pojas, bez trotoara, širok trotoar, staza s jedne strane, širine traka, radijusi 1–15 m);
+  krivine R20 i R50 s raskrsnicom; garažne rampe pod 30–150° s obje strane, u trotoaru i iza njega; rampa uz
+  raskrsnicu, dvije rampe jedna do druge, izlazna rampa; kružni tokovi s 3 i 5 krakova; pješački prelazi; kratka
+  ulica, dupla tačka, skoro ravna osovina.
+* **Ispravljeno**: kod kosih raskrsnica (30°, 60°) kolovoz i ivičnjak su se preklapali do 4 cm uz ivicu (šiljak nulte
+  širine je pri prilagođavanju lukova povlačio tačke luka); kolovoz kolnog prilaza više ne ulazi na rampu; rampa koja
+  počinje do 8 m iza ruba ulice (predbašta) dobija kolni prilaz do rampe (ranije samo do 1,5 m); spušteni dio
+  biciklističke staze završava okomito na stazu.
+
 ### Izvoz u SketchUp: izmjenjive plohe, SketchUp 2014–2027 (17.11.)
 * **Sve plohe se mogu uređivati** (Push/Pull i ostali alati): ivice se više ne omekšavaju niti zaglađuju (Soften
   Edges 0°, bez Smooth normals). Trouglovi u istoj ravni kod pojedinačno građenih tijela spajaju se u jednu plohu;
