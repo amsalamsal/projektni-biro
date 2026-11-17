@@ -257,7 +257,9 @@ namespace SiteDesignPro.Core.Tests
             RoadNetworkResult oblique = Build(new Vec2(1, 1).Normalized());
 
             // the sharp side (towards +X) is rounded much further along the road than the open side
-            double Reach(RoadNetworkResult res, bool plus) => res.Bands[RoadLevel.Carriageway][0].Outer.Points.Where(p => p.Y > 3.05 && (plus ? p.X > 50 : p.X < 50)).Select(p => Math.Abs(p.X - 50)).DefaultIfEmpty(0).Max();
+            // where the rounding starts on the kerb line (y = 3), near the driveway
+            double Reach(RoadNetworkResult res, bool plus) => res.Bands[RoadLevel.Carriageway][0].Outer.Points
+                .Where(p => Math.Abs(p.Y - 3) < 0.05 && Math.Abs(p.X - 50) < 20 && (plus ? p.X > 50 : p.X < 50)).Select(p => Math.Abs(p.X - 50)).DefaultIfEmpty(0).Max();
             Assert.True(Reach(oblique, true) > Reach(square, true) + 1.0, "sharp side " + Reach(oblique, true) + " vs " + Reach(square, true));
         }
 
