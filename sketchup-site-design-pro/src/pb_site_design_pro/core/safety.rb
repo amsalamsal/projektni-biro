@@ -76,7 +76,7 @@ module ProjektniBiro
         return [] unless File.directory?(dir)
 
         Dir.glob(File.join(dir, "#{glob_escape(stem)}*#{ext}")).filter_map do |f|
-          rest = File.basename(f, ext)[stem.length..]
+          rest = File.basename(f, ext)[stem.length..-1]
           m = STAMP.match(rest.to_s)
           next unless m
 

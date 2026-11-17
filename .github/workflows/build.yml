@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['2.0', '2.2', '2.5', '2.7']
+        ruby: ['2.2', '2.5', '2.7'] # Ruby 2.0 (SketchUp 2014-2016): syntax checked with the parser gem in the build job
     steps:
       - uses: actions/checkout@v4
       - name: SketchUp Ruby ${{ matrix.ruby }}

@@ -35,11 +35,11 @@ git diff --quiet -- shared/samples || echo "NOTE: sample packages changed - revi
 step "Ruby tests (core, builders, change planning, SketchUp adapter against the API fake)"
 for f in sketchup-site-design-pro/tests/test_*.rb; do [ "$(basename "$f")" = test_helper.rb ] && continue; ruby -Isketchup-site-design-pro/tests "$f" | grep -v '\[INFO\]' ; done
 
-step "Ruby 2.7 syntax compatibility (SketchUp 2021-2023)"
-if ruby -e 'require "parser/ruby27"' 2>/dev/null; then
+step "Ruby 2.0 syntax compatibility (SketchUp 2014-2016; newer Rubies run in the ruby-compat job)"
+if ruby -e 'require "parser/ruby20"' 2>/dev/null; then
   RP=$(gem contents parser | grep 'bin/ruby-parse$' | head -1)
-  find sketchup-site-design-pro/src -name '*.rb' -print0 | xargs -0 -n1 ruby "$RP" --27 >/dev/null
-  echo "all extension files parse as Ruby 2.7"
+  find sketchup-site-design-pro/src -name '*.rb' -print0 | xargs -0 -n1 ruby "$RP" --20 >/dev/null
+  echo "all extension files parse as Ruby 2.0"
 else
   echo "parser gem not installed (gem install parser) - skipped"
 fi
