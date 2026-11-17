@@ -1469,8 +1469,8 @@ namespace SiteDesignPro.Core.Roads
 
                 (List<Vec3[]> white, List<Vec3[]> yellow) = r.Paint3();
                 Add("Garažna rampa", r.Slab3(), "asphalt_new");
-                Add("Garažna rampa – bijele oznake", white, "line_paint_white", RoadElements.MarkingLift);
-                Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow", RoadElements.MarkingLift);
+                Add("Garažna rampa – bijele oznake", white, "line_paint_white", RoadElements.MarkingLift + 0.001);
+                Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow", RoadElements.MarkingLift + 0.001);
                 Add("Garažna rampa – srednje ostrvo", r.Island3(), null);
                 (List<Vec3[]> wall, List<Vec3[]> rail) = r.Walls3();
                 Add("Garažna rampa – potporni zidovi", wall, "blacktop_old");

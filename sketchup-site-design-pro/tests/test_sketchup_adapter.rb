@@ -88,7 +88,7 @@ class TestSketchupAdapter < Minitest::Test
     import(SAMPLE_ZIP)
     bay = managed.find { |e| e.get_attribute(DICT, 'type') == 'road.parking_bay' }
     faces = bay.definition.entities.grep(Sketchup::Group).flat_map { |g| g.entities.grep(Sketchup::Face) }
-    bottoms = faces.select { |f| f.points.all? { |p| p.z.abs < 1e-9 } }
+    bottoms = faces.select { |f| f.points.all? { |p| p.z < 1e-9 } } # 1 mm into the surface below
     refute_empty bottoms
     assert(bottoms.all? { |f| f.normal.z < 0 }, 'bottom faces point down')
     tops = faces.select { |f| f.points.all? { |p| p.z > 0.1 } }

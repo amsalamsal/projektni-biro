@@ -331,7 +331,7 @@ class TestBuilders < Minitest::Test
       assert_equal 'line_paint_white', meshes.first.material, type
       assert_in_delta 1.235, meshes.first.polygons.flatten(1).map { |p| p[2] }.max, 1e-9, type
       # paint 5 mm thick: a closed body down to the road
-      assert_in_delta 1.2, meshes.first.polygons.flatten(1).map { |p| p[2] }.min, 1e-9, type
+      assert_in_delta 1.199, meshes.first.polygons.flatten(1).map { |p| p[2] }.min, 1e-9, type
       assert_nil canvas.send(:mesh_manifold_error, meshes.first.polygons), type
     end
   end

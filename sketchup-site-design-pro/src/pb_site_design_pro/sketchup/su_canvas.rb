@@ -134,8 +134,8 @@ module ProjektniBiro
       end
 
       # A large surface of triangles (a road surface following its heights) is added in one step, which is many
-      # times faster than face by face: each polygon keeps its point order (its normal); triangles in one plane are
-      # joined into one face afterwards, the other edges stay hard (editable faces).
+      # times faster than face by face: each polygon keeps its point order (its normal) and every edge stays hard,
+      # so each triangle is a face of its own that Push/Pull works on.
       def add_polygon_mesh(ents, polygons)
         pm = Geom::PolygonMesh.new(polygons.length * 3, polygons.length)
         added = 0
@@ -149,9 +149,8 @@ module ProjektniBiro
             @stats['failed_faces'] += 1
           end
         end
-        ents.add_faces_from_mesh(pm, 0) # 0: no edge softened, smoothed or hidden
+        ents.add_faces_from_mesh(pm, 0) # 0: no edge softened, smoothed or hidden: every triangle is its own face
         @stats['faces'] += added
-        join_coplanar(ents)
       rescue StandardError => e # fall back to face by face
         Log.write(:debug, "mreža površine nije dodana u jednom koraku (#{e.message})")
         polygons.each { |poly| add_polygon(ents, poly, false) }

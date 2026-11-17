@@ -4,6 +4,8 @@ module ProjektniBiro
   module SiteDesignPro
     module Builders
       MARKING = 0.005
+      # paint reaches 1 mm into the surface below, so its bottom never lies in the plane of that surface
+      SINK = 0.001
 
       # Parking bay markings; insertion = centre of the aisle edge, bay along local +Y.
       class ParkingBay < PointBuilder
@@ -12,13 +14,13 @@ module ProjektniBiro
           l = e.num('length', 5.0)
           lw = e.num('lineWidth', 0.12)
           material = mat(e, 'markingMaterial', 'line_paint_white')
-          c.mesh(Mesh.box(-w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Bočna linija')
-          c.mesh(Mesh.box(w / 2, l / 2, 0, lw, l, MARKING), material: material, name: 'Bočna linija')
-          c.mesh(Mesh.box(0, l - (lw / 2), 0, w - lw - 0.002, lw, MARKING), material: material, name: 'Krajnja linija')
+          c.mesh(Mesh.box(-w / 2, l / 2, -SINK, lw, l, MARKING + SINK), material: material, name: 'Bočna linija')
+          c.mesh(Mesh.box(w / 2, l / 2, -SINK, lw, l, MARKING + SINK), material: material, name: 'Bočna linija')
+          c.mesh(Mesh.box(0, l - (lw / 2), -SINK, w - lw - 0.002, lw, MARKING + SINK), material: material, name: 'Krajnja linija')
           acc = e.bool('accessible')
-          c.mesh(Mesh.box(0, l * (e.bool('ev') ? 0.32 : 0.5), 0, [w * 0.45, 1.2].min, [w * 0.45, 1.2].min, MARKING), material: 'line_paint_blue', name: 'Površina simbola pristupačnosti') if acc
+          c.mesh(Mesh.box(0, l * (e.bool('ev') ? 0.32 : 0.5), -SINK, [w * 0.45, 1.2].min, [w * 0.45, 1.2].min, MARKING + SINK), material: 'line_paint_blue', name: 'Površina simbola pristupačnosti') if acc
           # an accessible bay can also have a charger: both symbols, one behind the other
-          c.mesh(Mesh.box(0, l * (acc ? 0.7 : 0.5), 0, [w * 0.4, 1.0].min, [w * 0.6, acc ? 1.2 : 1.5].min, MARKING), material: 'marking_green', name: 'Površina simbola punjača') if e.bool('ev')
+          c.mesh(Mesh.box(0, l * (acc ? 0.7 : 0.5), -SINK, [w * 0.4, 1.0].min, [w * 0.6, acc ? 1.2 : 1.5].min, MARKING + SINK), material: 'marking_green', name: 'Površina simbola punjača') if e.bool('ev')
         end
       end
       register('parking_bay', ParkingBay)
@@ -36,7 +38,8 @@ module ProjektniBiro
           while v + 1e-6 < r[:length_v]
             width = [sw, r[:length_v] - v].min
             corner = Geometry.rect_point(r, 0, v)
-            polys.concat(Mesh.block(corner, [r[:u][0] * r[:length_u], r[:u][1] * r[:length_u], 0], [r[:v][0] * width, r[:v][1] * width, 0], [0, 0, t]))
+            corner = [corner[0], corner[1], (corner[2] || 0.0) - SINK]
+            polys.concat(Mesh.block(corner, [r[:u][0] * r[:length_u], r[:u][1] * r[:length_u], 0], [r[:v][0] * width, r[:v][1] * width, 0], [0, 0, t + SINK]))
             v += sw + gap
           end
           c.mesh(polys, material: mat(e, 'material', 'line_paint_white'), name: 'Pruge') unless polys.empty?
@@ -52,7 +55,7 @@ module ProjektniBiro
           sw = e.num('shaftWidth', 0.15)
           head = [l * 0.4, hw * 1.6].min
           ring = [[0, -sw / 2], [l - head, -sw / 2], [l - head, -hw / 2], [l, 0], [l - head, hw / 2], [l - head, sw / 2], [0, sw / 2]]
-          c.mesh(Mesh.prism(ring, 0, e.num('thickness', MARKING)), material: mat(e, 'material', 'line_paint_white'), name: 'Strelica')
+          c.mesh(Mesh.prism(ring, -SINK, e.num('thickness', MARKING)), material: mat(e, 'material', 'line_paint_white'), name: 'Strelica')
         end
       end
       register('arrow_marking', ArrowMarking)
