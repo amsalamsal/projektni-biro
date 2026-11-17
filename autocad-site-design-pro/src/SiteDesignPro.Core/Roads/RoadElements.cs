@@ -386,6 +386,7 @@ namespace SiteDesignPro.Core.Roads
                 List<Vec2> outline = ramp.Plan().FirstOrDefault(x => x.Role == "surface") is RampShape surface
                     ? GeometryMath.Tessellate(new Ring(surface.Points.Select(q => q.WithZ(0)).ToList(), surface.Bulges), true, 0.005).Select(v => v.XY).ToList()
                     : new List<Vec2>();
+                outline = WithWalls(ramp, outline);
                 (Vec2 p0, Vec2 d0) = ramp.PointAt(0, 0);
                 (Vec2 p1, Vec2 d1) = ramp.PointAt(total, 0);
                 driveways.Add(new RoadDriveway { Point = p0, Direction = d0, Width = ramp.Width, Radius = ramp.JoinRadius, Exclude = outline });
@@ -665,6 +666,33 @@ namespace SiteDesignPro.Core.Roads
         public const string BikeRampType = "road.bike_ramp";
 
         /// <summary>Distance from a point to a polygon (0 inside).</summary>
+        /// <summary>The ramp's outline together with its retaining walls (nothing of the road lies on either).</summary>
+        private static List<Vec2> WithWalls(GarageRamp ramp, List<Vec2> outline)
+        {
+            (double From, double To)? span = ramp.WallSpan();
+            if (outline.Count < 3 || !span.HasValue || span.Value.To - span.Value.From < 0.01)
+            {
+                return outline;
+            }
+
+            List<Vec2> Line((List<Vec2> Points, List<double> Bulges) sub) =>
+                GeometryMath.Tessellate(new Ring(sub.Points.Select(q => q.WithZ(0)).ToList(), sub.Bulges), false, 0.005).Select(v => v.XY).ToList();
+
+            double half = ramp.Width / 2;
+            var all = new PathsD { new PathD(outline.Select(v => new PointD(v.X, v.Y))) };
+            foreach (double side in new[] { 1.0, -1.0 })
+            {
+                List<Vec2> inner = Line(ramp.Sub(side * half, span.Value.From, span.Value.To));
+                List<Vec2> outer = Line(ramp.Sub(side * (half + GarageRamp.WallThickness), span.Value.From, span.Value.To));
+                outer.Reverse();
+                all.Add(new PathD(inner.Concat(outer).Select(v => new PointD(v.X, v.Y))));
+            }
+
+            PathsD union = Clipper.Union(all, FillRule.NonZero);
+            PathD? best = union.OrderByDescending(x => Math.Abs(Clipper.Area(x))).FirstOrDefault();
+            return best == null || best.Count < 3 ? outline : best.Select(v => new Vec2(v.x, v.y)).ToList();
+        }
+
         /// <summary>
         /// Distance from <paramref name="p"/> to a polygon measured along <paramref name="dir"/> (forwards or back): 0
         /// inside it or beside it. To a straight side

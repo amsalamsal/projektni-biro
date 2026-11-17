@@ -440,15 +440,21 @@ namespace SiteDesignPro.Core.Roads
 
                 var opening = new PathsD { strip };
                 PathsD tab = opening;
+                PathsD clear = opening;
                 if (dw.Exclude.Count >= 3)
                 {
-                    tab = Clipper.Difference(opening, new PathsD { Positive(dw.Exclude.Select(q => q - origin)) }, FillRule.NonZero, Precision);
+                    var rampArea = new PathsD { Positive(dw.Exclude.Select(q => q - origin)) };
+                    tab = Clipper.Difference(opening, rampArea, FillRule.NonZero, Precision);
+
+                    // nothing of the road (kerb, bike lane, sidewalk, edging) lies on the ramp itself: a ramp at an
+                    // angle to the road reaches into the sidewalk with its corner
+                    clear = Clipper.Union(opening, rampArea, FillRule.NonZero, Precision);
                 }
 
-                kerb = Clipper.Difference(kerb, opening, FillRule.NonZero, Precision);
-                bike = Clipper.Difference(bike, opening, FillRule.NonZero, Precision);
-                walk = Clipper.Difference(walk, opening, FillRule.NonZero, Precision);
-                edge = Clipper.Difference(edge, opening, FillRule.NonZero, Precision);
+                kerb = Clipper.Difference(kerb, clear, FillRule.NonZero, Precision);
+                bike = Clipper.Difference(bike, clear, FillRule.NonZero, Precision);
+                walk = Clipper.Difference(walk, clear, FillRule.NonZero, Precision);
+                edge = Clipper.Difference(edge, clear, FillRule.NonZero, Precision);
                 carriageway = Clipper.Union(carriageway, tab, FillRule.NonZero, Precision);
 
                 // the two corners where the driveway leaves the carriageway are rounded, within the kerb and sidewalk.

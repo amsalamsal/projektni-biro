@@ -253,6 +253,31 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void RampAtAnAngle_NoSidewalkOrKerbLiesOnTheRamp()
+        {
+            Vec2 p = new Vec2(50, 5.6), d = new Vec2(Math.Sqrt(0.5), Math.Sqrt(0.5)), n = new Vec2(-d.Y, d.X);
+            var outline = new List<Vec2> { p + (n * 2), p - (n * 2), p - (n * 2) + (d * 10), p + (n * 2) + (d * 10) };
+            var dw = new RoadDriveway { Point = p, Direction = d, Width = 4.0, Radius = 1.0, Exclude = outline };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, null, null, null, new[] { dw });
+            Assert.Equal(1, res.Driveways);
+
+            // the corner of the ramp reaches into the sidewalk: nothing of the road is left there
+            var probes = new[] { new Vec2(51.4, 4.6), new Vec2(51.2, 5.0), new Vec2(50.2, 5.5) };
+            foreach (RoadLevel level in new[] { RoadLevel.Sidewalk, RoadLevel.Edge, RoadLevel.Kerb })
+            {
+                if (!res.Bands.ContainsKey(level))
+                {
+                    continue;
+                }
+
+                foreach (Vec2 q in probes.Where(q => GeometryMath.PointInPolygon(q, outline)))
+                {
+                    Assert.DoesNotContain(res.Bands[level], b => GeometryMath.PointInPolygon(q, b.Outer.Points));
+                }
+            }
+        }
+
+        [Fact]
         public void DrivewayAtAnAngle_GetsALargerRadiusOnItsSharpSide()
         {
             RoadNetworkResult Build(Vec2 dir) => RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, null, null, null, new[] { new RoadDriveway { Point = new Vec2(50, 5.6), Direction = dir, Width = 4.0, Radius = 1.0 } });

@@ -10,6 +10,8 @@
   omekšane): ravni dijelovi izgledaju kao jedna ploha, a svaki trougao se i dalje može Push/Pull-ati.
 * **Spuštena biciklistička staza preko prilaza** u 3D: ravni dio i obje kosine su zasebne ravne plohe; kosine se
   mjere duž staze (i kod prilaza pod uglom), pa nema izlomljenih trouglova; ivičnjak uz kosine prati istu ravan.
+* **Garažna rampa pod uglom**: trotoar, ivičnjak, biciklistička staza i rubnjak više ne leže na rampi ni na njenim
+  zidovima (ugao koso postavljene rampe ulazio je u trotoar).
 * **Oznake** (5 mm) sežu 1 mm u podlogu, tako da im dno nije u ravni asfalta (nema treperenja).
 * **Podrška za SketchUp 2014–2027**: kod radi na Ruby 2.0 (SketchUp 2014–2016), 2.2, 2.5, 2.7 i novijim; na
   SketchUp 2014–2016 dijalozi rade u WebDialog prozoru (HtmlDialog postoji tek od 2017), ikone su PNG (vektorske od
