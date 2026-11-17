@@ -2,6 +2,13 @@
 
 ## Neobjavljeno
 
+### Visine upisane kao m n.v. i brži uvoz u SketchUp (17.11.)
+* Visina tačke ulice, kote, garažne rampe ili ploče iznad nje upisana kao apsolutna (npr. 501,00 m n.v. kad je
+  osnovna visina 500,00) automatski se pretvara u visinu u odnosu na osnovnu (+1,00) i to se ispiše. Postojeći
+  crteži s takvim visinama ispravljaju se sami pri sljedećem crtanju ulica ili izvozu za SketchUp.
+* Uvoz u SketchUp je višestruko brži: površine ulica s visinama i garažnih rampi dodaju se u jednom koraku (a ne
+  trougao po trougao), mreža tačaka unutar površina je 1 × 1 m, a linije između trouglova su omekšane.
+
 ### Inputi 16.11.2026 16:30 – prijelaz, spoj rampe, kružni tok, 3D
 * **Rampa za invalide na prijelazu s biciklističkom stazom** počinje tamo gdje staza završava i ide prema zebri
   (2,00 m preko prvog dijela prijelaza). Rampe za invalide su u crtežu i u 3D **tamnosive** (tamnije od trotoara).

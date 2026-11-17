@@ -266,8 +266,8 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Write("Rampa počinje uz saobraćajnicu koja je tu na " + LevelText(roadLevel.Value) + ".");
             }
 
-            double h0 = ctx.Number("Visina početka rampe u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (npr. 0,00)", roadLevel ?? 0, true, true);
-            double h1 = ctx.Number("Visina kraja rampe u odnosu na osnovnu (npr. -3,00)", h0 - 3, true, true);
+            double h0 = RoadCommands.Relative(ctx, ctx.Number("Visina početka rampe u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (npr. 0,00)", roadLevel ?? 0, true, true), levels.Base);
+            double h1 = RoadCommands.Relative(ctx, ctx.Number("Visina kraja rampe u odnosu na osnovnu (npr. -3,00)", h0 - 3, true, true), levels.Base);
 
             // steeper than 10 %: transitions with half the slope at the top and bottom
             double transition = 0;
@@ -292,7 +292,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             double ceilingLevel = 0;
             if (ceilingFrom > 0.01)
             {
-                ceilingLevel = ctx.Number("Donja ivica te ploče u odnosu na osnovnu visinu (npr. -0,30)", Math.Max(h0, h1) - 0.3, true, true);
+                ceilingLevel = RoadCommands.Relative(ctx, ctx.Number("Donja ivica te ploče u odnosu na osnovnu visinu (npr. -0,30)", Math.Max(h0, h1) - 0.3, true, true), levels.Base);
             }
 
 

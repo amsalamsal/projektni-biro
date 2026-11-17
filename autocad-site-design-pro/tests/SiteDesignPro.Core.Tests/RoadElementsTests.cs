@@ -457,6 +457,17 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal("granite_setts", at.CreateDefaultParameters().Text("material", string.Empty));
         }
 
+        [Theory]
+        [InlineData(501.0, 500.0, 1.0)]
+        [InlineData(497.25, 500.0, -2.75)]
+        [InlineData(1.5, 500.0, 1.5)]
+        [InlineData(-3.0, 500.0, -3.0)]
+        [InlineData(150.0, 20.0, 150.0)]
+        public void AbsoluteHeights_BecomeRelativeToTheBase(double value, double baseLevel, double expected)
+        {
+            Assert.Equal(expected, RoadLevels.ToRelative(value, baseLevel), 9);
+        }
+
         [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {

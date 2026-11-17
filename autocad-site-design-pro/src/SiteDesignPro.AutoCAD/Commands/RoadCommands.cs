@@ -155,7 +155,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             // at an existing road the new one starts at its height
             double? there = RoadElements.LevelNear(ctx.ExistingElements(), ctx.Catalog, ctx.K, new Vec2(first.Value.X / ctx.K, first.Value.Y / ctx.K));
             string prompt = "Visina tačke u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (+X,XX ili -X,XX)";
-            double height = ctx.Number(prompt, there ?? 0, true, true);
+            double height = Relative(ctx, ctx.Number(prompt, there ?? 0, true, true), levels.Base);
             bool same = ctx.Keyword("Ostale tačke [Iste/Razlicite] visine", new[] { "Same|Iste", "Different|Razlicite" }, "Same") == "Same";
             var pts = new List<Point3d> { first.Value };
             var values = new List<double> { height };
@@ -204,7 +204,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     double value = last;
                     if (!same)
                     {
-                        value = ctx.Number(prompt, last, true, true);
+                        value = Relative(ctx, ctx.Number(prompt, last, true, true), levels.Base);
                         double run = p.DistanceTo(pts[pts.Count - 1]) / ctx.K;
                         if (run > 1e-6 && Math.Abs(value - last) / run > RoadLevels.MaxRoadSlope + 1e-9)
                         {
@@ -413,10 +413,69 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
         }
 
+        /// <summary>A height typed as m n.v. (e.g. 501,00 with the base at 500,00) becomes the height relative to the base.</summary>
+        internal static double Relative(CommandContext ctx, double value, double baseLevel)
+        {
+            double r = RoadLevels.ToRelative(value, baseLevel);
+            if (r != value)
+            {
+                ctx.Write("Upisano je " + Bs.Num(value, 2) + " m n.v. (apsolutna visina); uzeto je " + LevelText(r) + " u odnosu na osnovnu " + Bs.Num(baseLevel, 2) + " m n.v.");
+            }
+
+            return r;
+        }
+
+        /// <summary>
+        /// Road elevation marks and garage ramps whose heights were typed as absolute elevations (m n.v.) instead of
+        /// heights relative to the base elevation: the heights are converted in the drawing. Returns how many changed.
+        /// </summary>
+        internal static int FixAbsoluteLevels(CommandContext ctx)
+        {
+            RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+            if (!levels.Defined || Math.Abs(levels.Base) < RoadLevels.AbsoluteThreshold)
+            {
+                return 0;
+            }
+
+            int n = 0;
+            foreach (ManagedElement m in ctx.Svc.ReadAll().Where(x => x.Element != null && !x.IsCopy))
+            {
+                SiteElement e = m.Element!;
+                string[] keys = e.TypeId == RoadElements.LevelMarkType ? new[] { "level" }
+                    : e.TypeId == GarageRamp.Type ? new[] { "startLevel", "endLevel", "ceilingLevel" }
+                    : Array.Empty<string>();
+                bool changed = false;
+                foreach (string key in keys)
+                {
+                    double v = e.Parameters.Number(key, 0);
+                    double r = RoadLevels.ToRelative(v, levels.Base);
+                    if (r != v)
+                    {
+                        e.Parameters[key] = ParamValue.Of(r);
+                        changed = true;
+                    }
+                }
+
+                if (changed)
+                {
+                    ctx.Svc.Update(m, e);
+                    n++;
+                }
+            }
+
+            if (n > 0)
+            {
+                ctx.Write("Visine " + n + " elemenata (kote saobraćajnica, garažne rampe) bile su upisane kao apsolutne (m n.v.); pretvorene su u visine u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v.");
+            }
+
+            return n;
+        }
+
         internal static RoadNetworkResult? Rebuild(CommandContext ctx, bool verbose)
         {
             Busy = true;
             MigrateLegacy(ctx);
+            FixAbsoluteLevels(ctx);
             List<ManagedElement> managed = ctx.Svc.ReadAll().Where(m => m.Element != null && m.Type != null).ToList();
             List<ManagedElement> roads = managed.Where(m => RoadElements.IsNetworkRoad(m.Type)).ToList();
             if (RoundAxes(ctx, roads) > 0)
@@ -1086,7 +1145,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                     break;
                 }
 
-                double value = ctx.Number("Visina u odnosu na osnovnu " + Bs.Num(s.Base, 2) + " m n.v. (npr. -1,00 ili 5,00)", last, true, true);
+                double value = Relative(ctx, ctx.Number("Visina u odnosu na osnovnu " + Bs.Num(s.Base, 2) + " m n.v. (npr. -1,00 ili 5,00)", last, true, true), s.Base);
                 last = value;
                 UI.Preferences.Current.RememberDefault("roadLevel", value.ToString(CultureInfo.InvariantCulture));
                 SiteElement e = ctx.NewElement(type, new PointGeometry(new Vec3(at.Value.X, at.Value.Y, 0), 0), ctx.ExistingElements());

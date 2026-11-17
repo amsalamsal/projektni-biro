@@ -125,6 +125,12 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPEXPORT", CommandFlags.Modal)]
         public void Export() => CommandContext.Run("SDPEXPORT", ctx =>
         {
+            // heights typed as m n.v. are made relative first, and the roads redrawn with them
+            if (RoadCommands.FixAbsoluteLevels(ctx) > 0)
+            {
+                RoadCommands.RebuildNow(ctx);
+            }
+
             ValidationReport report = ValidateDrawing(ctx, out List<ManagedElement> managed);
             Print(ctx, report, 15);
             if (report.HasErrors && ctx.Keyword("Postoje greške. Elementi s greškama mogu biti preskočeni ili pojednostavljeni. Ipak izvesti? [Da/Ne]", new[] { "Da", "Ne" }, "Ne") == "Ne")

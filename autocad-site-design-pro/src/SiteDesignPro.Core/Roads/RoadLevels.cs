@@ -116,6 +116,24 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Spacing of the height grid on the road surfaces (50 × 50 cm).</summary>
         public const double GridSpacing = 0.5;
 
+        /// <summary>
+        /// Spacing of the grid of points inside a surface: the profile changes slowly along a road, so a coarser grid
+        /// inside keeps the 3D model light (the outline keeps <see cref="GridSpacing"/>).
+        /// </summary>
+        public const double InnerGridSpacing = 1.0;
+
+        /// <summary>Heights are relative to the base elevation and stay within ±100 m; larger values are absolute (m n.v.).</summary>
+        public const double AbsoluteThreshold = 100;
+
+        /// <summary>
+        /// A height typed as an absolute elevation (e.g. 501,00 m n.v. with the base at 500,00) as the height relative
+        /// to the base (+1,00); any other value unchanged.
+        /// </summary>
+        public static double ToRelative(double value, double baseLevel) =>
+            Math.Abs(baseLevel) >= AbsoluteThreshold && Math.Abs(value) >= AbsoluteThreshold && Math.Abs(value - baseLevel) < AbsoluteThreshold
+                ? value - baseLevel
+                : value;
+
         public static List<RoadProfile> Profiles(IReadOnlyList<RoadSpec> roads, IEnumerable<RoadLevelMark> marks)
         {
             var points = roads.Select(_ => new List<(double, double)>()).ToList();
@@ -204,7 +222,7 @@ namespace SiteDesignPro.Core.Roads
             rings.AddRange(region.Holes.Select(Densify));
             var area = new PathsD(rings);
 
-            // points: the outline every 0,5 m and a 0,5 × 0,5 m grid inside; the outline constrains the triangles
+            // points: the outline every 0,5 m and a 1 × 1 m grid inside; the outline constrains the triangles
             var points = new List<Vec3>();
             var constraints = new List<IReadOnlyList<Vec3>>();
             foreach (PathD ring in rings)
@@ -216,7 +234,7 @@ namespace SiteDesignPro.Core.Roads
             }
 
             RectD box = Clipper.GetBounds(area);
-            double g = GridSpacing;
+            double g = InnerGridSpacing;
             for (double x = Math.Ceiling(box.left / g) * g; x < box.right; x += g)
             {
                 for (double y = Math.Ceiling(box.top / g) * g; y < box.bottom; y += g)

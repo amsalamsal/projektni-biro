@@ -71,6 +71,12 @@ module ProjektniBiro
         polys.select! { |t| t.length == 3 && t.all? { |p| p.length == 3 } }
         return nil if polys.empty?
 
+        # paint lies on the road: every triangle faces up
+        polys.map! do |t|
+          n = ((t[1][0] - t[0][0]) * (t[2][1] - t[0][1])) - ((t[1][1] - t[0][1]) * (t[2][0] - t[0][0]))
+          n.negative? ? [t[0], t[2], t[1]] : t
+        end
+
         material = element.param('material').to_s
         material = 'line_paint_white' if material.empty? || (!ctx.materials.empty? && !ctx.materials.key?(material))
         canvas.group(element.display_name, attributes) do |gc|

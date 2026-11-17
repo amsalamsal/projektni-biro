@@ -47,8 +47,12 @@ module ProjektniBiro
       def mesh(polygons, material:, name: nil, smooth: false, solid: true, tag: nil)
         grp = @entities.add_group
         grp.name = name.to_s if name
-        polygons.each { |poly| add_polygon(grp.entities, poly, solid) }
-        soften(grp.entities) if smooth
+        if smooth && !solid && polygons.length > 20 && polygons.all? { |p| p.is_a?(Array) } && defined?(Geom::PolygonMesh)
+          add_polygon_mesh(grp.entities, polygons)
+        else
+          polygons.each { |poly| add_polygon(grp.entities, poly, solid) }
+          soften(grp.entities) if smooth
+        end
         grp.material = @materials.get(material)
         grp.layer = @tags[tag] if tag && @tags[tag]
         @stats['meshes'] += 1
@@ -126,6 +130,28 @@ module ProjektniBiro
       rescue ArgumentError => e
         @stats['failed_faces'] += 1
         Log.write(:debug, "face skipped (#{e.message})") if solid
+      end
+
+      # A large surface of triangles (a road surface following its heights) is added in one step, which is many
+      # times faster than face by face: each polygon keeps its point order (its normal), and edges between faces
+      # that are flat or bend gently are softened and smoothed, so the surface shows no triangle lines.
+      def add_polygon_mesh(ents, polygons)
+        pm = Geom::PolygonMesh.new(polygons.length * 3, polygons.length)
+        added = 0
+        polygons.each do |poly|
+          next if poly.length < 3
+
+          pm.add_polygon(poly.map { |p| pt(p) })
+          added += 1
+        rescue ArgumentError
+          @stats['failed_faces'] += 1
+        end
+        ents.add_faces_from_mesh(pm, Geom::PolygonMesh::AUTO_SOFTEN | Geom::PolygonMesh::SMOOTH_SOFT_EDGES)
+        @stats['faces'] += added
+      rescue StandardError => e # fall back to face by face
+        Log.write(:debug, "mreža površine nije dodana u jednom koraku (#{e.message})")
+        polygons.each { |poly| add_polygon(ents, poly, false) }
+        soften(ents)
       end
 
       # Adds a face and orients it to the polygon's right-hand-rule normal (SketchUp may flip faces on z = 0).
