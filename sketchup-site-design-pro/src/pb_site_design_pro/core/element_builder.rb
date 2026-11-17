@@ -187,7 +187,7 @@ module ProjektniBiro
         @xf = xf || (scale ? ->(p) { [p[0] * scale[0], p[1] * scale[1], (p[2] || 0.0) * scale[2]] } : ->(p) { p })
       end
 
-      def mesh(polygons, material:, name: nil, smooth: false, solid: true)
+      def mesh(polygons, material: nil, name: nil, smooth: false, solid: true)
         polys = polygons.map { |p| p.is_a?(Hash) ? { outer: p[:outer].map(&@xf), holes: p[:holes].map { |h| h.map(&@xf) } } : p.map(&@xf) }
         @c.mesh(polys, material: @remap.fetch(material, material), name: name, smooth: smooth, solid: solid)
       end

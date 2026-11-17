@@ -3,9 +3,23 @@
   'use strict';
   var sdp = window.sdp = window.sdp || {};
 
+  // SketchUp 2017+: HtmlDialog (window.sketchup.<name>); SketchUp 2014-2016: WebDialog (skp: address). The
+  // WebDialog calls are queued, because a new skp: address cancels one that is still being handled.
+  var queue = [], busy = false;
+  window.sdpWebDialog = /[?&]sdpwd=1/.test(window.location.search);
+  function next() {
+    if (busy || queue.length === 0) { return; }
+    busy = true;
+    window.location.href = 'skp:' + queue.shift();
+  }
+  sdp.ack = function () { busy = false; setTimeout(next, 0); };
   sdp.call = function (name, data) {
+    var json = data === undefined ? '' : JSON.stringify(data);
     if (window.sketchup && typeof window.sketchup[name] === 'function') {
-      window.sketchup[name](data === undefined ? '' : JSON.stringify(data));
+      window.sketchup[name](json);
+    } else if (window.sdpWebDialog) {
+      queue.push(name + '@' + encodeURIComponent(json));
+      next();
     } else if (window.console) {
       console.log('sketchup.' + name, data);
     }
@@ -43,7 +57,7 @@
   };
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { sdp.call('close'); }
+    if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) { sdp.call('close'); }
   });
   window.addEventListener('DOMContentLoaded', function () { sdp.call('ready'); });
 })();

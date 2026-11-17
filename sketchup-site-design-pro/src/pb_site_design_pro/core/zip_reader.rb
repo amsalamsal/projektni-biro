@@ -71,7 +71,7 @@ module ProjektniBiro
       rescue Zlib::Error => e
         raise PackageError, "oštećeni podaci arhive (#{e.message})"
       ensure
-        z&.close
+        z.close if z
       end
 
       def read_directory
@@ -100,7 +100,7 @@ module ProjektniBiro
         entries = {}
         pos = 0
         count.times do
-          raise PackageError, 'oštećena arhiva (centralni direktorij)' unless cd[pos, 4]&.unpack1('V') == CDIR_SIG
+          raise PackageError, 'oštećena arhiva (centralni direktorij)' unless (cd[pos, 4] || '').unpack('V')[0] == CDIR_SIG
 
           method = cd[pos + 10, 2].unpack1('v')
           crc, csize, usize = cd[pos + 16, 12].unpack('VVV')

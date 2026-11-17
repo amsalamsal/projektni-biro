@@ -45,7 +45,7 @@ module ProjektniBiro
         started = Time.now
         @backup_path = backup ? make_backup : nil
         journal = Safety.journal
-        op_id = journal&.begin_operation(OPERATION, @model.path.to_s.empty? ? '(nesačuvan model)' : @model.path, @backup_path)
+        op_id = journal && journal.begin_operation(OPERATION, @model.path.to_s.empty? ? '(nesačuvan model)' : @model.path, @backup_path)
         @model.start_operation(OPERATION, true)
         begin
           run_plan
@@ -53,10 +53,10 @@ module ProjektniBiro
           store_project_metadata
           Scenes.create(@model, @organizer, @catalog) if create_scenes
           @model.commit_operation
-          journal&.end_operation(op_id, 'Completed', @plan.summary)
+          journal.end_operation(op_id, 'Completed', @plan.summary) if journal
         rescue StandardError => e
           @model.abort_operation
-          journal&.end_operation(op_id, 'RolledBack', "#{e.class}: #{e.message}")
+          journal.end_operation(op_id, 'RolledBack', "#{e.class}: #{e.message}") if journal
           Log.error('Uvoz prekinut', e)
           @report.add(:error, 'SDP-I999', nil, "Uvoz je prekinut i poništen: #{e.class}: #{e.message}",
                       'Model nije izmijenjen. Pogledajte dnevnik (log) i prijavite grešku ako se ponavlja.')
@@ -103,7 +103,7 @@ module ProjektniBiro
         @tags = { review: @organizer.review_tag }
         total = @plan.actions.length
         @plan.actions.each_with_index do |action, i|
-          Sketchup.status_text = "Vanjsko uređenje PRO: #{i + 1} / #{total} – #{action.element&.display_name}" if (i % PROGRESS_EVERY).zero?
+          Sketchup.status_text = "Vanjsko uređenje PRO: #{i + 1} / #{total} – #{action.element ? action.element.display_name : ''}" if (i % PROGRESS_EVERY).zero?
           apply_action(action)
         end
       end
@@ -173,7 +173,7 @@ module ProjektniBiro
 
       def issue(sev, code, action, message)
         el = action.element
-        @report.add(sev, code, el ? el.id : action.entry&.id, message, '', el&.label)
+        @report.add(sev, code, el ? el.id : (action.entry ? action.entry.id : nil), message, '', el ? el.label : nil)
       end
 
       def canvas_for(element)
@@ -262,7 +262,7 @@ module ProjektniBiro
       def stamp(entity, element)
         entity.set_attribute(DICT, 'fingerprint', ModelIndex.fingerprint(entity))
         dicts = entity.attribute_dictionary(DICT)
-        dicts&.delete_key('localParams')
+        dicts.delete_key('localParams') if dicts
         element
       end
 

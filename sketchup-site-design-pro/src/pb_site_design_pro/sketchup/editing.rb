@@ -65,7 +65,7 @@ module ProjektniBiro
         begin
           new_entity = rebuild(model, entity, element, catalog, report)
           if local.empty?
-            new_entity.attribute_dictionary(DICT)&.delete_key('localParams')
+            (dict = new_entity.attribute_dictionary(DICT)) && dict.delete_key('localParams')
           else
             new_entity.set_attribute(DICT, 'localParams', JSON.generate(local))
           end
@@ -143,7 +143,7 @@ module ProjektniBiro
         if element.kind == 'point'
           key = builder.definition_key(element)
           defn = defs[key]
-          unless defn&.valid?
+          unless defn && defn.valid?
             temp = canvas.instance(key, [0, 0, 0], 0.0) { |dc| builder.build(element, dc) }
             defn = temp.definition
             temp.erase!
@@ -174,7 +174,7 @@ module ProjektniBiro
           next unless e.get_attribute(DICT, 'projectId') == project_id
           next if e.get_attribute(DICT, 'deletedInSource') == true
 
-          kind = type_definition(model, e.get_attribute(DICT, 'type'))&.fetch('geometry', nil) || (e.is_a?(Sketchup::Group) ? 'polygon' : 'point')
+          kind = (type_definition(model, e.get_attribute(DICT, 'type')) || {}).fetch('geometry', nil) || (e.is_a?(Sketchup::Group) ? 'polygon' : 'point')
           imported = kind == 'point' ? { position: e.get_attribute(DICT, 'position'), rotation: e.get_attribute(DICT, 'rotation') } : nil
           current = kind == 'point' ? ModelIndex.placement(e, root) : nil
           cs.add(id: e.get_attribute(DICT, 'id'), type_id: e.get_attribute(DICT, 'type'), label: e.get_attribute(DICT, 'label'),

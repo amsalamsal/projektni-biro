@@ -12,11 +12,11 @@ module ProjektniBiro
       POSITION_TOL = 0.001 # metres
       ROTATION_TOL = 1e-4  # radians
 
-      Change = Struct.new(:id, :type_id, :label, :base_content_hash, :parameters, :position, :rotation, keyword_init: true)
+      Change = Compat.kw_struct(:id, :type_id, :label, :base_content_hash, :parameters, :position, :rotation)
 
       attr_reader :changes, :report
 
-      def initialize(project_id:, package_id:, origin:)
+      def initialize(project_id: nil, package_id: nil, origin: nil)
         @project_id = project_id
         @package_id = package_id
         @origin = origin
@@ -27,7 +27,7 @@ module ProjektniBiro
       # imported: { position: [x,y,z], rotation: r } stored at import (metres, package frame) or nil
       # current:  { position:, rotation:, tilted: bool, scaled: bool } from the model, or nil
       # params:   parameter edits made in SketchUp ({} when none)
-      def add(id:, type_id:, label: nil, base_content_hash:, params: {}, imported: nil, current: nil, kind: 'point', geometry_modified: false)
+      def add(id: nil, type_id: nil, label: nil, base_content_hash: nil, params: {}, imported: nil, current: nil, kind: 'point', geometry_modified: false)
         change = Change.new(id: id, type_id: type_id, label: label, base_content_hash: base_content_hash,
                             parameters: params.dup, position: nil, rotation: nil)
         if kind == 'point' && imported && current

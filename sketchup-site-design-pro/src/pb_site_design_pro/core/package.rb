@@ -144,7 +144,7 @@ module ProjektniBiro
 
       # Reads an asset's bytes from the package (zip or folder), or nil when missing.
       def asset_bytes(asset)
-        @asset_reader&.call(asset.path)
+        @asset_reader ? @asset_reader.call(asset.path) : nil
       end
     end
 
@@ -346,7 +346,7 @@ module ProjektniBiro
 
       def ring(h)
         verts = h.fetch('vertices').map { |v| vec3(v) }
-        bulges = h['bulges']&.map(&:to_f)
+        bulges = h['bulges'] ? h['bulges'].map(&:to_f) : nil
         { vertices: verts, bulges: bulges }
       end
 

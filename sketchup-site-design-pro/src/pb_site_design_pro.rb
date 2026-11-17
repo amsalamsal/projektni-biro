@@ -2,7 +2,7 @@
 
 # Vanjsko uređenje PRO (Site Design Pro) za SketchUp – registracija proširenja.
 # Uvozi pakete razmjene iz AutoCAD-a i gradi organizovane, izmjenjive 3D modele
-# vanjskog uređenja tačnih dimenzija. Podržano: SketchUp 2022 i novije verzije.
+# vanjskog uređenja tačnih dimenzija. Podržano: SketchUp 2014–2027 (i novije).
 
 require 'sketchup.rb'
 require 'extensions.rb'
@@ -18,7 +18,7 @@ module ProjektniBiro
       ex = SketchupExtension.new('Vanjsko uređenje PRO', File.join(PLUGIN_DIR, 'main'))
       ex.description = 'Uvozi pakete iz AutoCAD-a (Vanjsko uređenje PRO) i gradi organizovane, ' \
                        'izmjenjive 3D modele vanjskog uređenja (teren, parter, zelenilo, rasvjeta, mobilijar, ' \
-                       'instalacije, zidovi, nadstrešnice) s ažuriranjem i praćenjem izmjena. SketchUp 2022+.'
+                       'instalacije, zidovi, nadstrešnice) s ažuriranjem i praćenjem izmjena. SketchUp 2014–2027.'
       ex.version = VERSION
       ex.copyright = '2026 Projektni biro'
       ex.creator = 'Projektni biro'

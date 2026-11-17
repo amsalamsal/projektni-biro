@@ -27,8 +27,8 @@ module ProjektniBiro
       begin
         Commands.install
         Log.info("Vanjsko uređenje PRO #{VERSION} učitano (SketchUp #{Sketchup.version}, Ruby #{RUBY_VERSION})")
-        if Sketchup.version.to_i < 22
-          UI.messagebox("Vanjsko uređenje PRO zahtijeva SketchUp 2022 ili noviji (pokrenuto: #{Sketchup.version}). " \
+        if Sketchup.version.to_i < 14
+          UI.messagebox("Vanjsko uređenje PRO zahtijeva SketchUp 2014 ili noviji (pokrenuto: #{Sketchup.version}). " \
                         'Proširenje može raditi nepotpuno.')
         end
       rescue StandardError => e

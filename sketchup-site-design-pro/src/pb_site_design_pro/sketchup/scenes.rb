@@ -47,7 +47,7 @@ module ProjektniBiro
           end
         end
       ensure
-        saved_visibility&.each { |l, v| l.visible = v if l.valid? }
+        (saved_visibility || []).each { |l, v| l.visible = v if l.valid? }
         model.rendering_options['ModelTransparency'] = saved_xray unless saved_xray.nil?
         model.active_view.camera = saved_camera if saved_camera
       end

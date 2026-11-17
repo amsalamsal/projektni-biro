@@ -28,7 +28,7 @@ module ProjektniBiro
         node
       end
 
-      def mesh(polygons, material:, name: nil, smooth: false, solid: true)
+      def mesh(polygons, material: nil, name: nil, smooth: false, solid: true)
         raise ArgumentError, 'mesh without polygons' if polygons.nil? || polygons.empty?
 
         node = Node.new(:mesh, name, material, polygons, [], nil, nil, nil, {}, smooth, solid)

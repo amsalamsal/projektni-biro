@@ -103,7 +103,7 @@ module ProjektniBiro
         left = edges.dup
         count = Hash.new(0)
         edges.each { |e| e.vertices.each { |v| count[v] += 1 } }
-        start = count.find { |_, n| n == 1 }&.first || edges.first.start
+        start = (count.find { |_, n| n == 1 } || [])[0] || edges.first.start
         pts = [start]
         v = start
         until left.empty?
@@ -212,7 +212,7 @@ module ProjektniBiro
         @shape = shape || {}
         @rotation = 0.0
         @kind = AssetInsert.library.type_definition(id)['geometry']
-        @name = AssetInsert.library.asset(id)&.fetch('name', id) || id
+        @name = (AssetInsert.library.asset(id) || {}).fetch('name', id) || id
       end
 
       def activate
@@ -241,7 +241,7 @@ module ProjektniBiro
       def preview_extent
         case @kind
         when 'point'
-          d = AssetInsert.library.asset(@id)&.fetch('dimensions', nil) || { 'x' => 1.0, 'y' => 1.0 }
+          d = (AssetInsert.library.asset(@id) || {}).fetch('dimensions', nil) || { 'x' => 1.0, 'y' => 1.0 }
           [d['x'].to_f, d['y'].to_f]
         when 'path' then [@shape.fetch('length', 6.0).to_f, 0.0]
         else [@shape.fetch('width', 4.0).to_f, @shape.fetch('depth', 3.0).to_f]
@@ -267,7 +267,7 @@ module ProjektniBiro
       end
 
       def draw(view)
-        return unless @ip&.valid?
+        return unless @ip && @ip.valid?
 
         @ip.draw(view)
         pts = outline(@ip.position)
@@ -281,7 +281,7 @@ module ProjektniBiro
 
       def getExtents
         bb = Geom::BoundingBox.new
-        outline(@ip.position).each { |p| bb.add(p) } if @ip&.valid?
+        outline(@ip.position).each { |p| bb.add(p) } if @ip && @ip.valid?
         bb
       end
 

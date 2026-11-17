@@ -9,8 +9,8 @@ module ProjektniBiro
     #   deleted_in_source    - already marked as deleted by an earlier import
     #   local_params         - parameters edited in SketchUp (Site Design Pro edit dialog), or nil
     #   ref                  - opaque reference to the entity (adapter use only)
-    ModelEntry = Struct.new(:id, :project_id, :type_id, :content_hash, :stored_fingerprint, :current_fingerprint,
-                            :deleted_in_source, :local_params, :ref, keyword_init: true) do
+    ModelEntry = Compat.kw_struct(:id, :project_id, :type_id, :content_hash, :stored_fingerprint, :current_fingerprint,
+                                  :deleted_in_source, :local_params, :ref) do
       def locally_modified?
         (stored_fingerprint && current_fingerprint && stored_fingerprint != current_fingerprint) ||
           (local_params.is_a?(Hash) && !local_params.empty?)
@@ -106,8 +106,7 @@ module ProjektniBiro
     end
 
     # State of a terrain surface found in the model (group with attribute terrainId).
-    TerrainEntry = Struct.new(:id, :project_id, :content_hash, :stored_fingerprint, :current_fingerprint, :deleted_in_source, :ref,
-                              keyword_init: true) do
+    TerrainEntry = Compat.kw_struct(:id, :project_id, :content_hash, :stored_fingerprint, :current_fingerprint, :deleted_in_source, :ref) do
       def locally_modified?
         stored_fingerprint && current_fingerprint && stored_fingerprint != current_fingerprint
       end
@@ -186,8 +185,8 @@ module ProjektniBiro
           'counts' => counts.transform_keys(&:to_s),
           'actions' => @actions.reject { |a| a.kind == :unchanged }.map do |a|
             el = a.element
-            { 'kind' => a.kind.to_s, 'id' => el ? el.id : a.entry&.id, 'label' => el&.label,
-              'name' => el ? el.base_name : a.entry&.type_id, 'type' => el ? el.type_id : a.entry&.type_id, 'reason' => a.reason }
+            { 'kind' => a.kind.to_s, 'id' => el ? el.id : (a.entry ? a.entry.id : nil), 'label' => el ? el.label : nil,
+              'name' => el ? el.base_name : (a.entry ? a.entry.type_id : nil), 'type' => el ? el.type_id : (a.entry ? a.entry.type_id : nil), 'reason' => a.reason }
           end
         }
       end

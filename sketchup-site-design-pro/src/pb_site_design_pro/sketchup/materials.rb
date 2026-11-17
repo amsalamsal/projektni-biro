@@ -45,7 +45,7 @@ module ProjektniBiro
       # A material of SketchUp's own library named by the catalog ("sketchup": "Asphalt New"), loaded from its .skm
       # file; nil when the library or the file is not found (the catalog colour and texture are used instead).
       def library_material(key, d)
-        name = (d.respond_to?(:library) && d.library) || @catalog[key]&.library
+        name = (d.respond_to?(:library) && d.library) || (@catalog[key] ? @catalog[key].library : nil)
         return nil if name.nil? || name.to_s.empty? || !@model.materials.respond_to?(:load)
 
         file = MaterialLibrary.skm_file(name.to_s)
@@ -123,7 +123,7 @@ module ProjektniBiro
           next unless src.texture
 
           file = File.join(TEXTURE_DIR, File.basename(src.texture))
-          return [file, src.texture_size || cat&.texture_size] if File.file?(file)
+          return [file, src.texture_size || (cat ? cat.texture_size : nil)] if File.file?(file)
         end
         nil
       end

@@ -27,7 +27,7 @@ module ProjektniBiro
         roots = Editing.projects(model)
         if path.nil? || !File.exist?(path)
           root = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICT, 'role') == 'projectRoot' }
-          path = root&.get_attribute(DICT, 'packagePath')
+          path = root ? root.get_attribute(DICT, 'packagePath') : nil
         end
         if path && File.exist?(path)
           Dialogs.import(path)
@@ -124,22 +124,25 @@ module ProjektniBiro
       end
 
       def about
-        UI.messagebox("Vanjsko uređenje PRO za SketchUp #{VERSION}\nShema razmjene #{SCHEMA_VERSION}\nPodržano: SketchUp 2022 i novije verzije\n\n" \
+        UI.messagebox("Vanjsko uređenje PRO za SketchUp #{VERSION}\nShema razmjene #{SCHEMA_VERSION}\nPodržano: SketchUp 2014–2027\n\n" \
                       "Uvozi pakete iz AutoCAD-a u organizovane, izmjenjive 3D modele.\nDnevnik: #{Log.path}")
       end
 
       def icon(name, size)
         svg = File.join(ICONS, "#{name}.svg")
         png = File.join(ICONS, "#{name}_#{size}.png")
-        Sketchup.platform == :platform_win && File.file?(svg) ? svg : png
+        # vector toolbar icons since SketchUp 2016; older versions take the PNG
+        Sketchup.version.to_i >= 16 && Sketchup.platform == :platform_win && File.file?(svg) ? svg : png
       end
 
       def command(text, tip, icon_name, &block)
         cmd = UI::Command.new(text) do
-          block.call
-        rescue StandardError => e
-          Log.error("Naredba '#{text}' nije uspjela", e)
-          UI.messagebox("#{text}: greška – #{e.message}\nDetalji su u dnevniku (log).")
+          begin
+            block.call
+          rescue StandardError => e
+            Log.error("Naredba '#{text}' nije uspjela", e)
+            UI.messagebox("#{text}: greška – #{e.message}\nDetalji su u dnevniku (log).")
+          end
         end
         cmd.tooltip = text
         cmd.status_bar_text = tip

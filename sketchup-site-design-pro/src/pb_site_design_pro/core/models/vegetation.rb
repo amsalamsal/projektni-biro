@@ -10,11 +10,11 @@ module ProjektniBiro
 
         # Tree with trunk, root flare, scaffold branches and foliage clusters inside the crown envelope
         # (overall height = height, crown width <= canopyDiameter).
-        def tree(k, e, foliage:, fruit: false)
+        def tree(k, e, foliage: nil, fruit: false)
           k.fit(width: e.num('canopyDiameter', 5.0), height: e.num('height', 8.0)) { tree_body(k, e, foliage: foliage, fruit: fruit) }
         end
 
-        def tree_body(k, e, foliage:, fruit: false)
+        def tree_body(k, e, foliage: nil, fruit: false)
           h = e.num('height', 8.0)
           canopy = e.num('canopyDiameter', 5.0)
           clear = [e.num('clearTrunkHeight', 2.2), h * 0.85].min

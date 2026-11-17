@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'uri'
+
 module ProjektniBiro
   module SiteDesignPro
     # HtmlDialog windows. Pages are local files (no network); data is pushed with sdp.render(json) and the
@@ -10,11 +12,61 @@ module ProjektniBiro
       module_function
 
       def create(title, file, key, width, height)
+        return LegacyDialog.new(title, File.join(HTML_DIR, file), key, width, height) unless defined?(UI::HtmlDialog)
+
         dlg = UI::HtmlDialog.new(dialog_title: title, preferences_key: "PB_SiteDesignPro_#{key}", scrollable: true,
                                  resizable: true, width: width, height: height, min_width: 420, min_height: 300,
                                  style: UI::HtmlDialog::STYLE_DIALOG)
         dlg.set_file(File.join(HTML_DIR, file))
         dlg
+      end
+
+      # SketchUp 2014-2016 have no HtmlDialog: the same pages run in a WebDialog. The page sends
+      # skp:<name>@<encoded JSON>; the callback gets the decoded JSON like from an HtmlDialog, and the page is told
+      # when it may send the next call.
+      class LegacyDialog
+        def initialize(title, path, key, width, height)
+          @dlg = UI::WebDialog.new(title, true, "PB_SiteDesignPro_#{key}", width, height, 100, 100, true)
+          @dlg.set_url(LegacyDialog.file_url(path) + '?sdpwd=1') # the page knows it runs in a WebDialog
+          @dlg.min_width = 420 if @dlg.respond_to?(:min_width=)
+          @dlg.min_height = 300 if @dlg.respond_to?(:min_height=)
+        end
+
+        def add_action_callback(name)
+          @dlg.add_action_callback(name) do |d, param|
+            begin
+              arg = URI.decode_www_form_component(param.to_s)
+              arg.force_encoding('UTF-8') if arg.respond_to?(:force_encoding)
+              yield d, arg
+            ensure
+              d.execute_script('sdp.ack()') rescue nil # rubocop:disable Style/RescueModifier
+            end
+          end
+        end
+
+        def execute_script(script)
+          @dlg.execute_script(script)
+        end
+
+        def show
+          @dlg.show
+        end
+
+        def self.file_url(path)
+          parts = path.tr('\\', '/').split('/').map do |seg|
+            seg =~ /\A[A-Za-z]:\z/ ? seg : URI.encode_www_form_component(seg).gsub('+', '%20')
+          end
+          url = parts.join('/')
+          url.start_with?('/') ? "file://#{url}" : "file:///#{url}"
+        end
+
+        def close
+          @dlg.close
+        end
+
+        def visible?
+          @dlg.visible?
+        end
       end
 
       def push(dlg, data)
@@ -65,7 +117,7 @@ module ProjektniBiro
         by_group = pkg.elements.group_by(&:model_group).map { |k, v| { 'group' => catalog.model_group(k).name, 'count' => v.length } }
         terrain = (importer.terrain_plan || []).map do |a|
           s = a.element
-          { 'kind' => a.kind.to_s, 'id' => s ? s.id : a.entry&.id, 'name' => s ? s.name : 'Teren', 'reason' => a.reason,
+          { 'kind' => a.kind.to_s, 'id' => s ? s.id : (a.entry ? a.entry.id : nil), 'name' => s ? s.name : 'Teren', 'reason' => a.reason,
             'triangles' => s ? s.triangle_count : 0, 'minZ' => s ? s.min_z : nil, 'maxZ' => s ? s.max_z : nil }
         end
         {
@@ -142,12 +194,14 @@ module ProjektniBiro
         end
         message = ->(kind, text) { push(dlg, 'mode' => 'message', 'kind' => kind, 'text' => text) }
         guarded = lambda do |label, &blk|
-          blk.call
-        rescue PackageError, ArgumentError, KeyError => e
-          message.call('error', "#{label}: #{e.message}")
-        rescue StandardError => e
-          Log.error("Biblioteka modela – #{label}", e)
-          message.call('error', "#{label} nije uspjelo: #{e.message} (detalji u dnevniku)")
+          begin
+            blk.call
+          rescue PackageError, ArgumentError, KeyError => e
+            message.call('error', "#{label}: #{e.message}")
+          rescue StandardError => e
+            Log.error("Biblioteka modela – #{label}", e)
+            message.call('error', "#{label} nije uspjelo: #{e.message} (detalji u dnevniku)")
+          end
         end
         dlg.add_action_callback('ready') do |_ctx|
           guarded.call('Učitavanje biblioteke') do

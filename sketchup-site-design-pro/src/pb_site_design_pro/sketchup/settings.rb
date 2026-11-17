@@ -107,7 +107,7 @@ module ProjektniBiro
       end
 
       def error(msg, exception = nil)
-        msg = "#{msg}: #{exception.class}: #{exception.message}\n  #{exception.backtrace&.first(8)&.join("\n  ")}" if exception
+        msg = "#{msg}: #{exception.class}: #{exception.message}\n  #{(exception.backtrace || []).first(8).join("\n  ")}" if exception
         write(:error, msg)
       end
     end

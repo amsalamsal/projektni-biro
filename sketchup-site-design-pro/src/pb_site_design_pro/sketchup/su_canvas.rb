@@ -4,10 +4,11 @@ module ProjektniBiro
   module SiteDesignPro
     # Canvas implementation on SketchUp entities (see RecordingCanvas for the contract). Converts metres to
     # SketchUp's internal inches, creates one group per solid (so solids never merge), orients faces outward,
-    # cuts openings, softens curved surfaces and shares component definitions by key across imports.
+    # cuts openings, joins coplanar triangles into single faces and shares component definitions by key across
+    # imports. No edge is softened or smoothed: every face stays a plain face that Push/Pull and the other tools
+    # work on (Soften Edges 0°, no smooth normals), in every SketchUp version.
     class SuCanvas
       DICT = 'SiteDesignPro'
-      SMOOTH_ANGLE = 50.0 * Math::PI / 180.0
       COPLANAR_ANGLE = 0.05 * Math::PI / 180.0
       PLANAR_TOL = 1e-4 # metres
 
@@ -44,14 +45,14 @@ module ProjektniBiro
         grp
       end
 
-      def mesh(polygons, material:, name: nil, smooth: false, solid: true, tag: nil)
+      def mesh(polygons, material: nil, name: nil, smooth: false, solid: true, tag: nil)
         grp = @entities.add_group
         grp.name = name.to_s if name
         if smooth && !solid && polygons.length > 20 && polygons.all? { |p| p.is_a?(Array) } && defined?(Geom::PolygonMesh)
           add_polygon_mesh(grp.entities, polygons)
         else
           polygons.each { |poly| add_polygon(grp.entities, poly, solid) }
-          soften(grp.entities) if smooth
+          join_coplanar(grp.entities) if smooth
         end
         grp.material = @materials.get(material)
         grp.layer = @tags[tag] if tag && @tags[tag]
@@ -70,7 +71,7 @@ module ProjektniBiro
 
       def instance(key, origin, rotation, name: nil, attributes: {})
         defn = @definitions[key]
-        unless defn&.valid?
+        unless defn && defn.valid?
           defn = @model.definitions.add(definition_name(key))
           defn.set_attribute(DICT, 'definitionKey', key)
           yield child(defn.entities) if block_given?
@@ -120,7 +121,7 @@ module ProjektniBiro
 
           poly[:holes].each do |hole|
             inner = add_face(ents, hole, orient: false)
-            inner.erase! if inner&.valid?
+            inner.erase! if inner && inner.valid?
           end
         elsif Mesh.planar?(poly, PLANAR_TOL)
           add_face(ents, poly)
@@ -133,25 +134,28 @@ module ProjektniBiro
       end
 
       # A large surface of triangles (a road surface following its heights) is added in one step, which is many
-      # times faster than face by face: each polygon keeps its point order (its normal), and edges between faces
-      # that are flat or bend gently are softened and smoothed, so the surface shows no triangle lines.
+      # times faster than face by face: each polygon keeps its point order (its normal); triangles in one plane are
+      # joined into one face afterwards, the other edges stay hard (editable faces).
       def add_polygon_mesh(ents, polygons)
         pm = Geom::PolygonMesh.new(polygons.length * 3, polygons.length)
         added = 0
         polygons.each do |poly|
-          next if poly.length < 3
+          begin
+            next if poly.length < 3
 
-          pm.add_polygon(poly.map { |p| pt(p) })
-          added += 1
-        rescue ArgumentError
-          @stats['failed_faces'] += 1
+            pm.add_polygon(poly.map { |p| pt(p) })
+            added += 1
+          rescue ArgumentError
+            @stats['failed_faces'] += 1
+          end
         end
-        ents.add_faces_from_mesh(pm, Geom::PolygonMesh::AUTO_SOFTEN | Geom::PolygonMesh::SMOOTH_SOFT_EDGES)
+        ents.add_faces_from_mesh(pm, 0) # 0: no edge softened, smoothed or hidden
         @stats['faces'] += added
+        join_coplanar(ents)
       rescue StandardError => e # fall back to face by face
         Log.write(:debug, "mreža površine nije dodana u jednom koraku (#{e.message})")
         polygons.each { |poly| add_polygon(ents, poly, false) }
-        soften(ents)
+        join_coplanar(ents)
       end
 
       # Adds a face and orients it to the polygon's right-hand-rule normal (SketchUp may flip faces on z = 0).
@@ -168,42 +172,25 @@ module ProjektniBiro
         face
       end
 
-      # Edges between two faces of one mesh: between faces in one plane the edge is erased, so the triangles of a
-      # flat or evenly sloped part become one face (no triangle lines, even with hidden geometry shown); between
-      # faces that bend less than SMOOTH_ANGLE it is softened and smoothed; sharper edges stay.
-      def soften(ents)
+      # Edges between two faces of one mesh in one plane (same material) are erased, so the triangles of a flat or
+      # evenly sloped part become one face (as the Eraser does). All other edges stay hard: nothing is softened or
+      # smoothed, so every face can be selected and pushed/pulled on its own.
+      def join_coplanar(ents)
         flat = []
         ents.grep(Sketchup::Edge).each do |edge|
           faces = edge.faces
           next unless faces.length == 2
+          next unless faces[0].normal.angle_between(faces[1].normal) < COPLANAR_ANGLE && faces[0].material == faces[1].material
 
-          angle = faces[0].normal.angle_between(faces[1].normal)
-          next if angle > SMOOTH_ANGLE
-
-          if angle < COPLANAR_ANGLE && faces[0].material == faces[1].material
-            flat << edge
-          else
-            edge.soft = true
-            edge.smooth = true
-          end
+          flat << edge
         end
-        merge_coplanar(ents, flat)
-      end
+        return if flat.empty?
 
-      # Erasing an edge between two faces in one plane joins them into one face (as the Eraser does). An edge that
-      # would leave a face open (an end that only it uses) is softened instead.
-      def merge_coplanar(ents, edges)
-        return if edges.empty?
-
-        keep, drop = edges.partition { |e| [e.start, e.end].any? { |v| v.edges.length < 3 } }
-        keep.each do |e|
-          e.soft = true
-          e.smooth = true
-        end
+        # an edge that would leave a face open (an end that only it uses) stays
+        drop = flat.reject { |e| [e.start, e.end].any? { |v| v.edges.length < 3 } }
         ents.erase_entities(drop) unless drop.empty?
-      rescue StandardError => e # merging is cosmetic: the faces stay triangles if it fails
+      rescue StandardError => e # joining is cosmetic: the faces stay triangles if it fails
         Log.write(:debug, "spajanje ravnih trouglova nije uspjelo (#{e.message})")
-        edges.each { |x| x.soft = true if x.valid? }
       end
     end
   end

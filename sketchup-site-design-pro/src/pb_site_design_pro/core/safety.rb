@@ -138,11 +138,13 @@ module ProjektniBiro
         return [] unless File.file?(@path)
 
         File.read(@path, encoding: 'UTF-8').split("\n").filter_map do |line|
-          next if line.strip.empty?
+          begin
+            next if line.strip.empty?
 
-          JSON.parse(line)
-        rescue JSON::ParserError
-          nil # torn line from an interrupted write
+            JSON.parse(line)
+          rescue JSON::ParserError
+            nil # torn line from an interrupted write
+          end
         end
       end
 

@@ -13,6 +13,7 @@ end
 
 require File.join(__dir__, 'version')
 %w[
+  compat
   report
   units
   geometry
