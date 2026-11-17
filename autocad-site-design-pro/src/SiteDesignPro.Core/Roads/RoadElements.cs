@@ -633,7 +633,7 @@ namespace SiteDesignPro.Core.Roads
         private static List<Vec3[]> DrapeOn(PathsD shapes, IReadOnlyList<RoadProfile> profiles, double lift)
         {
             var tris = new List<Vec3[]>();
-            PathsD union = Clipper.Union(shapes, FillRule.NonZero, 4);
+            PathsD union = Clipper.Union(shapes, new PathsD(), FillRule.NonZero, 4);
             foreach (PathD path in union.Where(q => q.Count >= 3 && Clipper.Area(q) > 1e-6))
             {
                 var outer = new RoadLoop(path.Select(q => new Vec2(q.x, q.y)).ToList(), path.Select(_ => 0.0).ToList());
