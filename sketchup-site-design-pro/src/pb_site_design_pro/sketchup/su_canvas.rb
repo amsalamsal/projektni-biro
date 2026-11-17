@@ -8,6 +8,7 @@ module ProjektniBiro
     class SuCanvas
       DICT = 'SiteDesignPro'
       SMOOTH_ANGLE = 50.0 * Math::PI / 180.0
+      COPLANAR_ANGLE = 0.05 * Math::PI / 180.0
       PLANAR_TOL = 1e-4 # metres
 
       attr_reader :entities, :stats
@@ -141,15 +142,42 @@ module ProjektniBiro
         face
       end
 
+      # Edges between two faces of one mesh: between faces in one plane the edge is erased, so the triangles of a
+      # flat or evenly sloped part become one face (no triangle lines, even with hidden geometry shown); between
+      # faces that bend less than SMOOTH_ANGLE it is softened and smoothed; sharper edges stay.
       def soften(ents)
+        flat = []
         ents.grep(Sketchup::Edge).each do |edge|
           faces = edge.faces
           next unless faces.length == 2
-          next if faces[0].normal.angle_between(faces[1].normal) > SMOOTH_ANGLE
 
-          edge.soft = true
-          edge.smooth = true
+          angle = faces[0].normal.angle_between(faces[1].normal)
+          next if angle > SMOOTH_ANGLE
+
+          if angle < COPLANAR_ANGLE && faces[0].material == faces[1].material
+            flat << edge
+          else
+            edge.soft = true
+            edge.smooth = true
+          end
         end
+        merge_coplanar(ents, flat)
+      end
+
+      # Erasing an edge between two faces in one plane joins them into one face (as the Eraser does). An edge that
+      # would leave a face open (an end that only it uses) is softened instead.
+      def merge_coplanar(ents, edges)
+        return if edges.empty?
+
+        keep, drop = edges.partition { |e| [e.start, e.end].any? { |v| v.edges.length < 3 } }
+        keep.each do |e|
+          e.soft = true
+          e.smooth = true
+        end
+        ents.erase_entities(drop) unless drop.empty?
+      rescue StandardError => e # merging is cosmetic: the faces stay triangles if it fails
+        Log.write(:debug, "spajanje ravnih trouglova nije uspjelo (#{e.message})")
+        edges.each { |x| x.soft = true if x.valid? }
       end
     end
   end
