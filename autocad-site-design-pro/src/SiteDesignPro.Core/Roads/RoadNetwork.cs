@@ -1075,6 +1075,12 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Length over which a bike lane slopes down to a driveway that crosses it.</summary>
         public const double BikeRampLength = 2.0;
 
+        /// <summary>
+        /// How far behind the outer edge of a road a garage ramp may start and still be joined to it (a front yard):
+        /// the driveway is paved from the carriageway up to the ramp.
+        /// </summary>
+        public const double MaxDrivewayGap = 8.0;
+
         [ThreadStatic]
         private static Action<RoadLevel, List<List<Vec2>>>? rawBand;
 
@@ -1334,7 +1340,7 @@ namespace SiteDesignPro.Core.Roads
             double kerbLine = road.Extent(RoadLevel.Carriageway, left), outer = road.Extent(RoadLevel.Edge, left);
             Vec2 dir = dw.Direction.Normalized();
             double cos = dir.Dot(normal);
-            if (best > outer + 1.5 || cos < 0.3)
+            if (best > outer + MaxDrivewayGap || cos < 0.3)
             {
                 return null; // too far, or not leading away from the road
             }

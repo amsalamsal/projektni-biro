@@ -319,8 +319,8 @@ namespace SiteDesignPro.Core.Tests
             Assert.True(RulesReportOnly || broken.Count == 0, name + ": " + string.Join("; ", broken));
         }
 
-        /// <summary>While the rules are being brought in, they are only reported (pravila.txt), not failed.</summary>
-        private const bool RulesReportOnly = true;
+        /// <summary>True only while new rules are being brought in: they are then reported (pravila.txt), not failed.</summary>
+        private const bool RulesReportOnly = false;
 
         /// <summary>A pedestrian crossing across a street along the X axis (its stripes from x0 to x1), with or without a cycle strip.</summary>
         private static SiteElement Z(double x0, double x1, double half, bool bikeStrip)

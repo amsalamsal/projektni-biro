@@ -118,6 +118,29 @@ namespace SiteDesignPro.Core.Tests
                 }
             }
 
+            // every garage ramp that starts or ends near a road and leads away from it is joined to it by a driveway
+            int expected = 0;
+            foreach (GarageRamp ramp in GarageRamp.All(elements))
+            {
+                if (ramp.Length < 1)
+                {
+                    continue;
+                }
+
+                foreach ((Vec2 p, Vec2 d) in new[] { ramp.PointAt(0, 0), ramp.PointAt(ramp.Length, 0) })
+                {
+                    if (res.Axes.Values.Any(axis => NearRoad(axis, p, d, ramp.Length, ramp.PointAt(0, 0).Point == p)))
+                    {
+                        expected++;
+                    }
+                }
+            }
+
+            if (res.Driveways < expected)
+            {
+                issues.Add("ramp not joined: " + res.Driveways + " driveways for " + expected + " ramp ends at a road");
+            }
+
             // 5. markings and arrows on the carriageway (or the lowered bike lane)
             PathsD drive = Clipper.Union(new PathsD(layers.Where(l => l.Name == "Carriageway" || l.Name == "BikeRamps").SelectMany(l => l.Paths)), FillRule.NonZero);
             PathsD driveTol = Clipper.InflatePaths(drive, 0.2, JoinType.Round, EndType.Polygon, 2, Precision);
@@ -188,6 +211,36 @@ namespace SiteDesignPro.Core.Tests
 
         /// <summary>What is left of an area after 1 cm is taken off all round: the few mm by which fitted arcs differ vanish.</summary>
         private static PathsD Solid(PathsD p) => Clipper.InflatePaths(Clipper.Union(p, FillRule.NonZero), -0.01, JoinType.Miter, EndType.Polygon, 3, Precision);
+
+        /// <summary>An end of a ramp lies within 12 m of a road axis, beside it, and the ramp leads away from it.</summary>
+        private static bool NearRoad(List<Vec2> axis, Vec2 p, Vec2 dir, double length, bool start)
+        {
+            Vec2 away = start ? dir : -dir;
+            for (int i = 0; i + 1 < axis.Count; i++)
+            {
+                Vec2 a = axis[i], ab = axis[i + 1] - a;
+                double l2 = ab.Dot(ab);
+                if (l2 < 1e-12)
+                {
+                    continue;
+                }
+
+                double t = (p - a).Dot(ab) / l2;
+                if (t < 0 || t > 1)
+                {
+                    continue;
+                }
+
+                Vec2 foot = a + (ab * t);
+                double dist = foot.DistanceTo(p);
+                if (dist < 12 && dist > 1e-6 && (p - foot).Normalized().Dot(away.Normalized()) > 0.5)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private static bool Finite(Vec3 v) => !double.IsNaN(v.X) && !double.IsNaN(v.Y) && !double.IsNaN(v.Z) && !double.IsInfinity(v.X) && !double.IsInfinity(v.Y);
 
