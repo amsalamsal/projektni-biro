@@ -2145,8 +2145,9 @@ namespace SiteDesignPro.Core.Roads
 
                     // the corner's own sidewalk and edging at the end: measured across, outwards from the bike lane
                     // (just inside the corner, off the end line itself)
-                    Vec2 c1 = p1 - (t * 0.02);
-                    double sw0 = Across(walk, c1, w, 4), ew0 = Across(edge, c1 + (w * sw0), w, 0.5);
+                    Vec2 c0 = p0 - (t * 0.02);
+                    bw = Math.Max(bw, Across(bike, c0, w, 4));
+                    double sw0 = Across(walk, c0 + (w * bw), w, 6), ew0 = Across(edge, c0 + (w * (bw + sw0)), w, 0.5);
                     double len = BikeTaperLength;
 
                     // the sidewalk beyond must go on for the whole transition
