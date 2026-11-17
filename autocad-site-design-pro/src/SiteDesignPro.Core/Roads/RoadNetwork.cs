@@ -2145,7 +2145,7 @@ namespace SiteDesignPro.Core.Roads
 
                     // the corner's own sidewalk and edging at the end: measured across, outwards from the bike lane
                     // (just inside the corner, off the end line itself)
-                    Vec2 c1 = p1 - (t * 0.05);
+                    Vec2 c1 = p1 - (t * 0.02);
                     double sw0 = Across(walk, c1, w, 4), ew0 = Across(edge, c1 + (w * sw0), w, 0.5);
                     double len = BikeTaperLength;
 
@@ -2200,14 +2200,17 @@ namespace SiteDesignPro.Core.Roads
             return true;
         }
 
-        /// <summary>How far a surface reaches from <paramref name="p"/> in direction <paramref name="dir"/> (to 5 cm, at most <paramref name="max"/>).</summary>
+        /// <summary>How far a surface reaches from <paramref name="p"/> in direction <paramref name="dir"/> (to 2 mm, at most <paramref name="max"/>).</summary>
         private static double Across(PathsD paths, Vec2 p, Vec2 dir, double max)
         {
             double d = 0;
-            while (d < max && InsideAny(paths, p + (dir * (d + 0.005))))
+            while (d < max && InsideAny(paths, p + (dir * (d + 0.001))))
             {
-                d += 0.01;
+                d += 0.002;
             }
+
+            return d < 0.02 ? 0 : d;
+        }
 
             return d < 0.02 ? 0 : Math.Round(d / 0.05) * 0.05;
         }
