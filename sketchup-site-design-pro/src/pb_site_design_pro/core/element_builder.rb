@@ -77,6 +77,9 @@ module ProjektniBiro
           n.negative? ? [t[0], t[2], t[1]] : t
         end
 
+        # paint 5 mm thick: the triangles are its top, 5 mm above the road; the body reaches down to the road
+        polys = Builders::Slab.closed_body(polys, Builders::MARKING)
+
         material = element.param('material').to_s
         material = 'line_paint_white' if material.empty? || (!ctx.materials.empty? && !ctx.materials.key?(material))
         canvas.group(element.display_name, attributes) do |gc|

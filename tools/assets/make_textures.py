@@ -206,6 +206,7 @@ for key, s in (('soil', 30), ('terrain', 20), ('sand', 120)):
 save('grass_grid', np.where(grid_joints(N // 4, N // 4, 14, 0)[0][..., None] > 0, tint(C['concrete'], grain(30), 0.2), tint(C['grass'], blades, 0.5)), 0.6)
 save('asphalt', tint(C['asphalt'], noise(160, 2) * 0.7 + noise(20, 3) * 0.3, 0.6), 1.0)
 save('asphalt_red', tint(C['asphalt_red'], noise(160, 2) * 0.7 + noise(20, 3) * 0.3, 0.5), 1.0)
+save('asphalt_bordo_dark', tint(C['asphalt_bordo_dark'], noise(160, 2) * 0.7 + noise(20, 3) * 0.3, 0.5), 1.0)
 save('acrylic_court', tint(C['acrylic_court'], noise(60, 3), 0.15), 1.0)
 for key in ('concrete', 'concrete_precast'):
     pores = (np.random.default_rng(12).random((N, N)) < 0.004).astype(float)

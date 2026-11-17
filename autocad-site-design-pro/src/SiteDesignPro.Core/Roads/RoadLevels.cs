@@ -216,7 +216,10 @@ namespace SiteDesignPro.Core.Roads
         /// Triangles of a surface region with heights (x, y, z per corner): the outline is divided at the grid
         /// spacing so the surface follows the road profile, then triangulated.
         /// </summary>
-        public static List<Vec3[]> Drape(RoadRegion region, IReadOnlyList<RoadProfile> profiles)
+        public static List<Vec3[]> Drape(RoadRegion region, IReadOnlyList<RoadProfile> profiles) => Drape(region, p => Height(profiles, p));
+
+        /// <summary>Triangles of a region (outline every 0,5 m and a 1 m grid inside) at the heights of a function.</summary>
+        public static List<Vec3[]> Drape(RoadRegion region, Func<Vec2, double> height)
         {
             var rings = new List<PathD> { Densify(region.Outer) };
             rings.AddRange(region.Holes.Select(Densify));
@@ -258,7 +261,7 @@ namespace SiteDesignPro.Core.Roads
                     continue; // outside the surface or in a hole
                 }
 
-                list.Add(new[] { pa, pb, pc }.Select(v => new Vec3(v.X, v.Y, Height(profiles, new Vec2(v.X, v.Y)))).ToArray());
+                list.Add(new[] { pa, pb, pc }.Select(v => new Vec3(v.X, v.Y, height(new Vec2(v.X, v.Y)))).ToArray());
             }
 
             return list;

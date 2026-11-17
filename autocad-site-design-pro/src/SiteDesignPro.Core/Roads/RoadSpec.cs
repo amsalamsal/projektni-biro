@@ -62,6 +62,39 @@ namespace SiteDesignPro.Core.Roads
 
         public const double MaxMedian = 6.0;
 
+        /// <summary>
+        /// Two-way roads with a median: distance along the axis from its start (as drawn) up to which the median is
+        /// full; behind it the lanes of both directions come together over <see cref="MedianTaper"/> and the road
+        /// continues without the median, the directions separated by one continuous line. 0 = median over the whole road.
+        /// </summary>
+        public double MedianTo { get; set; }
+
+        /// <summary>Length over which the median narrows to nothing after <see cref="MedianTo"/>.</summary>
+        public double MedianTaper { get; set; }
+
+        /// <summary>True when the median ends along the road (roundabout arms).</summary>
+        public bool MedianEnds => !OneWay && !Closed && Median > 0 && MedianTo > 0;
+
+        /// <summary>Network use: station (along the final axis) where the median starts to narrow and where it is gone.</summary>
+        internal double TaperFrom { get; set; } = double.PositiveInfinity;
+
+        internal double TaperTo { get; set; } = double.PositiveInfinity;
+
+        /// <summary>
+        /// How much every offset from the axis is pulled towards it at a station (metres): 0 where the median is full,
+        /// half the median where it is gone.
+        /// </summary>
+        public double Shrink(double station)
+        {
+            if (station <= TaperFrom || double.IsInfinity(TaperFrom))
+            {
+                return 0;
+            }
+
+            double hm = HalfMedian;
+            return station >= TaperTo || TaperTo - TaperFrom < 1e-6 ? hm : hm * (station - TaperFrom) / (TaperTo - TaperFrom);
+        }
+
         /// <summary>15 cm kerb at the road edge (simple roads without a cross-section have none).</summary>
         public bool Kerbs { get; set; } = true;
 
@@ -183,6 +216,8 @@ namespace SiteDesignPro.Core.Roads
             Markings = Markings,
             CornerRadius = CornerRadius,
             Median = Median,
+            MedianTo = MedianTo,
+            MedianTaper = MedianTaper,
         };
 
         /// <summary>Compact text form stored on the axis in the drawing ("key=value;..." with invariant numbers).</summary>

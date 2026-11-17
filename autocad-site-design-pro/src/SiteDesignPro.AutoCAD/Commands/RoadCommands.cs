@@ -691,6 +691,37 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
+            // the bike lane lowered across a driveway: dark bordo like an accessible ramp, its kerb in kerb grey
+            foreach (RoadRegion region in res.BikeRamps)
+            {
+                try
+                {
+                    Hatch h = RegionHatch(region, k);
+                    Add(h, "staza:spustena", Color.FromRgb(74, 12, 24), 15);
+                    hatches.Add(h.ObjectId);
+                    Add(LoopPolyline(region.Outer, k), "staza:spustena:rub", null, 0);
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception)
+                {
+                    failed++;
+                }
+            }
+
+            foreach (RoadRegion region in res.KerbRamps)
+            {
+                try
+                {
+                    (byte r, byte g, byte b, int t) = Fill[RoadLevel.Kerb];
+                    Hatch h = RegionHatch(region, k);
+                    Add(h, "ivicnjak:spusteni", Color.FromRgb(r, g, b), t);
+                    hatches.Add(h.ObjectId);
+                }
+                catch (Autodesk.AutoCAD.Runtime.Exception)
+                {
+                    failed++;
+                }
+            }
+
             // cycle strips beside the pedestrian crossings: RAL 5010, 30 % transparent
             foreach (List<Vec2> strip in RoadElements.BikeStrips(elements, k))
             {

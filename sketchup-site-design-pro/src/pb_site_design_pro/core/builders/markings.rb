@@ -3,7 +3,7 @@
 module ProjektniBiro
   module SiteDesignPro
     module Builders
-      MARKING = 0.003
+      MARKING = 0.005
 
       # Parking bay markings; insertion = centre of the aisle edge, bay along local +Y.
       class ParkingBay < PointBuilder

@@ -81,7 +81,7 @@ namespace SiteDesignPro.Core.Validation
     {
         private static readonly HashSet<string> SurfaceBuilders = new HashSet<string>(StringComparer.Ordinal)
         {
-            "slab", "planting_area", "pool", "basin", "planter", "steps", "ramp", "massing",
+            "slab", "planting_area", "pool", "basin", "planter", "steps", "ramp", "massing", "traffic_island",
         };
 
         private static readonly HashSet<string> RectangleBuilders = new HashSet<string>(StringComparer.Ordinal)

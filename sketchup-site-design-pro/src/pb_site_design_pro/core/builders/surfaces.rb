@@ -34,7 +34,7 @@ module ProjektniBiro
 
           # triangles of one curved or sloped surface: the edges between them are softened, corners stay sharp
           thickness = e.custom['openSurface'] == true ? 0.0 : e.num('thickness', 0.0)
-          polys = Slab.closed_body(polys, thickness) if thickness > 0.005
+          polys = Slab.closed_body(polys, thickness) if thickness > 0.001
           c.mesh(polys, material: mat(e, 'material'), name: 'Površina', smooth: true, solid: false)
         end
 
@@ -68,6 +68,28 @@ module ProjektniBiro
         end
       end
       register('slab', Slab)
+
+      # Traffic island (splitter island of a roundabout arm): a kerb all round, its rounded ends as smooth as in the
+      # drawing, filled with grass a little below the top of the kerb.
+      class TrafficIsland < PolygonBuilder
+        def build(e, c)
+          g = e.geometry
+          outer = Geometry.dedupe(Geometry.tessellate(g[:outer][:vertices], g[:outer][:bulges], true, 0.002, 256), true)
+          return if outer.length < 3
+
+          top = base_z(outer) + e.num('topOffset', 0.15)
+          bottom = top - e.num('thickness', 0.3)
+          kerb = e.num('kerbWidth', 0.12)
+          inner = kerb.positive? ? Geometry.offset_ring(outer, -kerb) : nil
+          if inner
+            c.mesh(Mesh.prism(outer, bottom, top, [inner]), material: mat(e, 'material', 'concrete'), name: 'Ivičnjak otoka')
+            c.mesh(Mesh.prism(inner, bottom, top - e.num('grassBelow', 0.03)), material: mat(e, 'grassMaterial', 'grass'), name: 'Trava')
+          else
+            c.mesh(Mesh.prism(outer, bottom, top), material: mat(e, 'material', 'concrete'), name: 'Otok')
+          end
+        end
+      end
+      register('traffic_island', TrafficIsland)
 
       # Building / reference massing.
       class Massing < PolygonBuilder

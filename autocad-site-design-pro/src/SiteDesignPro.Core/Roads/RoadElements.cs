@@ -242,6 +242,8 @@ namespace SiteDesignPro.Core.Roads
                     Arrows = B("arrows", true),
                     ArrowSpacing = N("arrowSpacing", 40),
                     Median = N("median", 0),
+                    MedianTo = N("medianTo", 0),
+                    MedianTaper = N("medianTaper", 0),
                 };
                 s.Normalize();
             }
@@ -330,12 +332,18 @@ namespace SiteDesignPro.Core.Roads
         }
 
         /// <summary>Outlines of the pedestrian crossings (metres), where lane lines and arrows stop.</summary>
-        public static List<IReadOnlyList<Vec2>> CrossingAreas(IEnumerable<SiteElement> elements, double unitsPerMeter = 1.0)
+        public static List<IReadOnlyList<Vec2>> CrossingAreas(IEnumerable<SiteElement> elements, double unitsPerMeter = 1.0) => CrossingAreas(elements, unitsPerMeter, true);
+
+        /// <summary>Outlines of the hatched areas (metres), where lane lines stop.</summary>
+        public static List<IReadOnlyList<Vec2>> HatchedAreas(IEnumerable<SiteElement> elements, double unitsPerMeter = 1.0) =>
+            elements.Where(e => e.TypeId == HatchedAreaType && e.Geometry is PolygonGeometry).Select(e => (IReadOnlyList<Vec2>)Outer((PolygonGeometry)e.Geometry, unitsPerMeter)).ToList();
+
+        private static List<IReadOnlyList<Vec2>> CrossingAreas(IEnumerable<SiteElement> elements, double unitsPerMeter, bool withHatched)
         {
             var list = new List<IReadOnlyList<Vec2>>();
             foreach (SiteElement e in elements)
             {
-                if ((e.TypeId == CrossingType || e.TypeId == HatchedAreaType) && e.Geometry is PolygonGeometry pg)
+                if ((e.TypeId == CrossingType || (withHatched && e.TypeId == HatchedAreaType)) && e.Geometry is PolygonGeometry pg)
                 {
                     // a crossing with a cycle strip: the strip belongs to it (lane lines stop there too)
                     List<Vec2> outer = Outer(pg, unitsPerMeter);
@@ -384,7 +392,7 @@ namespace SiteDesignPro.Core.Roads
                 driveways.Add(new RoadDriveway { Point = p1, Direction = -d1, Width = ramp.Width, Radius = ramp.JoinRadius, Exclude = outline });
             }
 
-            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter), crossings, rampMarks, driveways, rampWidths);
+            return specs.Count == 0 ? null : RoadNetwork.Build(specs, CrossingAreas(all, unitsPerMeter, false), crossings, rampMarks, driveways, rampWidths, HatchedAreas(all, unitsPerMeter));
         }
 
         /// <summary>Width of the cycle strip beside a pedestrian crossing.</summary>
@@ -560,6 +568,30 @@ namespace SiteDesignPro.Core.Roads
                 list[list.Count - 1].Parameters["material"] = ParamValue.Of("line_paint_yellow");
             }
 
+            // the bike lane where a driveway crosses it: at the carriageway across the driveway, sloping up to the
+            // bike lane over 2 m on both sides; the kerb beside the slopes is lowered with it
+            double bikeRise = catalog.FindType(LevelTypes[RoadLevel.Bike].Type)?.CreateDefaultParameters().Number("topOffset", 0.15) ?? 0.15;
+            double kerbRise = catalog.FindType(LevelTypes[RoadLevel.Kerb].Type)?.CreateDefaultParameters().Number("topOffset", 0.15) ?? 0.15;
+            List<List<Vec2>> rampBase = res.BikeRampBase;
+            double Lowered(Vec2 p, double rise)
+            {
+                double d = rampBase.Count == 0 ? RoadNetwork.BikeRampLength : rampBase.Min(b => DistanceTo(b, p));
+                return z + (profiles != null ? RoadLevels.Height(profiles, p) : 0) + (rise * Math.Min(1, d / RoadNetwork.BikeRampLength));
+            }
+
+            foreach (RoadRegion region in res.BikeRamps)
+            {
+                Add(BikeRampType, "Spuštena biciklistička staza preko kolnog prilaza", new PolygonGeometry(ToRing(region.Outer, z), region.Holes.Select(h => ToRing(h, z)).ToList()));
+                list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(RoadLevels.Drape(region, p => Lowered(p, bikeRise))));
+            }
+
+            foreach (RoadRegion region in res.KerbRamps)
+            {
+                Add(LevelTypes[RoadLevel.Kerb].Type, "Spušteni ivičnjak uz biciklističku stazu", new PolygonGeometry(ToRing(region.Outer, z), region.Holes.Select(h => ToRing(h, z)).ToList()));
+                list[list.Count - 1].Parameters["topOffset"] = ParamValue.Of(0.0);
+                list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(RoadLevels.Drape(region, p => Lowered(p, kerbRise))));
+            }
+
             // cycle strips beside the pedestrian crossings (blue, a little above the carriageway)
             foreach (List<Vec2> strip in BikeStrips(all))
             {
@@ -621,6 +653,31 @@ namespace SiteDesignPro.Core.Roads
             }
 
             return list;
+        }
+
+        /// <summary>Generated element type of the bike lane lowered across a driveway.</summary>
+        public const string BikeRampType = "road.bike_ramp";
+
+        /// <summary>Distance from a point to a polygon (0 inside).</summary>
+        private static double DistanceTo(IReadOnlyList<Vec2> poly, Vec2 p)
+        {
+            bool inside = false;
+            double best = double.MaxValue;
+            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
+            {
+                Vec2 a = poly[j], b = poly[i];
+                if ((b.Y > p.Y) != (a.Y > p.Y) && p.X < ((a.X - b.X) * (p.Y - b.Y) / (a.Y - b.Y)) + b.X)
+                {
+                    inside = !inside;
+                }
+
+                Vec2 ab = b - a;
+                double l2 = ab.Dot(ab);
+                double t = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
+                best = Math.Min(best, p.DistanceTo(a + (ab * t)));
+            }
+
+            return inside ? 0 : best;
         }
 
         /// <summary>Element type of the mountable apron around the island of a roundabout.</summary>

@@ -215,6 +215,65 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void MedianThatEnds_LanesComeTogether_OneCentreLineBeyond()
+        {
+            var r = Road("A", 0, 0, 60, 0, x => { x.Median = 1.5; x.MedianTo = 10; x.MedianTaper = 6; x.SidewalkLeft = 0; x.SidewalkRight = 0; });
+            RoadNetworkResult res = RoadNetwork.Build(new[] { r });
+            // full median up to 10 m, lanes together from 16 m on
+            Assert.InRange(res.Bands[RoadLevel.Carriageway][0].Outer.Points.Where(p => p.X < 9).Max(p => p.Y), 3.74, 3.76);
+            Assert.InRange(res.Bands[RoadLevel.Carriageway][0].Outer.Points.Where(p => p.X > 17).Max(p => p.Y), 2.99, 3.01);
+
+            // beyond the taper one continuous line on the axis; the lines along the median end there
+            Assert.Contains(res.Markings, m => m.Centre && m.Points.All(p => Math.Abs(p.Y) < 1e-6) && m.Points.Max(p => p.X) > 50);
+            Assert.DoesNotContain(res.Markings, m => m.Points.Any(p => p.X > 16.5 && Math.Abs(p.Y) > 0.01));
+            Assert.Contains(res.Markings, m => m.Centre && m.Points.Any(p => p.X < 9 && Math.Abs(p.Y - 0.75) < 1e-6));
+        }
+
+        [Fact]
+        public void DrivewayAcrossABikeLane_LowersTheBikeLaneAcrossIt()
+        {
+            var a = Road("A", 0, 0, 100, 0, x => { x.BikeLeft = 1.5; x.BikeRight = 1.5; });
+            var dw = new RoadDriveway { Point = new Vec2(50, 6.9), Direction = new Vec2(0, 1), Width = 4.0, Radius = 1.0 };
+            RoadNetworkResult res = RoadNetwork.Build(new[] { a }, null, null, null, new[] { dw });
+            Assert.Equal(1, res.Driveways);
+            Assert.NotEmpty(res.BikeRamps);
+            Assert.NotEmpty(res.KerbRamps);
+            Assert.NotEmpty(res.BikeRampBase);
+
+            // across the driveway and 2 m on both sides (plus the rounded corners): about 4 + 2 + 2 m long
+            double len = res.BikeRamps.Max(b => b.Outer.Points.Max(p => p.X) - b.Outer.Points.Min(p => p.X));
+            Assert.InRange(len, 7.5, 12);
+
+            // the bike lane itself leaves that part out, and the carriageway does not run under it
+            Assert.All(res.Bands[RoadLevel.Bike].SelectMany(b => b.Outer.Points).Where(p => p.Y > 0), p => Assert.True(Math.Abs(p.X - 50) > 3.9, "bike lane at " + p));
+            Assert.All(res.Bands[RoadLevel.Carriageway].SelectMany(b => b.Outer.Points), p => Assert.True(p.Y < 3.2 || p.Y > 4.6, "carriageway in the bike lane at " + p));
+        }
+
+        [Fact]
+        public void DrivewayAtAnAngle_GetsALargerRadiusOnItsSharpSide()
+        {
+            RoadNetworkResult Build(Vec2 dir) => RoadNetwork.Build(new[] { Road("A", 0, 0, 100, 0) }, null, null, null, new[] { new RoadDriveway { Point = new Vec2(50, 5.6), Direction = dir, Width = 4.0, Radius = 1.0 } });
+            RoadNetworkResult square = Build(new Vec2(0, 1));
+            RoadNetworkResult oblique = Build(new Vec2(1, 1).Normalized());
+
+            // the sharp side (towards +X) is rounded much further along the road than the open side
+            double Reach(RoadNetworkResult res, bool plus) => res.Bands[RoadLevel.Carriageway][0].Outer.Points.Where(p => p.Y > 3.05 && (plus ? p.X > 50 : p.X < 50)).Select(p => Math.Abs(p.X - 50)).DefaultIfEmpty(0).Max();
+            Assert.True(Reach(oblique, true) > Reach(square, true) + 1.0, "sharp side " + Reach(oblique, true) + " vs " + Reach(square, true));
+        }
+
+        [Fact]
+        public void RoadsMeetingAtAnAngle_TheObtuseCornersAreRoundedSmoothly()
+        {
+            double c = Math.Cos(Math.PI / 6), s = Math.Sin(Math.PI / 6);
+            RoadNetworkResult res = RoadNetwork.Build(new[] { Road("A", -70, 0, 70, 0), Road("B", -60 * c, -60 * s, 60 * c, 60 * s) });
+
+            // the 150° corners get 6 × tan 75° ≈ 22,4 m, the 30° corners keep the kerb radius 6 m
+            List<double> radii = res.Outlines[RoadLevel.Carriageway].SelectMany(l => l.ArcRadii()).ToList();
+            Assert.Contains(radii, x => Math.Abs(x - (6 * Math.Tan(75 * Math.PI / 180))) < 0.3);
+            Assert.Contains(radii, x => Math.Abs(x - 6) < 0.05);
+        }
+
+        [Fact]
         public void Driveway_CornersAreRounded_WithItsRadius()
         {
             RoadDriveway At(double radius) => new RoadDriveway { Point = new Vec2(50, 5.6), Direction = new Vec2(0, 1), Width = 6.5, Radius = radius };

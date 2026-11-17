@@ -44,6 +44,9 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// <summary>Median of the arms of a roundabout: the splitter island 1,20 m at its widest and 15 cm on both sides.</summary>
         internal const double SplitterMedian = 1.5;
 
+        /// <summary>Distance from the outer edge of a roundabout where the median of an arm is gone (one centre line beyond).</summary>
+        internal const double MedianEndFromRing = 15.0;
+
         /// <summary>A complete roundabout from its centre: ring, island, kerbs, splitter islands, crossings, arrows, signs, arms.</summary>
         /// <summary>
         /// Mini roundabout (up to 25 km/h): green central island (radius 10–30 m), truck apron 1,20 m (AR-B88), a
@@ -169,15 +172,6 @@ namespace SiteDesignPro.AutoCAD.Commands
                 Vec3 P(double along, double left) => new Vec3(c.X + (((ux * along) - (uy * left)) * k), c.Y + (((uy * along) + (ux * left)) * k), 0);
                 PolygonGeometry Box(double s0, double s1, double y0, double y1) => new PolygonGeometry(new Ring(new List<Vec3> { P(s0, y0), P(s1, y0), P(s1, y1), P(s0, y1) }));
 
-                // the arm: a street with the median, from the ring outwards (it is joined to the ring axis)
-                Add(RoadElements.StreetType, new PathGeometry(new Ring(new List<Vec3> { P(ro - 0.5, 0), P(ro + armLength, 0) }), false), e =>
-                {
-                    foreach (KeyValuePair<string, ParamValue> kv in RoadCommands.Params(arm))
-                    {
-                        e.Parameters[kv.Key] = kv.Value;
-                    }
-                });
-
                 // where the straight part starts: the corner arc between the arm edge and the ring ends there
                 double R = arm.CornerRadius;
                 double hl = arm.Extent(RoadLevel.Carriageway, true), hr = arm.Extent(RoadLevel.Carriageway, false);
@@ -185,6 +179,27 @@ namespace SiteDesignPro.AutoCAD.Commands
                 double st = Math.Sqrt(Math.Max(0, ((ro + R) * (ro + R)) - ((h + R) * (h + R))));
                 st = Math.Max(st, ro + 4);
                 double m2 = median / 2;
+
+                // behind the small splitter island the lanes of both directions come together: 15 m from the outer
+                // edge of the ring there is no median any more, only one continuous centre line
+                double taperFrom = st + 3.8;
+                double taperTo = Math.Max(ro + MedianEndFromRing, taperFrom + 3.0);
+                bool taper = median > 0 && armLength > taperTo - ro + 1;
+
+                // the arm: a street with the median, from the ring outwards (it is joined to the ring axis)
+                Add(RoadElements.StreetType, new PathGeometry(new Ring(new List<Vec3> { P(ro - 0.5, 0), P(ro + armLength, 0) }), false), e =>
+                {
+                    foreach (KeyValuePair<string, ParamValue> kv in RoadCommands.Params(arm))
+                    {
+                        e.Parameters[kv.Key] = kv.Value;
+                    }
+
+                    if (taper)
+                    {
+                        e.Parameters["medianTo"] = ParamValue.Of(taperFrom - (ro - 0.5));
+                        e.Parameters["medianTaper"] = ParamValue.Of(taperTo - taperFrom);
+                    }
+                });
 
                 // pedestrian crossing over the whole carriageway at the ramps (start of the straight part), 3 m wide
                 Add(RoadElements.CrossingType, Box(st, st + 3, -hr, hl));
@@ -221,7 +236,16 @@ namespace SiteDesignPro.AutoCAD.Commands
                     Add(RoadElements.HatchedAreaType, Box(ro + 0.8, bigFrom, -hw, hw));
                 }
 
-                Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(st + 4.0, -hw), P(st + 10, 0), P(st + 4.0, hw) })));
+                if (taper)
+                {
+                    // the hatched taper between the lines that come together behind the small island
+                    double tw = Math.Max(0.2, m2 - 0.12);
+                    Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(taperFrom, -tw), P(taperTo - 1.0, 0), P(taperFrom, tw) })));
+                }
+                else
+                {
+                    Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(st + 4.0, -hw), P(st + 10, 0), P(st + 4.0, hw) })));
+                }
 
                 // give-way line (broken, 30 cm) along the ring edge across the entry lanes (left of the arm axis:
                 // right-hand traffic drives towards the ring on that side), and a triangle in every entry lane

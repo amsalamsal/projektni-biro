@@ -232,7 +232,7 @@ class TestBuilders < Minitest::Test
     assert_in_delta 0.0, min[1], 1e-9
     assert_in_delta 5.0, max[1], 1e-9
     assert_in_delta 2.5 + 0.12, max[0] - min[0], 1e-9
-    assert_in_delta 0.003, max[2], 1e-12
+    assert_in_delta 0.005, max[2], 1e-12
   end
 
   def test_steps_and_ramp_rise
@@ -330,6 +330,24 @@ class TestBuilders < Minitest::Test
       assert_equal 1, meshes.length, type
       assert_equal 'line_paint_white', meshes.first.material, type
       assert_in_delta 1.235, meshes.first.polygons.flatten(1).map { |p| p[2] }.max, 1e-9, type
+      # paint 5 mm thick: a closed body down to the road
+      assert_in_delta 1.2, meshes.first.polygons.flatten(1).map { |p| p[2] }.min, 1e-9, type
+      assert_nil canvas.send(:mesh_manifold_error, meshes.first.polygons), type
     end
+  end
+
+  # A splitter island: a kerb round it and grass inside, its rounded end smooth (many segments).
+  def test_traffic_island_has_a_kerb_and_grass
+    geometry = { 'kind' => 'polygon', 'outer' => { 'vertices' => [[0.0, -0.3, 0.0], [0.8, -0.2, 0.0], [0.8, 0.2, 0.0], [0.0, 0.3, 0.0]], 'bulges' => [0.0, 1.0, 0.0, 0.0] }, 'holes' => [] }
+    canvas, = build_one('road.splitter_island', geometry: geometry)
+    kerb = canvas.find('Ivičnjak otoka')
+    grass = canvas.find('Trava')
+    refute_nil kerb
+    refute_nil grass
+    assert_equal 'grass', grass.material
+    pts = ->(name) { mesh_points(canvas, name) }
+    assert_in_delta 0.15, pts.call('Ivičnjak otoka').map { |p| p[2] }.max, 1e-9
+    assert_in_delta 0.12, pts.call('Trava').map { |p| p[2] }.max, 1e-9
+    assert pts.call('Ivičnjak otoka').count { |p| (p[2] - 0.15).abs < 1e-9 } > 40, 'rounded end in many segments'
   end
 end

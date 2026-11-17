@@ -134,6 +134,9 @@ namespace SiteDesignPro.Core.Tests
                 ("44_prijelaz_staza_obilazi_rampu", new[] { St(P(N("bikeLeft", 1.5), N("bikeRight", 1.5), N("sidewalkLeft", 2.4), N("sidewalkRight", 1.6)), -30, 0, 30, 0), Z(-2, 2, 3, false) }),
                 ("45_prijelaz_s_biciklistickom_stazom", new[] { St(bike, -30, 0, 30, 0), Z(-2, 2, 3, true) }),
                 ("46_prijelaz_uzak_trotoar_staza_ne_obilazi", new[] { St(P(N("bikeLeft", 1.5), N("bikeRight", 1.5), N("sidewalkLeft", 1.2), N("sidewalkRight", 1.2)), -30, 0, 30, 0), Z(-2, 2, 3, true) }),
+                ("48_krak_kruznog_trake_se_spajaju", new[] { Ring(17, N("sidewalkRight", 2)), St(P(N("median", 1.5), N("medianTo", 9), N("medianTaper", 7)), 19.5, 0, 70, 0), St(P(N("median", 1.5), N("medianTo", 9), N("medianTaper", 7)), -19.5, 0, -70, 0) }),
+                ("49_rampa_koso_45_staza", new[] { St(bike, -40, 0, 40, 0), R(new[] { 0.0, 5.0, 14, 19 }, null, "straight", false, 3.0, 0.25, false, 0, -3) }),
+                ("50_rampa_koso_30_staza", new[] { St(bike, -40, 0, 40, 0), R(new[] { 0.0, 5.0, 17.3, 15 }, null, "straight", true, 3.0, 0.25, false, 0, -3) }),
                 ("47_rampa_spoj_radijus", new[] { St(-40, 0, 40, 0), R(new[] { -15.0, -4.85, -15, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3), R(new[] { 15.0, -4.85, 15, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3) }),
             };
             return list.Select(x => new object[] { x.Item1, x.Item2 });
@@ -425,6 +428,16 @@ namespace SiteDesignPro.Core.Tests
             foreach (RoadLoop ramp in res.Ramps)
             {
                 sb.Append("<polygon fill='#4a90e2' points='").Append(string.Join(" ", ramp.Points.Select(Fmt))).Append("'/>");
+            }
+
+            foreach (RoadRegion r in res.BikeRamps)
+            {
+                sb.Append("<path fill-rule='evenodd' stroke='#000' stroke-width='0.04' fill='#4a0c18' d='").Append(PathOf(r.Outer)).Append("'/>");
+            }
+
+            foreach (RoadRegion r in res.KerbRamps)
+            {
+                sb.Append("<path fill-rule='evenodd' stroke='#000' stroke-width='0.02' fill='#bbbbbb' d='").Append(PathOf(r.Outer)).Append("'/>");
             }
 
             foreach (GarageRamp ramp in GarageRamp.All(elements))

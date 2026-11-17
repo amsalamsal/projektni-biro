@@ -1342,7 +1342,7 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>The painted lines and arrows in 3D, a little above the surface: (white, yellow).</summary>
         public (List<Vec3[]> White, List<Vec3[]> Yellow) Paint3()
         {
-            const double Lift = 0.006;
+            const double Lift = RoadElements.MarkingLift; // the top of the 5 mm paint
             var white = new List<Vec3[]>();
             var yellow = new List<Vec3[]>();
             double total = Length, half = Width / 2;
@@ -1435,7 +1435,7 @@ namespace SiteDesignPro.Core.Roads
                 right.Reverse();
                 var outline = left.Concat(right).Select(p => p.WithZ(0)).ToList();
                 int n = 0;
-                void Add(string name, List<Vec3[]> tris, string? material)
+                void Add(string name, List<Vec3[]> tris, string? material, double paint = 0)
                 {
                     if (tris.Count == 0)
                     {
@@ -1453,14 +1453,24 @@ namespace SiteDesignPro.Core.Roads
                     }
 
                     e.Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(tris));
-                    e.Custom["openSurface"] = ParamValue.Of(true); // the triangles already form closed bodies
+                    if (paint > 0)
+                    {
+                        // painted markings: the triangles are the top, the paint is a body this thick down to the surface
+                        e.Parameters["thickness"] = ParamValue.Of(paint);
+                        e.Parameters["topOffset"] = ParamValue.Of(0.0);
+                    }
+                    else
+                    {
+                        e.Custom["openSurface"] = ParamValue.Of(true); // the triangles already form closed bodies
+                    }
+
                     list.Add(e);
                 }
 
                 (List<Vec3[]> white, List<Vec3[]> yellow) = r.Paint3();
                 Add("Garažna rampa", r.Slab3(), "asphalt_new");
-                Add("Garažna rampa – bijele oznake", white, "line_paint_white");
-                Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow");
+                Add("Garažna rampa – bijele oznake", white, "line_paint_white", RoadElements.MarkingLift);
+                Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow", RoadElements.MarkingLift);
                 Add("Garažna rampa – srednje ostrvo", r.Island3(), null);
                 (List<Vec3[]> wall, List<Vec3[]> rail) = r.Walls3();
                 Add("Garažna rampa – potporni zidovi", wall, "blacktop_old");

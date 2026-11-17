@@ -457,6 +457,27 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal("granite_setts", at.CreateDefaultParameters().Text("material", string.Empty));
         }
 
+        [Fact]
+        public void GarageRampAcrossABikeLane_TheBikeLaneSlopesDownToTheCarriageway()
+        {
+            SiteElement street = Path(RoadElements.StreetType, -40, 0, 40, 0, ("bikeLeft", ParamValue.Of(1.5)), ("bikeRight", ParamValue.Of(1.5)));
+            ElementType rt = Cat.RequireType(GarageRamp.Type);
+            var ramp = new SiteElement(Guid.NewGuid().ToString(), GarageRamp.Type, new PathGeometry(new Ring(new List<Vec3> { new Vec3(0, 5.0, 0), new Vec3(0, 25, 0) }), false))
+            { Parameters = rt.CreateDefaultParameters(), Label = "GR-001" };
+            ramp.Parameters["kind"] = ParamValue.Of("straight");
+            ramp.Parameters["direction"] = ParamValue.Of("one_way");
+            ramp.Parameters["startLevel"] = ParamValue.Of(0.0);
+            ramp.Parameters["endLevel"] = ParamValue.Of(-3.0);
+
+            List<SiteElement> derived = RoadElements.Derived(new List<SiteElement> { street, ramp }, Cat);
+            SiteElement lowered = Assert.Single(derived, e => e.TypeId == RoadElements.BikeRampType);
+            Assert.Equal("asphalt_bordo_dark", lowered.Parameters.Text("material", string.Empty));
+            List<double> zs = lowered.Custom["triangles"].AsText().Split('|').SelectMany(t => t.Split(';')).Select(q => double.Parse(q.Split(',')[2], System.Globalization.CultureInfo.InvariantCulture)).ToList();
+            Assert.Equal(0.0, zs.Min(), 3);
+            Assert.Equal(0.15, zs.Max(), 3);
+            Assert.Contains(derived, e => e.TypeId == "road.street_kerb" && e.Name.Contains("Spušteni"));
+        }
+
         [Theory]
         [InlineData(501.0, 500.0, 1.0)]
         [InlineData(497.25, 500.0, -2.75)]

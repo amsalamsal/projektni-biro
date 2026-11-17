@@ -69,6 +69,7 @@
     { "key": "line_paint_yellow", "name": "Boja za oznake (žuta)", "color": [236, 196, 40], "nameEn": "Line paint (yellow)" },
     { "key": "line_paint_blue", "name": "Boja za oznake (plava)", "color": [40, 96, 180], "nameEn": "Line paint (blue)" },
     { "key": "bike_crossing_blue", "name": "Biciklistički prijelaz (RAL 5010, 30 % providno)", "color": [0, 79, 124], "alpha": 0.7, "nameEn": "Cycle crossing (RAL 5010, 30 % transparent)" },
+    { "key": "asphalt_bordo_dark", "name": "Tamni bordo asfalt (spuštena biciklistička staza)", "color": [92, 24, 34], "nameEn": "Dark bordeaux asphalt (lowered bike lane)", "texture": "asphalt_bordo_dark.jpg", "textureSize": [1.0, 1.0] },
     { "key": "curb_ramp_dark", "name": "Tamni beton (rampa za invalide)", "color": [104, 104, 102], "nameEn": "Dark concrete (accessible ramp)", "texture": "curb_ramp_dark.jpg", "textureSize": [1.0, 1.0] },
     { "key": "granite_setts", "name": "Granitna kaldrma", "color": [150, 148, 144], "nameEn": "Granite setts", "texture": "granite_setts.jpg", "textureSize": [1.0, 1.0] },
     { "key": "asphalt_new", "name": "Asfalt (Asphalt New)", "color": [58, 58, 60], "sketchup": "Asphalt New", "nameEn": "Asphalt (Asphalt New)", "texture": "asphalt_new.jpg", "textureSize": [1.0, 1.0] },

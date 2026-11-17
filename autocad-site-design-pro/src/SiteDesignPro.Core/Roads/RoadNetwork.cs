@@ -177,6 +177,18 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Position of each ramp of <see cref="Ramps"/> on its kerb line (same order).</summary>
         public List<RoadRampFrame> RampFrames { get; } = new List<RoadRampFrame>();
 
+        /// <summary>
+        /// The bike lane where a driveway crosses it: at the level of the carriageway across the driveway and sloping up
+        /// to the bike lane over <see cref="RoadNetwork.BikeRampLength"/> on both sides (dark bordo).
+        /// </summary>
+        public List<RoadRegion> BikeRamps { get; } = new List<RoadRegion>();
+
+        /// <summary>The kerb beside the sloping part of <see cref="BikeRamps"/>, lowered with it.</summary>
+        public List<RoadRegion> KerbRamps { get; } = new List<RoadRegion>();
+
+        /// <summary>The parts of <see cref="BikeRamps"/> at the level of the carriageway (the slopes rise away from them).</summary>
+        public List<List<Vec2>> BikeRampBase { get; } = new List<List<Vec2>>();
+
         /// <summary>The rounded junction corners added to the road surface (metres), for checks.</summary>
         public List<List<Vec2>> Fillets { get; } = new List<List<Vec2>>();
 
@@ -236,7 +248,7 @@ namespace SiteDesignPro.Core.Roads
         /// Builds the network; <paramref name="crossingRampWidths"/> gives the width of the ramps of each crossing (same
         /// order as <paramref name="crossings"/>; 1,20 m when missing).
         /// </summary>
-        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks, IEnumerable<RoadDriveway>? driveways, IReadOnlyList<double>? crossingRampWidths)
+        public static RoadNetworkResult Build(IReadOnlyList<RoadSpec> input, IEnumerable<IReadOnlyList<Vec2>>? noMarking, IEnumerable<IReadOnlyList<Vec2>>? crossings, IEnumerable<Vec2>? rampMarks, IEnumerable<RoadDriveway>? driveways, IReadOnlyList<double>? crossingRampWidths, IEnumerable<IReadOnlyList<Vec2>>? hatched = null)
         {
             var result = new RoadNetworkResult();
             List<RoadSpec> roads = input.Where(r => r.Axis.Count >= 2).Select(Copy).ToList();
@@ -263,11 +275,27 @@ namespace SiteDesignPro.Core.Roads
             }
 
             roads = roads.Where(r => r.Axis.Count >= 2).ToList();
+
+            // a median that ends along the road is measured from the start of the axis as drawn (joining moves it)
+            var anchors = roads.Where(r => r.MedianEnds).ToDictionary(r => r, r => r.Axis[0]);
             JoinEnds(roads, result.Notes);
             JoinCorners(roads);
             foreach (RoadSpec r in roads)
             {
                 r.Axis = Fillet(r);
+                if (anchors.TryGetValue(r, out Vec2 anchor))
+                {
+                    double s0 = RoadLevels.Project(r.Axis, false, anchor).Station;
+                    double from = s0 + r.MedianTo, to = from + Math.Max(0, r.MedianTaper);
+                    double total = Length(r.Axis, false);
+                    if (from < total - 0.01)
+                    {
+                        r.Axis = InsertStation(InsertStation(r.Axis, from), Math.Min(to, total));
+                        r.TaperFrom = from;
+                        r.TaperTo = Math.Max(from + 1e-3, Math.Min(to, total));
+                    }
+                }
+
                 result.Axes[r.Id] = r.Axis.Select(p => p + origin).ToList();
             }
 
@@ -278,8 +306,8 @@ namespace SiteDesignPro.Core.Roads
             // per-road carriageway and road surface up to the outer edge (lane lines and arrows use them)
             var bands = new Dictionary<RoadLevel, List<PathsD>>
             {
-                [RoadLevel.Carriageway] = roads.Select(r => Band(r.Axis, r.Closed, r.Extent(RoadLevel.Carriageway, true), r.Extent(RoadLevel.Carriageway, false))).ToList(),
-                [RoadLevel.Bike] = roads.Select(r => Band(r.Axis, r.Closed, r.Extent(RoadLevel.Bike, true), r.Extent(RoadLevel.Bike, false))).ToList(),
+                [RoadLevel.Carriageway] = roads.Select(r => RoadBand(r, r.Extent(RoadLevel.Carriageway, true), r.Extent(RoadLevel.Carriageway, false))).ToList(),
+                [RoadLevel.Bike] = roads.Select(r => RoadBand(r, r.Extent(RoadLevel.Bike, true), r.Extent(RoadLevel.Bike, false))).ToList(),
             };
 
             // the kerb line is the carriageway edge: all carriageways, inner junction corners rounded with the kerb radius
@@ -291,7 +319,7 @@ namespace SiteDesignPro.Core.Roads
 
             PathsD raw = Union(allSurface);
             PathsD surface = raw;
-            PathsD junctionCorners = JunctionCorners(bands[RoadLevel.Carriageway], radius);
+            PathsD junctionCorners = JunctionCorners(bands[RoadLevel.Carriageway], radius, roads);
             if (junctionCorners.Count > 0)
             {
                 surface = Clipper.Union(raw, junctionCorners, FillRule.NonZero, Precision);
@@ -394,9 +422,11 @@ namespace SiteDesignPro.Core.Roads
 
             // driveways (garage ramps that start at a road): the kerb, bike lane, sidewalk and edging are opened over the
             // width of the driveway and the carriageway runs through the opening up to the ramp
+            PathsD bikeBefore = bike;
+            var cuts = new PathsD();
             foreach (RoadDriveway dw in driveways ?? Enumerable.Empty<RoadDriveway>())
             {
-                PathD? strip = DrivewayStrip(dw, roads, origin);
+                PathD? strip = DrivewayStrip(dw, roads, origin, out Vec2 roadDir);
                 if (strip == null)
                 {
                     continue;
@@ -415,13 +445,46 @@ namespace SiteDesignPro.Core.Roads
                 edge = Clipper.Difference(edge, opening, FillRule.NonZero, Precision);
                 carriageway = Clipper.Union(carriageway, tab, FillRule.NonZero, Precision);
 
-                // the two corners where the driveway leaves the carriageway are rounded, within the kerb and sidewalk
+                // the two corners where the driveway leaves the carriageway are rounded, within the kerb and sidewalk.
+                // A driveway at an angle to the road gets a larger radius on its sharp side (the vehicle turns more
+                // there), so the turn in and out runs smoothly at any angle
                 PathsD beside = Clipper.Union(Clipper.Union(kerb, bike, FillRule.NonZero, Precision), Clipper.Union(walk, edge, FillRule.NonZero, Precision), FillRule.NonZero, Precision);
                 double dr = Math.Max(DrivewayRadius, Math.Min(MaxDrivewayRadius, dw.Radius));
-                PathsD near = Clipper.InflatePaths(opening, dr * 2.5, JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
-                PathsD corners = Clipper.Difference(Close(carriageway, dr), carriageway, FillRule.NonZero, Precision);
-                corners = Clipper.Intersect(Clipper.Intersect(corners, near, FillRule.NonZero, Precision), beside, FillRule.NonZero, Precision);
-                corners = new PathsD(corners.Where(c => Math.Abs(Clipper.Area(c)) > 0.02));
+                PathsD CornerFill(double radius, double reach)
+                {
+                    PathsD near = Clipper.InflatePaths(opening, reach, JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
+                    PathsD c = Clipper.Difference(Close(carriageway, radius), carriageway, FillRule.NonZero, Precision);
+                    c = Clipper.Intersect(Clipper.Intersect(c, near, FillRule.NonZero, Precision), beside, FillRule.NonZero, Precision);
+                    return new PathsD(c.Where(x => Math.Abs(Clipper.Area(x)) > 0.02));
+                }
+
+                PathsD corners = CornerFill(dr, dr * 2.5);
+                Vec2 ddir = dw.Direction.Normalized();
+                double cosA = ddir.Dot(roadDir);
+                double angle = Math.Acos(Math.Min(1, Math.Abs(cosA)));
+                if (angle < 80 * Math.PI / 180)
+                {
+                    double sin = Math.Sin(Math.Max(angle, 20 * Math.PI / 180));
+                    double ra = Math.Min(MaxDrivewayRadius, dr / (sin * sin));
+                    double tangent = ra / Math.Tan(Math.Max(angle, 20 * Math.PI / 180) / 2);
+                    PathsD sharp = CornerFill(ra, tangent + ra + 1.0);
+
+                    // the sharp corner lies on the side the driveway leans towards
+                    Vec2 lean = roadDir * Math.Sign(cosA);
+                    Vec2 at = dw.Point - origin;
+                    const double Far = 500;
+                    PathD half = Positive(new[] { at - (ddir * Far), at - (ddir * Far) + (lean * Far), at + (ddir * Far) + (lean * Far), at + (ddir * Far) });
+                    PathsD sharpSide = new PathsD { half };
+                    corners = Clipper.Union(
+                        Clipper.Difference(corners, sharpSide, FillRule.NonZero, Precision),
+                        Clipper.Intersect(sharp, sharpSide, FillRule.NonZero, Precision),
+                        FillRule.NonZero,
+                        Precision);
+                    corners = new PathsD(corners.Where(x => Math.Abs(Clipper.Area(x)) > 0.02));
+                }
+
+                cuts.AddRange(opening);
+                cuts.AddRange(corners);
                 if (corners.Count > 0)
                 {
                     kerb = Clipper.Difference(kerb, corners, FillRule.NonZero, Precision);
@@ -432,6 +495,29 @@ namespace SiteDesignPro.Core.Roads
                 }
 
                 result.Driveways++;
+            }
+
+            // where a driveway crosses a bike lane, the bike lane goes on across it at the level of the carriageway
+            // (marked dark bordo, like an accessible ramp) and slopes down to it over 2 m on both sides, the kerb
+            // beside it with it
+            if (cuts.Count > 0 && bikeBefore.Count > 0)
+            {
+                PathsD cutArea = Union(cuts);
+                PathsD across = Clipper.Intersect(bikeBefore, cutArea, FillRule.NonZero, Precision);
+                across = new PathsD(across.Where(x => Math.Abs(Clipper.Area(x)) > 0.05));
+                if (across.Count > 0)
+                {
+                    PathsD reach = Clipper.InflatePaths(across, BikeRampLength, JoinType.Round, EndType.Polygon, 2, Precision, 0.02);
+                    PathsD slopeBike = Clipper.Intersect(bike, reach, FillRule.NonZero, Precision);
+                    PathsD slopeKerb = Clipper.Intersect(kerb, reach, FillRule.NonZero, Precision);
+                    bike = Clipper.Difference(bike, reach, FillRule.NonZero, Precision);
+                    kerb = Clipper.Difference(kerb, reach, FillRule.NonZero, Precision);
+                    carriageway = Clipper.Difference(carriageway, across, FillRule.NonZero, Precision);
+                    PathsD lowered = Union(Clipper.Union(across, slopeBike, FillRule.NonZero, Precision));
+                    result.BikeRamps.AddRange(Regions(lowered, origin));
+                    result.KerbRamps.AddRange(Regions(Union(slopeKerb), origin));
+                    result.BikeRampBase.AddRange(across.Select(q => q.Select(v => new Vec2(v.x, v.y) + origin).ToList()));
+                }
             }
 
             // accessible kerb ramps (120 cm) only where the user wants them: at the ends of each pedestrian crossing and at
@@ -544,9 +630,19 @@ namespace SiteDesignPro.Core.Roads
                 }
             }
 
+            // hatched areas stop the lane lines, but not the lines along a median (they border the hatching)
+            var hatchGaps = new PathsD();
+            foreach (IReadOnlyList<Vec2> area in hatched ?? Enumerable.Empty<IReadOnlyList<Vec2>>())
+            {
+                if (area.Count >= 3)
+                {
+                    hatchGaps.Add(Positive(area.Select(p => p - origin)));
+                }
+            }
+
             for (int i = 0; i < roads.Count; i++)
             {
-                Paint(roads, i, bands, result, origin, gaps);
+                Paint(roads, i, bands, result, origin, gaps, hatchGaps);
             }
 
             return result;
@@ -815,6 +911,68 @@ namespace SiteDesignPro.Core.Roads
             return Clipper.BooleanOp(ClipType.Xor, a, b, FillRule.NonZero, Precision);
         }
 
+        /// <summary>
+        /// The band of a road between offsets from its axis; where the median of the road ends, every offset is pulled
+        /// towards the axis by <see cref="RoadSpec.Shrink"/> (the lanes of both directions come together).
+        /// </summary>
+        internal static PathsD RoadBand(RoadSpec r, double left, double right)
+        {
+            if (double.IsInfinity(r.TaperFrom) || r.Closed)
+            {
+                return Band(r.Axis, r.Closed, left, right);
+            }
+
+            double[] st = Stations(r.Axis);
+            List<Vec2> l = OffsetLine(r.Axis, false, i => left > 1e-9 ? Math.Max(0, left - r.Shrink(st[i])) : 0);
+            List<Vec2> rr = OffsetLine(r.Axis, false, i => right > 1e-9 ? -Math.Max(0, right - r.Shrink(st[i])) : 0);
+            rr.Reverse();
+            var poly = new PathD(l.Concat(rr).Select(p => new PointD(p.X, p.Y)));
+            if (Clipper.Area(poly) < 0)
+            {
+                poly.Reverse();
+            }
+
+            return Clipper.BooleanOp(ClipType.Union, new PathsD { poly }, null, FillRule.Positive, Precision);
+        }
+
+        /// <summary>Distance along the axis of each of its vertices.</summary>
+        internal static double[] Stations(IReadOnlyList<Vec2> axis)
+        {
+            var st = new double[axis.Count];
+            for (int i = 1; i < axis.Count; i++)
+            {
+                st[i] = st[i - 1] + axis[i].DistanceTo(axis[i - 1]);
+            }
+
+            return st;
+        }
+
+        /// <summary>The open axis with a vertex at the station (unchanged when one is already within 1 mm).</summary>
+        internal static List<Vec2> InsertStation(List<Vec2> axis, double station)
+        {
+            double s = 0;
+            for (int i = 1; i < axis.Count; i++)
+            {
+                double l = axis[i].DistanceTo(axis[i - 1]);
+                if (station <= s + l + 1e-9)
+                {
+                    double t = station - s;
+                    if (t < 1e-3 || l - t < 1e-3)
+                    {
+                        return axis;
+                    }
+
+                    var copy = new List<Vec2>(axis);
+                    copy.Insert(i, axis[i - 1] + ((axis[i] - axis[i - 1]) * (t / l)));
+                    return copy;
+                }
+
+                s += l;
+            }
+
+            return axis;
+        }
+
         private static PathsD Union(PathsD paths) => Clipper.BooleanOp(ClipType.Union, paths, null, FillRule.NonZero, Precision);
 
         private static PathD Positive(IEnumerable<Vec2> pts)
@@ -845,6 +1003,9 @@ namespace SiteDesignPro.Core.Roads
         /// edges of a right corner (the arc in a 1,00 × 1,00 m chamfer at 45°).
         /// </summary>
         public const double DrivewayRadius = 1.0;
+
+        /// <summary>Length over which a bike lane slopes down to a driveway that crosses it.</summary>
+        public const double BikeRampLength = 2.0;
 
         public const double MaxDrivewayRadius = 10.0;
 
@@ -1045,8 +1206,9 @@ namespace SiteDesignPro.Core.Roads
         /// The strip of a driveway across the side of the nearest road: from the kerb line out past the outer edge (and
         /// up to the point the driveway starts at), as wide as the driveway. Null when no road is beside it.
         /// </summary>
-        private static PathD? DrivewayStrip(RoadDriveway dw, List<RoadSpec> roads, Vec2 origin)
+        private static PathD? DrivewayStrip(RoadDriveway dw, List<RoadSpec> roads, Vec2 origin, out Vec2 roadDirection)
         {
+            roadDirection = new Vec2(1, 0);
             Vec2 p = dw.Point - origin;
             RoadSpec? road = null;
             Vec2 foot = p, along = new Vec2(1, 0);
@@ -1102,6 +1264,7 @@ namespace SiteDesignPro.Core.Roads
             // along the driveway: from just inside the kerb line to past the outer edge or the start of the driveway
             double from = (kerbLine - 0.02 - best) / cos, to = Math.Max((outer + 0.1 - best) / cos, 0.01);
             Vec2 side = dir.Perp() * (dw.Width / 2);
+            roadDirection = along;
             Vec2 s0 = p + (dir * from), s1 = p + (dir * to);
             return Positive(new[] { s0 - side, s1 - side, s1 + side, s0 + side });
         }
@@ -1124,8 +1287,8 @@ namespace SiteDesignPro.Core.Roads
                     a = Math.Max(0, a - 0.05);
                     b += 0.05;
 
-                    PathsD outer = Union(Band(r.Axis, r.Closed, left ? b : 0, left ? 0 : b));
-                    PathsD inner = Union(Band(r.Axis, r.Closed, left ? a : 0, left ? 0 : a));
+                    PathsD outer = Union(RoadBand(r, left ? b : 0, left ? 0 : b));
+                    PathsD inner = Union(RoadBand(r, left ? a : 0, left ? 0 : a));
                     all.AddRange(Clipper.Difference(outer, inner, FillRule.NonZero, Precision));
                 }
             }
@@ -1606,7 +1769,12 @@ namespace SiteDesignPro.Core.Roads
         /// roads with radius <paramref name="r"/>, kept only around their overlap. Roads that merely run close to each
         /// other (parallel streets, a service road) are not merged.
         /// </summary>
-        private static PathsD JunctionCorners(List<PathsD> perRoad, double r)
+        /// <summary>
+        /// Rounded inner corners of every pair of roads that meet. Where two roads meet at an angle, the corner on the
+        /// obtuse side is rounded with a radius as much larger as the corner is open (the same tangent length as a
+        /// right corner of the kerb radius), so the kerb runs through it smoothly instead of with a kink.
+        /// </summary>
+        private static PathsD JunctionCorners(List<PathsD> perRoad, double r, List<RoadSpec>? roads)
         {
             var fill = new PathsD();
             if (r < 0.05)
@@ -1650,11 +1818,109 @@ namespace SiteDesignPro.Core.Roads
                     PathsD zone = Clipper.InflatePaths(overlap, Math.Max(8 * r, 3), JoinType.Round, EndType.Polygon, 2, Precision, 0.05);
                     var pair = new PathsD(perRoad[i]);
                     pair.AddRange(perRoad[j]);
-                    fill.AddRange(Clipper.Intersect(Close(Union(pair), r), zone, FillRule.NonZero, Precision));
+                    PathsD paired = Union(pair);
+                    fill.AddRange(Clipper.Intersect(Close(paired, r), zone, FillRule.NonZero, Precision));
+                    if (roads != null && i < roads.Count && j < roads.Count)
+                    {
+                        fill.AddRange(ObtuseCorners(paired, overlap, zone, roads[i], roads[j], r));
+                    }
                 }
             }
 
             return fill;
+        }
+
+        /// <summary>
+        /// The corners on the obtuse sides of two roads that meet at an angle, rounded with r × tan(angle / 2) (an
+        /// angle of 150° gets about 3,7 r): only the pieces in the wedges between the two axes wider than 100°.
+        /// </summary>
+        private static PathsD ObtuseCorners(PathsD paired, PathsD overlap, PathsD zone, RoadSpec a, RoadSpec b, double r)
+        {
+            var list = new PathsD();
+            RectD box = Clipper.GetBounds(overlap);
+            var o = new Vec2((box.left + box.right) / 2, (box.top + box.bottom) / 2);
+            Vec2? da = DirectionNear(a, o), db = DirectionNear(b, o);
+            if (da == null || db == null)
+            {
+                return list;
+            }
+
+            double cross = Math.Acos(Math.Min(1, Math.Abs(da.Value.Dot(db.Value)))); // 0..90°
+            double open = Math.PI - cross;
+            if (open < 100 * Math.PI / 180 || open > 170 * Math.PI / 180)
+            {
+                return list;
+            }
+
+            double big = Math.Min(r * Math.Tan(open / 2), 6 * r);
+            if (big < r * 1.1)
+            {
+                return list;
+            }
+
+            var rays = new[] { da.Value, -da.Value, db.Value, -db.Value }.Select(v => Math.Atan2(v.Y, v.X)).OrderBy(x => x).ToList();
+            double Wedge(Vec2 v)
+            {
+                double ang = Math.Atan2(v.Y, v.X);
+                for (int k = 0; k < rays.Count; k++)
+                {
+                    double from = rays[k], to = k + 1 < rays.Count ? rays[k + 1] : rays[0] + (2 * Math.PI);
+                    double x = ang < from ? ang + (2 * Math.PI) : ang;
+                    if (x >= from && x < to)
+                    {
+                        return to - from;
+                    }
+                }
+
+                return 0;
+            }
+
+            PathsD pieces = Clipper.Intersect(Clipper.Difference(Close(paired, big), paired, FillRule.NonZero, Precision), zone, FillRule.NonZero, Precision);
+            foreach (PathD piece in pieces)
+            {
+                double area = Clipper.Area(piece);
+                if (area < 0.02)
+                {
+                    continue;
+                }
+
+                RectD pb = Clipper.GetBounds(new PathsD { piece });
+                var c = new Vec2((pb.left + pb.right) / 2, (pb.top + pb.bottom) / 2);
+                if ((c - o).Length > 1e-6 && Wedge(c - o) > 100 * Math.PI / 180)
+                {
+                    list.Add(piece);
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>Direction of the axis of a road at the point of it nearest to <paramref name="p"/>.</summary>
+        private static Vec2? DirectionNear(RoadSpec r, Vec2 p)
+        {
+            double best = double.MaxValue;
+            Vec2? dir = null;
+            int m = r.Axis.Count;
+            for (int i = 0; i < (r.Closed ? m : m - 1); i++)
+            {
+                Vec2 a = r.Axis[i], b = r.Axis[(i + 1) % m];
+                Vec2 ab = b - a;
+                double l2 = ab.Dot(ab);
+                if (l2 < 1e-12)
+                {
+                    continue;
+                }
+
+                double t = Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
+                double d = (a + (ab * t)).DistanceTo(p);
+                if (d < best)
+                {
+                    best = d;
+                    dir = ab.Normalized();
+                }
+            }
+
+            return dir;
         }
 
         private static Box2 Bounds(PathsD paths)
@@ -1963,7 +2229,7 @@ namespace SiteDesignPro.Core.Roads
 
         // ------------------------------------------------------------------ markings and arrows
 
-        private static void Paint(List<RoadSpec> roads, int i, Dictionary<RoadLevel, List<PathsD>> bands, RoadNetworkResult result, Vec2 origin, PathsD gaps)
+        private static void Paint(List<RoadSpec> roads, int i, Dictionary<RoadLevel, List<PathsD>> bands, RoadNetworkResult result, Vec2 origin, PathsD gaps, PathsD hatchGaps)
         {
             RoadSpec r = roads[i];
 
@@ -1985,6 +2251,14 @@ namespace SiteDesignPro.Core.Roads
                 others.AddRange(Clipper.InflatePaths(gaps, 0.5, JoinType.Miter, EndType.Polygon, 4, Precision));
                 othersWide.AddRange(Clipper.InflatePaths(gaps, 3.0, JoinType.Miter, EndType.Polygon, 4, Precision));
             }
+
+            PathsD othersMedian = Union(others);
+            if (hatchGaps.Count > 0)
+            {
+                others.AddRange(Clipper.InflatePaths(hatchGaps, 0.5, JoinType.Miter, EndType.Polygon, 4, Precision));
+                othersWide.AddRange(Clipper.InflatePaths(hatchGaps, 3.0, JoinType.Miter, EndType.Polygon, 4, Precision));
+            }
+
             others = Union(others);
             othersWide = Union(othersWide);
 
@@ -2025,9 +2299,42 @@ namespace SiteDesignPro.Core.Roads
 
             // a two-way road with two or more lanes in each direction, or with a median, gets continuous centre lines
             bool solidCentre = !r.OneWay && ((r.LanesLeft >= 2 && r.LanesRight >= 2) || r.Median > 0);
+
+            // where the median ends, the lines of both directions come together: the lines along the median end where
+            // it is gone and one continuous centre line goes on from there
+            bool taper = !double.IsInfinity(r.TaperFrom) && !r.Closed;
+            double[] stations = Stations(r.Axis);
+            int taperEnd = taper ? Array.FindIndex(stations, x => x >= r.TaperTo - 1e-6) : -1;
+            if (taper && taperEnd < 0)
+            {
+                taperEnd = stations.Length - 1;
+            }
+
+            var runs = new List<(double Offset, bool Centre, int From, int To, bool Median)>();
             foreach ((double offset, bool centre) in lines)
             {
-                List<Vec2> line = OffsetLine(r.Axis, r.Closed, offset);
+                bool alongMedian = taper && centre && Math.Abs(Math.Abs(offset) - r.HalfMedian) < 1e-9;
+                runs.Add((offset, centre, 0, alongMedian ? taperEnd : stations.Length - 1, alongMedian));
+            }
+
+            if (taper && r.Markings && taperEnd < stations.Length - 1)
+            {
+                runs.Add((0, true, taperEnd, stations.Length - 1, false));
+            }
+
+            foreach ((double offset, bool centre, int fromIndex, int toIndex, bool median) in runs)
+            {
+                List<Vec2> line = taper
+                    ? OffsetLine(r.Axis, false, j => offset > 0 ? Math.Max(0, offset - r.Shrink(stations[j])) : offset < 0 ? Math.Min(0, offset + r.Shrink(stations[j])) : 0)
+                    : OffsetLine(r.Axis, r.Closed, offset);
+                if (taper)
+                {
+                    line = line.GetRange(fromIndex, toIndex - fromIndex + 1);
+                    if (line.Count < 2)
+                    {
+                        continue;
+                    }
+                }
                 var c = new ClipperD(Precision);
                 c.AddOpenSubject(new PathsD { new PathD(line.Select(p => new PointD(p.X, p.Y))) });
                 c.AddClip(inside);
@@ -2036,7 +2343,7 @@ namespace SiteDesignPro.Core.Roads
                 c.Execute(ClipType.Intersection, FillRule.NonZero, closedOut, kept);
                 var c2 = new ClipperD(Precision);
                 c2.AddOpenSubject(kept);
-                c2.AddClip(others);
+                c2.AddClip(median ? othersMedian : others);
                 var openOut = new PathsD();
                 c2.Execute(ClipType.Difference, FillRule.NonZero, closedOut, openOut);
                 foreach (PathD run in openOut)
@@ -2094,9 +2401,10 @@ namespace SiteDesignPro.Core.Roads
 
                 (Vec2 at, Vec2 dir) = PointAt(r.Axis, r.Closed, st);
                 Vec2 nrm = dir.Perp();
+                double pull = r.Shrink(st);
                 foreach ((double offset, bool forward) in lanes)
                 {
-                    Vec2 p = at + (nrm * offset);
+                    Vec2 p = at + (nrm * (offset > 0 ? offset - pull : offset + pull));
                     if (!Inside(p, inside) || Inside(p, othersWide))
                     {
                         continue;
@@ -2107,7 +2415,10 @@ namespace SiteDesignPro.Core.Roads
             }
         }
 
-        internal static List<Vec2> OffsetLine(List<Vec2> axis, bool closed, double offset)
+        internal static List<Vec2> OffsetLine(List<Vec2> axis, bool closed, double offset) => OffsetLine(axis, closed, _ => offset);
+
+        /// <summary>Line beside the axis at an offset given per vertex (left positive), mitred at the vertices.</summary>
+        internal static List<Vec2> OffsetLine(List<Vec2> axis, bool closed, Func<int, double> offsetAt)
         {
             int n = axis.Count;
             var pts = new List<Vec2>(n + 1);
@@ -2118,7 +2429,7 @@ namespace SiteDesignPro.Core.Roads
                 Vec2 n2 = hasNext ? (axis[(i + 1) % n] - axis[i]).Normalized().Perp() : n1;
                 Vec2 m = (n1 + n2).Normalized();
                 double cos = Math.Max(0.25, m.Dot(n1));
-                pts.Add(axis[i] + (m * (offset / cos)));
+                pts.Add(axis[i] + (m * (offsetAt(i) / cos)));
             }
 
             if (closed)

@@ -2,6 +2,21 @@
 
 ## Neobjavljeno
 
+### Inputi 17.11.2026 16:00 – biciklistička staza preko prilaza, krakovi kružnog toka, oznake 5 mm, spojevi
+* **Biciklistička staza preko kolnog prilaza / garažne rampe**: gdje prilaz presijeca trotoar i biciklističku stazu,
+  staza ide preko prilaza u nivou kolovoza, označena **tamnim bordo** (kao rampa za invalide), i spušta se do njega
+  2,00 m sa obje strane; ivičnjak uz taj dio spušta se s njom. U 3D je to kosa površina od +0,15 do kolovoza.
+* **Krakovi kružnog toka**: iza malog razdjelnog otoka trake oba smjera se postepeno spoje, tako da 15 m od vanjske
+  ivice kružnog toka više nema razdjelnog pojasa – smjerove dijeli samo jedna puna linija. Linije uz razdjelni pojas
+  prate suženje, a između njih je šrafirani klin. Ulica dobija parametre „Srednje ostrvo do“ i „Dužina spajanja traka“.
+* **Oznake u 3D su debele 5 mm** i leže na asfaltu (linije, strelice, zebre, šrafure, plava staza uz prijelaz, oznake
+  garažne rampe, parking).
+* **Razdjelni otok u 3D**: ivičnjak okolo (12 cm), unutra trava 3 cm ispod vrha ivičnjaka; zaobljeni krajevi su
+  glatki kao na crtežu (mnogo segmenata).
+* **Spojevi pod uglom**: kad se dvije ulice sijeku pod uglom, ugao na tupoj strani zaobljen je većim radijusom
+  (ivičnjak ide glatko, bez loma); garažna rampa/prilaz pod uglom dobija veći radijus na oštroj strani (vozilo tu
+  više skreće).
+
 ### Visine upisane kao m n.v. i brži uvoz u SketchUp (17.11.)
 * Visina tačke ulice, kote, garažne rampe ili ploče iznad nje upisana kao apsolutna (npr. 501,00 m n.v. kad je
   osnovna visina 500,00) automatski se pretvara u visinu u odnosu na osnovnu (+1,00) i to se ispiše. Postojeći
