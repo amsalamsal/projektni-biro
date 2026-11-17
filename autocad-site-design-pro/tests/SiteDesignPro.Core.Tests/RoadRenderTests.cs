@@ -242,6 +242,20 @@ namespace SiteDesignPro.Core.Tests
             list.Add(("M_prijelaz_na_kraku", new[] { St(-50, 0, 50, 0), St(0, 0, 0, 50), Z(-20, -17, 3, false) }));
             list.Add(("M_prijelaz_staze", new[] { St(bike, -50, 0, 50, 0), Z(10, 13, 3, true), Z(-13, -10, 3, false) }));
 
+            // bike lanes on one side only, ending at the junction corners (they narrow out over a few metres)
+            list.Add(("M_staza_samo_sporedna", new[] { St(-50, 0, 50, 0), St(bike, 0, 0, 0, 50) }));
+            list.Add(("M_staza_glavna_desno", new[] { St(P(N("bikeRight", 1.5)), -50, 0, 50, 0), St(0, 0, 0, -50) }));
+            list.Add(("M_staza_jedna_strana_X", new[] { St(P(N("bikeLeft", 1.5)), -50, 0, 50, 0), St(P(N("bikeLeft", 1.5)), 0, -50, 0, 50) }));
+            list.Add(("M_staza_koso_60", new[] { St(-50, 0, 50, 0), St(bike, 0, 0, 25, 43.3) }));
+
+            // the same drawn far from the origin (state coordinates): nothing may depend on where the drawing lies
+            double gx = 6500000, gy = 4850000;
+            list.Add(("M_drzavne_koordinate", new[]
+            {
+                St(bike, gx - 50, gy, gx + 50, gy), St(bike, gx, gy, gx, gy + 50),
+                R(new[] { gx + 20, gy - 5.0, gx + 20 + (16 * Math.Cos(Math.PI / 4)), gy - 5 - (16 * Math.Sin(Math.PI / 4)) }, null, "straight", true, 3.0, 0.25, false, 0, -3),
+            }));
+
             // odd drawing: a very short street, a street with a doubled point, nearly straight bends
             list.Add(("M_kratka_ulica", new[] { St(-50, 0, 50, 0), St(0, 0, 0, 6) }));
             list.Add(("M_dupla_tacka", new[] { St(-50, 0, 0, 0, 0, 0, 50, 0) }));

@@ -426,6 +426,14 @@ namespace SiteDesignPro.Core.Roads
             PathsD toWalk = Clipper.Union(toBike, walk, FillRule.NonZero, Precision);
             PathsD edge = Clipper.Difference(Union(pieces[RoadLevel.Edge]), toWalk, FillRule.NonZero, Precision);
 
+            // a bike lane that ends at a junction corner, where the road beyond has none, narrows to nothing over a few
+            // metres and the sidewalk and edging follow it in, instead of ending square with a step
+            if (TaperBikeEnds(roads, surface, ref bike, ref walk, ref edge))
+            {
+                toBike = Clipper.Union(toKerb, bike, FillRule.NonZero, Precision);
+                toWalk = Clipper.Union(toBike, walk, FillRule.NonZero, Precision);
+            }
+
             // driveways (garage ramps that start at a road): the kerb, bike lane, sidewalk and edging are opened over the
             // width of the driveway and the carriageway runs through the opening up to the ramp
             PathsD bikeBefore = bike;
@@ -538,7 +546,7 @@ namespace SiteDesignPro.Core.Roads
                     var reach = new PathsD();
                     foreach (PathD piece in across)
                     {
-                        Vec2 c = new Vec2(piece.Average(v => v.x), piece.Average(v => v.y)) + origin;
+                        Vec2 c = new Vec2(piece.Average(v => v.x), piece.Average(v => v.y)); // local, like the road axes
                         Vec2 dir = LaneDirection(roads, c);
                         var side = new Vec2(-dir.Y, dir.X);
                         double t0 = piece.Min(v => (v.x * dir.X) + (v.y * dir.Y)), t1 = piece.Max(v => (v.x * dir.X) + (v.y * dir.Y));
@@ -577,7 +585,7 @@ namespace SiteDesignPro.Core.Roads
                     var baseDirs = new List<Vec2>();
                     foreach (PathD f in flat)
                     {
-                        Vec2 c = new Vec2(f.Average(v => v.x), f.Average(v => v.y)) + origin;
+                        Vec2 c = new Vec2(f.Average(v => v.x), f.Average(v => v.y));
                         bases.Add(f.Select(v => new Vec2(v.x, v.y) + origin).ToList());
                         baseDirs.Add(LaneDirection(roads, c));
                     }
@@ -1080,6 +1088,9 @@ namespace SiteDesignPro.Core.Roads
         /// the driveway is paved from the carriageway up to the ramp.
         /// </summary>
         public const double MaxDrivewayGap = 8.0;
+
+        /// <summary>Length over which a bike lane that ends at a junction corner narrows to nothing.</summary>
+        public const double BikeTaperLength = 6.0;
 
         [ThreadStatic]
         private static Action<RoadLevel, List<List<Vec2>>>? rawBand;
@@ -1979,7 +1990,7 @@ namespace SiteDesignPro.Core.Roads
             return list;
         }
 
-        /// <summary>Direction of the axis of the road nearest to <paramref name="p"/> (world coordinates), at that point.</summary>
+        /// <summary>Direction of the axis of the road nearest to <paramref name="p"/> (local coordinates, like the axes), at that point.</summary>
         private static Vec2 LaneDirection(List<RoadSpec> roads, Vec2 p)
         {
             double best = double.MaxValue;
@@ -2050,6 +2061,154 @@ namespace SiteDesignPro.Core.Roads
             }
 
             return b;
+        }
+
+        /// <summary>
+        /// Finds the square ends of bike lanes at junction corners (the sidewalk goes on beyond them, on a road side
+        /// without a bike lane) and replaces the step with a transition over <see cref="BikeTaperLength"/>: the bike
+        /// lane narrows to nothing, the sidewalk and edging move in with it. True when something changed.
+        /// </summary>
+        private static bool TaperBikeEnds(List<RoadSpec> roads, PathsD surface, ref PathsD bike, ref PathsD walk, ref PathsD edge)
+        {
+            if (bike.Count == 0 || walk.Count == 0)
+            {
+                return false;
+            }
+
+            var tapers = new List<(PathD Clear, PathD Bike, PathD Walk, PathD Edge)>();
+            foreach (PathD path in Union(bike))
+            {
+                int n = path.Count;
+                for (int i = 0; i < n; i++)
+                {
+                    var p = new Vec2(path[i].x, path[i].y);
+                    var q = new Vec2(path[(i + 1) % n].x, path[(i + 1) % n].y);
+                    double bw = p.DistanceTo(q);
+                    if (bw < 0.5 || bw > 3.5)
+                    {
+                        continue;
+                    }
+
+                    // the inner end of the edge lies at the kerb, next to the carriageway
+                    double dp = DistanceTo(surface, p), dq = DistanceTo(surface, q);
+                    if (Math.Min(dp, dq) > 0.4 || Math.Max(dp, dq) < bw * 0.8)
+                    {
+                        continue;
+                    }
+
+                    (Vec2 p0, Vec2 p1) = dp < dq ? (p, q) : (q, p);
+                    Vec2 w = (p1 - p0).Normalized();
+                    Vec2 t = w.Perp();
+                    Vec2 mid = (p0 + p1) * 0.5;
+                    if (InsideAny(bike, mid + (t * 0.05)))
+                    {
+                        t = -t;
+                    }
+
+                    if (InsideAny(bike, mid + (t * 0.05)) || !InsideAny(walk, p0 + (t * 0.3) + (w * 0.3)))
+                    {
+                        continue; // not an end, or nothing but the sidewalk goes on beyond it
+                    }
+
+                    // the road side beyond the end: it has no bike lane
+                    Vec2 probe = p0 + (t * 3);
+                    RoadSpec? road = null;
+                    bool left = false;
+                    double best = double.MaxValue;
+                    foreach (RoadSpec r in roads)
+                    {
+                        for (int k = 0; k + 1 < r.Axis.Count; k++)
+                        {
+                            Vec2 a = r.Axis[k], ab = r.Axis[k + 1] - a;
+                            double l2 = ab.Dot(ab);
+                            if (l2 < 1e-12)
+                            {
+                                continue;
+                            }
+
+                            double u = Math.Max(0, Math.Min(1, (probe - a).Dot(ab) / l2));
+                            Vec2 f = a + (ab * u);
+                            if (f.DistanceTo(probe) < best)
+                            {
+                                (best, road, left) = (f.DistanceTo(probe), r, ab.Cross(probe - a) > 0);
+                            }
+                        }
+                    }
+
+                    if (road == null || (left ? road.BikeLeft : road.BikeRight) > 0.01)
+                    {
+                        continue;
+                    }
+
+                    double sw1 = left ? road.SidewalkLeft : road.SidewalkRight;
+                    double ew1 = sw1 > 0 ? RoadSpec.EdgeWidth : 0;
+
+                    // the corner's own sidewalk and edging at the end: measured across, outwards from the bike lane
+                    double sw0 = Across(walk, p1, w, 4), ew0 = Across(edge, p1 + (w * sw0), w, 0.5);
+                    double len = BikeTaperLength;
+
+                    // the sidewalk beyond must go on for the whole transition
+                    bool room = true;
+                    for (double s = 0.5; s < len; s += 0.5)
+                    {
+                        room &= InsideAny(walk, p0 + (t * s) + (w * Math.Min(0.3, sw1 / 2)));
+                    }
+
+                    if (!room || sw1 < 0.3)
+                    {
+                        continue;
+                    }
+
+                    PathD Local(params (double S, double W)[] pts) => Positive(pts.Select(x => p0 + (t * x.S) + (w * x.W)));
+                    double far = bw + sw0 + ew0 + 0.05;
+                    tapers.Add((
+                        Local((0, -0.01), (len, -0.01), (len, far), (0, far)),
+                        Local((0, 0), (0, bw), (len, 0)),
+                        Local((0, bw), (0, bw + sw0), (len, sw1), (len, 0)),
+                        ew0 > 0.01 || ew1 > 0.01 ? Local((0, bw + sw0), (0, bw + sw0 + ew0), (len, sw1 + ew1), (len, sw1)) : new PathD()));
+                }
+            }
+
+            if (tapers.Count == 0)
+            {
+                return false;
+            }
+
+            var clear = new PathsD(tapers.Select(x => x.Clear));
+            bike = Clipper.Union(Clipper.Difference(bike, clear, FillRule.NonZero, Precision), new PathsD(tapers.Select(x => x.Bike)), FillRule.NonZero, Precision);
+            walk = Clipper.Union(Clipper.Difference(walk, clear, FillRule.NonZero, Precision), new PathsD(tapers.Select(x => x.Walk)), FillRule.NonZero, Precision);
+            edge = Clipper.Union(Clipper.Difference(edge, clear, FillRule.NonZero, Precision), new PathsD(tapers.Where(x => x.Edge.Count > 0).Select(x => x.Edge)), FillRule.NonZero, Precision);
+            return true;
+        }
+
+        /// <summary>How far a surface reaches from <paramref name="p"/> in direction <paramref name="dir"/> (2 cm steps, at most <paramref name="max"/>).</summary>
+        private static double Across(PathsD paths, Vec2 p, Vec2 dir, double max)
+        {
+            double d = 0;
+            while (d < max && InsideAny(paths, p + (dir * (d + 0.01))))
+            {
+                d += 0.02;
+            }
+
+            return d < 0.03 ? 0 : d;
+        }
+
+        private static double DistanceTo(PathsD paths, Vec2 p)
+        {
+            double best = double.MaxValue;
+            foreach (PathD path in paths)
+            {
+                for (int i = 0, j = path.Count - 1; i < path.Count; j = i++)
+                {
+                    var a = new Vec2(path[j].x, path[j].y);
+                    Vec2 ab = new Vec2(path[i].x, path[i].y) - a;
+                    double l2 = ab.Dot(ab);
+                    double u = l2 < 1e-12 ? 0 : Math.Max(0, Math.Min(1, (p - a).Dot(ab) / l2));
+                    best = Math.Min(best, p.DistanceTo(a + (ab * u)));
+                }
+            }
+
+            return best;
         }
 
         /// <summary>Removes zero-width spikes and slits (an opening of 1 mm).</summary>
