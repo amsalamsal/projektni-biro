@@ -526,46 +526,58 @@ namespace SiteDesignPro.Core.Roads
                 across = new PathsD(across.Where(x => Math.Abs(Clipper.Area(x)) > 0.05));
                 if (across.Count > 0)
                 {
-                    // the slopes run along the bike lane: each crossing is swept 2 m forwards and backwards along the
-                    // lane, so a slope is one even plane (also where the driveway meets the road at an angle)
+                    // the flat part ends square to the bike lane and the slopes run along it, 2 m on both sides: each
+                    // is one even plane, at any angle of the driveway. The kerb beside the slopes is lowered with them.
+                    var flat = new PathsD();
                     var reach = new PathsD();
-                    var dirs = new List<Vec2>();
                     foreach (PathD piece in across)
                     {
                         Vec2 c = new Vec2(piece.Average(v => v.x), piece.Average(v => v.y)) + origin;
                         Vec2 dir = LaneDirection(roads, c);
-                        dirs.Add(dir);
-                        // sideways it reaches the kerb beside the bike lane (only the bike lane and the kerb are
-                        // taken from it)
                         var side = new Vec2(-dir.Y, dir.X);
-                        var pts = new List<Vec2>();
-                        foreach (PointD v in piece)
+                        double t0 = piece.Min(v => (v.x * dir.X) + (v.y * dir.Y)), t1 = piece.Max(v => (v.x * dir.X) + (v.y * dir.Y));
+                        double w0 = piece.Min(v => (v.x * side.X) + (v.y * side.Y)), w1 = piece.Max(v => (v.x * side.X) + (v.y * side.Y));
+                        PathD Box(double ta, double tb, double wa, double wb) => Positive(new[]
                         {
-                            var q = new Vec2(v.x, v.y);
-                            foreach (double a in new[] { -1.0, 0.0, 1.0 })
-                            {
-                                foreach (double b in new[] { -1.0, 0.0, 1.0 })
-                                {
-                                    pts.Add(q + (dir * (a * BikeRampLength)) + (side * (b * BikeRampLength)));
-                                }
-                            }
+                            (dir * ta) + (side * wa), (dir * tb) + (side * wa), (dir * tb) + (side * wb), (dir * ta) + (side * wb),
+                        });
+                        PathsD square = Clipper.Intersect(bikeBefore, new PathsD { Box(t0, t1, w0 - 0.05, w1 + 0.05) }, FillRule.NonZero, Precision);
+                        if (onRamps.Count > 0)
+                        {
+                            square = Clipper.Difference(square, Union(onRamps), FillRule.NonZero, Precision);
                         }
 
-                        reach.Add(Positive(Hull(pts)));
+                        foreach (PathD part in square.Where(x => Math.Abs(Clipper.Area(x)) > 0.05))
+                        {
+                            flat.Add(part);
+                        }
+
+                        reach.Add(Box(t0 - BikeRampLength, t1 + BikeRampLength, w0 - BikeRampLength, w1 + BikeRampLength));
                     }
 
+                    flat = Union(flat);
                     reach = Union(reach);
-                    PathsD slopeBike = Clipper.Intersect(bike, reach, FillRule.NonZero, Precision);
+                    PathsD slopeBike = Clipper.Difference(Clipper.Intersect(bike, reach, FillRule.NonZero, Precision), flat, FillRule.NonZero, Precision);
                     PathsD slopeKerb = Clipper.Intersect(kerb, reach, FillRule.NonZero, Precision);
-                    bike = Clipper.Difference(bike, reach, FillRule.NonZero, Precision);
+                    bike = Clipper.Difference(Clipper.Difference(bike, reach, FillRule.NonZero, Precision), flat, FillRule.NonZero, Precision);
                     kerb = Clipper.Difference(kerb, reach, FillRule.NonZero, Precision);
-                    carriageway = Clipper.Difference(carriageway, across, FillRule.NonZero, Precision);
+                    carriageway = Clipper.Difference(carriageway, flat, FillRule.NonZero, Precision);
+
                     // the flat part and each slope are regions of their own, so each is one plane in 3D
-                    result.BikeRamps.AddRange(Regions(Union(across), origin));
-                    result.BikeRamps.AddRange(Regions(Union(Clipper.Difference(slopeBike, across, FillRule.NonZero, Precision)), origin));
+                    result.BikeRamps.AddRange(Regions(flat, origin));
+                    result.BikeRamps.AddRange(Regions(Union(slopeBike), origin));
                     result.KerbRamps.AddRange(Regions(Union(slopeKerb), origin));
-                    result.BikeRampBase.AddRange(across.Select(q => q.Select(v => new Vec2(v.x, v.y) + origin).ToList()));
-                    result.BikeRampDirections.AddRange(dirs);
+                    var bases = new List<List<Vec2>>();
+                    var baseDirs = new List<Vec2>();
+                    foreach (PathD f in flat)
+                    {
+                        Vec2 c = new Vec2(f.Average(v => v.x), f.Average(v => v.y)) + origin;
+                        bases.Add(f.Select(v => new Vec2(v.x, v.y) + origin).ToList());
+                        baseDirs.Add(LaneDirection(roads, c));
+                    }
+
+                    result.BikeRampBase.AddRange(bases);
+                    result.BikeRampDirections.AddRange(baseDirs);
                 }
             }
 
@@ -1974,38 +1986,6 @@ namespace SiteDesignPro.Core.Roads
 
             return dir;
         }
-
-        /// <summary>Convex hull of points (counter-clockwise).</summary>
-        private static List<Vec2> Hull(List<Vec2> pts)
-        {
-            List<Vec2> p = pts.OrderBy(v => v.X).ThenBy(v => v.Y).ToList();
-            if (p.Count < 3)
-            {
-                return p;
-            }
-
-            var h = new List<Vec2>();
-            for (int pass = 0; pass < 2; pass++)
-            {
-                int start = h.Count;
-                foreach (Vec2 v in p)
-                {
-                    while (h.Count >= start + 2 && Cross(h[h.Count - 2], h[h.Count - 1], v) <= 1e-12)
-                    {
-                        h.RemoveAt(h.Count - 1);
-                    }
-
-                    h.Add(v);
-                }
-
-                h.RemoveAt(h.Count - 1);
-                p.Reverse();
-            }
-
-            return h;
-        }
-
-        private static double Cross(Vec2 o, Vec2 a, Vec2 b) => ((a.X - o.X) * (b.Y - o.Y)) - ((a.Y - o.Y) * (b.X - o.X));
 
         /// <summary>Direction of the axis of a road at the point of it nearest to <paramref name="p"/>.</summary>
         private static Vec2? DirectionNear(RoadSpec r, Vec2 p)

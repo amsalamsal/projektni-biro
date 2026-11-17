@@ -142,6 +142,117 @@ namespace SiteDesignPro.Core.Tests
             return list.Select(x => new object[] { x.Item1, x.Item2 });
         }
 
+        /// <summary>
+        /// Every combination that matters, generated: junctions at all angles, every street option, curves, garage ramps
+        /// at all angles on both sides (in and beyond the sidewalk), roundabouts and pedestrian crossings.
+        /// </summary>
+        public static IEnumerable<object[]> Matrix()
+        {
+            var bike = P(N("bikeLeft", 1.5), N("bikeRight", 1.5));
+            var list = new List<(string, SiteElement[])>();
+            (double, double) Dir(double deg) => (Math.Cos(deg * Math.PI / 180), Math.Sin(deg * Math.PI / 180));
+
+            // T and X junctions at every angle, without and with bike lanes
+            foreach (int a in new[] { 20, 30, 45, 60, 75, 90, 105, 120, 135, 150, 160 })
+            {
+                (double c, double s) = Dir(a);
+                list.Add(("M_T" + a, new[] { St(-70, 0, 70, 0), St(0, 0, 50 * c, 50 * s) }));
+                list.Add(("M_T" + a + "_staze", new[] { St(bike, -70, 0, 70, 0), St(bike, 0, 0, 50 * c, 50 * s) }));
+            }
+
+            foreach (int a in new[] { 30, 45, 60, 90 })
+            {
+                (double c, double s) = Dir(a);
+                list.Add(("M_X" + a, new[] { St(-70, 0, 70, 0), St(-50 * c, -50 * s, 50 * c, 50 * s) }));
+                list.Add(("M_X" + a + "_staze", new[] { St(bike, -70, 0, 70, 0), St(bike, -50 * c, -50 * s, 50 * c, 50 * s) }));
+            }
+
+            // every street option on a T
+            var options = new List<(string, (string, ParamValue)[])>
+            {
+                ("trake_2", P(N("lanesLeft", 2), N("lanesRight", 2))),
+                ("trake_3", P(N("lanesLeft", 3), N("lanesRight", 3))),
+                ("jednosmjerna_2", P(("direction", ParamValue.Of("one_way")), N("lanesRight", 2))),
+                ("razdjelni_2", P(N("median", 2))),
+                ("bez_trotoara", P(N("sidewalkLeft", 0), N("sidewalkRight", 0))),
+                ("trotoar_3", P(N("sidewalkLeft", 3), N("sidewalkRight", 3))),
+                ("staza_lijevo", P(N("bikeLeft", 1.5))),
+                ("staza_bez_trotoara", P(N("bikeLeft", 1.5), N("bikeRight", 1.5), N("sidewalkLeft", 0), N("sidewalkRight", 0))),
+                ("traka_2_75", P(N("laneWidth", 2.75))),
+                ("traka_3_5", P(N("laneWidth", 3.5))),
+                ("radijus_1", P(N("cornerRadius", 1))),
+                ("radijus_15", P(N("cornerRadius", 15))),
+            };
+            foreach ((string n, (string, ParamValue)[] p) in options)
+            {
+                list.Add(("M_opcija_" + n, new[] { St(p, -70, 0, 70, 0), St(p, 0, 0, 0, 50) }));
+            }
+
+            // curves (axis every 10 degrees) and a T on the curve
+            foreach (int r in new[] { 20, 50 })
+            {
+                var arc = new List<double>();
+                for (int k = 0; k <= 9; k++)
+                {
+                    arc.Add(r * Math.Sin(k * 10 * Math.PI / 180));
+                    arc.Add(r - (r * Math.Cos(k * 10 * Math.PI / 180)));
+                }
+
+                list.Add(("M_krivina_R" + r, new[] { St(arc.ToArray()) }));
+                list.Add(("M_krivina_R" + r + "_T", new[] { St(bike, arc.ToArray()), St(r * Math.Sin(Math.PI / 4), r - (r * Math.Cos(Math.PI / 4)), r * Math.Sin(Math.PI / 4) + 30, r - (r * Math.Cos(Math.PI / 4)) - 30) }));
+            }
+
+            // garage ramps at every angle, on both sides, starting in the sidewalk or just beyond it, with and without bike lanes
+            foreach (int a in new[] { 30, 45, 60, 90, 120, 135, 150 })
+            {
+                (double c, double s) = Dir(a);
+                foreach (int side in new[] { 1, -1 })
+                {
+                    foreach (double y0 in new[] { 5.0, 7.5 })
+                    {
+                        string n = "M_rampa_" + a + (side > 0 ? "_lijevo" : "_desno") + (y0 < 6 ? "_u_trotoaru" : "_iza");
+                        list.Add((n + "_staze", new[] { St(bike, -50, 0, 50, 0), R(new[] { 0.0, side * y0, 16 * c, side * (y0 + (16 * s)) }, null, "straight", true, 3.0, 0.25, false, 0, -3) }));
+                        if (a == 45 || a == 90)
+                        {
+                            list.Add((n, new[] { St(-50, 0, 50, 0), R(new[] { 0.0, side * y0, 16 * c, side * (y0 + (16 * s)) }, null, "straight", false, 3.0, 0.25, false, 0, -3) }));
+                        }
+                    }
+                }
+            }
+
+            // a ramp that ends at the road (driving up), a ramp next to a junction, two ramps side by side
+            list.Add(("M_rampa_izlaz_gore", new[] { St(bike, -50, 0, 50, 0), R(new[] { 12.0, -22, 0, -6 }, null, "straight", true, 3.0, 0.25, false, -3, 0) }));
+            list.Add(("M_rampa_uz_raskrsnicu", new[] { St(bike, -50, 0, 50, 0), St(bike, 0, 0, 0, -45), R(new[] { 11.0, -6.5, 11, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3) }));
+            list.Add(("M_dvije_rampe_blizu", new[] { St(bike, -50, 0, 50, 0), R(new[] { -4.0, -6.5, -4, -24 }, null, "straight", false, 3.0, 0.25, false, 0, -3), R(new[] { 4.0, -6.5, 4, -24 }, null, "straight", false, 3.0, 0.25, false, 0, -3) }));
+
+            // roundabouts with 3 and 5 arms and bike lanes
+            foreach (int arms in new[] { 3, 5 })
+            {
+                var e = new List<SiteElement> { Ring(17, N("sidewalkRight", 2)) };
+                for (int k = 0; k < arms; k++)
+                {
+                    (double c, double s) = Dir((360.0 / arms * k) + 10);
+                    e.Add(St(bike, 20 * c, 20 * s, 60 * c, 60 * s));
+                }
+
+                list.Add(("M_kruzni_" + arms + "_kraka", e.ToArray()));
+            }
+
+            // pedestrian crossings on a junction arm and on a street with bike lanes
+            list.Add(("M_prijelaz_na_kraku", new[] { St(-50, 0, 50, 0), St(0, 0, 0, 50), Z(-20, -17, 3, false) }));
+            list.Add(("M_prijelaz_staze", new[] { St(bike, -50, 0, 50, 0), Z(10, 13, 3, true), Z(-13, -10, 3, false) }));
+
+            // odd drawing: a very short street, a street with a doubled point, nearly straight bends
+            list.Add(("M_kratka_ulica", new[] { St(-50, 0, 50, 0), St(0, 0, 0, 6) }));
+            list.Add(("M_dupla_tacka", new[] { St(-50, 0, 0, 0, 0, 0, 50, 0) }));
+            list.Add(("M_skoro_ravno", new[] { St(-50, 0, 0, 0.05, 50, 0) }));
+            return list.Select(x => new object[] { x.Item1, x.Item2 });
+        }
+
+        [Theory]
+        [MemberData(nameof(Matrix))]
+        public void MatrixScenario(string name, SiteElement[] elements) => Scenario(name, elements);
+
         [Theory]
         [MemberData(nameof(Scenarios))]
         public void Scenario(string name, SiteElement[] elements)
@@ -171,6 +282,15 @@ namespace SiteDesignPro.Core.Tests
             {
                 File.AppendAllText(Path.Combine(dir, "problemi.txt"), name + ": " + string.Join("; ", issues) + "\n");
             }
+
+            // the rules every network keeps
+            List<string> broken = RoadInvariants.Check(elements, res, Cat);
+            if (!string.IsNullOrEmpty(dir) && broken.Count > 0)
+            {
+                File.AppendAllText(Path.Combine(dir, "pravila.txt"), name + ": " + string.Join("; ", broken) + "\n");
+            }
+
+            Assert.True(broken.Count == 0, name + ": " + string.Join("; ", broken));
         }
 
         /// <summary>A pedestrian crossing across a street along the X axis (its stripes from x0 to x1), with or without a cycle strip.</summary>
