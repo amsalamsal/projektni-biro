@@ -430,6 +430,7 @@ namespace SiteDesignPro.Core.Roads
             // width of the driveway and the carriageway runs through the opening up to the ramp
             PathsD bikeBefore = bike;
             var cuts = new PathsD();
+            var onRamps = new PathsD();
             foreach (RoadDriveway dw in driveways ?? Enumerable.Empty<RoadDriveway>())
             {
                 PathD? strip = DrivewayStrip(dw, roads, origin, out Vec2 roadDir);
@@ -449,6 +450,7 @@ namespace SiteDesignPro.Core.Roads
                     // nothing of the road (kerb, bike lane, sidewalk, edging) lies on the ramp itself: a ramp at an
                     // angle to the road reaches into the sidewalk with its corner
                     clear = Clipper.Union(opening, onRamp, FillRule.NonZero, Precision);
+                    onRamps.AddRange(onRamp);
                 }
 
                 kerb = Clipper.Difference(kerb, clear, FillRule.NonZero, Precision);
@@ -516,6 +518,11 @@ namespace SiteDesignPro.Core.Roads
             {
                 PathsD cutArea = Union(cuts);
                 PathsD across = Clipper.Intersect(bikeBefore, cutArea, FillRule.NonZero, Precision);
+                if (onRamps.Count > 0)
+                {
+                    across = Clipper.Difference(across, Union(onRamps), FillRule.NonZero, Precision); // not on the ramp itself
+                }
+
                 across = new PathsD(across.Where(x => Math.Abs(Clipper.Area(x)) > 0.05));
                 if (across.Count > 0)
                 {
