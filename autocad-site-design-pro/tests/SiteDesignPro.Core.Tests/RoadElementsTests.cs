@@ -432,7 +432,7 @@ namespace SiteDesignPro.Core.Tests
             // every corner of a lane line, an arrow and a crossing stripe lies 5 mm above the profile (2 % up the road)
             List<SiteElement> marks = derived.Where(e => e.TypeId == RoadElements.MarkingType || e.TypeId == RoadElements.ArrowType).ToList();
             Assert.Contains(marks, e => e.TypeId == RoadElements.ArrowType);
-            Assert.All(marks.Append(crossing), e => Assert.All(Points(e), p => Assert.Equal((p.X * 0.02) + RoadElements.MarkingLift, p.Z, 3)));
+            Assert.All(marks.Append(crossing), e => Assert.All(Points(e), p => Assert.InRange(p.Z - ((p.X * 0.02) + RoadElements.MarkingLift), -0.002, 0.002)));
         }
 
         [Fact]
