@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Clipper2Lib;
 using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Geometry;
 using SiteDesignPro.Core.Model;
@@ -350,15 +351,15 @@ namespace SiteDesignPro.Core.Roads
         {
             List<SiteElement> all = elements as List<SiteElement> ?? elements.ToList();
             List<RoadSpec> specs = Specs(all, catalog, unitsPerMeter);
-            // the ramps of a crossing: 1,20 m in its middle; with a cycle strip 2,00 m, over the strip and the first
-            // 1,20 m of the crossing beside it
+            // the ramps of a crossing: 1,20 m in its middle; with a cycle strip 2,00 m, starting where the strip ends
+            // and running towards the stripes (over the first 2,00 m of the crossing)
             var crossings = new List<IReadOnlyList<Vec2>>();
             var rampWidths = new List<double>();
             foreach (SiteElement e in all.Where(x => x.TypeId == CrossingType && x.Geometry is PolygonGeometry))
             {
                 List<Vec2> outer = Outer((PolygonGeometry)e.Geometry, unitsPerMeter);
                 bool strip = HasBikeStrip(e) && outer.Count >= 3;
-                crossings.Add(strip ? CrossingBox(outer, -BikeStripWidth, RoadNetwork.RampWidth) : outer);
+                crossings.Add(strip ? CrossingBox(outer, 0, RoadNetwork.RampWidth + BikeStripWidth) : outer);
                 rampWidths.Add(strip ? RoadNetwork.RampWidth + BikeStripWidth : RoadNetwork.RampWidth);
             }
 
@@ -508,12 +509,34 @@ namespace SiteDesignPro.Core.Roads
 
             // with elevation marks the surfaces follow the road profiles in 3D (triangles on a 0,5 m grid)
             List<RoadProfile>? profiles = LevelMarks(all).Count > 0 ? Profiles(all, catalog) : null;
+
+            // roundabouts: the kerb between the ring and its apron lies at the level of the asphalt (mountable)
+            var aprons = new List<(Vec2 Centre, double Radius)>();
+            foreach (SiteElement e in all.Where(x => x.TypeId == ApronType && x.Geometry is PolygonGeometry))
+            {
+                List<Vec2> ring = Outer((PolygonGeometry)e.Geometry, 1.0);
+                if (ring.Count >= 3)
+                {
+                    var centre = new Vec2(ring.Average(q => q.X), ring.Average(q => q.Y));
+                    aprons.Add((centre, ring.Max(q => q.DistanceTo(centre))));
+                }
+            }
+
+            bool AtApron(RoadRegion region) => aprons.Any(a =>
+                region.Outer.Points.All(q => q.DistanceTo(a.Centre) <= a.Radius + RoadSpec.KerbWidth + 0.1));
+
             foreach (KeyValuePair<RoadLevel, List<RoadRegion>> band in res.Bands)
             {
                 (string type, string name) = LevelTypes[band.Key];
                 foreach (RoadRegion region in band.Value)
                 {
-                    Add(type, name, new PolygonGeometry(ToRing(region.Outer, z), region.Holes.Select(h => ToRing(h, z)).ToList()));
+                    bool flush = band.Key == RoadLevel.Kerb && aprons.Count > 0 && AtApron(region);
+                    Add(type, flush ? "Ivičnjak uz prijelazni prsten (u nivou asfalta)" : name, new PolygonGeometry(ToRing(region.Outer, z), region.Holes.Select(h => ToRing(h, z)).ToList()));
+                    if (flush)
+                    {
+                        list[list.Count - 1].Parameters["topOffset"] = ParamValue.Of(0.0);
+                    }
+
                     if (profiles != null)
                     {
                         list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(RoadLevels.Drape(region, profiles)));
@@ -533,6 +556,7 @@ namespace SiteDesignPro.Core.Roads
                 // the lowered kerb and its flares, painted yellow
                 Add(RampType, "Spušteni ivičnjak rampe", new PolygonGeometry(ToRing(res.Ramps[i], z)));
                 list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(kerb));
+                list[list.Count - 1].Custom["openSurface"] = ParamValue.Of(true);
                 list[list.Count - 1].Parameters["material"] = ParamValue.Of("line_paint_yellow");
             }
 
@@ -560,6 +584,11 @@ namespace SiteDesignPro.Core.Roads
             foreach (RoadMarking m in res.Markings)
             {
                 Add(MarkingType, m.Centre ? "Razdjelna linija" : "Linija traka", new PathGeometry(new Ring(m.Points.Select(p => p.WithZ(z)).ToList()), false), ("width", 0.12));
+                if (profiles != null)
+                {
+                    PathsD band = Clipper.InflatePaths(new PathsD { new PathD(m.Points.Select(p => new PointD(p.X, p.Y))) }, 0.06, JoinType.Miter, EndType.Butt, 4, 4);
+                    list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(DrapeOn(band, profiles, MarkingLift)));
+                }
             }
 
             foreach (RoadArrow a in res.Arrows)
@@ -567,9 +596,56 @@ namespace SiteDesignPro.Core.Roads
                 // the arrow element starts at its tail; the network gives the centre of a 5 m arrow
                 Vec2 tail = a.Position - (new Vec2(Math.Cos(a.Angle), Math.Sin(a.Angle)) * 2.5);
                 Add(ArrowType, "Strelica smjera", new PointGeometry(tail.WithZ(z), a.Angle), ("length", 5.0), ("width", 0.64), ("shaftWidth", 0.18));
+                if (profiles != null)
+                {
+                    var outline = new PathsD { new PathD(a.Outline().Select(p => new PointD(p.X, p.Y))) };
+                    list[list.Count - 1].Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(DrapeOn(outline, profiles, MarkingLift)));
+                }
+            }
+
+            // on roads with heights the stripes of the crossings and hatched areas lie on the sloped surface too
+            if (profiles != null)
+            {
+                foreach (SiteElement e in all.Where(x => (x.TypeId == CrossingType || x.TypeId == HatchedAreaType) && x.Geometry is PolygonGeometry))
+                {
+                    List<Vec2> outer = Outer((PolygonGeometry)e.Geometry, 1.0);
+                    double stripe = e.Parameters.Number("stripeWidth", e.TypeId == CrossingType ? 0.5 : 0.3);
+                    double gap = e.Parameters.Number("gapWidth", e.TypeId == CrossingType ? 0.5 : 1.0);
+                    var bars = new PathsD(StripeBars(outer, stripe, gap).Select(b => new PathD(b.Select(p => new PointD(p.X, p.Y)))));
+                    List<Vec3[]> tris = DrapeOn(bars, profiles, MarkingLift);
+                    if (tris.Count > 0)
+                    {
+                        e.Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(tris));
+                    }
+                }
             }
 
             return list;
+        }
+
+        /// <summary>Element type of the mountable apron around the island of a roundabout.</summary>
+        public const string ApronType = "road.roundabout_apron";
+
+        /// <summary>Height of painted markings above the road surface in 3D.</summary>
+        public const double MarkingLift = 0.005;
+
+        /// <summary>Triangles of flat shapes (metres) laid on the road surfaces with heights, lifted a little above them.</summary>
+        private static List<Vec3[]> DrapeOn(PathsD shapes, IReadOnlyList<RoadProfile> profiles, double lift)
+        {
+            var tris = new List<Vec3[]>();
+            PathsD union = Clipper.Union(shapes, FillRule.NonZero, 4);
+            foreach (PathD path in union.Where(q => q.Count >= 3 && Clipper.Area(q) > 1e-6))
+            {
+                var outer = new RoadLoop(path.Select(q => new Vec2(q.x, q.y)).ToList(), path.Select(_ => 0.0).ToList());
+                var holes = union.Where(q => q.Count >= 3 && Clipper.Area(q) < -1e-6 && Clipper.PointInPolygon(q[0], path) != PointInPolygonResult.IsOutside)
+                    .Select(q => new RoadLoop(q.Select(v => new Vec2(v.x, v.y)).ToList(), q.Select(_ => 0.0).ToList())).ToList();
+                foreach (Vec3[] t in RoadLevels.Drape(new RoadRegion(outer, holes, Clipper.Area(path)), profiles))
+                {
+                    tris.Add(t.Select(v => new Vec3(v.X, v.Y, v.Z + lift)).ToArray());
+                }
+            }
+
+            return tris;
         }
 
         /// <summary>The elements together with what their roads generate.</summary>

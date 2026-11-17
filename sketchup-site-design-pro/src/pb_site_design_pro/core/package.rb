@@ -27,7 +27,7 @@ module ProjektniBiro
       end
     end
 
-    Material = Struct.new(:key, :name, :color, :alpha, :texture, :texture_size)
+    Material = Struct.new(:key, :name, :color, :alpha, :texture, :texture_size, :library)
 
     Asset = Struct.new(:id, :path, :kind, :sha256)
 

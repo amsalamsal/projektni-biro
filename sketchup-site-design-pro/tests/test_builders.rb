@@ -5,8 +5,8 @@ require_relative 'test_helper'
 class TestBuilders < Minitest::Test
   include SdpTest
 
-  def build_one(type, parameters: {}, geometry: nil, lod: 'standard')
-    pkg, = package([{ type: type, parameters: parameters, geometry: geometry }])
+  def build_one(type, parameters: {}, geometry: nil, lod: 'standard', custom: nil)
+    pkg, = package([{ type: type, parameters: parameters, geometry: geometry, custom: custom }])
     canvas, ctx = build_all(pkg, lod: lod)
     node = canvas.top_level.first
     [canvas, node, ctx, pkg.elements.first]
@@ -298,5 +298,38 @@ class TestBuilders < Minitest::Test
     ElementBuilder.build(pkg.elements.first, canvas, ctx)
     assert(ctx.report.issues.any? { |i| i.code == 'SDP-M001' })
     assert_equal 'default', canvas.find('Površina').material
+  end
+
+  # A kerb on a street with heights comes as top triangles; it is built as a closed body with sides down to its
+  # thickness, so it meets the asphalt like a flat kerb.
+  def test_draped_surface_is_a_closed_body_with_sides
+    tris = '0,0,0.5;2,0,0.6;2,1,0.6|0,0,0.5;2,1,0.6;0,1,0.5' # one counter-clockwise, the other too
+    canvas, = build_one('road.street_kerb', custom: { 'triangles' => tris })
+    mesh = canvas.find_all { |n| n.kind == :mesh }.first
+    refute_nil mesh
+    assert_nil canvas.send(:mesh_manifold_error, mesh.polygons)
+    zs = mesh.polygons.flatten(1).map { |p| p[2] }
+    assert_in_delta 0.6 + 0.15, zs.max, 1e-9            # top: the triangles plus the kerb's top offset
+    assert_in_delta 0.5 + 0.15 - 0.35, zs.min, 1e-9     # bottom: the thickness lower
+    assert_equal 2 + 2 + 4, mesh.polygons.length        # top, bottom and four sides
+  end
+
+  def test_open_surface_keeps_its_triangles
+    tris = '0,0,0;1,0,0;1,1,0'
+    canvas, = build_one('road.garage_ramp_surface', custom: { 'triangles' => tris, 'openSurface' => true })
+    mesh = canvas.find_all { |n| n.kind == :mesh }.first
+    assert_equal 1, mesh.polygons.length
+  end
+
+  # Markings on roads with heights come as triangles at their height; they are drawn as they come.
+  def test_draped_marking_and_arrow_follow_their_triangles
+    tris = '0,0,1.205;3,0,1.235;3,0.12,1.235|0,0,1.205;3,0.12,1.235;0,0.12,1.205'
+    %w[road.marking_line road.arrow road.pedestrian_crossing].each do |type|
+      canvas, = build_one(type, custom: { 'triangles' => tris })
+      meshes = canvas.find_all { |n| n.kind == :mesh }
+      assert_equal 1, meshes.length, type
+      assert_equal 'line_paint_white', meshes.first.material, type
+      assert_in_delta 1.235, meshes.first.polygons.flatten(1).map { |p| p[2] }.max, 1e-9, type
+    end
   end
 end

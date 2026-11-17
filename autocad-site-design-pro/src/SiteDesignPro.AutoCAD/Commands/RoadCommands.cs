@@ -623,7 +623,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 try
                 {
                     Hatch h = RegionHatch(new RoadRegion(ramp, new List<RoadLoop>(), 0), k);
-                    Add(h, "rampa", Color.FromRgb(90, 140, 210), 20);
+                    Add(h, "rampa", Color.FromRgb(42, 42, 42), 15); // darker grey than the sidewalk
                     Add(LoopPolyline(ramp, k), "rampa:rub", null, 0);
                 }
                 catch (Autodesk.AutoCAD.Runtime.Exception)

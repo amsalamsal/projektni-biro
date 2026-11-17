@@ -68,6 +68,7 @@ module SdpTest
             'builder' => td['builder'], 'name' => td['name'], 'revision' => 1, 'contentHash' => s[:hash] || ('0' * 64),
             'modelGroup' => td['modelGroup'], 'parameters' => s[:parameters] || {} }
       h['label'] = s[:label] if s[:label]
+      h['custom'] = s[:custom] if s[:custom]
       h
     end
     geoms = specs.zip(elements).map do |s, e|

@@ -134,7 +134,7 @@ namespace SiteDesignPro.Core.Tests
                 ("44_prijelaz_staza_obilazi_rampu", new[] { St(P(N("bikeLeft", 1.5), N("bikeRight", 1.5), N("sidewalkLeft", 2.4), N("sidewalkRight", 1.6)), -30, 0, 30, 0), Z(-2, 2, 3, false) }),
                 ("45_prijelaz_s_biciklistickom_stazom", new[] { St(bike, -30, 0, 30, 0), Z(-2, 2, 3, true) }),
                 ("46_prijelaz_uzak_trotoar_staza_ne_obilazi", new[] { St(P(N("bikeLeft", 1.5), N("bikeRight", 1.5), N("sidewalkLeft", 1.2), N("sidewalkRight", 1.2)), -30, 0, 30, 0), Z(-2, 2, 3, true) }),
-                ("47_rampa_spoj_radijus_1_i_3", new[] { St(-40, 0, 40, 0), R(new[] { -15.0, -4.85, -15, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3), WithP(R(new[] { 15.0, -4.85, 15, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3), N("joinRadius", 3)) }),
+                ("47_rampa_spoj_radijus", new[] { St(-40, 0, 40, 0), R(new[] { -15.0, -4.85, -15, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3), R(new[] { 15.0, -4.85, 15, -24 }, null, "straight", true, 3.0, 0.25, false, 0, -3) }),
             };
             return list.Select(x => new object[] { x.Item1, x.Item2 });
         }

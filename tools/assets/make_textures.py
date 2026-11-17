@@ -229,6 +229,19 @@ save('pool_finish', img * (1 - mask[..., None]) + np.array([230, 236, 238])[None
 save('water', tint(C['water'], noise(10, 4) * 0.7 + noise(60, 2) * 0.3, 0.35), 2.0)
 save('solar_pv', np.where(grid_joints(N // 6, N // 10, 3, 0)[0][..., None] > 0, np.array([200, 205, 210])[None, None, :], tint(C['solar_pv'], noise(80, 2), 0.2)), 1.0)
 
+# granite setts (kaldrma): small square stones, rough tops, wide sandy joints
+mask, rows, cols = grid_joints(N // 10, N // 10, 7, 0.5)
+shade = cell_shade(rows, cols, 0.16)
+speck = noise(120, 2)
+img = tint(C['granite_setts'], shade + speck * 0.5 + noise(20, 3) * 0.3, 0.45)
+save('granite_setts', img * (1 - mask[..., None]) + np.array([118, 110, 98])[None, None, :] * mask[..., None], 1.0)
+
+# asphalt surfaces used when SketchUp's own materials are not found, and the dark concrete of accessible ramps
+save('asphalt_new', tint(C['asphalt_new'], noise(140, 2) * 0.7 + noise(30, 3) * 0.3, 0.45), 1.0)
+save('blacktop_old', tint(C['blacktop_old'], noise(90, 3) * 0.5 + noise(8, 4) * 0.5, 0.4), 2.0)
+pores = (noise(160, 1) > 0.8).astype(float)
+save('curb_ramp_dark', tint(C['curb_ramp_dark'], noise(25, 4) - pores * 0.8, 0.3), 1.0)
+
 # update catalog (keep the one-entry-per-line formatting)
 text = open(CAT, encoding='utf-8').read()
 for key, size in SIZES.items():

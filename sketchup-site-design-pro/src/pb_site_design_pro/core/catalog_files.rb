@@ -38,7 +38,8 @@ module ProjektniBiro
         @option_labels = File.file?(builders_file) ? (JSON.parse(File.read(builders_file, encoding: 'UTF-8'))['optionLabels'] || {}) : {}
         mats = JSON.parse(File.read(File.join(dir, 'materials.json'), encoding: 'UTF-8'))
         @materials = mats['materials'].each_with_object({}) do |m, acc|
-          acc[m['key']] = Material.new(m['key'], m['name'], m['color'], (m['alpha'] || 1.0).to_f, m['texture'], m['textureSize'])
+          acc[m['key']] = Material.new(m['key'], m['name'], m['color'], (m['alpha'] || 1.0).to_f, m['texture'], m['textureSize'],
+                                      m['sketchup'])
         end
       end
 

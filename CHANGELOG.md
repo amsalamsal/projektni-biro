@@ -2,6 +2,26 @@
 
 ## Neobjavljeno
 
+### Inputi 16.11.2026 16:30 – prijelaz, spoj rampe, kružni tok, 3D
+* **Rampa za invalide na prijelazu s biciklističkom stazom** počinje tamo gdje staza završava i ide prema zebri
+  (2,00 m preko prvog dijela prijelaza). Rampe za invalide su u crtežu i u 3D **tamnosive** (tamnije od trotoara).
+* **Spoj garažne rampe sa saobraćajnicom** je uvijek zaobljen automatski (zakošenje 1,00 × 1,00 m pod 45°); pitanje
+  i podešavanje radijusa su uklonjeni.
+* **Pomoćna linija okomita na saobraćajnicu**: kad prva tačka rampe padne uz ulicu, pri biranju sljedeće tačke vidi se
+  plava pomoćna linija okomita na ulicu, a tačka se „zalijepi“ za nju kad je kursor unutar 6°.
+* **Kružni tok**:
+  * kad prsten ima jednu traku, sredinom prstena ide ista isprekidana linija (3 m linija, 3 m razmak) kao na kracima;
+  * zelena površina je 15 cm iznad asfalta i oko nje je ivičnjak (15 cm, iscrtan u crtežu i u 3D);
+  * prijelazni prsten i ivičnjak uz saobraćajnu traku su u nivou asfalta;
+  * prijelazni prsten je od **granitne kaldrme** (šrafura kocke ~12 cm u crtežu, tekstura u 3D).
+* **3D (SketchUp)**:
+  * na ulicama s visinama sve oznake (linije, strelice, pješački prijelazi, šrafirane površine, biciklistička staza uz
+    prijelaz) leže na kosoj površini ulice, 5 mm iznad nje – više nisu ispod ili iznad asfalta;
+  * ivičnjaci, trotoari i staze ulica s visinama su zatvorena tijela s bočnim stranama (bok ivičnjaka je spojen s
+    asfaltom);
+  * garažne rampe: pod je materijal **Asphalt New**, zidovi **Blacktop Old 02** (iz biblioteke SketchUpa; ako je nema,
+    slična vlastita tekstura), a u zidovima su **LED svjetla 8 × 3 cm** na 40 cm od poda, svakih 2,50 m.
+
 ### Inputi 16.11.2026 – rampe, pješački prijelaz, kružni tok
 * **Spoj garažne rampe sa saobraćajnicom** je uvijek u radijusu: najmanje luk koji na oba kraka odsijeca 1,00 m
   (luk u zakošenju 1,00 × 1,00 m pod 45°). Naredba pita radijus kad rampa počinje ili završava uz ulicu; mijenja se

@@ -280,7 +280,6 @@ namespace SiteDesignPro.Core.Roads
                 Drain = e.Parameters.Text("drain", "bottom"),
                 Heated = e.Parameters.Bool("heated", false),
                 Walls = e.Parameters.Bool("walls", true),
-                JoinRadius = Math.Max(RoadNetwork.DrivewayRadius, Math.Min(RoadNetwork.MaxDrivewayRadius, e.Parameters.Number("joinRadius", RoadNetwork.DrivewayRadius))),
                 Axis = GeometryMath.Tessellate(path.Ring, false, 0.002 * unitsPerMeter, 1024).Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList(),
             };
             r.RingPoints = path.Ring.Vertices.Select(v => new Vec2(v.X / unitsPerMeter, v.Y / unitsPerMeter)).ToList();
@@ -1114,6 +1113,55 @@ namespace SiteDesignPro.Core.Roads
         /// Retaining walls on both sides as closed bodies, from under the slab up to the level of the top end, along the
         /// part below it, and a railing 1,00 m high on them where the wall reaches that level (3D): (walls, railing).
         /// </summary>
+        /// <summary>Wall LED lights: 8 × 3 cm.</summary>
+        public const double LedLength = 0.08, LedHeight = 0.03, LedAbove = 0.40, LedSpacing = 2.50, LedDepth = 0.01;
+
+        /// <summary>
+        /// Wall LED lights 8 × 3 cm in the inner faces of the retaining walls, 40 cm above the ramp floor, every
+        /// 2,50 m (3D boxes standing 1 cm out of the wall), where the wall is high enough for them.
+        /// </summary>
+        public List<Vec3[]> Leds3()
+        {
+            var list = new List<Vec3[]>();
+            (double From, double To)? span = WallSpan();
+            if (!span.HasValue)
+            {
+                return list;
+            }
+
+            double half = Width / 2, from = span.Value.From, to = span.Value.To, length = to - from;
+            int n = (int)Math.Floor((length - 0.5) / LedSpacing);
+            if (n < 0)
+            {
+                return list;
+            }
+
+            double first = from + ((length - (n * LedSpacing)) / 2);
+            foreach (double side in new[] { 1.0, -1.0 })
+            {
+                for (int i = 0; i <= n; i++)
+                {
+                    double s = first + (i * LedSpacing), a = s - (LedLength / 2), b = s + (LedLength / 2);
+                    double floor = HeightAt(s, side * half), z0 = floor + LedAbove, z1 = z0 + LedHeight;
+                    if (WallTop(s) < z1 + 0.05 || a < from || b > to)
+                    {
+                        continue;
+                    }
+
+                    double d0 = side * half, d1 = side * (half - LedDepth);
+                    Vec3 P(double st, double d, double z) => PointAt(st, d).Point.WithZ(z);
+                    Vec3 c = P(s, side * (half - (LedDepth / 2)), (z0 + z1) / 2);
+                    QuadAway(P(a, d1, z0), P(b, d1, z0), P(b, d1, z1), P(a, d1, z1), c, list);
+                    QuadAway(P(a, d0, z1), P(b, d0, z1), P(b, d1, z1), P(a, d1, z1), c, list);
+                    QuadAway(P(a, d0, z0), P(b, d0, z0), P(b, d1, z0), P(a, d1, z0), c, list);
+                    QuadAway(P(a, d0, z0), P(a, d1, z0), P(a, d1, z1), P(a, d0, z1), c, list);
+                    QuadAway(P(b, d0, z0), P(b, d1, z0), P(b, d1, z1), P(b, d0, z1), c, list);
+                }
+            }
+
+            return list;
+        }
+
         public (List<Vec3[]> Walls, List<Vec3[]> Railing) Walls3()
         {
             var walls = new List<Vec3[]>();
@@ -1405,16 +1453,18 @@ namespace SiteDesignPro.Core.Roads
                     }
 
                     e.Custom["triangles"] = ParamValue.Of(RoadLevels.Encode(tris));
+                    e.Custom["openSurface"] = ParamValue.Of(true); // the triangles already form closed bodies
                     list.Add(e);
                 }
 
                 (List<Vec3[]> white, List<Vec3[]> yellow) = r.Paint3();
-                Add("Garažna rampa", r.Slab3(), null);
+                Add("Garažna rampa", r.Slab3(), "asphalt_new");
                 Add("Garažna rampa – bijele oznake", white, "line_paint_white");
                 Add("Garažna rampa – zaštitni razmak", yellow, "line_paint_yellow");
                 Add("Garažna rampa – srednje ostrvo", r.Island3(), null);
                 (List<Vec3[]> wall, List<Vec3[]> rail) = r.Walls3();
-                Add("Garažna rampa – potporni zidovi", wall, null);
+                Add("Garažna rampa – potporni zidovi", wall, "blacktop_old");
+                Add("Garažna rampa – zidna LED svjetla", r.Leds3(), "led_light");
                 Add("Garažna rampa – ograda", rail, "steel_dark");
                 Add("Garažna rampa – rešetka odvodnje", r.DrainSpans().SelectMany(x => r.Band3(-((r.Width / 2) - r.Margin), (r.Width / 2) - r.Margin, x.From, x.To, 0.004)).ToList(), "grate_steel");
             }

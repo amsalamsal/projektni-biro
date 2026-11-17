@@ -67,5 +67,32 @@ namespace SiteDesignPro.Core.Tests
             Assert.True(inner.Z < outer.Z);
             Assert.InRange(outer.Z - inner.Z, (GarageRamp.CrossSlope * r.Width) - 0.01, (GarageRamp.CrossSlope * r.Width) + 0.01);
         }
+
+        [Fact]
+        public void WallLeds_Every250cm_40cmAboveTheFloor()
+        {
+            var axis = new Ring(new List<Vec3> { new Vec3(0, 0, 0), new Vec3(30, 0, 0) });
+            GarageRamp r = GarageRamp.From(Ramp(axis, "straight", "one_way", 0, -3), 1.0)!;
+            List<Vec3[]> leds = r.Leds3();
+            Assert.NotEmpty(leds);
+            Assert.Equal(0, leds.Count % 10); // a box of five quads (two triangles each) per light
+
+            // the lights stand on both sides, 2,50 m apart, 8 × 3 cm, from 40 cm above the floor
+            var boxes = Enumerable.Range(0, leds.Count / 10).Select(i => leds.Skip(i * 10).Take(10).SelectMany(t => t).ToList()).ToList();
+            foreach (List<Vec3> b in boxes)
+            {
+                double x = (b.Min(p => p.X) + b.Max(p => p.X)) / 2;
+                Assert.Equal(GarageRamp.LedLength, b.Max(p => p.X) - b.Min(p => p.X), 6);
+                Assert.Equal(GarageRamp.LedHeight, b.Max(p => p.Z) - b.Min(p => p.Z), 6);
+                Assert.Equal(r.HeightAt(x, 0) + GarageRamp.LedAbove, b.Min(p => p.Z), 2);
+            }
+
+            List<double> left = boxes.Where(b => b.Average(p => p.Y) > 0).Select(b => b.Average(p => p.X)).OrderBy(x => x).ToList();
+            Assert.True(left.Count >= 5);
+            for (int i = 1; i < left.Count; i++)
+            {
+                Assert.Equal(GarageRamp.LedSpacing, left[i] - left[i - 1], 6);
+            }
+        }
     }
 }

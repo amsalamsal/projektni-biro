@@ -122,11 +122,44 @@ namespace SiteDesignPro.AutoCAD.Commands
                 e.Name = "Kružni tok";
             });
 
-            // green island and the mountable apron around it
-            Add("landscape.lawn_area", new PolygonGeometry(Circle(ri)));
+            // the lane line of the ring: the same broken line (3 m line, 3 m gap) as on the arms, along the middle
+            // of the ring (with two or more lanes the road network draws the lines between the lanes)
+            if (lanes == 1)
+            {
+                double rc = inner + (w / 2);
+                int dashes = Math.Max(4, (int)Math.Round(2 * Math.PI * rc / 6.0));
+                double step = 2 * Math.PI / dashes, sweep = step / 2;
+                for (int d = 0; d < dashes; d++)
+                {
+                    double a0 = d * step, a1 = a0 + sweep;
+                    Vec3 Q(double ang) => new Vec3(c.X + (rc * Math.Cos(ang) * k), c.Y + (rc * Math.Sin(ang) * k), 0);
+                    Add(RoadElements.MarkingType, new PathGeometry(new Ring(new List<Vec3> { Q(a0), Q(a1) }, new List<double> { Math.Tan(sweep / 4), 0 }), false), e =>
+                    {
+                        e.Parameters["width"] = ParamValue.Of(0.12);
+                        e.Name = "Linija trake kružnog toka";
+                    });
+                }
+            }
+
+            // green island 15 cm above the asphalt with a kerb 15 cm around it, and the mountable apron of granite
+            // setts at the level of the asphalt between the kerb and the ring
+            const double islandKerb = 0.15;
+            Add("landscape.lawn_area", new PolygonGeometry(Circle(ri - islandKerb)), e => e.Parameters["topOffset"] = ParamValue.Of(0.15));
+            Add("edge.kerb", new PathGeometry(Circle(ri - (islandKerb / 2)), true), e =>
+            {
+                e.Parameters["thickness"] = ParamValue.Of(islandKerb);
+                e.Parameters["height"] = ParamValue.Of(0.30);
+                e.Parameters["baseOffset"] = ParamValue.Of(-0.15);
+                e.Parameters["material"] = ParamValue.Of("concrete");
+                e.Name = "Ivičnjak zelene površine kružnog toka";
+            });
             if (apron > 0.05)
             {
-                Add("road.roundabout_apron", new PolygonGeometry(Circle(ri + apron), new List<Ring> { Circle(ri) }));
+                Add("road.roundabout_apron", new PolygonGeometry(Circle(ri + apron), new List<Ring> { Circle(ri) }), e =>
+                {
+                    e.Parameters["topOffset"] = ParamValue.Of(0.0);
+                    e.Parameters["material"] = ParamValue.Of("granite_setts");
+                });
             }
 
             for (int i = 0; i < arms; i++)

@@ -30,8 +30,41 @@ module ProjektniBiro
             end
           end
           polys.select! { |t| t.length == 3 }
+          return if polys.empty?
+
           # triangles of one curved or sloped surface: the edges between them are softened, corners stay sharp
-          c.mesh(polys, material: mat(e, 'material'), name: 'Površina', smooth: true, solid: false) unless polys.empty?
+          thickness = e.custom['openSurface'] == true ? 0.0 : e.num('thickness', 0.0)
+          polys = Slab.closed_body(polys, thickness) if thickness > 0.005
+          c.mesh(polys, material: mat(e, 'material'), name: 'Površina', smooth: true, solid: false)
+        end
+
+        public
+
+        # A closed body from the top triangles of a surface: the top (facing up), the bottom the thickness lower
+        # (facing down) and vertical sides along the outline (edges used by one triangle only), facing out. So a
+        # kerb or sidewalk on a sloped street has its sides like a flat one.
+        def self.closed_body(tris, thickness)
+          key = ->(p) { [(p[0] * 1e4).round, (p[1] * 1e4).round] }
+          up = tris.map do |t|
+            n = (t[1][0] - t[0][0]) * (t[2][1] - t[0][1]) - (t[1][1] - t[0][1]) * (t[2][0] - t[0][0])
+            n.negative? ? [t[0], t[2], t[1]] : t
+          end
+          count = Hash.new(0)
+          up.each { |t| 3.times { |i| count[[key.call(t[i]), key.call(t[(i + 1) % 3])].sort] += 1 } }
+          down = ->(p) { [p[0], p[1], p[2] - thickness] }
+          out = up.dup
+          up.each do |t|
+            out << [down.call(t[0]), down.call(t[2]), down.call(t[1])]
+            3.times do |i|
+              a = t[i]
+              b = t[(i + 1) % 3]
+              next unless count[[key.call(a), key.call(b)].sort] == 1
+
+              # a -> b runs counter-clockwise around the top, so the outside is on its right
+              out << [a, down.call(a), down.call(b), b]
+            end
+          end
+          out
         end
       end
       register('slab', Slab)

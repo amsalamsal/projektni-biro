@@ -73,6 +73,42 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             Vec2 M(Point3d p) => new Vec2(p.X / k, p.Y / k);
 
+            // a ramp that starts at a road: a helper line square to the road through the first point, and the next
+            // point is pulled onto it when the cursor is within 6° of it
+            List<RoadSpec> nearRoads = RoadElements.Specs(ctx.ExistingElements(), ctx.Catalog, k);
+            Vec2? Square(Vec2 p) => SquareToRoad(p, nearRoads);
+            Point3d Pull(Point3d first, Point3d cur, Vec2? n)
+            {
+                if (!n.HasValue)
+                {
+                    return cur;
+                }
+
+                Vec2 a0 = M(first), v = M(cur) - a0;
+                double along = v.Dot(n.Value);
+                if (v.Length < 1e-6 || Math.Abs(along) / v.Length < Math.Cos(6 * Math.PI / 180))
+                {
+                    return cur;
+                }
+
+                Vec2 q = a0 + (n.Value * along);
+                return new Point3d(q.X * k, q.Y * k, cur.Z);
+            }
+
+            List<PreviewShape> WithHelper(List<PreviewShape> shapes, Point3d first, Vec2? n)
+            {
+                if (n.HasValue)
+                {
+                    Vec2 a0 = M(first), p0 = a0 - (n.Value * 40), p1 = a0 + (n.Value * 40);
+                    var helper = new PreviewShape { Color = 4 };
+                    helper.Points.Add(new Point2d(p0.X * k, p0.Y * k));
+                    helper.Points.Add(new Point2d(p1.X * k, p1.Y * k));
+                    shapes.Insert(0, helper);
+                }
+
+                return shapes;
+            }
+
             Ring axis;
             double axisLength;
             if (!curved)
@@ -83,7 +119,19 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return;
                 }
 
-                Point3d? b = ctx.PointPreview("Kraj rampe (sredina, donji kraj)", a.Value, false, cur => Preview(new List<Vec2> { M(a.Value), M(cur) }, new List<double> { 0, 0 }));
+                Vec2? square = Square(M(a.Value));
+                if (square.HasValue)
+                {
+                    ctx.Write("Početak rampe je uz saobraćajnicu: plava pomoćna linija pokazuje smjer okomit na nju.");
+                }
+
+                Point3d? b = ctx.PointPreview("Kraj rampe (sredina, donji kraj)", a.Value, false, cur =>
+                    WithHelper(Preview(new List<Vec2> { M(a.Value), M(Pull(a.Value, cur, square)) }, new List<double> { 0, 0 }), a.Value, square));
+                if (b.HasValue)
+                {
+                    b = Pull(a.Value, b.Value, square);
+                }
+
                 if (!b.HasValue || a.Value.DistanceTo(b.Value) < 0.5 * k)
                 {
                     ctx.Write("Rampa nije nacrtana.");
@@ -99,18 +147,33 @@ namespace SiteDesignPro.AutoCAD.Commands
                 double bend = ctx.Number("Poluprečnik srednje linije u krivinama (m)", Math.Max(8.0, (width / 2) + 5.0));
                 var clicked = new List<Vec2>();
                 Point3d? last = null;
+                Vec2? square = null;
                 while (true)
                 {
+                    Vec2? helper = clicked.Count == 1 ? square : null;
                     Point3d? pt = clicked.Count == 0
                         ? ctx.Point("Početak rampe (sredina, gornji kraj)")
                         : ctx.PointPreview("Sljedeća tačka srednje linije (Enter za kraj)", last, clicked.Count >= 2, cur =>
                         {
-                            (List<Vec2> pp, List<double> pb) = GarageRamp.FilletPath(clicked.Concat(new[] { M(cur) }).ToList(), bend);
-                            return Preview(pp, pb);
+                            (List<Vec2> pp, List<double> pb) = GarageRamp.FilletPath(clicked.Concat(new[] { M(Pull(last!.Value, cur, helper)) }).ToList(), bend);
+                            return WithHelper(Preview(pp, pb), last!.Value, helper);
                         });
                     if (!pt.HasValue)
                     {
                         break;
+                    }
+
+                    if (clicked.Count == 0)
+                    {
+                        square = Square(M(pt.Value));
+                        if (square.HasValue)
+                        {
+                            ctx.Write("Početak rampe je uz saobraćajnicu: plava pomoćna linija pokazuje smjer okomit na nju.");
+                        }
+                    }
+                    else if (clicked.Count == 1)
+                    {
+                        pt = Pull(last!.Value, pt.Value, helper);
                     }
 
                     clicked.Add(new Vec2(pt.Value.X / k, pt.Value.Y / k));
@@ -232,19 +295,6 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ceilingLevel = ctx.Number("Donja ivica te ploče u odnosu na osnovnu visinu (npr. -0,30)", Math.Max(h0, h1) - 0.3, true, true);
             }
 
-            // the joint with the road: both corners rounded, at least the arc of a 1,00 × 1,00 m chamfer at 45°
-            double joinRadius = RoadNetwork.DrivewayRadius;
-            List<RoadSpec> roadSpecs = RoadElements.Specs(ctx.ExistingElements(), ctx.Catalog, k);
-            if (roadSpecs.Count > 0)
-            {
-                var joint = new GarageRamp { Kind = kind, RingPoints = axis.Vertices.Select(vv => new Vec2(vv.X / k, vv.Y / k)).ToList(), RingBulges = Enumerable.Range(0, axis.Count).Select(ii => ii < axis.Count - 1 ? axis.BulgeAt(ii) : 0.0).ToList() };
-                joint.Axis = joint.RingPoints;
-                if (RoadElements.AtRoad(joint, 0, roadSpecs) || RoadElements.AtRoad(joint, joint.Length, roadSpecs))
-                {
-                    joinRadius = ctx.Number("Radijus spoja rampe sa saobraćajnicom (m, najmanje 1,00 – zakošenje 1,00 × 1,00 pod 45°)", RoadNetwork.DrivewayRadius, false, true);
-                    joinRadius = Math.Max(RoadNetwork.DrivewayRadius, Math.Min(RoadNetwork.MaxDrivewayRadius, joinRadius));
-                }
-            }
 
 
             ElementType type = ctx.Catalog.RequireType(GarageRamp.Type);
@@ -259,7 +309,6 @@ namespace SiteDesignPro.AutoCAD.Commands
             e.Parameters["ceilingFrom"] = ParamValue.Of(ceilingFrom);
             e.Parameters["ceilingLevel"] = ParamValue.Of(ceilingLevel);
             e.Parameters["heated"] = ParamValue.Of(false);
-            e.Parameters["joinRadius"] = ParamValue.Of(joinRadius);
             e.Parameters["startLevel"] = ParamValue.Of(h0);
             e.Parameters["endLevel"] = ParamValue.Of(h1);
             e.Parameters["width"] = ParamValue.Of(width);
@@ -330,6 +379,40 @@ namespace SiteDesignPro.AutoCAD.Commands
             "L=" + Bs.Num(r.Length, 2) + " m, h=" + Bs.Num(Math.Abs(r.Rise), 2) + " m, " + Bs.Num(r.Slope * 100, 2) + " %";
 
         /// <summary>Draws all garage ramps of the drawing (their own layer and owner; erased and redrawn each time).</summary>
+        /// <summary>
+        /// The direction square to the nearest road (metres) when a point lies on or beside it (within its outer edge
+        /// and 3 m), else null.
+        /// </summary>
+        internal static Vec2? SquareToRoad(Vec2 p, List<RoadSpec> roads)
+        {
+            Vec2? best = null;
+            double bestGap = double.MaxValue;
+            foreach (RoadSpec r in roads)
+            {
+                List<Vec2> pts = r.Closed && r.Axis.Count > 2 ? r.Axis.Concat(new[] { r.Axis[0] }).ToList() : r.Axis;
+                double half = Math.Max(r.Extent(RoadLevel.Edge, true), r.Extent(RoadLevel.Edge, false));
+                for (int i = 1; i < pts.Count; i++)
+                {
+                    Vec2 a = pts[i - 1], d = pts[i] - a;
+                    double l2 = d.Dot(d);
+                    if (l2 < 1e-12)
+                    {
+                        continue;
+                    }
+
+                    double t = Math.Max(0, Math.Min(1, (p - a).Dot(d) / l2));
+                    double gap = p.DistanceTo(a + (d * t)) - half;
+                    if (gap < bestGap && gap < 3.0)
+                    {
+                        bestGap = gap;
+                        best = d.Normalized().Perp();
+                    }
+                }
+            }
+
+            return best;
+        }
+
         internal static void DrawGarageRamps(CommandContext ctx, List<SiteElement> elements)
         {
             foreach ((ObjectId id, string _) in ctx.Svc.Aux(RampOwner).ToList())

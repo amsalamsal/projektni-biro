@@ -407,6 +407,57 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void LevelMarks_TheMarkingsLieOnTheSlopedSurface()
+        {
+            var elements = new List<SiteElement> { Path(RoadElements.StreetType, 0, 0, 100, 0) };
+            ElementType mt = Cat.RequireType(RoadElements.LevelMarkType);
+            foreach ((double x, double v) in new[] { (0.0, 0.0), (100.0, 2.0) })
+            {
+                var m = new SiteElement(Guid.NewGuid().ToString(), RoadElements.LevelMarkType, new PointGeometry(new Vec3(x, 0, 0), 0)) { Parameters = mt.CreateDefaultParameters() };
+                m.Parameters["level"] = ParamValue.Of(v);
+                elements.Add(m);
+            }
+
+            ElementType ct = Cat.RequireType(RoadElements.CrossingType);
+            var crossing = new SiteElement(Guid.NewGuid().ToString(), RoadElements.CrossingType,
+                new PolygonGeometry(new Ring(new List<Vec3> { new Vec3(50, -3, 0), new Vec3(50, 3, 0), new Vec3(53, 3, 0), new Vec3(53, -3, 0) })))
+            { Parameters = ct.CreateDefaultParameters() };
+            elements.Add(crossing);
+
+            List<SiteElement> derived = RoadElements.Derived(elements, Cat);
+            static List<Vec3> Points(SiteElement e) => e.Custom["triangles"].AsText()!.Split('|').SelectMany(t => t.Split(';'))
+                .Select(v => v.Split(',').Select(x => double.Parse(x, System.Globalization.CultureInfo.InvariantCulture)).ToArray())
+                .Select(a => new Vec3(a[0], a[1], a[2])).ToList();
+
+            // every corner of a lane line, an arrow and a crossing stripe lies 5 mm above the profile (2 % up the road)
+            List<SiteElement> marks = derived.Where(e => e.TypeId == RoadElements.MarkingType || e.TypeId == RoadElements.ArrowType).ToList();
+            Assert.Contains(marks, e => e.TypeId == RoadElements.ArrowType);
+            Assert.All(marks.Append(crossing), e => Assert.All(Points(e), p => Assert.Equal((p.X * 0.02) + RoadElements.MarkingLift, p.Z, 3)));
+        }
+
+        [Fact]
+        public void Roundabout_TheKerbAtTheApronIsFlush()
+        {
+            ElementType st = Cat.RequireType(RoadElements.StreetType);
+            var ring = new SiteElement(Guid.NewGuid().ToString(), RoadElements.StreetType,
+                new PathGeometry(new Ring(new List<Vec3> { new Vec3(13.85, 0, 0), new Vec3(-13.85, 0, 0) }, new List<double> { 1, 1 }), true))
+            { Parameters = st.CreateDefaultParameters() };
+            ring.Parameters["direction"] = ParamValue.Of("one_way");
+            ring.Parameters["lanesRight"] = ParamValue.Of(1.0);
+            ring.Parameters["sidewalkLeft"] = ParamValue.Of(0.0);
+            ElementType at = Cat.RequireType(RoadElements.ApronType);
+            Ring Circle(double r) => new Ring(new List<Vec3> { new Vec3(r, 0, 0), new Vec3(-r, 0, 0) }, new List<double> { 1, 1 });
+            var apron = new SiteElement(Guid.NewGuid().ToString(), RoadElements.ApronType, new PolygonGeometry(Circle(12.2), new List<Ring> { Circle(11) }))
+            { Parameters = at.CreateDefaultParameters() };
+
+            List<SiteElement> kerbs = RoadElements.Derived(new List<SiteElement> { ring, apron }, Cat).Where(e => e.TypeId == "road.street_kerb").ToList();
+            Assert.Contains(kerbs, e => e.Parameters.Number("topOffset", 0.15) == 0.0);
+            Assert.Contains(kerbs, e => e.Parameters.Number("topOffset", 0.15) > 0.1);
+            Assert.Equal(0.0, at.CreateDefaultParameters().Number("topOffset", 1), 6);
+            Assert.Equal("granite_setts", at.CreateDefaultParameters().Text("material", string.Empty));
+        }
+
+        [Fact]
         public void StripeBars_FollowTheFirstEdge_LikeSketchUp()
         {
             // crossing 4 m along the road (first edge) and 5,5 m across it: 6 bars of 0,50 m with 0,50 m gaps
@@ -442,11 +493,11 @@ namespace SiteDesignPro.Core.Tests
             Assert.InRange(strip.Max(q => q.X), 48 - 1e-6, 48 + 1e-6);
             Assert.InRange(strip.Max(q => q.Y) - strip.Min(q => q.Y), 6 - 1e-6, 6 + 1e-6);
 
-            // the ramps: 2,00 m wide, over the strip and the first 1,20 m of the crossing
+            // the ramps: 2,00 m wide, from where the strip ends towards the stripes
             RoadNetworkResult res = RoadElements.Network(elements, Cat)!;
             Assert.Equal(2, res.Ramps.Count);
             Assert.All(res.RampFrames, f => Assert.Equal(2.0, f.Width, 6));
-            Assert.All(res.RampFrames, f => Assert.Equal(48.2, f.Foot.X, 3));
+            Assert.All(res.RampFrames, f => Assert.Equal(49.0, f.Foot.X, 3));
             Assert.Single(RoadElements.Derived(elements, Cat), e => e.TypeId == RoadElements.BikeCrossingType);
         }
 

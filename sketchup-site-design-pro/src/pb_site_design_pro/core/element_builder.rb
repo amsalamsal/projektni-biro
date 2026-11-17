@@ -27,6 +27,8 @@ module ProjektniBiro
 
       # Returns the created canvas node, or nil when the element could not be reconstructed (reported).
       def build(element, canvas, ctx, attributes = {})
+        return build_draped(element, canvas, ctx, attributes) if draped?(element)
+
         model = model_for(element)
         return build_model(model, element, canvas, ctx, attributes) if model
 
@@ -55,6 +57,25 @@ module ProjektniBiro
         ctx.report.add(:error, 'SDP-B999', element.id, "Rekonstrukcija geometrije nije uspjela: #{e.class}: #{e.message}",
                        'Provjerite geometriju i parametre elementa u AutoCAD-u (SDPVALIDATE); prijavite grešku ako se ponavlja.', element.label)
         nil
+      end
+
+      # Markings on roads with elevation marks (lane lines, arrows, crossing stripes) come as triangles already at
+      # their height ("x,y,z;x,y,z;x,y,z|..."), so they lie on the sloped surface. Surfaces (slab) build their own.
+      def draped?(element)
+        t = element.custom['triangles']
+        t.is_a?(String) && !t.empty? && element.builder != 'slab'
+      end
+
+      def build_draped(element, canvas, ctx, attributes)
+        polys = element.custom['triangles'].split('|').map { |tri| tri.split(';').map { |p| p.split(',').map(&:to_f) } }
+        polys.select! { |t| t.length == 3 && t.all? { |p| p.length == 3 } }
+        return nil if polys.empty?
+
+        material = element.param('material').to_s
+        material = 'line_paint_white' if material.empty? || (!ctx.materials.empty? && !ctx.materials.key?(material))
+        canvas.group(element.display_name, attributes) do |gc|
+          gc.mesh(polys, material: material, name: 'Oznaka', smooth: true, solid: false)
+        end
       end
 
       def build_model(model, element, canvas, ctx, attributes)
