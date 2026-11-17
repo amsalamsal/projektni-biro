@@ -2164,12 +2164,32 @@ namespace SiteDesignPro.Core.Roads
                         continue;
                     }
 
-                    PathD Local(params (double S, double W)[] pts) => Positive(pts.Select(x => p0 + (t * x.S) + (w * x.W)));
-                    double far = bw + sw0 + ew0 + 0.05;
-                    PathD box = Local((0, -0.01), (len, -0.01), (len, far), (0, far));
-                    PathD tb = Local((0, 0), (0, bw), (len, 0));
-                    PathD tw = Local((0, bw), (0, bw + sw0), (len, sw1), (len, 0));
-                    PathD te = ew0 > 0.01 || ew1 > 0.01 ? Local((0, bw + sw0), (0, bw + sw0 + ew0), (len, sw1 + ew1), (len, sw1)) : new PathD();
+                    // in the frame of the road beyond: T along it (away from the bike lane), N out from the kerb. The
+                    // transition starts on the end line itself (it may lie askew at an oblique corner) and ends square
+                    // to the road, where the cross-section beyond takes over exactly.
+                    Vec2 tT = d0.Dot(t) < 0 ? -d0 : d0;
+                    Vec2 nN = tT.Perp();
+                    if (nN.Dot(w) < 0)
+                    {
+                        nN = -nN;
+                    }
+
+                    double en = w.Dot(nN);
+                    if (en < 0.5)
+                    {
+                        continue;
+                    }
+
+                    double bwN = bw * en, sw0N = sw0 * en, ew0N = ew0 * en;
+                    double far = bwN + sw0N + ew0N + 0.05;
+                    Vec2 E(double off) => p0 + (w * (off / en));
+                    double sEnd = len + Math.Max(0, (E(far) - p0).Dot(tT));
+                    Vec2 F(double off) => p0 + (tT * sEnd) + (nN * off);
+                    PathD Poly(params Vec2[] pts) => Positive(pts);
+                    PathD box = Poly(E(-0.01), E(far), F(far), F(-0.01));
+                    PathD tb = Poly(E(0), E(bwN), F(0));
+                    PathD tw = Poly(E(bwN), E(bwN + sw0N), F(sw1), F(0));
+                    PathD te = ew0 > 0.01 || ew1 > 0.01 ? Poly(E(bwN + sw0N), E(bwN + sw0N + ew0N), F(sw1 + ew1), F(sw1)) : new PathD();
 
                     // it may not reach onto anything else (another bike lane, the carriageway)
                     PathsD others = Clipper.Union(Clipper.Difference(bike, new PathsD { box }, FillRule.NonZero, Precision), surface, FillRule.NonZero, Precision);
