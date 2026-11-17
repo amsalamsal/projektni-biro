@@ -11,6 +11,11 @@
   krivine R20 i R50 s raskrsnicom; garažne rampe pod 30–150° s obje strane, u trotoaru i iza njega; rampa uz
   raskrsnicu, dvije rampe jedna do druge, izlazna rampa; kružni tokovi s 3 i 5 krakova; pješački prelazi; kratka
   ulica, dupla tačka, skoro ravna osovina.
+* **Biciklistička staza koja završava na uglu raskrsnice** (ulica iza ugla nema stazu na toj strani): staza se
+  sužava do nule na 6 m, a trotoar i rubnjak je prate – nema više odsječenog kraja i stepenice u trotoaru. Radi i kod
+  kosih uglova; uz kružni tok (zakrivljen prsten) staza i dalje završava na kraju luka.
+* **Smjer staze kod kolnog prilaza** se traži u lokalnim koordinatama mreže (kod crteža u državnim koordinatama se
+  mogao uzeti smjer pogrešne ulice); nova situacija u matrici: isti crtež daleko od ishodišta.
 * **Ispravljeno**: kod kosih raskrsnica (30°, 60°) kolovoz i ivičnjak su se preklapali do 4 cm uz ivicu (šiljak nulte
   širine je pri prilagođavanju lukova povlačio tačke luka); kolovoz kolnog prilaza više ne ulazi na rampu; rampa koja
   počinje do 8 m iza ruba ulice (predbašta) dobija kolni prilaz do rampe (ranije samo do 1,5 m); spušteni dio
