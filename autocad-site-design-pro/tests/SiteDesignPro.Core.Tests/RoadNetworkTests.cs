@@ -241,7 +241,10 @@ namespace SiteDesignPro.Core.Tests
             Assert.NotEmpty(res.BikeRampBase);
 
             // across the driveway and 2 m on both sides (plus the rounded corners): about 4 + 2 + 2 m long
-            double len = res.BikeRamps.Max(b => b.Outer.Points.Max(p => p.X) - b.Outer.Points.Min(p => p.X));
+            double len = res.BikeRamps.Max(b => b.Outer.Points.Max(p => p.X)) - res.BikeRamps.Min(b => b.Outer.Points.Min(p => p.X));
+            Assert.True(res.BikeRamps.Count >= 3, "the flat part and the two slopes are regions of their own");
+            Assert.Equal(res.BikeRampBase.Count, res.BikeRampDirections.Count);
+            Assert.All(res.BikeRampDirections, d => Assert.True(Math.Abs(d.Y) < 1e-9, "the slopes run along the road"));
             Assert.InRange(len, 7.5, 12);
 
             // the bike lane itself leaves that part out, and the carriageway does not run under it

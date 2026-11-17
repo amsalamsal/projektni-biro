@@ -573,9 +573,15 @@ namespace SiteDesignPro.Core.Roads
             double bikeRise = catalog.FindType(LevelTypes[RoadLevel.Bike].Type)?.CreateDefaultParameters().Number("topOffset", 0.15) ?? 0.15;
             double kerbRise = catalog.FindType(LevelTypes[RoadLevel.Kerb].Type)?.CreateDefaultParameters().Number("topOffset", 0.15) ?? 0.15;
             List<List<Vec2>> rampBase = res.BikeRampBase;
+            List<Vec2> rampDirs = res.BikeRampDirections;
             double Lowered(Vec2 p, double rise)
             {
-                double d = rampBase.Count == 0 ? RoadNetwork.BikeRampLength : rampBase.Min(b => DistanceTo(b, p));
+                double d = RoadNetwork.BikeRampLength;
+                for (int k = 0; k < rampBase.Count; k++)
+                {
+                    d = Math.Min(d, k < rampDirs.Count ? DistanceAlong(rampBase[k], rampDirs[k], p) : DistanceTo(rampBase[k], p));
+                }
+
                 return z + (profiles != null ? RoadLevels.Height(profiles, p) : 0) + (rise * Math.Min(1, d / RoadNetwork.BikeRampLength));
             }
 
@@ -659,6 +665,48 @@ namespace SiteDesignPro.Core.Roads
         public const string BikeRampType = "road.bike_ramp";
 
         /// <summary>Distance from a point to a polygon (0 inside).</summary>
+        /// <summary>
+        /// Distance from <paramref name="p"/> to a polygon measured along <paramref name="dir"/> (forwards or back): 0
+        /// inside it or beside it. To a straight side
+        /// it changes evenly, so a slope measured with it is one plane.
+        /// </summary>
+        private static double DistanceAlong(IReadOnlyList<Vec2> poly, Vec2 dir, Vec2 p)
+        {
+            // a point beside the polygon (the kerb next to the bike lane) is measured as if it were at its side
+            var n = new Vec2(-dir.Y, dir.X);
+            double wMin = poly.Min(v => v.Dot(n)) + 1e-6, wMax = poly.Max(v => v.Dot(n)) - 1e-6, w = p.Dot(n);
+            if (wMin <= wMax)
+            {
+                p = p + (n * (Math.Max(wMin, Math.Min(wMax, w)) - w));
+            }
+
+            if (DistanceTo(poly, p) < 1e-9)
+            {
+                return 0;
+            }
+
+            double best = double.MaxValue;
+            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
+            {
+                Vec2 a = poly[j], e = poly[i] - a;
+                double den = (dir.X * e.Y) - (dir.Y * e.X);
+                if (Math.Abs(den) < 1e-12)
+                {
+                    continue;
+                }
+
+                Vec2 ap = a - p;
+                double s = ((ap.X * e.Y) - (ap.Y * e.X)) / den; // along dir
+                double u = ((ap.X * dir.Y) - (ap.Y * dir.X)) / den; // along the side
+                if (u >= -1e-9 && u <= 1 + 1e-9)
+                {
+                    best = Math.Min(best, Math.Abs(s));
+                }
+            }
+
+            return best;
+        }
+
         private static double DistanceTo(IReadOnlyList<Vec2> poly, Vec2 p)
         {
             bool inside = false;

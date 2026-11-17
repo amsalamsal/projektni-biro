@@ -149,7 +149,8 @@ module ProjektniBiro
             @stats['failed_faces'] += 1
           end
         end
-        ents.add_faces_from_mesh(pm, 0) # 0: no edge softened, smoothed or hidden: every triangle is its own face
+        ents.add_faces_from_mesh(pm, 0) # 0: no edge softened or smoothed: every triangle is its own face
+        hide_coplanar(ents)
         @stats['faces'] += added
       rescue StandardError => e # fall back to face by face
         Log.write(:debug, "mreža površine nije dodana u jednom koraku (#{e.message})")
@@ -175,14 +176,7 @@ module ProjektniBiro
       # evenly sloped part become one face (as the Eraser does). All other edges stay hard: nothing is softened or
       # smoothed, so every face can be selected and pushed/pulled on its own.
       def join_coplanar(ents)
-        flat = []
-        ents.grep(Sketchup::Edge).each do |edge|
-          faces = edge.faces
-          next unless faces.length == 2
-          next unless faces[0].normal.angle_between(faces[1].normal) < COPLANAR_ANGLE && faces[0].material == faces[1].material
-
-          flat << edge
-        end
+        flat = coplanar_edges(ents)
         return if flat.empty?
 
         # an edge that would leave a face open (an end that only it uses) stays
@@ -190,6 +184,23 @@ module ProjektniBiro
         ents.erase_entities(drop) unless drop.empty?
       rescue StandardError => e # joining is cosmetic: the faces stay triangles if it fails
         Log.write(:debug, "spajanje ravnih trouglova nije uspjelo (#{e.message})")
+      end
+
+      # In a large triangle mesh the edges between two triangles in one plane are hidden (not softened, not
+      # smoothed and not erased): a flat or evenly sloped part shows no diagonals, while every triangle stays a face
+      # of its own that Push/Pull works on. Edges where the surface bends stay visible.
+      def hide_coplanar(ents)
+        coplanar_edges(ents).each { |e| e.hidden = true }
+      rescue StandardError => e # hiding is cosmetic
+        Log.write(:debug, "skrivanje ivica ravnih trouglova nije uspjelo (#{e.message})")
+      end
+
+      def coplanar_edges(ents)
+        ents.grep(Sketchup::Edge).select do |edge|
+          faces = edge.faces
+          faces.length == 2 && faces[0].material == faces[1].material &&
+            faces[0].normal.angle_between(faces[1].normal) < COPLANAR_ANGLE
+        end
       end
     end
   end

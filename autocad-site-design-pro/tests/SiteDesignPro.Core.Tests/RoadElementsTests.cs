@@ -470,9 +470,10 @@ namespace SiteDesignPro.Core.Tests
             ramp.Parameters["endLevel"] = ParamValue.Of(-3.0);
 
             List<SiteElement> derived = RoadElements.Derived(new List<SiteElement> { street, ramp }, Cat);
-            SiteElement lowered = Assert.Single(derived, e => e.TypeId == RoadElements.BikeRampType);
-            Assert.Equal("asphalt_bordo_dark", lowered.Parameters.Text("material", string.Empty));
-            List<double> zs = lowered.Custom["triangles"].AsText().Split('|').SelectMany(t => t.Split(';')).Select(q => double.Parse(q.Split(',')[2], System.Globalization.CultureInfo.InvariantCulture)).ToList();
+            List<SiteElement> lowered = derived.Where(e => e.TypeId == RoadElements.BikeRampType).ToList();
+            Assert.NotEmpty(lowered);
+            Assert.All(lowered, e => Assert.Equal("asphalt_bordo_dark", e.Parameters.Text("material", string.Empty)));
+            List<double> zs = lowered.SelectMany(e => e.Custom["triangles"].AsText().Split('|')).SelectMany(t => t.Split(';')).Select(q => double.Parse(q.Split(',')[2], System.Globalization.CultureInfo.InvariantCulture)).ToList();
             Assert.Equal(0.0, zs.Min(), 3);
             Assert.Equal(0.15, zs.Max(), 3);
             Assert.Contains(derived, e => e.TypeId == "road.street_kerb" && e.Name.Contains("Spušteni"));
