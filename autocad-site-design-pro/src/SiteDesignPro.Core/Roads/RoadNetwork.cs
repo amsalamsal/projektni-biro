@@ -680,7 +680,7 @@ namespace SiteDesignPro.Core.Roads
                 RawBand?.Invoke(level, region[level].Select(path => path.Select(q => new Vec2(q.x, q.y) + origin).ToList()).ToList());
                 result.Bands[level] = Regions(region[level], origin);
                 bool draw = level == RoadLevel.Carriageway || region[level].Count > 0;
-                result.Outlines[level] = draw ? outline[level].Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
+                result.Outlines[level] = draw ? Open(outline[level]).Select(p => FitArcs(p, origin)).ToList() : new List<RoadLoop>();
             }
 
             // the inner edge of a bike lane that goes around a ramp
@@ -2046,8 +2046,15 @@ namespace SiteDesignPro.Core.Roads
             return b;
         }
 
+        /// <summary>Removes zero-width spikes and slits (an opening of 1 mm).</summary>
+        private static PathsD Open(PathsD paths) =>
+            Clipper.InflatePaths(Clipper.InflatePaths(paths, -0.001, JoinType.Miter, EndType.Polygon, 2, Precision), 0.001, JoinType.Miter, EndType.Polygon, 2, Precision);
+
         private static List<RoadRegion> Regions(PathsD paths, Vec2 origin)
         {
+            // an opening of a millimetre removes the zero-width spikes a union can leave where two edges run
+            // over each other (they would otherwise take real arc points with them when the arcs are fitted)
+            paths = Open(paths);
             var tree = new PolyTreeD();
             var c = new ClipperD(Precision);
             c.AddSubject(paths);
@@ -2677,7 +2684,7 @@ namespace SiteDesignPro.Core.Roads
                     Vec2 ab = b - a, bc = c - b;
                     double la = ab.Length, lc = bc.Length;
                     bool tiny = la < 0.01;
-                    bool spike = la > 1e-9 && lc > 1e-9 && ab.Dot(bc) < 0 && Math.Abs(ab.Cross(bc)) / (la * lc) < 0.09;
+                    bool spike = la > 1e-9 && lc > 1e-9 && ab.Dot(bc) < 0 && Math.Abs(ab.Cross(bc)) / (la * lc) < 0.02;
                     if (tiny || spike)
                     {
                         list.RemoveAt(i);
