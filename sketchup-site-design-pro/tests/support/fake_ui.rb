@@ -5,6 +5,8 @@
 MF_ENABLED = 0
 MF_GRAYED = 2
 MB_YESNO = 4
+MB_MULTILINE = 16
+GL_LINE_STRIP = 3
 IDYES = 6
 VK_LEFT = 37
 VK_RIGHT = 39
@@ -35,7 +37,7 @@ module UI
       (@menus ||= {})[name] ||= Menu.new(name)
     end
 
-    def messagebox(text, type = 0)
+    def messagebox(text, type = 0, _title = nil)
       @log << [:messagebox, text]
       type == MB_YESNO ? (@answers[:yesno] || 7) : 1
     end
@@ -64,7 +66,9 @@ module UI
       @log << [:beep]
     end
 
-    def start_timer(*_args, &_block)
+    # a one-shot timer of 0 s (used to run the next step after a dialog closed) runs at once
+    def start_timer(interval = 0, repeat = false, &block)
+      block.call if block && interval.to_f.zero? && !repeat
       1
     end
 
@@ -211,11 +215,15 @@ module Sketchup
   class InputPoint
     attr_accessor :position
 
-    def initialize
-      @position = nil
+    def initialize(position = nil)
+      @position = position
     end
 
-    def pick(_view, x, y)
+    def display?
+      true
+    end
+
+    def pick(_view, x, y, _from = nil)
       @position = Geom::Point3d.new(x.to_f, y.to_f, 0.0)
       true
     end
@@ -234,7 +242,7 @@ end
 
 module Sketchup
   class View
-    attr_accessor :drawing_color, :line_width, :tooltip
+    attr_accessor :drawing_color, :line_width, :tooltip, :line_stipple
     attr_reader :drawn
 
     def draw(mode, pts)

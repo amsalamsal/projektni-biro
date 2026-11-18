@@ -125,7 +125,7 @@ module ProjektniBiro
 
       def about
         UI.messagebox("Vanjsko uređenje PRO za SketchUp #{VERSION}\nShema razmjene #{SCHEMA_VERSION}\nPodržano: SketchUp 2014–2027\n\n" \
-                      "Uvozi pakete iz AutoCAD-a u organizovane, izmjenjive 3D modele.\nDnevnik: #{Log.path}")
+                      "Uvozi pakete iz AutoCAD-a u organizovane, izmjenjive 3D modele.\nSaobraćajnice (ulice, kružni tokovi, prijelazi, rampe) crta i samostalno, bez AutoCAD-a.\nDnevnik: #{Log.path}")
       end
 
       def icon(name, size)
@@ -176,6 +176,13 @@ module ProjektniBiro
         %i[scenes underground].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
         %i[models library report recovery].each { |k| menu.add_item(cmds[k]) }
+        menu.add_separator
+        begin
+          Roads::Commands.install(menu)
+        rescue StandardError => e
+          Log.error('Alati za saobraćajnice se nisu pokrenuli', e)
+        end
+        menu.add_separator
         menu.add_item('Otvori dnevnik (log)') { open_log }
         menu.add_item('O programu Vanjsko uređenje PRO') { about }
 

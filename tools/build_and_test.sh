@@ -40,6 +40,7 @@ $ENGINE build --in shared/samples/roads-request.json --out out/roads-sample || {
 python3 tools/validate_schema.py out/roads-sample
 python3 -c "import json;r=json.load(open('out/roads-sample/result.json'));print('engine:',r['summary']);assert r['ok']"
 export SDP_ROADS_SAMPLE="$PWD/out/roads-sample"
+export SDP_ROADS_ENGINE_TEST="dotnet $PWD/autocad-site-design-pro/src/SiteDesignPro.Engine/bin/Release/net8.0/sdp-ceste.dll"
 
 step "Ruby tests (core, builders, change planning, SketchUp adapter against the API fake)"
 for f in sketchup-site-design-pro/tests/test_*.rb; do [ "$(basename "$f")" = test_helper.rb ] && continue; ruby -Isketchup-site-design-pro/tests "$f" | grep -v '\[INFO\]' ; done

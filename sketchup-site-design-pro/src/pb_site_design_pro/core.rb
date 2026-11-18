@@ -50,4 +50,5 @@ require File.join(__dir__, 'version')
   change_set
   terrain
   safety
+  roads
 ].each { |f| require File.join(ProjektniBiro::SiteDesignPro::CORE_DIR, f) }

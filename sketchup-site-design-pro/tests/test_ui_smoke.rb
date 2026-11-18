@@ -38,7 +38,7 @@ class TestUiSmoke < Minitest::Test
   def test_menu_and_toolbar_are_complete
     menu = UI.menu('Extensions').items.first
     assert_equal 'Vanjsko uređenje PRO', menu.name
-    texts = menu.items.reject { |i| i == :separator }.map { |i| i.is_a?(Array) ? i[0] : i.text }
+    texts = menu.items.reject { |i| i == :separator }.map { |i| i.is_a?(Array) ? i[0] : (i.respond_to?(:text) ? i.text : i.name) }
     ['Uvoz paketa...', 'Biblioteka 3D modela...', 'Biblioteka i postavke...', 'Svojstva elementa'].each { |t| assert_includes texts, t }
     @cmds.each_value do |c|
       next unless c.small_icon

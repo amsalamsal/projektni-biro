@@ -157,6 +157,11 @@ module Sketchup
       :platform_osx
     end
 
+    def add_observer(obs)
+      (@observers ||= []) << obs
+      true
+    end
+
     def version
       'fake'
     end
@@ -314,6 +319,16 @@ module Sketchup
 
     def faces
       []
+    end
+
+    EdgeVertex = Struct.new(:position)
+
+    def start
+      EdgeVertex.new(@points[0])
+    end
+
+    def end
+      EdgeVertex.new(@points[1])
     end
   end
 
@@ -725,6 +740,11 @@ module Sketchup
 
     def import(path, _show_options = true)
       (@imported ||= []) << path
+      true
+    end
+
+    def add_observer(obs)
+      (@observers ||= []) << obs
       true
     end
 

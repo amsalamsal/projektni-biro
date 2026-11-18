@@ -37,24 +37,29 @@ module ProjektniBiro
       end
 
       # Applies the current plan. Returns the import report. Any exception aborts the whole operation.
-      def apply!(create_scenes: Settings.get('createScenes'), backup: Settings.get('backupEnabled'))
+      # operation: false when the caller has already started the SketchUp operation (the road tools build the roads
+      # in the same undo step as the axis); an exception is then raised to the caller, which aborts it.
+      def apply!(create_scenes: Settings.get('createScenes'), backup: Settings.get('backupEnabled'), operation: true, set_north: Settings.get('setNorth'))
         plan! unless @plan
+        @set_north = set_north
         @report = Report.new('Vanjsko uređenje PRO – izvještaj uvoza')
         @report.package_path = @path
         @report.merge!(@read_report)
         started = Time.now
         @backup_path = backup ? make_backup : nil
-        journal = Safety.journal
+        journal = operation ? Safety.journal : nil
         op_id = journal && journal.begin_operation(OPERATION, @model.path.to_s.empty? ? '(nesačuvan model)' : @model.path, @backup_path)
-        @model.start_operation(OPERATION, true)
+        @model.start_operation(OPERATION, true) if operation
         begin
           run_plan
           run_terrain_plan
           store_project_metadata
           Scenes.create(@model, @organizer, @catalog) if create_scenes
-          @model.commit_operation
+          @model.commit_operation if operation
           journal.end_operation(op_id, 'Completed', @plan.summary) if journal
         rescue StandardError => e
+          raise unless operation
+
           @model.abort_operation
           journal.end_operation(op_id, 'RolledBack', "#{e.class}: #{e.message}") if journal
           Log.error('Uvoz prekinut', e)
@@ -287,7 +292,7 @@ module ProjektniBiro
           @report.add(:info, 'SDP-E001', nil, 'Projekat nema definisanu apsolutnu nadmorsku visinu; model je u relativnim kotama.',
                       'Definišite nultu kotu objekta u AutoCAD-u (SDPDATUM) za prikaz apsolutnih kota.')
         end
-        return unless Settings.get('setNorth')
+        return unless @set_north
 
         @model.shadow_info['NorthAngle'] = @package.true_north_degrees
       end

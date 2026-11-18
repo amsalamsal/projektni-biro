@@ -17,6 +17,11 @@ require File.join(__dir__, 'core')
   sketchup/importer
   sketchup/editing
   sketchup/asset_insert
+  sketchup/roads/store
+  sketchup/roads/rebuild
+  sketchup/roads/tools
+  sketchup/roads/forms
+  sketchup/roads/commands
   sketchup/ui/dialogs
   sketchup/ui/commands
 ].each { |f| require File.join(__dir__, f) }

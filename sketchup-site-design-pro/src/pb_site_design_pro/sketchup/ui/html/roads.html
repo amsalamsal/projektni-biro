@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Vanjsko uređenje PRO – saobraćajnice</title>
+<link rel="stylesheet" href="sdp.css">
+<style>
+  .form { display: grid; grid-template-columns: minmax(200px, 44%) 1fr; gap: 6px 12px; align-items: center; }
+  .form h2 { grid-column: 1 / -1; font-size: 13px; margin: 10px 0 0; padding-top: 6px; border-top: 1px solid var(--line); }
+  .form h2:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+  .form .lab { color: var(--text); }
+  .form .ed { display: flex; gap: 6px; align-items: center; }
+  .form .ed input[type=number] { width: 110px; }
+  .form .ed select { min-width: 180px; }
+  .form .hint { grid-column: 2; color: var(--muted); font-size: 11px; margin-top: -4px; }
+  .radio { display: flex; gap: 12px; flex-wrap: wrap; }
+  .radio label { display: flex; gap: 4px; align-items: center; }
+  #summary { white-space: pre-wrap; }
+  .hidden { display: none !important; }
+  .err { color: var(--error); }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Saobraćajnice</h1>
+  <div class="sub" id="intro"></div>
+</header>
+<main>
+  <div class="panel"><div class="form" id="form"></div></div>
+  <div class="panel" id="summaryPanel"><div id="summary"></div><div id="error" class="err"></div></div>
+</main>
+<footer>
+  <span class="note" id="note"></span>
+  <button id="cancel">Odustani</button>
+  <button id="ok" class="primary">U redu</button>
+</footer>
+<script src="sdp.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = sdp.$, esc = sdp.esc, data = null;
+
+  function num(v) { return typeof v === 'number' ? String(v).replace('.', ',') : (v === null || v === undefined ? '' : String(v)); }
+
+  function editor(f, v) {
+    var a = ' data-key="' + esc(f.key) + '" data-type="' + esc(f.type) + '"';
+    switch (f.type) {
+      case 'bool':
+        return '<input type="checkbox"' + a + (v === true ? ' checked' : '') + '>';
+      case 'radio':
+        return '<div class="radio">' + f.options.map(function (o) {
+          return '<label><input type="radio" name="r_' + esc(f.key) + '"' + a + ' value="' + esc(o[0]) + '"' + (o[0] === v ? ' checked' : '') + '>' + esc(o[1]) + '</label>';
+        }).join('') + '</div>';
+      case 'enum':
+        return '<select' + a + '>' + f.options.map(function (o) {
+          return '<option value="' + esc(o[0]) + '"' + (String(o[0]) === String(v) ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+        }).join('') + '</select>';
+      case 'number': case 'int':
+        return '<input type="text" inputmode="decimal"' + a + ' value="' + esc(num(v)) + '">' + (f.unit ? '<span>' + esc(f.unit) + '</span>' : '');
+      default:
+        return '<input type="text"' + a + ' value="' + esc(v) + '">';
+    }
+  }
+
+  function render() {
+    $('#title').textContent = data.title || '';
+    $('#intro').textContent = data.intro || '';
+    $('#note').textContent = data.note || '';
+    $('#ok').textContent = data.okLabel || 'U redu';
+    var html = '';
+    data.fields.forEach(function (f) {
+      if (f.type === 'group') { html += '<h2 data-row="' + esc(f.key) + '">' + esc(f.label) + '</h2>'; return; }
+      html += '<div class="lab" data-row="' + esc(f.key) + '">' + esc(f.label) + '</div><div class="ed" data-row="' + esc(f.key) + '">' + editor(f, data.values[f.key]) + '</div>';
+      if (f.hint) { html += '<div class="hint" data-row="' + esc(f.key) + '">' + esc(f.hint) + '</div>'; }
+    });
+    $('#form').innerHTML = html;
+    sdp.$$('#form [data-key]').forEach(function (el) {
+      el.addEventListener('change', changed);
+      el.addEventListener('input', changed);
+    });
+    visibility();
+    summary(data.summary);
+  }
+
+  function values() {
+    var v = {};
+    data.fields.forEach(function (f) {
+      if (f.type === 'group') { return; }
+      var els = sdp.$$('#form [data-key="' + f.key + '"]');
+      if (els.length === 0) { return; }
+      if (f.type === 'bool') { v[f.key] = els[0].checked; }
+      else if (f.type === 'radio') { els.forEach(function (e) { if (e.checked) { v[f.key] = e.value; } }); }
+      else if (f.type === 'number' || f.type === 'int') {
+        var t = els[0].value.trim().replace(',', '.');
+        v[f.key] = t === '' ? null : Number(t);
+      } else { v[f.key] = els[0].value; }
+    });
+    return v;
+  }
+
+  function shown(f, v) {
+    if (!f.show) { return true; }
+    return Object.keys(f.show).every(function (k) {
+      var want = f.show[k];
+      return Array.isArray(want) ? want.indexOf(v[k]) >= 0 : v[k] === want;
+    });
+  }
+
+  function visibility() {
+    var v = values();
+    data.fields.forEach(function (f) {
+      sdp.$$('#form [data-row="' + f.key + '"]').forEach(function (el) { el.classList.toggle('hidden', !shown(f, v)); });
+    });
+  }
+
+  function check() {
+    var v = values(), bad = null;
+    data.fields.forEach(function (f) {
+      if (bad || !shown(f, v) || (f.type !== 'number' && f.type !== 'int')) { return; }
+      var x = v[f.key];
+      if (x === null || !isFinite(x) || (f.min !== undefined && x < f.min) || (f.max !== undefined && x > f.max)) {
+        bad = f.label + ' mora biti broj' + (f.min !== undefined ? ' od ' + num(f.min) + ' do ' + num(f.max) : '') + '.';
+      }
+    });
+    $('#error').textContent = bad || '';
+    $('#ok').disabled = !!bad;
+    return !bad;
+  }
+
+  var timer = null;
+  function changed() {
+    visibility();
+    if (check() && data.live) {
+      clearTimeout(timer);
+      timer = setTimeout(function () { sdp.call('change', values()); }, 150);
+    }
+  }
+
+  function summary(text) {
+    $('#summary').textContent = text || '';
+    $('#summaryPanel').classList.toggle('hidden', !text && !$('#error').textContent);
+  }
+
+  sdp.render = function (d) {
+    if (d.summaryOnly) { summary(d.summary); return; }
+    data = d;
+    render();
+    check();
+  };
+
+  $('#ok').addEventListener('click', function () { if (check()) { sdp.call('ok', values()); } });
+  $('#cancel').addEventListener('click', function () { sdp.call('close'); });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.keyCode === 13) && e.target.tagName !== 'BUTTON' && check()) { sdp.call('ok', values()); }
+  });
+})();
+</script>
+</body>
+</html>
