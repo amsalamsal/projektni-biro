@@ -2237,7 +2237,15 @@ namespace SiteDesignPro.Core.Roads
                         continue;
                     }
 
-                    tapers.Add((box, tb, tw, te));
+                    // added to the bands 2 cm longer at both ends (with the same cross-section there), so they join
+                    // the pieces beside them into one region instead of meeting them along a hairline
+                    Vec2 G(double off) => E(off) - (tT * 0.02);
+                    Vec2 H(double off) => F(off) + (tT * 0.02);
+                    tapers.Add((
+                        box,
+                        Poly(G(0), G(bwN), E(bwN), F(0), E(0)),
+                        Poly(G(bwN), G(bwN + sw0N), E(bwN + sw0N), F(sw1), H(sw1), H(0), F(0), E(bwN)),
+                        te.Count > 0 ? Poly(G(bwN + sw0N), G(bwN + sw0N + ew0N), E(bwN + sw0N + ew0N), F(sw1 + ew1), H(sw1 + ew1), H(sw1), F(sw1), E(bwN + sw0N)) : te));
                 }
             }
 
