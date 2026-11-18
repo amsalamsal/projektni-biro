@@ -43,7 +43,7 @@ module ProjektniBiro
           rescue Engine::Error => e
             m.commit_operation
             Log.warn("Saobraćajnice: #{e.message}")
-            UI.messagebox("#{title}: osovina je sačuvana, ali saobraćajnice nisu izgrađene:\n#{e.message}\n\nNakon ispravke: Saobraćajnice > Osvježi.")
+            UI.messagebox("#{title}: izmjena je sačuvana, ali saobraćajnice nisu izgrađene:\n#{e.message}\n\nNakon ispravke: Saobraćajnice > Osvježi.")
           rescue StandardError => e
             m.abort_operation
             Log.error("Saobraćajnice: #{title}", e)
@@ -177,7 +177,7 @@ module ProjektniBiro
           g = selected_source
           return edit_street_record(g) if g
 
-          if store.records.none? { |r| network_road?(r.type) }
+          if store.records.none? { |r| Roads.network_road?(r.type) }
             UI.messagebox('U modelu nema ulica ni cesta. Nova ulica: Saobraćajnice > Ulica.')
             return
           end
@@ -391,7 +391,7 @@ module ProjektniBiro
         end
 
         def road_infos
-          store.records.select { |r| network_road?(r.type) && r.kind == 'path' }.map do |r|
+          store.records.select { |r| Roads.network_road?(r.type) && r.kind == 'path' }.map do |r|
             { axis: r.axis_points, closed: r.geometry['closed'] == true, half: SourceStore.half_width(r), rec: r }
           end
         end

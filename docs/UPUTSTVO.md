@@ -137,6 +137,36 @@ Meni *Extensions → Vanjsko uređenje PRO*:
 * **Organizacija:** korijenska grupa projekta → grupa po modelskoj grupi (oznake `VU …`) → elementi. Atributi su u
   rječniku `SiteDesignPro`.
 
+### 10. Saobraćajnice u SketchUpu – bez AutoCAD-a
+Meni *Extensions → Vanjsko uređenje PRO → Saobraćajnice* i traka *Vanjsko uređenje PRO – Saobraćajnice*. Ulice,
+kružni tokovi, prijelazi i rampe crtaju se direktno u SketchUpu; grade se **istim motorom kao u AutoCAD-u** (program
+`sdp-ceste` dolazi uz proširenje, na Windowsu radi bez ikakve instalacije), pa su spojevi, radijusi, staze, rampe i
+3D visine isti.
+
+| Stavka | Namjena |
+|---|---|
+| Ulica | Prozor s presjekom (smjer, 1–3 trake lijevo/desno, širina trake, srednje ostrvo i do kojeg mjesta ide, dužina spajanja traka, trotoari, biciklističke staze, radijus ivičnjaka, strelice i razmak), zatim klikovi osovine. Visine tačaka: iz kliknutih tačaka (npr. na terenu), sve iste ili upisane za svaku tačku |
+| Uredi ulicu | Isti prozor za odabranu osovinu ili kliknutu ulicu; obična cesta postaje ulica (i desni klik → *Uredi ulicu*) |
+| Kružni tok | Otok 10–30 m, prijelazni prsten, broj i dužina krakova, presjek krakova; klik na centar (po želji drugi klik za smjer prvog kraka) |
+| Pješački prijelaz | Klik na ulicu: trake i širina se preuzimaju, prijelaz ide okomito preko kolovoza; opcija biciklističke staze 80 cm |
+| Cesta | Kolni prilaz, interna pristupna ili servisna cesta zadana širinom |
+| Kota saobraćajnice | Klikovi na ulicu i visina; između kota visina se mijenja linearno, nagib preko 10 % se javlja |
+| Rampa za invalide | Klik na trotoar (ta strana) ili na kolovoz (obje strane) |
+| Garažna rampa | Pravolinijska, polukružna, spiralna ili kombinovana; jednosmjerna/dvosmjerna, širina trake, zaštitni razmak, ostrvo, visine (početak može na visini ulice), prijelazne dionice, blagi dio pred ulicom, ploča iznad i svijetla visina, odvodnja, zidovi, grijanje. Uz ulicu se nudi smjer okomit na nju |
+| Presjek rampe | Uzdužni presjek rampe na mjestu klika (prati izmjene rampe) |
+| Visine i postavke saobraćajnica | Nadmorska visina Z = 0 modela (tada se visine mogu upisivati i kao m n.v.), ravan ili neravan teren, automatsko osvježavanje |
+| Osvježi saobraćajnice | Ponovo gradi sve; inače se gradi samo nakon svake izmjene |
+
+* **Osovine** su male grupe u grupi *Saobraćajnice – osovine* (oznaka *VU Saobraćajnice – osovine*). Mogu se
+  pomjerati, rotirati, kopirati i brisati alatima SketchUpa, a tačke ravne osovine pomjerati unutar njene grupe (i
+  gore-dolje: to je visina osovine tu). Saobraćajnice se same osvježe; *Poništi* (Undo) vraća i osovinu i 3D.
+* **3D** se gradi u grupi *Saobraćajnice – 3D* (kao uvezeni paket), tekstovi L / h / nagib garažnih rampi i uzdužni
+  presjeci u grupi *Saobraćajnice – tekstovi i presjeci*.
+* Pri crtanju osovine: Enter ili dvostruki klik = kraj, Backspace = poništi tačku, u VCB se upisuje dužina u m,
+  `dužina;visina` ili `v visina` (visina sljedeće tačke).
+* Upozorenja (nagib ulice preko 10 %, rampe preko 17 %, mali radijus rampe, niska svijetla visina) javljaju se odmah;
+  zadnji izvještaj: *Saobraćajnice → Izvještaj posljednje izgradnje*.
+
 ## Šifre nalaza
 | Prefiks | Značenje |
 |---|---|

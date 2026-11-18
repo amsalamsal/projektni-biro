@@ -508,7 +508,12 @@ module ProjektniBiro
           ok = run(['build', '--in', req, '--out', out])
           result_file = File.join(out, 'result.json')
           result = File.file?(result_file) ? JSON.parse(File.read(result_file, encoding: 'UTF-8')) : nil
-          raise Error, (result && result['error']) || "motor saobraćajnica nije uspio (#{ok.inspect})" unless result && result['ok'] == true
+          unless result && result['ok'] == true
+            raise Error, result['error'] if result && result['error']
+            raise Error, "motor saobraćajnica se ne može pokrenuti (#{@command.join(' ')})" if ok.nil?
+
+            raise Error, 'motor saobraćajnica nije uspio (nema rezultata)'
+          end
 
           [result, out]
         end

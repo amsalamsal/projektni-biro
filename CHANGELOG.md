@@ -2,6 +2,18 @@
 
 ## Neobjavljeno
 
+### Saobraćajnice u SketchUpu bez AutoCAD-a (18.11.)
+* **Nova traka i meni *Saobraćajnice*** u SketchUp proširenju: Ulica, Uredi ulicu, Kružni tok, Pješački prijelaz,
+  Cesta (kolni prilaz, pristupna, servisna), Kota saobraćajnice, Rampa za invalide, Garažna rampa (sve četiri vrste),
+  Presjek rampe, Visine i postavke, Osvježi, Ulica iz odabranih linija – sve opcije kao u AutoCAD-u.
+* **Isti motor kao u AutoCAD-u**: saobraćajnice gradi program `sdp-ceste` (ista C# biblioteka mreže ulica) koji
+  dolazi uz proširenje (`engine/win` – .NET Framework, dio Windowsa; `engine/net8` – .NET 8 za macOS). Rezultat je
+  paket koji se uvozi kao i svaki drugi: pri izmjeni se mijenja samo ono što se promijenilo.
+* **Osovine su SketchUp grupe**: pomjeranje, rotacija, kopiranje, brisanje i pomjeranje tačaka (i po visini) osvježe
+  saobraćajnice same, u istom koraku za *Poništi*. Visine tačaka osovine postaju kote ulice.
+* **Kružni tok** je premješten u zajedničku biblioteku (`Roundabout`): AutoCAD i SketchUp crtaju isti.
+* Testovi: motor (C#), izvorni elementi i izgradnja (Ruby, lažni SketchUp API), cijeli tok s pravim motorom u CI-ju.
+
 ### Sistematsko testiranje saobraćajnica (17.11. uveče)
 * **Automatska pravila za svaku mrežu** (provjeravaju se pri svakoj izgradnji, na 160+ situacija): površine se ne
   preklapaju, između njih nema šavova, nema komadića (sliver), ništa od ulice ne leži na garažnoj rampi, svaka rampa
