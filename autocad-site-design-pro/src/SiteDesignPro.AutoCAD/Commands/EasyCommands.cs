@@ -41,12 +41,6 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         // ------------------------------------------------------------------ roundabout
 
-        /// <summary>Median of the arms of a roundabout: the splitter island 1,20 m at its widest and 15 cm on both sides.</summary>
-        internal const double SplitterMedian = 1.5;
-
-        /// <summary>Distance from the outer edge of a roundabout where the median of an arm is gone (one centre line beyond).</summary>
-        internal const double MedianEndFromRing = 15.0;
-
         /// <summary>A complete roundabout from its centre: ring, island, kerbs, splitter islands, crossings, arrows, signs, arms.</summary>
         /// <summary>
         /// Mini roundabout (up to 25 km/h): green central island (radius 10–30 m), truck apron 1,20 m (AR-B88), a
@@ -82,187 +76,33 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            arm = chosen;
-            arm.OneWay = false;
-            // the splitter islands always have the same shape and size, so the median between the directions is fixed
-            double median = arms > 0 ? SplitterMedian : 0;
-            arm.Median = median;
-            arm.Normalize();
+            // the parts come from the shared roundabout of the core library (the same in SketchUp)
+            var options = new RoundaboutOptions { Centre = Vec2.Zero, IslandRadius = ri, Apron = apron, Arms = arms, ArmLength = armLength, FirstArmAngle = first, Arm = chosen };
+            Core.Roads.Roundabout.Normalize(options);
+            arm = options.Arm;
+            int lanes = Math.Max(1, arm.LanesLeft);
+            double lw = arm.LaneWidth;
+            double ro = Core.Roads.Roundabout.OuterRadius(options);
 
             double k = ctx.K;
             List<SiteElement> existing = ctx.ExistingElements();
-            Ring Circle(double rMeters) => new Ring(new List<Vec3> { new Vec3(c.X + (rMeters * k), c.Y, 0), new Vec3(c.X - (rMeters * k), c.Y, 0) }, new List<double> { 1.0, 1.0 });
-            ElementType T(string id) => ctx.Catalog.RequireType(id);
             int n = 0;
-            SiteElement Add(string type, ElementGeometry g, Action<SiteElement>? set = null)
+            foreach (RoundaboutPart part in Core.Roads.Roundabout.Create(options))
             {
-                SiteElement e = ctx.NewElement(T(type), g, existing);
-                set?.Invoke(e);
-                ctx.Svc.Create(e);
-                existing.Add(e);
-                n++;
-                return e;
-            }
-
-            // the ring: as many lanes as enter from an arm, lane width of the arms; kerb 15 cm against the apron
-            int lanes = Math.Max(1, arm.LanesLeft);
-            double lw = arm.LaneWidth;
-            double w = lanes * lw;
-            double inner = ri + apron + RoadSpec.KerbWidth;
-            double ro = inner + w;
-            Add(RoadElements.StreetType, new PathGeometry(Circle(inner + (w / 2)), true), e =>
-            {
-                var ring = new RoadSpec
-                {
-                    OneWay = true, LanesRight = lanes, LaneWidth = lw, SidewalkLeft = 0, BikeLeft = 0,
-                    SidewalkRight = arm.SidewalkRight, BikeRight = arm.BikeRight, CornerRadius = arm.CornerRadius, Arrows = true, ArrowSpacing = 20,
-                };
-                foreach (KeyValuePair<string, ParamValue> kv in RoadCommands.Params(ring))
+                SiteElement e = ctx.NewElement(ctx.Catalog.RequireType(part.TypeId), part.Geometry.Transform(v => new Vec3(c.X + (v.X * k), c.Y + (v.Y * k), 0)), existing);
+                foreach (KeyValuePair<string, ParamValue> kv in part.Parameters)
                 {
                     e.Parameters[kv.Key] = kv.Value;
                 }
 
-                e.Name = "Kružni tok";
-            });
-
-            // the lane line of the ring: the same broken line (3 m line, 3 m gap) as on the arms, along the middle
-            // of the ring (with two or more lanes the road network draws the lines between the lanes)
-            if (lanes == 1)
-            {
-                double rc = inner + (w / 2);
-                int dashes = Math.Max(4, (int)Math.Round(2 * Math.PI * rc / 6.0));
-                double step = 2 * Math.PI / dashes, sweep = step / 2;
-                for (int d = 0; d < dashes; d++)
+                if (part.Role == "ring" || part.Role == "ringLine" || part.Role == "islandKerb")
                 {
-                    double a0 = d * step, a1 = a0 + sweep;
-                    Vec3 Q(double ang) => new Vec3(c.X + (rc * Math.Cos(ang) * k), c.Y + (rc * Math.Sin(ang) * k), 0);
-                    Add(RoadElements.MarkingType, new PathGeometry(new Ring(new List<Vec3> { Q(a0), Q(a1) }, new List<double> { Math.Tan(sweep / 4), 0 }), false), e =>
-                    {
-                        e.Parameters["width"] = ParamValue.Of(0.12);
-                        e.Name = "Linija trake kružnog toka";
-                    });
-                }
-            }
-
-            // green island 15 cm above the asphalt with a kerb 15 cm around it, and the mountable apron of granite
-            // setts at the level of the asphalt between the kerb and the ring
-            const double islandKerb = 0.15;
-            Add("landscape.lawn_area", new PolygonGeometry(Circle(ri - islandKerb)), e => e.Parameters["topOffset"] = ParamValue.Of(0.15));
-            Add("edge.kerb", new PathGeometry(Circle(ri - (islandKerb / 2)), true), e =>
-            {
-                e.Parameters["thickness"] = ParamValue.Of(islandKerb);
-                e.Parameters["height"] = ParamValue.Of(0.30);
-                e.Parameters["baseOffset"] = ParamValue.Of(-0.15);
-                e.Parameters["material"] = ParamValue.Of("concrete");
-                e.Name = "Ivičnjak zelene površine kružnog toka";
-            });
-            if (apron > 0.05)
-            {
-                Add("road.roundabout_apron", new PolygonGeometry(Circle(ri + apron), new List<Ring> { Circle(ri) }), e =>
-                {
-                    e.Parameters["topOffset"] = ParamValue.Of(0.0);
-                    e.Parameters["material"] = ParamValue.Of("granite_setts");
-                });
-            }
-
-            for (int i = 0; i < arms; i++)
-            {
-                double a = first + (i * 2 * Math.PI / arms);
-                double ux = Math.Cos(a), uy = Math.Sin(a);
-                Vec3 P(double along, double left) => new Vec3(c.X + (((ux * along) - (uy * left)) * k), c.Y + (((uy * along) + (ux * left)) * k), 0);
-                PolygonGeometry Box(double s0, double s1, double y0, double y1) => new PolygonGeometry(new Ring(new List<Vec3> { P(s0, y0), P(s1, y0), P(s1, y1), P(s0, y1) }));
-
-                // where the straight part starts: the corner arc between the arm edge and the ring ends there
-                double R = arm.CornerRadius;
-                double hl = arm.Extent(RoadLevel.Carriageway, true), hr = arm.Extent(RoadLevel.Carriageway, false);
-                double h = Math.Max(hl, hr);
-                double st = Math.Sqrt(Math.Max(0, ((ro + R) * (ro + R)) - ((h + R) * (h + R))));
-                st = Math.Max(st, ro + 4);
-                double m2 = median / 2;
-
-                // behind the small splitter island the lanes of both directions come together: 15 m from the outer
-                // edge of the ring there is no median any more, only one continuous centre line
-                double taperFrom = st + 3.8;
-                double taperTo = Math.Max(ro + MedianEndFromRing, taperFrom + 3.0);
-                bool taper = median > 0 && armLength > taperTo - ro + 1;
-
-                // the arm: a street with the median, from the ring outwards (it is joined to the ring axis)
-                Add(RoadElements.StreetType, new PathGeometry(new Ring(new List<Vec3> { P(ro - 0.5, 0), P(ro + armLength, 0) }), false), e =>
-                {
-                    foreach (KeyValuePair<string, ParamValue> kv in RoadCommands.Params(arm))
-                    {
-                        e.Parameters[kv.Key] = kv.Value;
-                    }
-
-                    if (taper)
-                    {
-                        e.Parameters["medianTo"] = ParamValue.Of(taperFrom - (ro - 0.5));
-                        e.Parameters["medianTaper"] = ParamValue.Of(taperTo - taperFrom);
-                    }
-                });
-
-                // pedestrian crossing over the whole carriageway at the ramps (start of the straight part), 3 m wide
-                Add(RoadElements.CrossingType, Box(st, st + 3, -hr, hl));
-
-                // splitter islands of a fixed shape on both sides of the crossing (the refuge between them is at road
-                // level): towards the ring 2,00 m long, 1,00 m wide at the crossing, 1,20 m at the end with rounded
-                // corners; behind the crossing 1,00 m long, 0,60 m wide at the crossing, 0,40 m at the round end
-                double bigFrom = st - 2.0;
-                {
-                    const double cornerR = 0.25;
-                    double slope = Math.Atan2(0.1, 2.0);            // the long edges open by 10 cm over 2 m
-                    double corner = (Math.PI / 2) - slope;           // inner angle at the wide end
-                    double tl = cornerR / Math.Tan(corner / 2);      // tangent length of the rounding
-                    double bulge = Math.Tan((Math.PI - corner) / 4);
-                    double cx = Math.Cos(slope), sy = Math.Sin(slope);
-                    Add("road.splitter_island", new PolygonGeometry(new Ring(
-                        new List<Vec3>
-                        {
-                            P(st, -0.5), P(st, 0.5),
-                            P(bigFrom + (tl * cx), 0.6 - (tl * sy)), P(bigFrom, 0.6 - tl),
-                            P(bigFrom, -0.6 + tl), P(bigFrom + (tl * cx), -0.6 + (tl * sy)),
-                        },
-                        new List<double> { 0, 0, bulge, 0, bulge, 0 })));
+                    e.Name = part.Name;
                 }
 
-                Add("road.splitter_island", new PolygonGeometry(new Ring(
-                    new List<Vec3> { P(st + 3, -0.3), P(st + 3.8, -0.2), P(st + 3.8, 0.2), P(st + 3, 0.3) },
-                    new List<double> { 0, 1.0, 0, 0 })));
-
-                // hatched median between the ring and the island, and a taper behind the small island
-                double hw = Math.Max(0.2, m2 - 0.6);
-                if (bigFrom > ro + 1.5)
-                {
-                    Add(RoadElements.HatchedAreaType, Box(ro + 0.8, bigFrom, -hw, hw));
-                }
-
-                if (taper)
-                {
-                    // the hatched taper between the lines that come together behind the small island
-                    double tw = Math.Max(0.2, m2 - 0.12);
-                    Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(taperFrom, -tw), P(taperTo - 1.0, 0), P(taperFrom, tw) })));
-                }
-                else
-                {
-                    Add(RoadElements.HatchedAreaType, new PolygonGeometry(new Ring(new List<Vec3> { P(st + 4.0, -hw), P(st + 10, 0), P(st + 4.0, hw) })));
-                }
-
-                // give-way line (broken, 30 cm) along the ring edge across the entry lanes (left of the arm axis:
-                // right-hand traffic drives towards the ring on that side), and a triangle in every entry lane
-                for (double y = m2 + 0.25; y + 0.5 <= hl - 0.1; y += 1.0)
-                {
-                    double s0 = Math.Sqrt(Math.Max(0, ((ro + 0.4) * (ro + 0.4)) - (y * y)));
-                    double s1 = Math.Sqrt(Math.Max(0, ((ro + 0.4) * (ro + 0.4)) - ((y + 0.5) * (y + 0.5))));
-                    Add(RoadElements.MarkingType, new PathGeometry(new Ring(new List<Vec3> { P(s0, y), P(s1, y + 0.5) }), false), e => e.Parameters["width"] = ParamValue.Of(0.3));
-                }
-
-                for (int l = 0; l < arm.LanesLeft; l++)
-                {
-                    double yc = m2 + ((l + 0.5) * lw);
-                    double sb = Math.Sqrt(Math.Max(0, (ro * ro) - (yc * yc))) + 1.5;
-                    double half = Math.Min(0.75, lw * 0.3);
-                    Add(RoadElements.MarkingType, new PathGeometry(new Ring(new List<Vec3> { P(sb, yc - half), P(sb, yc + half), P(sb + 3.0, yc) }), true), e => e.Parameters["width"] = ParamValue.Of(0.12));
-                }
+                ctx.Svc.Create(e);
+                existing.Add(e);
+                n++;
             }
 
             RoadCommands.RebuildNow(ctx);

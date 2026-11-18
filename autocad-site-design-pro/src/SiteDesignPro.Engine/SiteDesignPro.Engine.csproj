@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Road engine for the SketchUp road tools (Saobraćajnice): the same road network as in AutoCAD, run as a small
+    program next to the extension. net47 runs on every Windows 10/11 without installing anything (.NET Framework
+    4.7+ is part of Windows); the net8.0 build is for macOS/Linux with the .NET 8 runtime and for the tests.
+    No console window (WinExe): requests and results are files.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net47;net8.0</TargetFrameworks>
+    <AssemblyName>sdp-ceste</AssemblyName>
+    <RootNamespace>SiteDesignPro.Engine</RootNamespace>
+    <RollForward>Major</RollForward>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net47'">
+    <OutputType>WinExe</OutputType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net47'">
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SiteDesignPro.Core\SiteDesignPro.Core.csproj" />
+  </ItemGroup>
+</Project>

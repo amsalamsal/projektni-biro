@@ -3,7 +3,8 @@
 
   dist/SiteDesignPro.bundle/           AutoCAD autoloader bundle (R23 = 2020, R24 = 2021-2024, R25 = 2025/2026, R26 = 2027)
   dist/SiteDesignPro.bundle.zip
-  dist/pb_site_design_pro.rbz          SketchUp extension (install with Extension Manager > Install Extension)
+  dist/pb_site_design_pro.rbz          SketchUp extension (install with Extension Manager > Install Extension),
+                                       with the road engine (engine/win/sdp-ceste.exe, engine/net8/sdp-ceste.dll)
   dist/samples/                        sample package, change file, schedules
 
 Run tools/build_and_test.sh (or the dotnet build commands it lists) first.
@@ -217,6 +218,17 @@ def sketchup_rbz() -> pathlib.Path:
     if catalog.exists():
         shutil.rmtree(catalog)
     shutil.copytree(ROOT / "shared" / "catalog", catalog)
+    # road engine of the road tools (Saobraćajnice): net47 for Windows, net8.0 (dotnet sdp-ceste.dll) for the others
+    engine = staging / "pb_site_design_pro" / "engine"
+    for tfm, sub in (("net47", "win"), ("net8.0", "net8")):
+        out = ACAD / "src" / "SiteDesignPro.Engine" / "bin" / CONFIG / tfm
+        if not (out / "SiteDesignPro.Core.dll").exists():
+            sys.exit(f"missing build output {out}; build with: dotnet build -c {CONFIG} autocad-site-design-pro/src/SiteDesignPro.Engine")
+        target_dir = engine / sub
+        target_dir.mkdir(parents=True)
+        for f in sorted(out.iterdir()):
+            if f.is_file() and f.suffix in (".dll", ".exe", ".config", ".json") and not f.name.endswith(".dev.json"):
+                shutil.copy2(f, target_dir / f.name)
     target = DIST / "pb_site_design_pro.rbz"
     zip_dir(staging, target)
     shutil.rmtree(staging)

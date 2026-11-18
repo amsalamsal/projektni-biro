@@ -12,8 +12,9 @@ ruby tools/assets/check_params.rb | tail -1
 step "AutoCAD command registration"
 python3 tools/check_commands.py
 
-step "C# build (Core, CLI, AutoCAD adapter for AutoCAD 2025/2026 and 2027)"
+step "C# build (Core, CLI, road engine for SketchUp, AutoCAD adapter for AutoCAD 2020-2027)"
 dotnet build -c Release autocad-site-design-pro/src/SiteDesignPro.Cli
+dotnet build -c Release autocad-site-design-pro/src/SiteDesignPro.Engine
 dotnet build -c Release autocad-site-design-pro/src/SiteDesignPro.AutoCAD
 
 step "C# unit tests"
@@ -31,6 +32,14 @@ jsonschema.Draft202012Validator(json.load(open('shared/schema/changes.schema.jso
 print('valid   shared/samples/residential-complex-changes.json :: changes.schema.json')
 PY
 git diff --quiet -- shared/samples || echo "NOTE: sample packages changed - review and commit them."
+
+step "Road engine for SketchUp: sample request -> package (read by the Ruby tests)"
+ENGINE="dotnet autocad-site-design-pro/src/SiteDesignPro.Engine/bin/Release/net8.0/sdp-ceste.dll"
+rm -rf out/roads-sample && mkdir -p out
+$ENGINE build --in shared/samples/roads-request.json --out out/roads-sample || { cat out/roads-sample/result.json; exit 1; }
+python3 tools/validate_schema.py out/roads-sample
+python3 -c "import json;r=json.load(open('out/roads-sample/result.json'));print('engine:',r['summary']);assert r['ok']"
+export SDP_ROADS_SAMPLE="$PWD/out/roads-sample"
 
 step "Ruby tests (core, builders, change planning, SketchUp adapter against the API fake)"
 for f in sketchup-site-design-pro/tests/test_*.rb; do [ "$(basename "$f")" = test_helper.rb ] && continue; ruby -Isketchup-site-design-pro/tests "$f" | grep -v '\[INFO\]' ; done

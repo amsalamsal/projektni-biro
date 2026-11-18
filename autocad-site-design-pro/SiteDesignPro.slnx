@@ -3,6 +3,7 @@
     <Project Path="src/SiteDesignPro.AutoCAD/SiteDesignPro.AutoCAD.csproj" />
     <Project Path="src/SiteDesignPro.Cli/SiteDesignPro.Cli.csproj" />
     <Project Path="src/SiteDesignPro.Core/SiteDesignPro.Core.csproj" />
+    <Project Path="src/SiteDesignPro.Engine/SiteDesignPro.Engine.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SiteDesignPro.Core.Tests/SiteDesignPro.Core.Tests.csproj" />
