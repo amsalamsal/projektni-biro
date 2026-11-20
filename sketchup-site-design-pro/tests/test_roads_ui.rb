@@ -166,9 +166,9 @@ class TestRoadsUi < Minitest::Test
     @model = Sketchup::Model.new
     Sketchup.active_model = @model
     run_command('Garažna rampa')
-    form('kind' => 'straight', 'endLevel' => -1.5)
+    form('kind' => 'straight', 'endLevel' => -1.0)
     click(@model.tool, 0, 0)
-    click(@model.tool, 0, -12) # 12,5 %
+    click(@model.tool, 0, -12) # 1 m over 12 m: well below 17 % in every part
     assert_equal [:commit], @model.operations.last(1).map(&:first), UI.log.inspect
   end
 end
