@@ -94,11 +94,11 @@ namespace SiteDesignPro.Core.Tests
             var small = new Ring(new List<Vec3> { new Vec3(6, 0, 0), new Vec3(-6, 0, 0) }, new List<double> { 1.0, 0.0 });
             Assert.Contains(GarageRamp.From(Ramp(small, "semicircular", "one_way", 0, -1), 1.0)!.Violations(), v => v.StartsWith("unutrašnji poluprečnik", StringComparison.Ordinal));
 
-            // too narrow a lane on a curved ramp
+            // a lane narrower than the minimum of the kind is never drawn: a curved ramp gets at least 3,50 m
             var big = new Ring(new List<Vec3> { new Vec3(10, 0, 0), new Vec3(-10, 0, 0) }, new List<double> { 1.0, 0.0 });
             SiteElement narrow = Ramp(big, "semicircular", "one_way", 0, -1);
             narrow.Parameters["laneWidth"] = ParamValue.Of(3.0);
-            Assert.Contains(GarageRamp.From(narrow, 1.0)!.Violations(), v => v.StartsWith("širina trake", StringComparison.Ordinal));
+            Assert.Equal(3.5, GarageRamp.From(narrow, 1.0)!.LaneWidth, 9);
 
             // a slab too low above the ramp
             SiteElement low = Ramp(axis, "straight", "one_way", 0, -3);
