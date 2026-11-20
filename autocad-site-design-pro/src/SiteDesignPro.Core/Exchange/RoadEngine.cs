@@ -28,6 +28,12 @@ namespace SiteDesignPro.Core.Exchange
         /// <summary>Source elements in metres (model frame). Road axes may carry heights in Z (become elevation marks).</summary>
         public List<SiteElement> Elements { get; } = new List<SiteElement>();
 
+        /// <summary>
+        /// Origin of the project frame (E, N, H in metres) the elements are given in: that of the AutoCAD project the
+        /// SketchUp model was imported from, so an exported package lands in the drawing where it belongs.
+        /// </summary>
+        public double[] Origin { get; set; } = new double[3];
+
         /// <summary>Problems found while reading the request (an element that could not be read is left out).</summary>
         public List<string> Problems { get; } = new List<string>();
     }
@@ -41,6 +47,9 @@ namespace SiteDesignPro.Core.Exchange
     public static class RoadEngine
     {
         public const string ResultFile = "result.json";
+
+        /// <summary>Host written into the packages of the engine: AutoCAD recognises a package of the SketchUp road tools by it.</summary>
+        public const string Host = "SketchUp – saobraćajnice (sdp-ceste)";
 
         /// <summary>Axis vertices whose heights differ less than this from 0 carry no height.</summary>
         public const double HeightTolerance = 0.0005;
@@ -69,6 +78,11 @@ namespace SiteDesignPro.Core.Exchange
             if (root.TryGetProperty("base", out JsonElement b) && b.ValueKind == JsonValueKind.Number)
             {
                 req.BaseLevel = b.GetDouble();
+            }
+
+            if (root.TryGetProperty("origin", out JsonElement or) && or.ValueKind == JsonValueKind.Array && or.GetArrayLength() >= 2)
+            {
+                req.Origin = new[] { or[0].GetDouble(), or[1].GetDouble(), or.GetArrayLength() >= 3 ? or[2].GetDouble() : 0 };
             }
 
             var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -297,7 +311,7 @@ namespace SiteDesignPro.Core.Exchange
             PackageWriteResult written = PackageWriter.Write(outputFolder, settings, elements, catalog, new PackageWriteOptions
             {
                 GeneratorVersion = generatorVersion,
-                Host = "SketchUp – saobraćajnice (sdp-ceste)",
+                Host = Host,
                 SourceDocument = request.ProjectName,
             });
             notes.AddRange(written.Skipped.Select(s => "Preskočeno: " + s));
@@ -311,6 +325,48 @@ namespace SiteDesignPro.Core.Exchange
             result["ramps"] = rampsJson;
             result["sections"] = sections;
             return result;
+        }
+
+        /// <summary>
+        /// Writes the roads of the request as a package for AutoCAD (.sdpkg): the source elements (streets, roads,
+        /// roundabout parts, crossings, elevation marks – heights of axis vertices become marks –, kerb ramp marks,
+        /// garage ramps, ramp sections) in the project frame of the request, with the generated elements flagged so
+        /// AutoCAD leaves them out and draws its own network.
+        /// </summary>
+        public static JsonObject Export(RoadEngineRequest request, string packagePath, ElementCatalog catalog, string generatorVersion = "0.0.0")
+        {
+            List<SiteElement> elements = Prepare(request.Elements, catalog);
+            var settings = new ProjectSettings
+            {
+                ProjectId = request.ProjectId,
+                Name = request.ProjectName,
+                DrawingUnit = "m",
+                Origin = request.Origin,
+            };
+            if (request.BaseLevel.HasValue)
+            {
+                settings.Elevations.BuildingZeroAbsolute = request.BaseLevel.Value;
+                settings.Elevations.DrawingZ = Elevation.DrawingZMode.Relative;
+            }
+
+            PackageWriteResult written = PackageWriter.WritePackageFrame(packagePath, settings, elements, catalog, new PackageWriteOptions
+            {
+                GeneratorVersion = generatorVersion,
+                Host = Host,
+                SourceDocument = request.ProjectName,
+            });
+            var notes = new List<string>(request.Problems);
+            notes.AddRange(written.Skipped.Select(x => "Preskočeno: " + x));
+            return new JsonObject
+            {
+                ["format"] = "sdp-roads-export",
+                ["version"] = 1,
+                ["ok"] = true,
+                ["package"] = written.Path,
+                ["elements"] = elements.Count,
+                ["roads"] = elements.Count(e => RoadElements.IsNetworkRoad(catalog.FindType(e.TypeId))),
+                ["notes"] = new JsonArray(notes.Select(n => (JsonNode)JsonValue.Create(n)!).ToArray()),
+            };
         }
 
         /// <summary>The parts of a roundabout as source elements (request element format) for the host to keep.</summary>

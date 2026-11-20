@@ -95,8 +95,12 @@ namespace SiteDesignPro.Core.Exchange
 
             // the road network adds its carriageway, bike lanes, kerbs, sidewalks, lane lines and arrows
             List<SiteElement> elementList = packageFrameElements.ToList();
-            elementList.AddRange(Roads.RoadElements.Derived(elementList, catalog));
-            elementList.AddRange(Roads.GarageRamp.Derived(elementList, catalog));
+            var derivedIds = new HashSet<string>(StringComparer.Ordinal);
+            List<SiteElement> derivedNetwork = Roads.RoadElements.Derived(elementList, catalog);
+            elementList.AddRange(derivedNetwork);
+            List<SiteElement> derivedRamps = Roads.GarageRamp.Derived(elementList, catalog);
+            elementList.AddRange(derivedRamps);
+            derivedIds.UnionWith(derivedNetwork.Concat(derivedRamps).Select(x => x.Id));
             foreach (SiteElement e in elementList)
             {
                 ElementType? type = catalog.FindType(e.TypeId);
@@ -155,6 +159,14 @@ namespace SiteDesignPro.Core.Exchange
                     // (added after the content hash, so it does not count as a change of the road)
                     var custom = el["custom"] as JsonObject ?? new JsonObject();
                     custom[Roads.RoadElements.NetworkFlag] = true;
+                    el["custom"] = custom;
+                }
+
+                if (derivedIds.Contains(e.Id))
+                {
+                    // made by the network or a ramp: a host that draws them itself leaves them out (after the hash)
+                    var custom = el["custom"] as JsonObject ?? new JsonObject();
+                    custom[Roads.RoadElements.DerivedFlag] = true;
                     el["custom"] = custom;
                 }
 

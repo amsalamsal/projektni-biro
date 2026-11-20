@@ -247,11 +247,17 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             var byId = existing.Where(m => !m.IsCopy).GroupBy(m => m.Record.Id).ToDictionary(g => g.Key, g => g.First());
-            bool replace = pkg.Elements.Any(e => byId.ContainsKey(e.Element.Id)) &&
+
+            // the carriageways, kerbs, sidewalks, markings, … of the package are left out: AutoCAD draws its own road
+            // network from the streets, roads and marks (as if they had been drawn here)
+            List<PackageElement> elements = pkg.Elements.Where(pe => !IsGenerated(pe.Element)).ToList();
+            int generated = pkg.Elements.Count - elements.Count;
+            bool fromSketchUpRoads = pkg.GeneratorHost == RoadEngine.Host;
+            bool replace = elements.Any(e => byId.ContainsKey(e.Element.Id)) &&
                 ctx.Keyword("Neki elementi paketa već postoje u crtežu [Preskoci/Zamijeni]", new[] { "Preskoci", "Zamijeni" }, "Preskoci") == "Zamijeni";
             ctx.Svc.Layers.EnsureAll(false);
-            int created = 0, replaced = 0, skipped = 0, failed = 0;
-            foreach (PackageElement pe in pkg.Elements)
+            int created = 0, replaced = 0, skipped = 0, failed = 0, roads = 0;
+            foreach (PackageElement pe in elements)
             {
                 if (ctx.Catalog.FindType(pe.Element.TypeId) == null)
                 {
@@ -279,8 +285,15 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 try
                 {
-                    ctx.Svc.Create(PackageImport.ToDrawingFrame(pe.Element, ctx.Settings));
+                    SiteElement element = pe.Element;
+                    element.Custom.Remove(Core.Roads.RoadElements.NetworkFlag);
+                    element.Custom.Remove(Core.Roads.RoadElements.DerivedFlag);
+                    ctx.Svc.Create(PackageImport.ToDrawingFrame(element, ctx.Settings));
                     created++;
+                    if (Core.Roads.RoadElements.SourceTypes.Contains(element.TypeId))
+                    {
+                        roads++;
+                    }
                 }
                 catch (System.Exception ex) when (ex is InvalidOperationException || ex is ArgumentException || ex is Autodesk.AutoCAD.Runtime.Exception)
                 {
@@ -303,9 +316,46 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
+            // roads erased in SketchUp: a package of the SketchUp road tools of this project holds all its roads
+            int erased = 0;
+            if (fromSketchUpRoads && !adopt && pkg.ProjectId == ctx.Settings.ProjectId)
+            {
+                var inPackage = new HashSet<string>(pkg.Elements.Select(e => e.Element.Id), StringComparer.Ordinal);
+                List<ManagedElement> gone = existing.Where(m => !m.IsCopy && Core.Roads.RoadElements.SourceTypes.Contains(m.Record.TypeId) && !inPackage.Contains(m.Record.Id)).ToList();
+                if (gone.Count > 0 &&
+                    ctx.Keyword(Core.Text.Bs.T("U crtežu je {0} saobraćajnih elemenata kojih nema u paketu iz SketchUp-a (tamo su obrisani). Obrisati ih i u crtežu? [Da/Ne]", gone.Count), new[] { "Da", "Ne" }, "Ne") == "Da")
+                {
+                    foreach (ManagedElement m in gone)
+                    {
+                        foreach ((ObjectId auxId, string _) in ctx.Svc.Aux(m.Record.Id).ToList())
+                        {
+                            ctx.Tr.GetObject(auxId, OpenMode.ForWrite).Erase();
+                        }
+
+                        ctx.Tr.GetObject(m.ObjectId, OpenMode.ForWrite).Erase();
+                        erased++;
+                    }
+                }
+            }
+
             ctx.SaveSettings();
             ctx.Write(Core.Text.Bs.T("Uvoz paketa {0}: kreirano {1} elemenata (zamijenjeno {2}, preskočeno postojećih {3}, neuspjelo {4}).",
                 Path.GetFileName(r.StringResult), created, replaced, skipped, failed));
+            if (generated > 0)
+            {
+                ctx.Write(Core.Text.Bs.T("  {0} elemenata mreže (kolovoz, ivičnjaci, trotoari, oznake, …) nije uvezeno: crtež ih crta sam iz ulica i cesta.", generated));
+            }
+
+            if (erased > 0)
+            {
+                ctx.Write(Core.Text.Bs.T("  obrisano {0} saobraćajnih elemenata kojih više nema u SketchUp-u.", erased));
+            }
+
+            if (roads > 0 || erased > 0)
+            {
+                RoadCommands.RebuildNow(ctx);
+                ctx.Write("  Mreža saobraćajnica je ponovo nacrtana (kolovozi, ivičnjaci, trotoari, oznake, rampe).");
+            }
             if (adopt)
             {
                 ctx.Write(Core.Text.Bs.T("Preuzeto iz paketa: jedinica {0}, ishodište E {1} N {2}{3}.", ctx.Settings.DrawingUnit,
@@ -316,6 +366,11 @@ namespace SiteDesignPro.AutoCAD.Commands
             ctx.Write("Dalje: ZOOM Extents, SDPEDIT za izmjene, SDPVALIDATE, SDPEXPORT.");
             Log.Info("Uvezen paket " + r.StringResult + ": " + created + " elemenata");
         });
+
+        /// <summary>An element the road network or a garage ramp generated (flagged in the package, or of a type only the network makes).</summary>
+        internal static bool IsGenerated(SiteElement e) =>
+            (e.Custom.Contains(Core.Roads.RoadElements.DerivedFlag) && e.Custom[Core.Roads.RoadElements.DerivedFlag].AsBool()) ||
+            Core.Roads.RoadElements.NetworkOnlyTypes.Contains(e.TypeId);
 
         /// <summary>Applies a SketchUp change file (parameter edits, moved/rotated point elements).</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPAPPLYCHANGES", CommandFlags.Modal)]

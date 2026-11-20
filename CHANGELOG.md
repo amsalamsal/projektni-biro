@@ -2,6 +2,19 @@
 
 ## Neobjavljeno
 
+### Saobraćajnice u oba smjera: SketchUp ⇄ AutoCAD (20.11.)
+* **SketchUp → AutoCAD:** nova stavka *Izvoz saobraćajnica za AutoCAD…* (motor `sdp-ceste export`) snima izvorne
+  elemente alata Saobraćajnice u `.sdpkg`; visine osovina postaju kote. Generisani elementi su u paketu označeni
+  (`derivedFromRoads`).
+* **AutoCAD `SDPUVOZPAKETA`:** preskače generisane dijelove (kolovoz, trotoari, ivičnjaci, oznake, površine rampi),
+  dodaje ili zamjenjuje izvorne elemente i odmah ponovo crta mrežu ulica. Paket iz SketchUpa za isti projekat nudi
+  brisanje ulica kojih u njemu više nema.
+* **AutoCAD → SketchUp:** *Preuzmi saobraćajnice iz AutoCAD-a* pretvara ulice uvezenog projekta u osovine; projekat
+  ostaje povezan, pa naredni uvozi iz AutoCAD-a mijenjaju osovine (nove, izmijenjene, obrisane), a ne 3D. Kote na
+  tački osovine se vraćaju u visinu osovine.
+* Koordinate preko ishodišta AutoCAD projekta (korijenska grupa uvoza). Testovi: C# (izvoz motora) i Ruby (cijeli
+  krug s pravim motorom).
+
 ### Saobraćajnice u SketchUpu bez AutoCAD-a (18.11.)
 * **Nova traka i meni *Saobraćajnice*** u SketchUp proširenju: Ulica, Uredi ulicu, Kružni tok, Pješački prijelaz,
   Cesta (kolni prilaz, pristupna, servisna), Kota saobraćajnice, Rampa za invalide, Garažna rampa (sve četiri vrste),

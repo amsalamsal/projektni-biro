@@ -20,6 +20,17 @@ module ProjektniBiro
       SIMPLE_ROADS = %w[road.access_road road.driveway road.service_route].freeze
       NETWORK_ROADS = ([STREET] + SIMPLE_ROADS).freeze
 
+      # Types the roads are made from (drawn by the user; the same list as RoadElements.SourceTypes in C#).
+      SOURCE_TYPES = (NETWORK_ROADS + [CROSSING, LEVEL_MARK, CURB_RAMP_MARK, GARAGE_RAMP, RAMP_SECTION, HATCHED_AREA,
+                                        'road.splitter_island', 'road.roundabout_apron']).freeze
+      # Types only the road network makes (RoadElements.NetworkOnlyTypes).
+      NETWORK_ONLY_TYPES = %w[road.carriageway road.street_bike_lane road.street_kerb road.sidewalk road.sidewalk_edge
+                              road.garage_ramp_surface road.curb_ramp road.bike_ramp road.bike_crossing].freeze
+      # Custom flag of an element the network or a garage ramp generated (RoadElements.DerivedFlag).
+      DERIVED_FLAG = 'derivedFromRoads'
+      # Generator host of the packages of the road engine (RoadEngine.Host).
+      ENGINE_HOST = 'SketchUp – saobraćajnice (sdp-ceste)'
+
       KERB = 0.15
       EDGE = 0.10
       MAX_ROAD_SLOPE = 0.10
@@ -402,7 +413,7 @@ module ProjektniBiro
       module Request
         module_function
 
-        def build(records, project_id: nil, project_name: 'Saobraćajnice', base: nil, flat: false)
+        def build(records, project_id: nil, project_name: 'Saobraćajnice', base: nil, flat: false, origin: nil)
           elements = records.map do |r|
             h = r.to_request
             if flat
@@ -414,6 +425,7 @@ module ProjektniBiro
           end.compact
           req = { 'format' => 'sdp-roads-request', 'version' => 1, 'project' => { 'id' => project_id, 'name' => project_name }, 'elements' => elements }
           req['base'] = base.to_f unless base.nil?
+          req['origin'] = origin.map(&:to_f) if origin
           req
         end
 
@@ -516,6 +528,27 @@ module ProjektniBiro
           end
 
           [result, out]
+        end
+
+        # The roads of the request as a package for AutoCAD (.sdpkg at `path`): returns the result hash.
+        def export(request, path)
+          raise Error, missing unless available?
+
+          FileUtils.mkdir_p(@work_dir)
+          req = File.join(@work_dir, 'izvoz-zahtjev.json')
+          res = File.join(@work_dir, 'izvoz-rezultat.json')
+          File.delete(res) if File.file?(res)
+          File.open(req, 'wb') { |f| f.write(JSON.generate(request)) }
+          ok = run(['export', '--in', req, '--out', path, '--result', res])
+          result = File.file?(res) ? JSON.parse(File.read(res, encoding: 'UTF-8')) : nil
+          unless result && result['ok'] == true
+            raise Error, result['error'] if result && result['error']
+            raise Error, "motor saobraćajnica se ne može pokrenuti (#{@command.join(' ')})" if ok.nil?
+
+            raise Error, 'motor saobraćajnica nije napravio paket'
+          end
+
+          result
         end
 
         # Parts of a roundabout (source elements).

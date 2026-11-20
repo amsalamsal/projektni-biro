@@ -19,6 +19,7 @@ require File.join(__dir__, 'core')
   sketchup/asset_insert
   sketchup/roads/store
   sketchup/roads/rebuild
+  sketchup/roads/exchange
   sketchup/roads/tools
   sketchup/roads/forms
   sketchup/roads/commands

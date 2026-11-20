@@ -126,6 +126,15 @@ module ProjektniBiro
         @by_id = @elements.each_with_object({}) { |e, acc| acc[e.id] = e }
       end
 
+      # Takes the elements the block selects out of the package (they are then neither planned nor imported);
+      # returns them.
+      def drop_elements!
+        out, keep = @elements.partition { |e| yield(e) }
+        @elements = keep
+        @by_id = @elements.each_with_object({}) { |e, acc| acc[e.id] = e }
+        out
+      end
+
       def element(id)
         @by_id[id]
       end

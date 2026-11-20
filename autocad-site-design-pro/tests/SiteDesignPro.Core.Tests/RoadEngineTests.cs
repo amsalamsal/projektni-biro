@@ -127,6 +127,41 @@ namespace SiteDesignPro.Core.Tests
         }
 
         [Fact]
+        public void Export_WritesTheSourcesForAutoCad_GeneratedAreFlagged_InTheProjectFrame()
+        {
+            JsonObject a = Element(RoadElements.StreetType, Path(false, -60, 0, 0, 60, 0, 0), null, "U-001");
+            JsonObject b = Element(RoadElements.StreetType, Path(false, 0, 0, 0, 0, 60, 3.0), null, "U-002");
+            JsonObject o = JsonNode.Parse(Request(a, b))!.AsObject();
+            o["origin"] = new JsonArray(6500000.0, 4800000.0, 0.0);
+            RoadEngineRequest req = RoadEngine.ParseRequest(o.ToJsonString(), Cat);
+            Assert.Equal(6500000.0, req.Origin[0]);
+            string file = System.IO.Path.Combine(TestSupport.TempDir(), "saobracajnice.sdpkg");
+            JsonObject result = RoadEngine.Export(req, file, Cat, "test");
+            Assert.True(result["ok"]!.GetValue<bool>());
+            Assert.Equal(2, result["roads"]!.GetValue<int>());
+            Assert.True(File.Exists(file));
+
+            PackageReadResult read = PackageReader.Read(file);
+            Assert.NotNull(read.Package);
+            Assert.False(read.Report.HasErrors, read.Report.ToString());
+            SitePackage pkg = read.Package!;
+            Assert.Equal(RoadEngine.Host, pkg.GeneratorHost);
+            Assert.Equal("7a0f5d3e-3c55-4d47-9a7e-1f0d8f2b9c01", pkg.ProjectId);
+            Assert.Equal(6500000.0, pkg.Origin[0]);
+
+            List<SiteElement> sources = pkg.Elements.Select(x => x.Element).Where(x => RoadElements.SourceTypes.Contains(x.TypeId) && !(x.Custom.Contains(RoadElements.DerivedFlag) && x.Custom[RoadElements.DerivedFlag].AsBool())).ToList();
+            Assert.Equal(2, sources.Count(x => x.TypeId == RoadElements.StreetType));
+            Assert.Contains(sources, x => x.TypeId == RoadElements.LevelMarkType); // heights of U-002
+            Assert.Contains(sources, x => x.Label == "U-001");
+
+            // everything else (surfaces, kerbs, markings) is generated: AutoCAD leaves it out and draws its own network
+            List<SiteElement> generated = pkg.Elements.Select(x => x.Element).Except(sources).ToList();
+            Assert.NotEmpty(generated);
+            Assert.All(generated, x => Assert.True(RoadElements.NetworkOnlyTypes.Contains(x.TypeId) || (x.Custom.Contains(RoadElements.DerivedFlag) && x.Custom[RoadElements.DerivedFlag].AsBool()), x.TypeId));
+            Assert.Contains(generated, x => x.TypeId == "road.carriageway");
+        }
+
+        [Fact]
         public void Roundabout_PartsAreTheAutoCadRoundabout_AndBuildWithoutErrors()
         {
             string options = new JsonObject

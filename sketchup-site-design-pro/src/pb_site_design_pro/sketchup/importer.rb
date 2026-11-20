@@ -10,7 +10,7 @@ module ProjektniBiro
       PROGRESS_EVERY = 50
       OPERATION = 'Uvoz paketa Vanjsko uređenje PRO'
 
-      attr_reader :package, :read_report, :plan, :terrain_plan, :report, :backup_path
+      attr_reader :package, :read_report, :plan, :terrain_plan, :report, :backup_path, :road_items, :road_outcome
 
       def initialize(model, path, catalog: CatalogFiles.new, lod: Settings.get('lod'), policy: Settings.policy)
         @model = model
@@ -31,7 +31,10 @@ module ProjektniBiro
         raise PackageError, 'paket nije moguće pročitati' unless @package
 
         entries = ModelIndex.entries(@model)
+        # a linked AutoCAD project: its roads go to the road tools (source elements), not into this import
+        @road_items ||= Roads::Exchange.take_roads!(@model, @package) if defined?(Roads::Exchange)
         @plan = ChangePlanner.new(@policy).plan(@package, entries, ->(e) { ElementBuilder.supported?(e) || custom_component(e) })
+        @plan = Roads::Exchange.keep_roads(@plan) if @road_items
         @terrain_plan = TerrainPlanner.plan(@package.terrains, ModelIndex.terrain_entries(@model), @package.project_id, @plan.policy)
         @plan
       end
@@ -57,6 +60,7 @@ module ProjektniBiro
           Scenes.create(@model, @organizer, @catalog) if create_scenes
           @model.commit_operation if operation
           journal.end_operation(op_id, 'Completed', @plan.summary) if journal
+          import_roads if @road_items && operation
         rescue StandardError => e
           raise unless operation
 
@@ -75,6 +79,21 @@ module ProjektniBiro
       end
 
       private
+
+      # The roads of a linked AutoCAD project: into the source elements of the road tools, then built by the road
+      # engine (a failure is reported; the rest of the import stays).
+      def import_roads
+        stats, outcome = Roads::Exchange.after_import(@model, @package, @road_items)
+        @road_outcome = outcome
+        @report.add(:info, 'SDP-S001', nil, "Saobraćajnice iz AutoCAD-a preuzete u alate Saobraćajnice: #{Roads::Exchange.stats_text(stats)}.",
+                    'Uređuju se alatima Saobraćajnice; nazad u AutoCAD: Saobraćajnice > Izvoz saobraćajnica za AutoCAD.')
+        unless outcome
+          @report.add(:warning, 'SDP-S002', nil, 'Saobraćajnice nisu izgrađene (motor saobraćajnica).', 'Saobraćajnice > Osvježi saobraćajnice.')
+        end
+      rescue StandardError => e
+        Log.error('Saobraćajnice iz AutoCAD-a nisu preuzete', e)
+        @report.add(:warning, 'SDP-S003', nil, "Saobraćajnice iz AutoCAD-a nisu preuzete: #{e.message}", 'Pogledajte dnevnik (log).')
+      end
 
       # Backup of the model before the import. A saved model is copied (Model#save_copy keeps unsaved changes
       # too); an unsaved model cannot be backed up and the user relies on Undo.

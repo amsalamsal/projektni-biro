@@ -13,6 +13,7 @@ namespace SiteDesignPro.Engine
     /// <summary>
     /// sdp-ceste: the road engine of the SketchUp road tools.
     ///   sdp-ceste build --in request.json --out folder          package (manifest.json, geometry.json) + result.json
+    ///   sdp-ceste export --in request.json --out roads.sdpkg --result result.json   the roads as a package for AutoCAD
     ///   sdp-ceste roundabout --in options.json --out parts.json  the parts of a roundabout as source elements
     ///   sdp-ceste version --out version.json
     /// Exit code 0 on success, 1 on an error (the error is written to the output: result.json or the given file).
@@ -41,6 +42,14 @@ namespace SiteDesignPro.Engine
                             return 0;
                         }
 
+                    case "export":
+                        {
+                            RoadEngineRequest request = RoadEngine.ParseRequest(ReadText(Require(o, "in")), catalog);
+                            JsonObject result = RoadEngine.Export(request, Require(o, "out"), catalog, version);
+                            Write(Require(o, "result"), result);
+                            return 0;
+                        }
+
                     case "roundabout":
                         {
                             JsonObject parts = RoadEngine.RoundaboutParts(ReadText(Require(o, "in")), catalog);
@@ -54,7 +63,7 @@ namespace SiteDesignPro.Engine
                         return 0;
 
                     default:
-                        throw new ArgumentException("Nepoznata naredba '" + command + "' (build, roundabout, version).");
+                        throw new ArgumentException("Nepoznata naredba '" + command + "' (build, export, roundabout, version).");
                 }
             }
             catch (Exception ex)
@@ -68,6 +77,10 @@ namespace SiteDesignPro.Engine
                         if (command == "build")
                         {
                             RoadEngine.WriteResult(output!, error);
+                        }
+                        else if (command == "export" && o.TryGetValue("result", out string? resultFile))
+                        {
+                            Write(resultFile, error);
                         }
                         else
                         {

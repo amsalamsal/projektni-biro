@@ -169,6 +169,29 @@ namespace SiteDesignPro.Core.Roads
         /// <summary>Custom flag on exported roads whose surfaces come from the network (SketchUp builds no strip for them).</summary>
         public const string NetworkFlag = "networkSurface";
 
+        /// <summary>
+        /// Custom flag of an element the road network or a garage ramp generated (carriageway, kerb, sidewalk,
+        /// markings, …) in a package: a host that draws the network itself (AutoCAD) leaves these out on import.
+        /// </summary>
+        public const string DerivedFlag = "derivedFromRoads";
+
+        /// <summary>
+        /// Types of the elements the generated road elements are made from (drawn by the user): the roads, crossings,
+        /// elevation marks, kerb ramp marks, garage ramps, ramp sections, hatched areas and the islands of roundabouts.
+        /// </summary>
+        public static readonly IReadOnlyCollection<string> SourceTypes = new HashSet<string>(StringComparer.Ordinal)
+        {
+            StreetType, "road.access_road", "road.driveway", "road.service_route", "road.pedestrian_crossing", LevelMarkType,
+            "road.curb_ramp_mark", "road.garage_ramp", RampSectionType, "road.hatched_area", "road.splitter_island", "road.roundabout_apron",
+        };
+
+        /// <summary>Generated types (only ever made by the network): left out on import even without the flag (older packages).</summary>
+        public static readonly IReadOnlyCollection<string> NetworkOnlyTypes = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "road.carriageway", "road.street_bike_lane", "road.street_kerb", "road.sidewalk", "road.sidewalk_edge",
+            "road.garage_ramp_surface", "road.curb_ramp", BikeRampType, "road.bike_crossing",
+        };
+
         /// <summary>Generated element type of each level of the cross-section.</summary>
         public static IReadOnlyDictionary<RoadLevel, (string Type, string Name)> LevelTypes { get; } = new Dictionary<RoadLevel, (string, string)>
         {

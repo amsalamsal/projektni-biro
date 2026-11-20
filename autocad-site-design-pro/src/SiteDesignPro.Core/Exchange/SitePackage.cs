@@ -73,6 +73,9 @@ namespace SiteDesignPro.Core.Exchange
 
         public string GeneratorVersion { get; set; } = string.Empty;
 
+        /// <summary>The host that wrote the package (e.g. AutoCAD, or the SketchUp road tools).</summary>
+        public string GeneratorHost { get; set; } = string.Empty;
+
         public string ProjectId { get; set; } = string.Empty;
 
         public string ProjectName { get; set; } = string.Empty;

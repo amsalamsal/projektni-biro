@@ -167,6 +167,21 @@ kružni tokovi, prijelazi i rampe crtaju se direktno u SketchUpu; grade se **ist
 * Upozorenja (nagib ulice preko 10 %, rampe preko 17 %, mali radijus rampe, niska svijetla visina) javljaju se odmah;
   zadnji izvještaj: *Saobraćajnice → Izvještaj posljednje izgradnje*.
 
+#### Saobraćajnice u oba smjera (SketchUp ⇄ AutoCAD)
+* **SketchUp → AutoCAD:** *Saobraćajnice → Izvoz saobraćajnica za AutoCAD…* snima ulice, ceste, kružne tokove,
+  prijelaze, kote, rampe za invalide, garažne rampe i presjeke (osovine i sve postavke, ne 3D) u `.sdpkg`. U
+  AutoCAD-u `SDPUVOZPAKETA`: postojeći elementi se zamjenjuju (isti id), novi dodaju, generisani dijelovi (kolovoz,
+  trotoari, oznake) se preskaču i AutoCAD odmah ponovo crta mrežu ulica. Ulice obrisane u SketchUpu program nudi
+  obrisati i u crtežu (pitanje Da/Ne). Visine osovina dolaze kao kote saobraćajnice.
+* **AutoCAD → SketchUp:** nakon uvoza AutoCAD paketa, *Saobraćajnice → Preuzmi saobraćajnice iz AutoCAD-a* pretvara
+  ulice tog projekta u osovine alata Saobraćajnice (uređuju se ovdje; 3D gradi motor). Od tada je projekat
+  **povezan**: svaki naredni *Uvoz paketa* iz AutoCAD-a prenosi izmjene ulica (nove, izmijenjene, obrisane) u
+  osovine i ponovo gradi saobraćajnice, a izvoz iz SketchUpa ide pod id-em AutoCAD projekta.
+* **Koordinate:** paket je u koordinatama AutoCAD projekta (ishodište / državne koordinate se prenose preko
+  korijenske grupe uvezenog projekta). Model napravljen uvozom iz AutoCAD-a se zato poklapa sam; ulice nacrtane u
+  praznom SketchUp modelu idu u AutoCAD relativno na ishodište crteža.
+* Šifre u izvještaju uvoza: `SDP-S001` preuzete saobraćajnice, `SDP-S002` / `SDP-S003` nisu izgrađene / preuzete.
+
 ## Šifre nalaza
 | Prefiks | Značenje |
 |---|---|
@@ -177,6 +192,7 @@ kružni tokovi, prijelazi i rampe crtaju se direktno u SketchUpu; grade se **ist
 | `SDP-P…` | Parametri (raspon, nedostaju, neispravne vrijednosti) |
 | `SDP-D…` | Podaci (nepoznata vrsta, kopirani id-evi, jedinice) |
 | `SDP-C…` | Kolizije, preklapanja, razmaci, izlazak iz parcele |
+| `SDP-S…` | Saobraćajnice između SketchUpa i AutoCAD-a |
 | `SDP-R…` | Stavke za reviziju (statika, elektro, odvodnja, pristupačnost) – provjera stručnjaka |
 
 ## Slojevi

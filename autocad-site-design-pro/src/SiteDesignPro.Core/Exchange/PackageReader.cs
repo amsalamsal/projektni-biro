@@ -155,6 +155,7 @@ namespace SiteDesignPro.Core.Exchange
                 CreatedUtc = DateTime.Parse(Str(m, "createdUtc"), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal),
                 GeneratorApplication = Str(generator, "application"),
                 GeneratorVersion = Str(generator, "version"),
+                GeneratorHost = generator.TryGetProperty("host", out JsonElement host) && host.ValueKind == JsonValueKind.String ? host.GetString() ?? string.Empty : string.Empty,
                 ProjectId = Str(project, "id"),
                 ProjectName = Str(project, "name"),
                 SourceLengthUnit = Str(units, "sourceLengthUnit"),
