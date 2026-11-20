@@ -2,6 +2,15 @@
 
 ## Neobjavljeno
 
+### Unos u prozorima umjesto komandne linije (20.11.)
+* Pitanja naredbi su u prozorima, sva pitanja jedne naredbe u jednom prozoru, s pamćenjem zadnjih unosa i
+  provjerom prije „U redu“ (npr. nagib rampe, širina trake). Ulica i cesta (osovina i visine), kružni tok, pješački
+  prijelaz, visine saobraćajnica, garažna rampa, duž linije, popuna površine, niz parking mjesta, parking u nizu,
+  izmjena elementa (SDPEDIT – svi parametri odjednom), postavke projekta, dokumentovanje, razmjernik, zaglavlje,
+  detalj, prohodnost, sigurnosne kopije. Ostala pojedinačna pitanja su u malom prozoru.
+* Prozori se otvaraju i kad je FILEDIA = 0 (ranije je to prebacivalo sve na komandnu liniju); skripte i AutoLISP
+  i dalje pitaju u komandnoj liniji. `SDPPROZORI` prebacuje na komandnu liniju i nazad.
+
 ### Inputi 19.11.: rampe i parking mjesta u nizu (20.11.)
 * **Garažna rampa**: prvi i zadnji metar su ravni (bez poprečnog pada), u ravni s ulicom ili pločom; poprečni pad
   3 % počinje nakon 1 m i raste na punu vrijednost na 2 m (AutoCAD 3D i SketchUp, isti motor).

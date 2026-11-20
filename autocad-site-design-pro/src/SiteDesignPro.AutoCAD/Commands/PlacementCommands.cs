@@ -652,6 +652,12 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             ElementType type = sel[0].Type!;
             List<ParameterDefinition> shared = type.Parameters.Where(p => sel.All(m => m.Type!.Parameter(p.Key) != null)).ToList();
+            if (CommandContext.UseDialogs)
+            {
+                EditInWindow(ctx, sel, type, shared, typeCount);
+                return;
+            }
+
             while (true)
             {
                 SiteElement first = sel[0].Element!;
@@ -736,6 +742,152 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
         });
 
+        /// <summary>
+        /// SDPEDIT in one window: every parameter of the selected elements by group (values that differ between them
+        /// show the first one), the label of a single element and a free property. Only what is changed is applied.
+        /// </summary>
+        private static void EditInWindow(CommandContext ctx, List<ManagedElement> sel, ElementType type, List<ParameterDefinition> shared, int typeCount)
+        {
+            SiteElement first = sel[0].Element!;
+            string heading = typeCount > 1 ? Bs.T("Različiti tipovi ({0})", typeCount) : type.Name;
+            var form = new Form("Izmjena – " + heading, null, sel.Count > 1
+                ? Bs.Elements(sel.Count) + ": mijenja se samo ono što promijenite (različite vrijednosti prikazuju prvi element)."
+                : first.Label + ": " + type.Name + ".");
+            var initial = new Dictionary<string, string>(StringComparer.Ordinal);
+            string? group = null;
+            foreach (ParameterDefinition p in shared)
+            {
+                if (!string.Equals(p.Group, group, StringComparison.Ordinal) && !string.IsNullOrEmpty(p.Group))
+                {
+                    group = p.Group;
+                    form.Header(p.Group);
+                }
+
+                ParamValue cur = first.Parameters.Contains(p.Key) ? first.Parameters[p.Key] : p.Default;
+                bool differs = sel.Select(m => ElementCatalog.FormatValue(p, m.Element!.Parameters.Contains(p.Key) ? m.Element.Parameters[p.Key] : p.Default, 3, ctx.Catalog)).Distinct().Count() > 1;
+                string label = p.Label + (p.Type == ParameterType.Length || p.Type == ParameterType.Number || p.Type == ParameterType.Angle ? " (" + p.DisplayUnit + ")" : string.Empty) + (differs ? " *" : string.Empty);
+                string? hint = differs ? "Odabrani elementi imaju različite vrijednosti; prikazana je vrijednost prvog." : p.Description;
+                switch (p.Type)
+                {
+                    case ParameterType.Bool:
+                        form.Bool(p.Key, label, cur.AsBool(), hint);
+                        break;
+                    case ParameterType.Enum:
+                        form.Choice(p.Key, label, p.Options.Select(o => o + "|" + ctx.Catalog.OptionLabel(o)).ToArray(), p.Options.Contains(cur.AsText()) ? cur.AsText() : p.Options.FirstOrDefault() ?? string.Empty, hint);
+                        break;
+                    case ParameterType.Integer:
+                        form.Integer(p.Key, label, (int)cur.AsNumber(p.Min ?? 0), (int)(p.Min ?? int.MinValue / 2), p.Max.HasValue ? (int)p.Max.Value : (int?)null, hint);
+                        break;
+                    case ParameterType.Length:
+                    case ParameterType.Number:
+                    case ParameterType.Angle:
+                        form.Number(p.Key, label, cur.IsNull ? (p.Min ?? 0) : cur.AsNumber(), p.Min, p.Max, hint, null, !p.Min.HasValue || p.Min.Value < 0, true);
+                        break;
+                    case ParameterType.Material:
+                        {
+                            string[] mats = ctx.Catalog.Materials.Select(m => m.Key + "|" + m.Name + " (" + m.Key + ")").ToArray();
+                            string v = cur.AsText();
+                            if (!ctx.Catalog.Materials.Any(m => m.Key == v))
+                            {
+                                mats = new[] { v + "|" + v }.Concat(mats).ToArray();
+                            }
+
+                            form.Choice(p.Key, label, mats, v, hint);
+                            break;
+                        }
+
+                    default:
+                        form.Text(p.Key, label, cur.IsNull ? string.Empty : cur.AsText(), hint);
+                        break;
+                }
+
+                initial[p.Key] = form.Field(p.Key).Format();
+            }
+
+            form.Header("Oznaka i svojstva");
+            if (sel.Count == 1)
+            {
+                form.Text("_label", "Oznaka", first.Label ?? string.Empty, null, null, false);
+                initial["_label"] = first.Label ?? string.Empty;
+            }
+
+            form.Text("_pk", "Dodatno svojstvo – naziv (npr. botanicalName, notes)", string.Empty, "Prazno: bez izmjene svojstava.");
+            form.Text("_pv", "Vrijednost svojstva (prazno = briši)", string.Empty, null, v => v.Text("_pk").Trim().Length > 0);
+            ctx.Ask(form);
+
+            int changed = 0;
+            foreach (ParameterDefinition p in shared)
+            {
+                FormField f = form.Field(p.Key);
+                if (f.Format() == initial[p.Key])
+                {
+                    continue;
+                }
+
+                ParamValue value = f.Kind switch
+                {
+                    FieldKind.Bool => ParamValue.Of((bool)f.Value),
+                    FieldKind.Integer => ParamValue.Of((double)(int)f.Value),
+                    FieldKind.Number => ParamValue.Of((double)f.Value),
+                    _ => ((string)f.Value).Length == 0 && p.Type == ParameterType.Text ? ParamValue.Null : ParamValue.Of((string)f.Value),
+                };
+                foreach (ManagedElement m in sel)
+                {
+                    m.Element!.Parameters[p.Key] = value;
+                }
+
+                changed++;
+            }
+
+            if (sel.Count == 1 && (string)form.Field("_label").Value != initial["_label"])
+            {
+                first.Label = (string)form.Field("_label").Value;
+                changed++;
+            }
+
+            string pk = ((string)form.Field("_pk").Value).Trim();
+            if (pk.Length > 0)
+            {
+                string pv = (string)form.Field("_pv").Value;
+                foreach (ManagedElement m in sel)
+                {
+                    if (pv.Length == 0)
+                    {
+                        m.Element!.Properties.Remove(pk);
+                    }
+                    else
+                    {
+                        m.Element!.Properties[pk] = pv;
+                    }
+                }
+
+                changed++;
+            }
+
+            if (changed == 0)
+            {
+                ctx.Write("Ništa nije promijenjeno.");
+                return;
+            }
+
+            int applied = 0;
+            foreach (ManagedElement m in sel)
+            {
+                ValidationReport check = new ProjectValidator(ctx.Catalog, ctx.Settings.Checks).Validate(new[] { Core.Exchange.PackageWriter.ToPackageFrame(m.Element!, ctx.Settings) });
+                ValidationIssue? err = check.Issues.FirstOrDefault(i => i.Severity == Severity.Error && i.Code.StartsWith("SDP-P", StringComparison.Ordinal));
+                if (err != null)
+                {
+                    ctx.Write("Nije primijenjeno na " + m.Element!.Label + ": " + err.Message);
+                    continue;
+                }
+
+                ctx.Svc.Update(m, m.Element!);
+                applied++;
+            }
+
+            ctx.Write("Izmijenjeno: " + Bs.Elements(applied) + ".");
+        }
+
         internal static ParamValue AskValue(CommandContext ctx, ParameterDefinition def, ParamValue current)
         {
             switch (def.Type)
@@ -787,9 +939,10 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPSETPARAM", CommandFlags.Modal)]
         public void SetParam() => CommandContext.Run("SDPSETPARAM", ctx =>
         {
-            string handles = ctx.Text("Handle elemenata (odvojeni zarezom)", null, false);
-            string key = ctx.Text("Parametar", null, false);
-            string raw = ctx.Text("Vrijednost", null, true);
+            // the palette sends the answers: always the command line
+            string handles = ctx.CliText("Handle elemenata (odvojeni zarezom)", null, false);
+            string key = ctx.CliText("Parametar", null, false);
+            string raw = ctx.CliText("Vrijednost", null, true);
             foreach (string h in handles.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 if (!TryHandle(ctx, h, out ObjectId id))
@@ -910,7 +1063,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPZOOM", CommandFlags.Modal | CommandFlags.Redraw)]
         public void Zoom() => CommandContext.Run("SDPZOOM", ctx =>
         {
-            string text = ctx.Text("Handle elementa", null, false);
+            string text = ctx.CliText("Handle elementa", null, false);
             var ids = new List<ObjectId>();
             Extents3d? box = null;
             foreach (string h in text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -967,13 +1120,22 @@ namespace SiteDesignPro.AutoCAD.Commands
             ObjectId cid = ctx.Entity("Odaberite trasu (polilinija, linija ili luk)", typeof(Curve));
             (Ring ring, bool closed) = ElementService.ReadCurve((Entity)ctx.Tr.GetObject(cid, OpenMode.ForRead));
             ElementType type = ctx.ChooseType("Tip elementa koji se ponavlja", null, GeometryKind.Point);
-            double spacing = ctx.Number("Razmak (m)", 8.0);
-            SpacingMode mode = ctx.Keyword("Način razmaka [Fiksni/Uklopi]", new[] { "Fixed|Fiksni", "Fit|Uklopi" }, "Fit") == "Fit" ? SpacingMode.Fit : SpacingMode.Fixed;
-            double start = ctx.Number("Odmak od početka (m)", 0, false, true);
-            double end = ctx.Number("Odmak od kraja (m)", 0, false, true);
-            double lateral = ctx.Number("Bočni odmak lijevo od trase, negativno = desno (m)", 0, true, true);
-            string align = ctx.Keyword("Rotacija [Poravnaj/Fiksna]", new[] { "Align|Poravnaj", "Fixed|Fiksna" }, "Align");
-            double extra = ctx.Number(align == "Align" ? "Dodatna rotacija (°)" : "Rotacija (°)", 0, true, true) * Math.PI / 180;
+            var form = new Form("Duž linije – " + type.Name, "duz-linije", "Element " + type.Name + " se ponavlja duž odabrane trase (dužina " + CommandContext.F(GeometryMath.Length(ring, closed) / ctx.K, 2) + " m).");
+            form.Number("spacing", "Razmak (m)", 8.0, 0.1, 1000);
+            form.Choice("mode", "Način razmaka", new[] { "Fit|Uklopi (jednaki razmaci od početka do kraja)", "Fixed|Fiksni (tačno zadani razmak)" }, "Fit");
+            form.Number("start", "Odmak od početka (m)", 0, 0, null, null, null, false, true);
+            form.Number("end", "Odmak od kraja (m)", 0, 0, null, null, null, false, true);
+            form.Number("lateral", "Bočni odmak lijevo od trase (m, negativno = desno)", 0, null, null, null, null, true, true);
+            form.Choice("align", "Rotacija", new[] { "Align|Poravnaj s trasom", "Fixed|Fiksna" }, "Align");
+            form.Number("angle", "Dodatna / fiksna rotacija (°)", 0, null, null, "Poravnaj: dodaje se smjeru trase; Fiksna: isti ugao za sve.", null, true, true);
+            FormValues fv = ctx.Ask(form);
+            double spacing = fv.Number("spacing");
+            SpacingMode mode = fv.Choice("mode") == "Fit" ? SpacingMode.Fit : SpacingMode.Fixed;
+            double start = fv.Number("start");
+            double end = fv.Number("end");
+            double lateral = fv.Number("lateral");
+            string align = fv.Choice("align");
+            double extra = fv.Number("angle") * Math.PI / 180;
             double k = ctx.K;
             List<Placement> placements = PathPlacement.Distribute(ring, closed, spacing * k, start * k, end * k, mode, lateral * k, align == "Align" ? extra : 0);
             List<SiteElement> existing = ctx.ExistingElements();
@@ -997,10 +1159,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                 type = ctx.ChooseType("Tip parking mjesta (generator parking_bay)", null, GeometryKind.Point);
             }
 
+            double angle = ctx.Ask(new Form("Niz parking mjesta", "parking-niz", "Parking mjesta tipa " + type.Name + " popunjavaju ivicu prolaza koju zatim zadate s dvije tačke i stranom. Za mjesta po standardu (okomito, paralelno, 45° s oznakama) koristite karticu Parking mjesta.")
+                .Number("angle", "Ugao parking mjesta prema prolazu (°)", 90, 30, 90)).Number("angle");
             Point3d a = ctx.Point("Početak ivice prolaza")!.Value;
             Point3d b = ctx.Point("Kraj ivice prolaza", a)!.Value;
             Point3d side = ctx.Point("Tačka na strani gdje su parking mjesta", b)!.Value;
-            double angle = ctx.Number("Ugao parking mjesta prema prolazu (°)", 90);
             double width = type.Parameter("width")!.Default.AsNumber();
             Vector3d dir = b - a;
             bool left = (dir.X * (side.Y - a.Y)) - (dir.Y * (side.X - a.X)) > 0;
@@ -1031,10 +1194,16 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             ElementType type = ctx.ChooseType("Tip elementa", null, GeometryKind.Point);
-            double sx = ctx.Number("Razmak u redu (m)", 1.0);
-            double sy = ctx.Number("Razmak redova (m)", sx);
-            bool stagger = ctx.Keyword("Smaknuti raspored (trouglasti) [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "Yes") == "Yes";
-            double margin = ctx.Number("Udaljenost od granice (m)", sx / 2, false, true);
+            var form = new Form("Popuni površinu – " + type.Name, "mreza", "Element " + type.Name + " se raspoređuje u mrežu unutar odabrane granice.");
+            form.Number("sx", "Razmak u redu (m)", 1.0, 0.05, 1000);
+            form.Number("sy", "Razmak redova (m)", 1.0, 0.05, 1000);
+            form.Bool("stagger", "Smaknuti (trouglasti) raspored", true);
+            form.Number("margin", "Udaljenost od granice (m)", 0.5, 0, null, null, null, false, true);
+            FormValues fv = ctx.Ask(form);
+            double sx = fv.Number("sx");
+            double sy = fv.Number("sy");
+            bool stagger = fv.Bool("stagger");
+            double margin = fv.Number("margin");
             double k = ctx.K;
             List<Vec2> outline = GeometryMath.Tessellate(ring, true, 0.05 * k).Select(v => v.XY).ToList();
             List<Vec2> pts = GridLayout.InPolygon(outline, sx * k, sy * k, (ring.Vertices[1].XY - ring.Vertices[0].XY).Angle, margin * k, stagger);

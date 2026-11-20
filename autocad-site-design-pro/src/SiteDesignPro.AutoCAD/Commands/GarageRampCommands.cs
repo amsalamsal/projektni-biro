@@ -30,21 +30,47 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             EnsureUnits(ctx);
             double k = ctx.K;
-            string kind = ctx.Keyword("Vrsta rampe [Pravolinijska/Polukruzna/Spiralna/Kombinovana]", new[] { "straight|Pravolinijska", "semicircular|Polukruzna", "spiral|Spiralna", "combined|Kombinovana" }, "straight");
+            var form = new Form("Garažna rampa", "garazna-rampa", "Vrsta i presjek rampe. Nakon „U redu“ crtate rampu u crtežu (dok birate tačke, rampa se vidi), a zatim se otvara prozor za visine.");
+            Func<FormValues, bool> isStraight = v => v.Is("kind", "straight");
+            Func<FormValues, bool> isRound = v => v.Is("kind", "semicircular") || v.Is("kind", "spiral");
+            form.Choice("kind", "Vrsta rampe", new[] { "straight|Pravolinijska", "semicircular|Polukružna", "spiral|Spiralna", "combined|Kombinovana" }, "straight",
+                "Kombinovana: pravi dijelovi spojeni lukovima istog poluprečnika.");
+            form.Choice("direction", "Smjer", new[] { "one_way|Jednosmjerna", "two_way|Dvosmjerna" }, "one_way");
+            form.Number("laneWidth", "Širina trake (m)", 3.0, 2.5, 5.0, "Pravolinijska 2,50–3,50 m, zakrivljena 3,50–5,00 m, kombinovana 2,50–5,00 m (u lukovima najmanje 3,50 m).");
+            form.Number("margin", "Zaštitni razmak sa obje strane (m)", 0.25, 0, 0.5, "Pravolinijska 0–0,50 m, zakrivljena 0,25–0,50 m.", null, false, true);
+            form.Bool("island", "Srednje ostrvo 60 × 250 cm na dnu", true, null, v => isStraight(v) && v.Is("direction", "two_way"));
+            form.Number("bend", "Poluprečnik srednje linije u krivinama (m)", 8.0, 3, 100, "Unutrašnja ivica luka mora imati najmanje 5,00 m.", v => v.Is("kind", "combined"));
+            form.Choice("turn", "Smjer okretanja", new[] { "Left|Lijevo", "Right|Desno" }, "Left", null, isRound);
+            form.Number("turns", "Broj punih krugova", 1.0, 1, 5, "Npr. 1 ili 1,5.", v => v.Is("kind", "spiral"));
+            form.Check = v =>
+            {
+                (double l, double h) = v.Is("kind", "combined") ? (2.5, 5.0) : v.Is("kind", "straight") ? (2.5, 3.5) : (3.5, 5.0);
+                if (v.Number("laneWidth") < l - 1e-9 || v.Number("laneWidth") > h + 1e-9)
+                {
+                    return "Širina trake za ovu vrstu rampe mora biti od " + Bs.Num(l, 2) + " do " + Bs.Num(h, 2) + " m.";
+                }
+
+                if (!v.Is("kind", "straight") && v.Number("margin") < 0.25 - 1e-9)
+                {
+                    return "Zaštitni razmak zakrivljene rampe mora biti najmanje 0,25 m.";
+                }
+
+                double w = ((v.Is("direction", "two_way") ? 2 : 1) * v.Number("laneWidth")) + (2 * v.Number("margin"));
+                if (v.Is("kind", "combined") && v.Number("bend") - (w / 2) < GarageRamp.MinInnerRadius - 1e-9)
+                {
+                    return "Unutrašnja ivica luka bi imala " + Bs.Num(v.Number("bend") - (w / 2), 2) + " m; najmanje je 5,00 m – poluprečnik srednje linije mora biti najmanje " + Bs.Num(GarageRamp.MinInnerRadius + (w / 2), 2) + " m.";
+                }
+
+                return null;
+            };
+            FormValues kindAnswers = ctx.Ask(form);
+            string kind = kindAnswers.Choice("kind");
             bool combined = kind == "combined";
             bool curved = kind != "straight";
-            bool twoWay = ctx.Keyword("Smjer [Jednosmjerna/Dvosmjerna]", new[] { "one_way|Jednosmjerna", "two_way|Dvosmjerna" }, "one_way") == "two_way";
-            (double lo, double hi) = combined ? (2.5, 5.0) : curved ? (3.5, 5.0) : (2.5, 3.5);
-            double lw = ctx.Number("Širina trake (m, " + Bs.Num(lo, 1) + "–" + Bs.Num(hi, 1) + ")", curved ? 4.0 : 3.0);
-            if (lw < lo || lw > hi)
-            {
-                lw = Math.Max(lo, Math.Min(hi, lw));
-                ctx.Write("Širina trake je ograničena na " + Bs.Num(lw, 2) + " m.");
-            }
-
-            double margin = ctx.Number("Zaštitni razmak sa obje strane (m, " + (curved ? "0,25–0,50" : "0–0,50") + ")", curved ? 0.5 : 0.25, false, true);
-            margin = Math.Max(curved ? 0.25 : 0, Math.Min(0.5, margin));
-            bool island = !curved && twoWay && ctx.Keyword("Srednje ostrvo 60 × 250 cm na dnu [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, "Yes") == "Yes";
+            bool twoWay = kindAnswers.Is("direction", "two_way");
+            double lw = kindAnswers.Number("laneWidth");
+            double margin = kindAnswers.Number("margin");
+            bool island = !curved && twoWay && kindAnswers.Bool("island");
             double width = ((twoWay ? 2 : 1) * lw) + (2 * margin);
 
             // while the points are picked, the ramp is shown at the cursor as it will be drawn
@@ -144,7 +170,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             else if (combined)
             {
                 // straight parts joined by arcs: the points of the centreline and one radius for its bends
-                double bend = ctx.Number("Poluprečnik srednje linije u krivinama (m)", Math.Max(8.0, (width / 2) + 5.0));
+                double bend = kindAnswers.Number("bend");
                 var clicked = new List<Vec2>();
                 Point3d? last = null;
                 Vec2? square = null;
@@ -203,11 +229,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                     return;
                 }
 
-                bool left = ctx.Keyword("Smjer okretanja [Lijevo/Desno]", new[] { "Left|Lijevo", "Right|Desno" }, "Left") == "Left";
+                bool left = kindAnswers.Choice("turn") == "Left";
                 int halves = 1;
                 if (kind == "spiral")
                 {
-                    double turns = ctx.Number("Broj punih krugova (npr. 1 ili 1,5)", 1.0);
+                    double turns = kindAnswers.Number("turns");
                     halves = Math.Max(2, (int)Math.Round(turns * 2));
                 }
 
@@ -250,52 +276,50 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
-            if (!levels.Defined)
-            {
-                ctx.Write("Osnovna visina saobraćajnica još nije zadana; zadajte je sada (može se promijeniti s Visine saobraćajnica).");
-                levels.Flat = false;
-                levels.Base = ctx.Number("Osnovna visina saobraćajnica (m n.v.)", 0, true, true);
-                levels.Write(ctx.Db, ctx.Tr);
-            }
 
             // a ramp that starts at a road starts at the height of the road there
             Vec3 startAt = axis.Vertices[0];
             double? roadLevel = RoadElements.LevelNear(ctx.ExistingElements(), ctx.Catalog, k, new Vec2(startAt.X / k, startAt.Y / k));
-            if (roadLevel.HasValue)
+            double length = axisLength;
+            var hf = new Form("Garažna rampa – visine", "garazna-rampa-visine",
+                "Dužina rampe po osovini: " + Bs.Num(length, 2) + " m." + (roadLevel.HasValue ? " Rampa počinje uz saobraćajnicu koja je tu na " + LevelText(roadLevel.Value) + "." : string.Empty) +
+                " Visine su u odnosu na osnovnu visinu saobraćajnica.");
+            if (!levels.Defined)
             {
-                ctx.Write("Rampa počinje uz saobraćajnicu koja je tu na " + LevelText(roadLevel.Value) + ".");
+                hf.Number("base", "Osnovna (nulta) visina saobraćajnica (m n.v.)", 0, null, null, "Zadaje se jednom za crtež.", null, true, true);
             }
 
-            double h0 = RoadCommands.Relative(ctx, ctx.Number("Visina početka rampe u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (npr. 0,00)", roadLevel ?? 0, true, true), levels.Base);
-            double h1 = RoadCommands.Relative(ctx, ctx.Number("Visina kraja rampe u odnosu na osnovnu (npr. -3,00)", h0 - 3, true, true), levels.Base);
+            Func<FormValues, double> avg = v => length < 1e-9 ? 0 : Math.Abs(v.Number("end") - v.Number("start")) / length;
+            hf.Number("start", "Visina početka rampe (m)", roadLevel ?? 0, null, null, "Npr. 0,00.", null, true, true);
+            hf.Number("end", "Visina kraja rampe (m)", (roadLevel ?? 0) - 3, null, null, "Npr. -3,00.", null, true, true);
+            hf.Number("transition", "Blaže prijelazne dionice s pola nagiba na vrhu i dnu (m, 0 = bez)", 0, 0, Math.Max(0, Math.Min(8, (length - 1) / 2)), "Ima smisla kad je prosječni nagib veći od 10 %.", v => avg(v) > 0.10 + 1e-9 && length >= 9, false, true);
+            hf.Number("flat", "Blagi dio pred ulicom na vrhu, najviše 5 % (m, 0 = bez)", 0, 0, Math.Max(0, Math.Min(10, length - 3)), null, v => avg(v) > GarageRamp.FlatSlope + 1e-9 && length >= 12, false, true);
+            hf.Number("ceilingFrom", "Ploča iznad rampe počinje na (m od početka, 0 = nema ploče)", 0, 0, null, "Provjerava se svijetla visina ispod ploče (najmanje 2,10 m).", null, false, true);
+            hf.Number("ceilingLevel", "Donja ivica te ploče (m)", -0.3, null, null, "Npr. -0,30.", v => v.Number("ceilingFrom") > 0.01, true, true);
+            foreach (string key in new[] { "start", "end", "ceilingFrom", "ceilingLevel" })
+            {
+                hf.Field(key).Remember = false;
+            }
 
-            // steeper than 10 %: transitions with half the slope at the top and bottom
-            double transition = 0;
+            hf.Summary = v => "Prosječni nagib: " + Bs.Num(avg(v) * 100, 2) + " % (najviše " + Bs.Num(RoadLevels.MaxRampSlope * 100, 0) + " %).";
+            hf.Check = v => avg(v) > RoadLevels.MaxRampSlope + 1e-9
+                ? "Nagib " + Bs.Num(avg(v) * 100, 2) + " % je veći od dozvoljenih " + Bs.Num(RoadLevels.MaxRampSlope * 100, 0) + " %: za ovu visinsku razliku rampa mora biti duga najmanje " + Bs.Num(Math.Abs(v.Number("end") - v.Number("start")) / RoadLevels.MaxRampSlope, 2) + " m."
+                : null;
+            FormValues hv = ctx.Ask(hf);
+            if (!levels.Defined)
+            {
+                levels.Flat = false;
+                levels.Base = hv.Number("base");
+                levels.Write(ctx.Db, ctx.Tr);
+            }
+
+            double h0 = RoadCommands.Relative(ctx, hv.Number("start"), levels.Base);
+            double h1 = RoadCommands.Relative(ctx, hv.Number("end"), levels.Base);
             double average = axisLength < 1e-9 ? 0 : Math.Abs(h1 - h0) / axisLength;
-            if (average > 0.10 + 1e-9 && axisLength >= 9)
-            {
-                ctx.Write("Prosječni nagib je " + Bs.Num(average * 100, 2) + " % (preko 10 %). Rampa ima jedan nagib od početka do kraja; po želji se na vrhu i dnu mogu dodati blaže prijelazne dionice s pola nagiba.");
-                transition = ctx.Number("Dužina blaže prijelazne dionice na vrhu i dnu (m, 0 = bez, jedan nagib cijelom dužinom)", 0, false, true);
-                transition = Math.Max(0, Math.Min(Math.Min(8, (axisLength - 1) / 2), transition));
-            }
-
-            // a nearly level part at the top, where the ramp meets the street
-            double flat = 0;
-            if (average > GarageRamp.FlatSlope + 1e-9 && axisLength >= 12)
-            {
-                flat = ctx.Number("Blagi dio pred ulicom na vrhu, najviše 5 % (m, 0 = bez, jedan nagib cijelom dužinom)", 0, false, true);
-                flat = Math.Max(0, Math.Min(Math.Min(10, axisLength - 3), flat));
-            }
-
-            // a slab above the ramp: the clear height under it is checked
-            double ceilingFrom = ctx.Number("Ploča iznad rampe počinje na (m od početka, 0 = nema ploče)", 0, false, true);
-            double ceilingLevel = 0;
-            if (ceilingFrom > 0.01)
-            {
-                ceilingLevel = RoadCommands.Relative(ctx, ctx.Number("Donja ivica te ploče u odnosu na osnovnu visinu (npr. -0,30)", Math.Max(h0, h1) - 0.3, true, true), levels.Base);
-            }
-
-
+            double transition = average > 0.10 + 1e-9 && axisLength >= 9 ? hv.Number("transition") : 0;
+            double flat = average > GarageRamp.FlatSlope + 1e-9 && axisLength >= 12 ? hv.Number("flat") : 0;
+            double ceilingFrom = hv.Number("ceilingFrom");
+            double ceilingLevel = ceilingFrom > 0.01 ? RoadCommands.Relative(ctx, hv.Number("ceilingLevel"), levels.Base) : 0;
 
             ElementType type = ctx.Catalog.RequireType(GarageRamp.Type);
             SiteElement e = ctx.NewElement(type, new PathGeometry(axis, false), ctx.ExistingElements());

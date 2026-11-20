@@ -37,7 +37,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             string mode = ctx.Keyword("Urbanistički pokazatelji [Tabela/Zahtjevi]", new[] { "Table|Tabela", "Requirements|Zahtjevi" }, req.IsEmpty ? "Requirements" : "Table");
             if (mode == "Requirements")
             {
-                UrbanRequirements? edited = CommandContext.Interactive ? UI.UrbanDialog.Ask(req) : AskRequirements(ctx, req);
+                UrbanRequirements? edited = CommandContext.UseDialogs ? UI.UrbanDialog.Ask(req) : AskRequirements(ctx, req);
                 if (edited == null)
                 {
                     return;
@@ -349,9 +349,13 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            string vk = ctx.Keyword("Vozilo [Vatrogasno/Smece/Dostavno/Putnicko]", new[] { "fire|Vatrogasno", "refuse|Smece", "van|Dostavno", "car|Putnicko" }, "fire");
+            FormValues fv = ctx.Ask(new Form("Prohodnost vozila", "prohodnost", "Crta se trag vozila duž putanje (osovina prednjih točkova) i provjerava da li prolazi.")
+                .Choice("vehicle", "Vozilo", new[] { "fire|Vatrogasno", "refuse|Smeće", "van|Dostavno", "car|Putničko" }, "fire")
+                .Choice("how", "Putanja vozila", new[] { "Select|Odaberi liniju u crtežu", "Draw|Nacrtaj sada" }, "Select")
+                .Choice("dir", "Smjer vožnje", new[] { "Forward|U smjeru linije", "Reverse|Obrnuto" }, "Forward"));
+            string vk = fv.Choice("vehicle");
             DesignVehicle v = DesignVehicle.Standard.First(x => x.Key == vk);
-            string how = ctx.Keyword("Putanja vozila (osovina prednjih točkova) [Odaberi/Nacrtaj]", new[] { "Select|Odaberi", "Draw|Nacrtaj" }, "Select");
+            string how = fv.Choice("how");
             Ring ring;
             bool closed;
             if (how == "Draw")
@@ -373,7 +377,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             double k = ctx.K;
             List<Vec2> path = GeometryMath.Tessellate(ring, closed, 0.02 * k).Select(p => new Vec2(p.X / k, p.Y / k)).ToList();
-            if (ctx.Keyword("Smjer vožnje [Naprijed/Obrnuto]", new[] { "Forward|Naprijed", "Reverse|Obrnuto" }, "Forward") == "Reverse")
+            if (fv.Choice("dir") == "Reverse")
             {
                 path.Reverse();
             }

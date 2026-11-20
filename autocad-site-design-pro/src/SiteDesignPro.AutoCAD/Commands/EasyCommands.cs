@@ -53,28 +53,29 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPKRUZNITOK", CommandFlags.Modal)]
         public void Roundabout() => CommandContext.RunMajor("SDPKRUZNITOK", "Kružni tok (SDPKRUZNITOK)", ctx =>
         {
-            Point3d c = ctx.Point("Centar kružnog toka")!.Value;
-            double ri = ctx.Number("Poluprečnik srednjeg otoka – zelenilo (m, 10–30)", 15);
-            if (ri < 10 || ri > 30)
-            {
-                ri = Math.Max(10, Math.Min(30, ri));
-                ctx.Write("Poluprečnik srednjeg otoka je ograničen na " + CommandContext.F(ri, 2) + " m (mini kružni tok: 10–30 m).");
-            }
-
-            double apron = ctx.Number("Širina prijelaznog prstena (m)", 1.2);
-            int arms = Math.Min(ctx.Integer("Broj krakova (0–6)", 4, 0), 6);
+            var form = new Form("Kružni tok", "kruzni-tok", "Mini kružni tok: srednji otok sa zelenilom, prijelazni prsten, prsten i krakovi. Presjek krakova (trake, trotoari, staze) zadaje se u sljedećem prozoru, zatim kliknete centar.");
+            form.Number("island", "Poluprečnik srednjeg otoka – zelenilo (m)", 15, 10, 30, "Mini kružni tok: 10–30 m.");
+            form.Number("apron", "Širina prijelaznog prstena (m)", 1.2, 0, 3, "Ivica koju mogu preći teška vozila; 0 = nema.", null, false, true);
+            form.Integer("arms", "Broj krakova", 4, 0, 6, "Prvi krak ide u smjeru +X; kružni tok se poslije rotira kao bilo koji crtež.");
+            form.Number("armLength", "Dužina krakova od vanjske ivice (m)", 40, 1, 500, null, v => v.Integer("arms") > 0);
+            FormValues fv = ctx.Ask(form);
+            double ri = fv.Number("island");
+            double apron = fv.Number("apron");
+            int arms = fv.Integer("arms");
             double first = 0; // the first arm points along +X; the roundabout is turned afterwards like any drawing
-            double armLength = arms > 0 ? ctx.Number("Dužina krakova od vanjske ivice kružnog toka (m)", 40) : 0;
+            double armLength = arms > 0 ? fv.Number("armLength") : 0;
 
             // cross-section of the arms (and the lanes of the ring): the same window as for a street
             RoadSpec arm = RoadSpec.FromParameterString(UI.Preferences.Current.Default("roadSpec", new RoadSpec().ToParameterString()));
             arm.OneWay = false;
-            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(arm, "Krakovi kružnog toka", ctx.K >= 99 ? "cm" : "m") : arm;
+            RoadSpec? chosen = CommandContext.UseDialogs ? UI.RoadDialog.Ask(arm, "Krakovi kružnog toka", ctx.K >= 99 ? "cm" : "m") : arm;
             if (chosen == null)
             {
                 ctx.Write("Kružni tok nije nacrtan.");
                 return;
             }
+
+            Point3d c = ctx.Point("Centar kružnog toka")!.Value;
 
             // the parts come from the shared roundabout of the core library (the same in SketchUp)
             var options = new RoundaboutOptions { Centre = Vec2.Zero, IslandRadius = ri, Apron = apron, Arms = arms, ArmLength = armLength, FirstArmAngle = first, Arm = chosen };
@@ -135,9 +136,14 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             UI.Preferences prefs = UI.Preferences.Current;
-            string title = ctx.Text("Naziv crteža", prefs.Default("sheetTitle", "Situacija vanjskog uređenja"));
-            string sheetNo = ctx.Text("Broj lista", prefs.Default("sheetNumber", "VU-01"), false);
-            string format = ctx.Keyword("Format lista [Auto/A3/A2/A1/A0]", new[] { "Auto", "A3", "A2", "A1", "A0" }, "Auto");
+            var form = new Form("Dokumentovanje lista", "dokumentuj", "Brojevi, oznake, površine, širine, legenda, tabele količina, sjever, razmjernik i zaglavlje oko plana, na najmanjem listu na koji stane. Ponovno pokretanje zamjenjuje list.");
+            form.Text("title", "Naziv crteža", prefs.Default("sheetTitle", "Situacija vanjskog uređenja"), null, null, false);
+            form.Text("number", "Broj lista", prefs.Default("sheetNumber", "VU-01"), null, null, false);
+            form.Choice("format", "Format lista", new[] { "Auto", "A3", "A2", "A1", "A0" }, "Auto", "Auto: najmanji list na koji plan stane u mjerilu projekta.");
+            FormValues fv = ctx.Ask(form);
+            string title = fv.Text("title");
+            string sheetNo = fv.Text("number");
+            string format = fv.Choice("format");
             prefs.RememberDefault("sheetTitle", title);
             prefs.RememberDefault("sheetNumber", sheetNo);
 

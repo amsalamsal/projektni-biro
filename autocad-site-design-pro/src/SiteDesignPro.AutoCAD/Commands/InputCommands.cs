@@ -199,13 +199,17 @@ namespace SiteDesignPro.AutoCAD.Commands
                 try
                 {
                     ctx.Write(Bs.T("Oznaka objekta {0} (blok {1}) – tlocrt se ne pretpostavlja; unesite stvarne dimenzije ili preskočite.", o.Handle, o.BlockName));
-                    if (ctx.Keyword("Napraviti tlocrt za ovu oznaku? [Da/Preskoci]", new[] { "Da", "Preskoci" }, "Preskoci") != "Da")
+                    FormValues fv = ctx.Ask(new Form("Tlocrt objekta " + o.Handle, null, Bs.T("Oznaka objekta {0} (blok {1}): tlocrt se ne pretpostavlja; unesite stvarne dimenzije ili preskočite.", o.Handle, o.BlockName))
+                        .Bool("make", "Napraviti tlocrt za ovu oznaku", false)
+                        .Number("w", "Dužina objekta duž ose bloka (m)", 10, 0.1, 10000, null, v => v.Bool("make"))
+                        .Number("d", "Širina objekta okomito na osu bloka (m)", 10, 0.1, 10000, null, v => v.Bool("make")));
+                    if (!fv.Bool("make"))
                     {
                         continue;
                     }
 
-                    double w = ctx.Number("Dužina objekta duž ose bloka (m)", 10) * ctx.K;
-                    double d = ctx.Number("Širina objekta okomito na osu bloka (m)", 10) * ctx.K;
+                    double w = fv.Number("w") * ctx.K;
+                    double d = fv.Number("d") * ctx.K;
                     double c = Math.Cos(br.Rotation), s = Math.Sin(br.Rotation);
                     var p = br.Position;
                     var corners = new[] { (-w / 2, -d / 2), (w / 2, -d / 2), (w / 2, d / 2), (-w / 2, d / 2) }

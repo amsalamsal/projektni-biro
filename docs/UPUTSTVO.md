@@ -91,6 +91,7 @@ imaju padajuće liste svih vrsta elemenata po podkategorijama i dugme *Pregled*,
 | `SDPSETPARAM` | Jedan parametar na više elemenata |
 | `SDPPATHARRAY` | Niz elemenata duž putanje (drvored, svjetiljke, stubići, stalci) |
 | `SDPPARKING` | Numerisani niz parking mjesta uz rub prolaza (standardno, za osobe s invaliditetom, punjač…) |
+| `SDPPROZORI` | Pitanja naredbi u prozorima (zadano) ili u komandnoj liniji – prekidač |
 | `SDPPARKINGOKOMITO` | Kartica *Parking mjesta → Okomito*: broj mjesta i broj mjesta za osobe s invaliditetom (2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1); mjesta 2,50 × 5,00 m |
 | `SDPPARKINGPARALELNO` | *Paralelno*: mjesta 5,50 × 2,50 m, strelica u prolazu 3,00 m |
 | `SDPPARKINGUGAO` | *Pod uglom 45°*: 3,40 m duž niza, 4,75 m dubine, šrafirani početni trougao, prikazan ugao 45°, strelica u prolazu |
@@ -169,6 +170,13 @@ kružni tokovi, prijelazi i rampe crtaju se direktno u SketchUpu; grade se **ist
   `dužina;visina` ili `v visina` (visina sljedeće tačke).
 * Upozorenja (nagib ulice preko 10 %, rampe preko 17 %, mali radijus rampe, niska svijetla visina) javljaju se odmah;
   zadnji izvještaj: *Saobraćajnice → Izvještaj posljednje izgradnje*.
+
+#### Unos u prozorima
+Sve naredbe pitaju u **prozoru**: sva pitanja jedne naredbe su u jednom prozoru (ulica – presjek pa osovina i
+visine, kružni tok, pješački prijelaz, garažna rampa – vrsta pa visine, duž linije, popuna površine, parking,
+izmjena elementa – svi parametri odjednom, postavke projekta, dokumentovanje …). Prozor pamti zadnje unose. Tačke i
+linije se i dalje biraju u crtežu. Ko više voli kucanje: `SDPPROZORI` prebacuje na komandnu liniju (i nazad).
+Skripte i AutoLISP uvijek dobijaju pitanja u komandnoj liniji.
 
 #### Parking mjesta u nizu (AutoCAD, kartica *Parking mjesta*)
 * Okomito, paralelno ili pod uglom 45°: upišete broj mjesta (kod okomitog i broj mjesta za osobe s invaliditetom),

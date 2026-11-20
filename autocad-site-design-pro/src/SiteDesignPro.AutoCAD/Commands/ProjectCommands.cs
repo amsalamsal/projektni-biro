@@ -22,7 +22,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void NewProject() => CommandContext.Run("SDPNEW", ctx =>
         {
             ProjectSettings s = ctx.Settings;
-            if (CommandContext.Interactive)
+            if (CommandContext.UseDialogs)
             {
                 NewProjectFromWindow(ctx, s);
                 return;
@@ -100,10 +100,28 @@ namespace SiteDesignPro.AutoCAD.Commands
                 : "Nulta kota nije unesena; unesite je kada je budete znali (Nulta kota). Sljedeće: parcela (Biblioteka → Parcelna granica).");
         }
 
+        /// <summary>Questions in windows (default) or in the command line, for whoever prefers typing.</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPPROZORI", CommandFlags.Modal)]
+        public void DialogsToggle() => CommandContext.Safe("SDPPROZORI", () =>
+        {
+            UI.Preferences prefs = UI.Preferences.Current;
+            bool on = prefs.Default("dialogs", "1") != "0";
+            prefs.RememberDefault("dialogs", on ? "0" : "1");
+            Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument?.Editor.WriteMessage(on
+                ? "\nPitanja naredbi su sada u komandnoj liniji. Ponovo SDPPROZORI za prozore."
+                : "\nPitanja naredbi su sada u prozorima (sva pitanja jedne naredbe u jednom prozoru). Ponovo SDPPROZORI za komandnu liniju.");
+        });
+
         [CommandMethod("SITEDESIGNPRO", "SDPSETTINGS", CommandFlags.Modal)]
         public void Settings() => CommandContext.Run("SDPSETTINGS", ctx =>
         {
             ProjectSettings s = ctx.Settings;
+            if (CommandContext.UseDialogs)
+            {
+                SettingsInWindow(ctx, s);
+                return;
+            }
+
             while (true)
             {
                 ctx.Write(Bs.T("Projekat: {0} {1} | Jedinice: {2} | Ishodište: {3} | Sjever: {4}° | Mjerilo 1:{5} | Tekst {6} mm | Zona '{7}' | Revizija {8}",
@@ -143,6 +161,72 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
         });
+
+        /// <summary>All project settings in one window; the origin is picked in the drawing when asked for.</summary>
+        private static void SettingsInWindow(CommandContext ctx, ProjectSettings s)
+        {
+            LengthUnit? ins = UnitConversion.FromInsUnits((int)ctx.Db.Insunits);
+            string unit = ins.HasValue ? UnitConversion.Code(ins.Value) : s.DrawingUnit;
+            var f = new Form("Postavke projekta", null, "Visine: Nulta kota (SDPDATUM), georeferenciranje: SDPGEOREF, sigurnosne kopije: SDPKOPIJEPOSTAVKE.");
+            f.Header("Projekat");
+            f.Text("name", "Naziv projekta", s.Name);
+            f.Text("number", "Broj projekta", s.Number);
+            f.Text("client", "Investitor", s.Client);
+            f.Text("location", "Lokacija", s.Location);
+            f.Text("author", "Autor", s.Author);
+            f.Text("revision", "Revizija", s.Revision);
+            f.Header("Crtež");
+            f.Choice("unit", "Jedinica crteža", new[] { "mm|Milimetri", "cm|Centimetri", "m|Metri" }, unit == "m" || unit == "cm" ? unit : "mm",
+                "Promjena jedinice ne mijenja mjerilo već nacrtane geometrije.");
+            f.Bool("pickOrigin", "Zadati novo ishodište projekta klikom u crtežu (sada: " + string.Join("; ", s.Origin.Select(v => CommandContext.F(v))) + ")", false,
+                "U SketchUp-u ishodište postaje 0,0,0.");
+            f.Number("north", "Pravi sjever (° u smjeru kazaljke od +Y)", s.TrueNorthDegrees, -360, 360, null, null, true, true);
+            f.Text("crs", "Koordinatni sistem (npr. EPSG:3908)", s.Crs);
+            f.Header("Oznake i numeracija");
+            f.Number("scale", "Mjerilo anotacija 1:", s.Labels.ScaleDenominator, 1, 100000);
+            f.Number("text", "Visina teksta na papiru (mm)", s.Labels.TextHeightMm, 0.5, 20);
+            f.Text("zone", "Oznaka zone u numeraciji (prazno = bez)", s.Labels.Zone);
+            f.Choice("scope", "Niz brojeva po", new[] { "prefix|Prefiksu", "category|Kategoriji" }, s.Labels.NumberingScope == "category" ? "category" : "prefix");
+            f.Integer("digits", "Broj cifara", s.Labels.NumberWidth, 1, 6);
+            FormValues v = ctx.Ask(f);
+            s.Name = v.Text("name");
+            s.Number = v.Text("number");
+            s.Client = v.Text("client");
+            s.Location = v.Text("location");
+            s.Author = v.Text("author");
+            s.Revision = v.Text("revision");
+            string newUnit = v.Choice("unit");
+            if (newUnit != unit)
+            {
+                if (ctx.ExistingElements().Count > 0 && newUnit != s.DrawingUnit)
+                {
+                    ctx.Write("Upozorenje: crtež već sadrži elemente nacrtane u jedinici " + s.DrawingUnit + ". Promjena jedinice ne mijenja mjerilo geometrije.");
+                }
+
+                LengthUnit lu = newUnit == "m" ? LengthUnit.Meter : newUnit == "cm" ? LengthUnit.Centimeter : LengthUnit.Millimeter;
+                s.DrawingUnit = newUnit;
+                ctx.Db.Insunits = (UnitsValue)UnitConversion.ToInsUnits(lu);
+            }
+
+            s.TrueNorthDegrees = v.Number("north");
+            s.Crs = v.Text("crs");
+            s.Labels.ScaleDenominator = v.Number("scale");
+            s.Labels.TextHeightMm = v.Number("text");
+            s.Labels.Zone = v.Text("zone").Trim();
+            s.Labels.NumberingScope = v.Choice("scope");
+            s.Labels.NumberWidth = v.Integer("digits");
+            if (v.Bool("pickOrigin"))
+            {
+                Point3d? o = ctx.Point("Ishodište projekta", null, true);
+                if (o.HasValue)
+                {
+                    s.Origin = new[] { o.Value.X, o.Value.Y, o.Value.Z };
+                }
+            }
+
+            ctx.SaveSettings();
+            ctx.Write("Postavke su sačuvane.");
+        }
 
         private static void ChooseUnits(CommandContext ctx, ProjectSettings s)
         {

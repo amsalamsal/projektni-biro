@@ -164,6 +164,18 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// </summary>
         public string Keyword(string message, string[] keywords, string? defaultKeyword = null)
         {
+            if (UseDialogs)
+            {
+                string label = Strip(message);
+                var f = new Form(label).Choice("v", label, keywords, defaultKeyword ?? FormField.Global(keywords[0]));
+                return Ask(f).Choice("v");
+            }
+
+            return CliKeyword(message, keywords, defaultKeyword);
+        }
+
+        private string CliKeyword(string message, string[] keywords, string? defaultKeyword)
+        {
             var o = new PromptKeywordOptions("\n" + message);
             foreach (string k in keywords)
             {
@@ -211,6 +223,18 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         public string Text(string message, string? defaultValue = null, bool allowSpaces = true)
         {
+            if (UseDialogs)
+            {
+                var f = new Form(Strip(message)).Text("v", Strip(message), defaultValue ?? string.Empty, null, null, defaultValue != null);
+                return Ask(f).Text("v");
+            }
+
+            return CliText(message, defaultValue, allowSpaces);
+        }
+
+        /// <summary>Always in the command line: for commands that the palette feeds with their answers (SDPSETPARAM, SDPZOOM).</summary>
+        internal string CliText(string message, string? defaultValue, bool allowSpaces)
+        {
             var o = new PromptStringOptions("\n" + message + (defaultValue != null ? " <" + defaultValue + ">" : string.Empty) + ": ") { AllowSpaces = allowSpaces };
             PromptResult r = Ed.GetString(o);
             if (r.Status != PromptStatus.OK)
@@ -226,6 +250,17 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// with a comma and Enter accepts it.
         /// </summary>
         public double Number(string message, double defaultValue, bool allowNegative = false, bool allowZero = false)
+        {
+            if (UseDialogs)
+            {
+                var f = new Form(Strip(message)).Number("v", Strip(message), defaultValue, null, null, null, null, allowNegative, allowZero);
+                return Ask(f).Number("v");
+            }
+
+            return CliNumber(message, defaultValue, allowNegative, allowZero);
+        }
+
+        private double CliNumber(string message, double defaultValue, bool allowNegative, bool allowZero)
         {
             for (int attempt = 0; attempt < 6; attempt++)
             {
@@ -267,6 +302,17 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
 
         public int Integer(string message, int defaultValue, int min = 1)
+        {
+            if (UseDialogs)
+            {
+                var f = new Form(Strip(message)).Integer("v", Strip(message), defaultValue, min);
+                return Ask(f).Integer("v");
+            }
+
+            return CliInteger(message, defaultValue, min);
+        }
+
+        private int CliInteger(string message, int defaultValue, int min)
         {
             var o = new PromptIntegerOptions("\n" + message) { DefaultValue = defaultValue, UseDefaultValue = true, LowerLimit = min, AllowNegative = min < 0, AllowZero = min <= 0 };
             PromptIntegerResult r = Ed.GetInteger(o);
@@ -424,8 +470,9 @@ namespace SiteDesignPro.AutoCAD.Commands
         private static DateTime typeHintSet;
 
         /// <summary>
-        /// True when a person runs the command (dialogs may open); false inside scripts, AutoLISP calls or with
-        /// FILEDIA = 0, where every answer comes from the command line.
+        /// True when a person runs the command (windows open); false inside scripts and AutoLISP calls, where every
+        /// answer comes from the command line. FILEDIA does not matter (it is about file dialogs only, and a script
+        /// may leave it at 0).
         /// </summary>
         public static bool Interactive
         {
@@ -434,14 +481,99 @@ namespace SiteDesignPro.AutoCAD.Commands
                 try
                 {
                     int active = Convert.ToInt32(AcApp.GetSystemVariable("CMDACTIVE"), CultureInfo.InvariantCulture);
-                    int filedia = Convert.ToInt32(AcApp.GetSystemVariable("FILEDIA"), CultureInfo.InvariantCulture);
-                    return (active & (4 | 32)) == 0 && filedia != 0;
+                    return (active & (4 | 32)) == 0;
                 }
                 catch (System.Exception)
                 {
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// Questions are asked in windows (a person at the keyboard, and the preference "unos u prozorima" on – the
+        /// default); otherwise in the command line.
+        /// </summary>
+        public static bool UseDialogs => Interactive && UI.Preferences.Current.Default("dialogs", "1") != "0";
+
+        /// <summary>
+        /// Asks all questions of a form: in one window for a person, one after the other in the command line for a
+        /// script (fields whose condition is not met are skipped). Cancel stops the command.
+        /// </summary>
+        public FormValues Ask(Form form)
+        {
+            form.Recall();
+            if (UseDialogs)
+            {
+                if (!UI.FormDialog.Ask(form))
+                {
+                    throw new CommandCancelled();
+                }
+            }
+            else
+            {
+                foreach (FormField f in form.Fields.Where(x => x.Kind != FieldKind.Header))
+                {
+                    if (f.When != null && !f.When(form.Values()))
+                    {
+                        continue;
+                    }
+
+                    string label = f.Label.TrimEnd(':');
+                    switch (f.Kind)
+                    {
+                        case FieldKind.Number:
+                            for (int attempt = 0; ; attempt++)
+                            {
+                                double v = CliNumber(label, (double)f.Value, !f.Min.HasValue || f.Min.Value < 0, f.AllowZero);
+                                if (f.TryParse(F(v, 6), out object? ok, out string err))
+                                {
+                                    f.Value = ok!;
+                                    break;
+                                }
+
+                                Write(err);
+                                if (attempt > 5)
+                                {
+                                    throw new CommandCancelled();
+                                }
+                            }
+
+                            break;
+                        case FieldKind.Integer:
+                            f.Value = Math.Min(CliInteger(label, (int)f.Value, (int)(f.Min ?? 0)), (int)(f.Max ?? int.MaxValue));
+                            break;
+                        case FieldKind.Bool:
+                            f.Value = CliKeyword(label + " [Da/Ne]", new[] { "Yes|Da", "No|Ne" }, (bool)f.Value ? "Yes" : "No") == "Yes";
+                            break;
+                        case FieldKind.Choice:
+                            f.Value = CliKeyword(label + " [" + string.Join("/", f.Options.Select(FormField.Shown)) + "]", f.Options, (string)f.Value);
+                            break;
+                        default:
+                            f.Value = CliText(label, f.Format().Length > 0 || f.AllowEmpty ? f.Format() : null, true);
+                            break;
+                    }
+                }
+
+                string? check = form.Check?.Invoke(form.Values());
+                if (check != null)
+                {
+                    Write(check);
+                    throw new CommandCancelled();
+                }
+            }
+
+            form.Remember();
+            return form.Values();
+        }
+
+        /// <summary>A command-line prompt as the label of a window field: without the keyword list in [...].</summary>
+        private static string Strip(string message)
+        {
+            int i = message.IndexOf('[');
+            int j = i < 0 ? -1 : message.IndexOf(']', i);
+            string s = i >= 0 && j > i ? (message.Substring(0, i) + message.Substring(j + 1)).Trim() : message.Trim();
+            return s.TrimEnd(':', ' ', '?').Length > 0 ? s.TrimEnd(':', ' ') : message;
         }
 
         /// <summary>
@@ -460,7 +592,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
-            if (argument == null && Interactive)
+            if (argument == null && UseDialogs)
             {
                 ElementType? picked = UI.TypePickerDialog.Pick(message, kinds);
                 if (picked == null)

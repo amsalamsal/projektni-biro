@@ -124,8 +124,10 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void ScaleBar() => CommandContext.Run("SDPSCALEBAR", ctx =>
         {
             Point3d at = ctx.Point("Početna tačka razmjernika")!.Value;
-            double len = ctx.Number("Dužina (m)", Math.Max(5, Math.Round(ctx.Settings.Labels.ScaleDenominator / 10)));
-            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).ScaleBar(at, len, ctx.Integer("Broj podjela", 4));
+            FormValues fv = ctx.Ask(new Form("Razmjernik")
+                .Number("len", "Dužina (m)", Math.Max(5, Math.Round(ctx.Settings.Labels.ScaleDenominator / 10)), 0.1, 100000)
+                .Integer("div", "Broj podjela", 4, 1, 20));
+            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).ScaleBar(at, fv.Number("len"), fv.Integer("div"));
         });
 
         [CommandMethod("SITEDESIGNPRO", "SDPSPOTLEVEL", CommandFlags.Modal)]
@@ -170,7 +172,10 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void Detail() => CommandContext.Run("SDPDETAIL", ctx =>
         {
             Point3d at = ctx.Point("Položaj oznake detalja")!.Value;
-            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).DetailReference(at, ctx.Text("Broj detalja", "1", false), ctx.Text("List", "D-01", false));
+            FormValues fv = ctx.Ask(new Form("Oznaka detalja", "detalj")
+                .Text("no", "Broj detalja", "1", null, null, false)
+                .Text("sheet", "List", "D-01", null, null, false));
+            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).DetailReference(at, fv.Text("no"), fv.Text("sheet"));
         });
 
         [CommandMethod("SITEDESIGNPRO", "SDPAREALABEL", CommandFlags.Modal | CommandFlags.UsePickSet)]
@@ -202,8 +207,11 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void TitleBlock() => CommandContext.Run("SDPTITLEBLOCK", ctx =>
         {
             Point3d corner = ctx.Point("Donji lijevi ugao lista")!.Value;
-            string size = ctx.Keyword("Format lista [A0/A1/A2/A3/A4]", new[] { "A0", "A1", "A2", "A3", "A4" }, "A1");
-            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).TitleBlock(corner, size, ctx.Text("Naziv crteža", "Situacija vanjskog uređenja"), ctx.Text("Broj lista", "VU-100", false));
+            FormValues fv = ctx.Ask(new Form("Okvir i zaglavlje lista", "zaglavlje")
+                .Choice("size", "Format lista", new[] { "A0", "A1", "A2", "A3", "A4" }, "A1")
+                .Text("title", "Naziv crteža", "Situacija vanjskog uređenja", null, null, false)
+                .Text("number", "Broj lista", "VU-100", null, null, false));
+            new Annotations(ctx.Db, ctx.Tr, ctx.Svc).TitleBlock(corner, fv.Choice("size"), fv.Text("title"), fv.Text("number"));
         });
 
         [CommandMethod("SITEDESIGNPRO", "SDPREVCLOUD", CommandFlags.Modal)]

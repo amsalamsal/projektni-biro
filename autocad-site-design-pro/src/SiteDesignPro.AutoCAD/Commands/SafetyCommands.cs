@@ -39,9 +39,13 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void BackupSettings() => CommandContext.Run("SDPKOPIJEPOSTAVKE", ctx =>
         {
             BackupPolicy p = ctx.Settings.Backups;
-            p.Enabled = ctx.Keyword("Automatska sigurnosna kopija prije većih operacija [Ukljuceno/Iskljuceno]", new[] { "Ukljuceno", "Iskljuceno" }, p.Enabled ? "Ukljuceno" : "Iskljuceno") == "Ukljuceno";
-            p.KeepPerFile = ctx.Integer("Broj kopija po crtežu (najnovija se nikad ne briše)", p.KeepPerFile, 1);
-            p.MaxAgeDays = ctx.Integer("Najveća starost kopija u danima (0 = bez ograničenja)", p.MaxAgeDays, 0);
+            FormValues fv = ctx.Ask(new Form("Sigurnosne kopije", null, "Kopija crteža prije većih operacija, u folderu " + BackupManager.DefaultFolderName + " pored crteža.")
+                .Bool("on", "Automatska sigurnosna kopija prije većih operacija", p.Enabled)
+                .Integer("keep", "Broj kopija po crtežu (najnovija se nikad ne briše)", p.KeepPerFile, 1, 1000, null, v => v.Bool("on"))
+                .Integer("age", "Najveća starost kopija u danima (0 = bez ograničenja)", p.MaxAgeDays, 0, 10000, null, v => v.Bool("on")));
+            p.Enabled = fv.Bool("on");
+            p.KeepPerFile = fv.Integer("keep");
+            p.MaxAgeDays = fv.Integer("age");
             ctx.SaveSettings();
             ctx.Write(Bs.T("Sigurnosne kopije: {0}, čuva se {1} po crtežu, najviše {2} dana. Folder: {3}", p.Enabled ? "uključene" : "isključene", p.KeepPerFile,
                 p.MaxAgeDays == 0 ? "neograničeno" : p.MaxAgeDays.ToString(System.Globalization.CultureInfo.InvariantCulture), BackupManager.DefaultFolderName + " pored crteža"));

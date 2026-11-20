@@ -36,31 +36,34 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             double k = ctx.K;
             (double w, double depth) = ParkingRows.Size(kind);
-            ctx.Write("Parking mjesta u nizu – " + Title(kind) + ": " + Bs.Num(w, 2) + " × " + Bs.Num(depth, 2) + " m" +
-                      (kind == ParkingRows.Perpendicular ? "; mjesto za osobe s invaliditetom 2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1." : kind == ParkingRows.Angled ? ", prolaz 3,00 m." : ", prolaz 3,00 m."));
-            int count = ctx.Integer("Broj parking mjesta u nizu", 5, 1);
-            int accessible = 0;
-            if (kind == ParkingRows.Perpendicular)
-            {
-                accessible = ctx.Integer("Broj mjesta za osobe s invaliditetom u nizu (0 = nema)", 1, 0);
-                if (accessible > count)
-                {
-                    accessible = count;
-                    ctx.Write("Mjesta za osobe s invaliditetom: " + accessible + " (koliko ima mjesta u nizu).");
-                }
-            }
-
             // numbering: on, or from 1 again
             List<SiteElement> existing = ctx.ExistingElements();
             int last = existing.Where(e => e.TypeId.StartsWith("road.parking_bay", StringComparison.Ordinal) && e.Parameters.Contains("bayNumber"))
                 .Select(e => int.TryParse(e.Parameters.Text("bayNumber"), NumberStyles.Integer, CultureInfo.InvariantCulture, out int n) ? n : 0)
                 .DefaultIfEmpty(0).Max();
-            int first = 1;
-            if (last > 0 && count > accessible)
+            bool perpendicular = kind == ParkingRows.Perpendicular;
+            var form = new Form("Parking mjesta u nizu – " + Title(kind), "parking-" + kind,
+                "Mjesta " + Bs.Num(w, 2) + " × " + Bs.Num(depth, 2) + " m" +
+                (perpendicular ? "; mjesto za osobe s invaliditetom 2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1." : ", prolaz 3,00 m sa strelicom smjera.") +
+                " Nakon „U redu“ kliknete početak niza na ivici trotoara, smjer niza i stranu prolaza.");
+            form.Integer("count", "Broj parking mjesta u nizu", 5, 1, 500);
+            if (perpendicular)
             {
-                string answer = ctx.Keyword("U crtežu su parking mjesta do broja " + last + ". Numeracija [Nastavi/Od1]", new[] { "Next|Nastavi", "One|Od1" }, "Next");
-                first = answer == "Next" ? last + 1 : 1;
+                form.Integer("accessible", "Od toga za osobe s invaliditetom", 1, 0, 500, "0 = nema. Uvijek su na početku niza, ispred broja 1.");
             }
+
+            if (last > 0)
+            {
+                form.Choice("numbering", "Numeracija (u crtežu su mjesta do broja " + last + ")", new[] { "Next|Nastavi od " + (last + 1), "One|Od 1" }, "Next");
+                form.Field("numbering").Remember = false;
+            }
+
+            form.Summary = v => "Dužina niza: " + Bs.Num(ParkingRows.Length(kind, v.Integer("count"), perpendicular ? Math.Min(v.Integer("count"), v.Integer("accessible")) : 0), 2) + " m.";
+            form.Check = v => perpendicular && v.Integer("accessible") > v.Integer("count") ? "Mjesta za osobe s invaliditetom ne može biti više od broja mjesta u nizu." : null;
+            FormValues fv = ctx.Ask(form);
+            int count = fv.Integer("count");
+            int accessible = perpendicular ? Math.Min(count, fv.Integer("accessible")) : 0;
+            int first = last > 0 && count > accessible && fv.Choice("numbering") == "Next" ? last + 1 : 1;
 
             Point3d a = ctx.Point("Početak niza na ivici trotoara / granici (strana suprotna prolazu)")!.Value;
             Vec2 M(Point3d p) => new Vec2(p.X / k, p.Y / k);

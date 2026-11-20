@@ -57,7 +57,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         {
             EnsureUnits(ctx);
             RoadSpec spec = RoadSpec.FromParameterString(UI.Preferences.Current.Default(PrefKey, new RoadSpec().ToParameterString()));
-            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(spec, "Ulica", UnitText(ctx)) : AskText(ctx, spec);
+            RoadSpec? chosen = CommandContext.UseDialogs ? UI.RoadDialog.Ask(spec, "Ulica", UnitText(ctx)) : AskText(ctx, spec);
             if (chosen == null)
             {
                 throw new CommandCancelled();
@@ -71,14 +71,15 @@ namespace SiteDesignPro.AutoCAD.Commands
             UI.Preferences.Current.RememberDefault(PrefKey, chosen.ToParameterString());
             ElementType type = ctx.Catalog.RequireType(RoadElements.StreetType);
             ctx.Write("Ulica: " + Describe(chosen) + ".");
-            string how = ctx.Keyword("Osovina ulice [Nacrtaj/Odaberi]", new[] { "Draw|Nacrtaj", "Select|Odaberi" }, "Draw");
+            FormValues axis = ctx.Ask(AxisForm(ctx, "Ulica – osovina i visine", "ulica-osovina", "Ulica: " + Describe(chosen) + "."));
+            string how = axis.Choice("axis");
             ObjectId axisId;
             var heights = new List<(Point3d Point, double Height)>();
             if (how == "Draw")
             {
                 ctx.Write("Nacrtajte osovinu (sredinu kolovoza) u smjeru vožnje desnih traka. Ulica se sama spaja s ulicama i cestama koje dodiruje.");
                 List<RoadSpec> present = RoadElements.Specs(ctx.ExistingElements(), ctx.Catalog, ctx.K);
-                axisId = DrawAxisWithHeights(ctx, StreetPreview(ctx.K, chosen, present), out heights);
+                axisId = DrawAxisWithHeights(ctx, StreetPreview(ctx.K, chosen, present), axis, out heights);
                 if (axisId.IsNull)
                 {
                     ctx.Write("Osovina nije nacrtana.");
@@ -129,21 +130,38 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// each its own; with different heights, the height is asked after every point. Enter ends, [Zatvori] closes,
         /// [Ponisti] takes the last point back.
         /// </summary>
-        private static ObjectId DrawAxisWithHeights(CommandContext ctx, Func<List<Point3d>, List<PreviewShape>> preview, out List<(Point3d Point, double Height)> heights)
+        /// <summary>
+        /// The questions about the axis of a street or road in one window: drawn or picked, the base elevation of the
+        /// roads (only while it is not set), the height of the first point (or that of the road it starts on) and
+        /// whether the other points have the same height or each its own.
+        /// </summary>
+        internal static Form AxisForm(CommandContext ctx, string title, string id, string intro)
         {
-            heights = new List<(Point3d, double)>();
-            Point3d? first = ctx.Point("Prva tačka");
-            if (first == null)
+            RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
+            Func<FormValues, bool> draw = v => v.Is("axis", "Draw");
+            var f = new Form(title, id, intro + " Nakon „U redu“ crtate osovinu (sredinu kolovoza) u smjeru vožnje desnih traka; Enter završava, Z zatvara, P vraća zadnju tačku.");
+            f.Choice("axis", "Osovina", new[] { "Draw|Nacrtaj sada", "Select|Odaberi postojeću liniju" }, "Draw", "Odaberi: polilinija, linija ili luk u crtežu, ili postojeća cesta.");
+            if (!levels.Defined)
             {
-                return ObjectId.Null;
+                f.Number("base", "Osnovna (nulta) visina saobraćajnica (m n.v.)", 0, null, null, "Zadaje se jednom za crtež; mijenja se s Visine saobraćajnica.", null, true, true);
             }
 
+            string baseText = levels.Defined ? Bs.Num(levels.Base, 2) + " m n.v." : "osnovnu";
+            f.Bool("fromRoad", "Ako osovina počinje na postojećoj ulici/cesti, prva tačka dobija njenu visinu", true, null, draw);
+            f.Number("start", "Visina prve tačke u odnosu na " + baseText + " (m, + ili -)", 0, null, null, "Npr. 0,00, -1,20 ili 2,50.", draw, true, true);
+            f.Choice("heights", "Visine ostalih tačaka", new[] { "Same|Iste kao prva", "Different|Upisujem za svaku tačku" }, "Same", "Upisujem: poslije svakog klika otvara se prozor za visinu te tačke.", draw);
+            f.Field("start").Remember = false;
+            return f;
+        }
+
+        private static ObjectId DrawAxisWithHeights(CommandContext ctx, Func<List<Point3d>, List<PreviewShape>> preview, FormValues answers, out List<(Point3d Point, double Height)> heights)
+        {
+            heights = new List<(Point3d, double)>();
             RoadLevelSettings levels = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
             if (!levels.Defined)
             {
-                ctx.Write("Osnovna (nulta) visina saobraćajnica još nije zadana; zadajte je sada (može se promijeniti s Visine saobraćajnica).");
                 levels.Flat = false;
-                levels.Base = ctx.Number("Osnovna visina saobraćajnica (m n.v.)", 0, true, true);
+                levels.Base = answers.Number("base");
                 levels.Write(ctx.Db, ctx.Tr);
             }
             else if (levels.Flat)
@@ -152,11 +170,22 @@ namespace SiteDesignPro.AutoCAD.Commands
                 levels.Write(ctx.Db, ctx.Tr);
             }
 
+            Point3d? first = ctx.Point("Prva tačka osovine");
+            if (first == null)
+            {
+                return ObjectId.Null;
+            }
+
             // at an existing road the new one starts at its height
-            double? there = RoadElements.LevelNear(ctx.ExistingElements(), ctx.Catalog, ctx.K, new Vec2(first.Value.X / ctx.K, first.Value.Y / ctx.K));
+            double? there = answers.Bool("fromRoad") ? RoadElements.LevelNear(ctx.ExistingElements(), ctx.Catalog, ctx.K, new Vec2(first.Value.X / ctx.K, first.Value.Y / ctx.K)) : null;
             string prompt = "Visina tačke u odnosu na osnovnu " + Bs.Num(levels.Base, 2) + " m n.v. (+X,XX ili -X,XX)";
-            double height = Relative(ctx, ctx.Number(prompt, there ?? 0, true, true), levels.Base);
-            bool same = ctx.Keyword("Ostale tačke [Iste/Razlicite] visine", new[] { "Same|Iste", "Different|Razlicite" }, "Same") == "Same";
+            double height = there ?? Relative(ctx, answers.Number("start"), levels.Base);
+            if (there.HasValue)
+            {
+                ctx.Write("Prva tačka je na postojećoj saobraćajnici: visina " + Bs.Num(there.Value, 2) + " m u odnosu na osnovnu.");
+            }
+
+            bool same = answers.Choice("heights") != "Different";
             var pts = new List<Point3d> { first.Value };
             var values = new List<double> { height };
             bool closed = false;
@@ -301,7 +330,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ctx.Write("Ova cesta je zadana samo širinom; u prozoru joj možete dati trake, trotoare i staze (postaje ulica).");
             }
 
-            RoadSpec? chosen = CommandContext.Interactive ? UI.RoadDialog.Ask(spec, "Uredi ulicu " + road.Element.Label, UnitText(ctx)) : AskText(ctx, spec);
+            RoadSpec? chosen = CommandContext.UseDialogs ? UI.RoadDialog.Ask(spec, "Uredi ulicu " + road.Element.Label, UnitText(ctx)) : AskText(ctx, spec);
             if (chosen == null)
             {
                 throw new CommandCancelled();
@@ -361,10 +390,20 @@ namespace SiteDesignPro.AutoCAD.Commands
                 dir = new Vec2(Math.Cos(a), Math.Sin(a));
             }
 
-            lanes = Math.Min(6, ctx.Integer("Broj traka", lanes, 1));
-            lw = ctx.Number("Širina saobraćajne trake (m)", lw);
-            double length = ctx.Number("Širina prijelaza – dužina pruga (m)", 4.0);
-            bool bikeStrip = ctx.Keyword("Vrsta prijelaza – samo pješački ili s biciklističkom stazom 80 cm [Pjesacki/Biciklisticki]", new[] { "Plain|Pjesacki", "Bike|Biciklisticki" }, "Plain") == "Bike";
+            var form = new Form("Pješački prijelaz", "pjesacki-prijelaz", onRoad
+                ? "Prijelaz ide okomito na osovinu, preko cijelog kolovoza; broj i širina traka su preuzeti s ulice."
+                : "Prijelaz preko kolovoza zadanog broja traka.");
+            form.Integer("lanes", "Broj traka", lanes, 1, 6);
+            form.Number("laneWidth", "Širina saobraćajne trake (m)", lw, 1, 5);
+            form.Number("length", "Širina prijelaza – dužina pruga (m)", 4.0, 1, 10, "Najmanje 3,00 m, uobičajeno 4,00 m.");
+            form.Choice("kind", "Vrsta prijelaza", new[] { "Plain|Samo pješački", "Bike|S biciklističkom stazom 80 cm" }, "Plain");
+            form.Field("lanes").Remember = false;
+            form.Field("laneWidth").Remember = false;
+            FormValues fv = ctx.Ask(form);
+            lanes = fv.Integer("lanes");
+            lw = fv.Number("laneWidth");
+            double length = fv.Number("length");
+            bool bikeStrip = fv.Choice("kind") == "Bike";
             if (lw < 1 || length < 1)
             {
                 ctx.Write("Širina trake i prijelaza moraju biti najmanje 1 m.");
@@ -1134,9 +1173,12 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void RoadLevelBase() => Guarded(() => CommandContext.Run("SDPVISINECESTA", ctx =>
         {
             RoadLevelSettings s = RoadLevelSettings.Read(ctx.Db, ctx.Tr);
-            string mode = ctx.Keyword("Teren [Ravan/Neravan]", new[] { "Ravan", "Neravan" }, s.Flat ? "Ravan" : "Neravan");
-            s.Flat = mode == "Ravan";
-            s.Base = ctx.Number(s.Flat ? "Visina saobraćajnica (m n.v.)" : "Osnovna visina saobraćajnica (m n.v.)", s.Base, true, true);
+            var form = new Form("Visine saobraćajnica", null, "Ravan teren: sve saobraćajnice su na jednoj visini. Neravan: to je osnovna visina, a dijelovi saobraćajnica dobijaju visine iz kota (Kota saobraćajnice) ili pri crtanju osovine.");
+            form.Choice("mode", "Teren", new[] { "Ravan|Potpuno ravan", "Neravan" }, s.Flat ? "Ravan" : "Neravan");
+            form.Number("base", "Visina / osnovna visina saobraćajnica (m n.v.)", s.Base, null, null, null, null, true, true);
+            FormValues fv = ctx.Ask(form);
+            s.Flat = fv.Choice("mode") == "Ravan";
+            s.Base = fv.Number("base");
             s.Write(ctx.Db, ctx.Tr);
             ctx.Write(s.Flat
                 ? "Potpuno ravan teren: sve saobraćajnice su na " + Bs.Num(s.Base, 2) + " m n.v."
