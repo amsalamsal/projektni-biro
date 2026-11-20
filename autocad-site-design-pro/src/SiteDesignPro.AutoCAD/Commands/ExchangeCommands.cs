@@ -227,6 +227,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             SitePackage pkg = read.Package;
+            ctx.Svc.CheckMinimums = false; // designed elsewhere: the validator reports a ramp below the minimums
             List<ManagedElement> existing = ctx.Svc.ReadAll();
             bool adopt = existing.Count == 0;
             if (!adopt && pkg.ProjectId != ctx.Settings.ProjectId &&

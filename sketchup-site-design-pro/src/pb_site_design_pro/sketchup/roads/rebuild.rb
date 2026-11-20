@@ -64,6 +64,7 @@ module ProjektniBiro
             name_root(model, settings)
             draw_overlays(model, result)
             store.built_signature = store.signature
+            model.set_attribute(SourceStore::SETTINGS, 'violations', JSON.generate(violation_keys(result)))
             model.commit_operation unless operation == :none
           rescue StandardError
             model.abort_operation unless operation == :none
@@ -81,6 +82,30 @@ module ProjektniBiro
           when :own then model.start_operation('Saobraćajnice: izgradnja', true)
           when :transparent then model.start_operation('Saobraćajnice: osvježavanje', true, false, true)
           end
+        end
+
+        # ---- technical minimums (the engine reports a ramp that breaks one: it cannot be designed)
+
+        # "id|kind" of every broken minimum of a build result (kind: the text up to the first number).
+        def violation_keys(result)
+          (result['violations'] || []).flat_map do |v|
+            (v['rules'] || []).map { |r| "#{v['id']}|#{r.to_s.split(/\d/, 2).first}" }
+          end
+        end
+
+        # The broken minimums the last build added (texts "GR-001: …"): the change that caused them is refused.
+        def new_violations(before, outcome)
+          return [] unless outcome
+
+          (outcome.result['violations'] || []).flat_map do |v|
+            (v['rules'] || []).reject { |r| before.include?("#{v['id']}|#{r.to_s.split(/\d/, 2).first}") }.map { |r| "#{v['name']}: #{r}" }
+          end
+        end
+
+        def violations_before(model)
+          JSON.parse(model.get_attribute(SourceStore::SETTINGS, 'violations', '[]') || '[]')
+        rescue JSON::ParserError
+          []
         end
 
         def name_root(model, settings)

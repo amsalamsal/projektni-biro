@@ -15,6 +15,9 @@ module ProjektniBiro
 
       # Detailed asset model of the element's type, when one exists for its geometry kind.
       def model_for(element)
+        # a bay of a parking row from AutoCAD is drawn with the markings of the row, not the asset model
+        return nil if element.builder == 'parking_bay' && Builders::ParkingBay::ROW_LAYOUTS.include?(element.text('layout', 'single'))
+
         m = Models.for(element.type_id)
         m && m.geometry == element.kind ? m : nil
       end

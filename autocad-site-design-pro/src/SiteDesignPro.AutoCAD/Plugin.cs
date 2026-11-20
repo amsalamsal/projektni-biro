@@ -20,6 +20,7 @@ using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 [assembly: CommandClass(typeof(EasyCommands))]
 [assembly: CommandClass(typeof(AnalysisCommands))]
 [assembly: CommandClass(typeof(RoadCommands))]
+[assembly: CommandClass(typeof(ParkingCommands))]
 
 namespace SiteDesignPro.AutoCAD
 {

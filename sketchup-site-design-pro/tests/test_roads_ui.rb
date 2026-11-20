@@ -120,7 +120,7 @@ class TestRoadsUi < Minitest::Test
     form('bikeLane' => true)
 
     run_command('Garažna rampa')
-    form('kind' => 'straight', 'endLevel' => -3.0, 'flatLength' => 5.0)
+    form('kind' => 'straight', 'endLevel' => -2.5, 'flatLength' => 5.0)
     click(@model.tool, 30, -6)
     click(@model.tool, 30, -26)
 
@@ -151,5 +151,21 @@ class TestRoadsUi < Minitest::Test
     form('lanesRight' => 3)
     assert_in_delta 3.0, R::SourceStore.new(@model).records.find { |r| r.label == 'U-001' }.params['lanesRight']
     assert_empty errors, errors.inspect
+  end
+
+  def test_a_ramp_below_the_technical_minimum_is_refused
+    need_engine
+    run_command('Garažna rampa')
+    form('kind' => 'straight', 'endLevel' => -4.0)
+    click(@model.tool, 0, 0)
+    click(@model.tool, 0, -12) # 4 m over 12 m: 33 %
+    refute(R::SourceStore.new(@model).records.any? { |r| r.type == R::GARAGE_RAMP }, 'the ramp is not kept')
+    assert(UI.log.any? { |e| e[0] == :messagebox && e[1] =~ /tehničkog minimuma/ && e[1] =~ /uzdužni nagib/ }, UI.log.inspect)
+
+    run_command('Garažna rampa')
+    form('kind' => 'straight', 'endLevel' => -1.5)
+    click(@model.tool, 0, 0)
+    click(@model.tool, 0, -12) # 12,5 %
+    assert_equal 1, R::SourceStore.new(@model).records.count { |r| r.type == R::GARAGE_RAMP }
   end
 end

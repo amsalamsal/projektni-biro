@@ -109,6 +109,11 @@ namespace SiteDesignPro.AutoCAD.UI
                       Small("Presjek rampe", "SDPRAMPAPRESJEK", "slope", "Uzdužni presjek garažne rampe pored tlocrta: nagibi i dužine dionica, kote, ploča iznad i svijetla visina. Prati izmjene rampe.")),
                 Stack(Small("Rampa za invalide", "SDPRAMPAINVALIDI", "roads", "Rampa 120 cm (spušteni ivičnjak i kosina) gdje kliknete: na trotoaru s te strane, na kolovozu s obje strane. Briše se brisanjem plavog trougla."))));
 
+            tab.Panels.Add(Panel("Parking mjesta",
+                Large("Okomito", "SDPPARKINGOKOMITO", "parking", "Parking mjesta u nizu 2,50 × 5,00 m: broj mjesta i broj mjesta za osobe s invaliditetom (2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1). Ponovo: numeracija se nastavlja ili kreće od 1."),
+                Stack(Small("Paralelno", "SDPPARKINGPARALELNO", "parking", "Parking mjesta u nizu 5,50 × 2,50 m uz prolaz 3,00 m sa strelicom smjera."),
+                      Small("Pod uglom 45°", "SDPPARKINGUGAO", "parking", "Parking mjesta pod 45°: 3,40 m duž niza, 4,75 m dubine, šrafirani početni trougao, ugao 45° i strelica u prolazu."))));
+
             tab.Panels.Add(Panel("Izmjena",
                 Large("Uredi element", "SDPEDIT", "edit", "Širina, visina i ostali podaci odabranih elemenata. Isto se može i u paleti, kartica Svojstva."),
                 Stack(Small("Odabir", "SDPSELECT", "select", "Odabir svih elemenata iste vrste, kategorije, oznake ili materijala."),

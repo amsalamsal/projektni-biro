@@ -398,6 +398,14 @@ namespace SiteDesignPro.Core.Validation
             ParameterSet p = e.Parameters;
             double N(string k) => p.Contains(k) ? p.Number(k) : type.Parameter(k)?.Default.AsNumber() ?? double.NaN;
             bool B(string k) => p.Contains(k) ? p.Bool(k) : type.Parameter(k)?.Default.AsBool() ?? false;
+            List<string> broken = RampMinimums.Check(e, catalog);
+            if (broken.Count > 0)
+            {
+                report.Add(Severity.Error, IssueKind.DesignConflict, "SDP-C012", e.Id,
+                    "Rampa ispod tehničkog minimuma: " + string.Join("; ", broken) + ".",
+                    "Ispravite rampu (dužina, visine, širina, poluprečnik ili svijetla visina); takva rampa se ne može projektovati.");
+            }
+
             switch (type.Builder.Id)
             {
                 case "linear_slab":

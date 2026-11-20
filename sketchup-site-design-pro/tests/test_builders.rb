@@ -225,6 +225,24 @@ class TestBuilders < Minitest::Test
     assert_in_delta 5.0, max[1] - min[1], 1e-6
   end
 
+  def test_parking_rows_from_autocad_are_marked_like_the_plan
+    geometry = { 'kind' => 'point', 'position' => [0.0, 0.0, 0.0], 'rotation' => 0.0 }
+    %w[perpendicular parallel angled].each do |layout|
+      w, d = { 'perpendicular' => [2.5, 5.0], 'parallel' => [5.5, 2.5], 'angled' => [3.4, 4.75] }[layout]
+      canvas, node, ctx = build_one('road.parking_bay', geometry: geometry,
+                                                        parameters: { 'layout' => layout, 'width' => w, 'length' => d, 'lineWidth' => 0.1, 'rowStart' => true, 'rowEnd' => false, 'bayNumber' => '1' })
+      assert_empty ctx.report.issues.select { |i| i.severity == :error }
+      assert_empty canvas.manifold_errors, "#{layout}: #{canvas.manifold_errors.first(3).join("\n")}"
+      min, max = bbox(canvas, node)
+      assert_in_delta d, max[1] - min[1], 0.08, layout
+      assert max[2] < 0.01, 'flat paint'
+    end
+    # the accessible bay: yellow, with the hatched area and the symbol
+    canvas, = build_one('road.parking_bay_accessible', geometry: geometry,
+                                                       parameters: { 'layout' => 'perpendicular', 'width' => 3.9, 'length' => 5.0, 'accessible' => true, 'hatchWidth' => 1.4, 'rowStart' => true })
+    assert(canvas.definitions.values.any? { |d| d.children.any? { |c| c.name == 'Površina simbola pristupačnosti' } })
+  end
+
   def test_parking_bay_extends_along_local_y
     geometry = { 'kind' => 'point', 'position' => [0.0, 0.0, 0.0], 'rotation' => 0.0 }
     canvas, node, = build_one('road.parking_bay', geometry: geometry)

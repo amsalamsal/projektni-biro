@@ -9,6 +9,7 @@ using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Geometry;
 using SiteDesignPro.Core.Model;
 using SiteDesignPro.Core.Symbols;
+using SiteDesignPro.Core.Validation;
 using AcGeom = Autodesk.AutoCAD.Geometry;
 
 namespace SiteDesignPro.AutoCAD.Data
@@ -64,6 +65,13 @@ namespace SiteDesignPro.AutoCAD.Data
         public ProjectSettings Settings => settings;
 
         private double K => settings.Scale.DrawingUnitsPerMeter;
+
+        /// <summary>
+        /// Ramps below the technical minimum are refused (<see cref="RampMinimums"/>): a new one is not created and a
+        /// change that breaks a minimum the ramp kept is not made. Off while a package is imported (what is in it was
+        /// designed elsewhere and is reported by the validator).
+        /// </summary>
+        public bool CheckMinimums { get; set; } = true;
 
         public BlockTableRecord ModelSpace(OpenMode mode = OpenMode.ForRead)
             => (BlockTableRecord)tr.GetObject(SymbolUtilityServices.GetBlockModelSpaceId(db), mode);
@@ -317,6 +325,11 @@ namespace SiteDesignPro.AutoCAD.Data
         public ObjectId Create(SiteElement element)
         {
             ElementType type = catalog.RequireType(element.TypeId);
+            if (CheckMinimums)
+            {
+                RampMinimums.Require(element, catalog, K);
+            }
+
             BlockTableRecord ms = ModelSpace(OpenMode.ForWrite);
             string layer = layers.Ensure(type.LayerKey);
             Entity entity;
@@ -726,6 +739,19 @@ namespace SiteDesignPro.AutoCAD.Data
         {
             var entity = (Entity)tr.GetObject(m.ObjectId, OpenMode.ForWrite);
             ElementType type = catalog.RequireType(element.TypeId);
+            if (CheckMinimums && RampMinimums.Applies(type))
+            {
+                // only what the change breaks: a ramp drawn before the rule can still be changed for the better
+                List<string> now = RampMinimums.Check(element, catalog, K);
+                SiteElement? before = Read(entity)?.Element;
+                List<string> was = before == null ? new List<string>() : RampMinimums.Check(before, catalog, K);
+                List<string> added = now.Where(x => !was.Any(w => RuleKind(w) == RuleKind(x))).ToList();
+                if (added.Count > 0)
+                {
+                    throw new DesignRuleException(RampMinimums.Message(element, catalog, added));
+                }
+            }
+
             if (element.Geometry is PointGeometry p && entity is BlockReference br)
             {
                 br.Position = new Point3d(p.Position.X, p.Position.Y, p.Position.Z);
@@ -737,6 +763,13 @@ namespace SiteDesignPro.AutoCAD.Data
             ElementStore.Write(entity, rec, tr);
             ApplyRepresentation(entity, element, type);
             UpdateLabels(element);
+        }
+
+        /// <summary>The kind of a broken minimum: its text up to the first number.</summary>
+        private static string RuleKind(string violation)
+        {
+            int i = violation.IndexOfAny("0123456789".ToCharArray());
+            return i < 0 ? violation : violation.Substring(0, i);
         }
 
         /// <summary>Updates the text of label leaders attached to an element.</summary>

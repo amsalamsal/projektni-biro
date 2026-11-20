@@ -4,6 +4,7 @@ using System.Linq;
 using SiteDesignPro.Core.Catalog;
 using SiteDesignPro.Core.Geometry;
 using SiteDesignPro.Core.Model;
+using SiteDesignPro.Core.Text;
 
 namespace SiteDesignPro.Core.Roads
 {
@@ -253,6 +254,59 @@ namespace SiteDesignPro.Core.Roads
 
         public bool TooSteep => Slope > RoadLevels.MaxRampSlope + 1e-9;
 
+        /// <summary>Smallest radius of the inner edge in the arcs of a curved ramp (technical minimum 5,00 m).</summary>
+        public const double MinInnerRadius = 5.0;
+
+        /// <summary>Clear height under a slab above a ramp: never below this, whatever is entered (2,10 m).</summary>
+        public const double MinClearHeight = 2.10;
+
+        /// <summary>
+        /// The technical minimums a garage ramp must keep; a ramp that breaks one is not drawn (each broken one is a
+        /// line). Longitudinal slope at most 17 % in every part, inner radius of the arcs at least 5,00 m, lane width
+        /// of the kind (straight 2,50 m, curved 3,50 m), safety margin of a curved ramp 0,25 m, clear height under a
+        /// slab above at least 2,10 m (or the clear height asked for, when higher).
+        /// </summary>
+        public List<string> Violations()
+        {
+            var list = new List<string>();
+            string Pc(double v) => Bs.Num(v * 100, 2) + " %";
+            double steepest = Parts().Select(x => x.Slope).DefaultIfEmpty(Slope).Max();
+            if (Math.Max(steepest, Slope) > RoadLevels.MaxRampSlope + 1e-9)
+            {
+                list.Add("uzdužni nagib " + Pc(Math.Max(steepest, Slope)) + " je veći od dozvoljenih " + Pc(RoadLevels.MaxRampSlope) + " (produžite rampu ili smanjite visinsku razliku)");
+            }
+
+            List<Seg> arcs = Segments().Where(g => g.Arc).ToList();
+            if (Curved && arcs.Count > 0)
+            {
+                double inner = arcs.Min(g => g.Radius) - (Width / 2);
+                if (inner < MinInnerRadius - 1e-6)
+                {
+                    list.Add("unutrašnji poluprečnik " + Bs.Num(inner, 2) + " m je manji od najmanjih " + Bs.Num(MinInnerRadius, 2) + " m");
+                }
+            }
+
+            double minLane = Combined ? (arcs.Count > 0 ? 3.5 : 2.5) : LaneRange.Min;
+            if (LaneWidth < minLane - 1e-6)
+            {
+                list.Add("širina trake " + Bs.Num(LaneWidth, 2) + " m je manja od najmanjih " + Bs.Num(minLane, 2) + " m");
+            }
+
+            if (Curved && Margin < 0.25 - 1e-6)
+            {
+                list.Add("zaštitni razmak " + Bs.Num(Margin, 2) + " m je manji od najmanjih 0,25 m (zakrivljena rampa)");
+            }
+
+            (double Clearance, double Station)? clear = Clearance;
+            double need = Math.Max(MinClearance, MinClearHeight);
+            if (clear.HasValue && clear.Value.Clearance < need - 1e-6)
+            {
+                list.Add("svijetla visina pod pločom " + Bs.Num(clear.Value.Clearance, 2) + " m je manja od " + Bs.Num(need, 2) + " m");
+            }
+
+            return list;
+        }
+
         /// <summary>Allowed lane width range of the kind (straight 2,5–3,5 m, curved 3,5–5,0 m).</summary>
         public (double Min, double Max) LaneRange => Combined ? (2.5, 5.0) : Curved ? (3.5, 5.0) : (2.5, 3.5);
 
@@ -496,9 +550,17 @@ namespace SiteDesignPro.Core.Roads
                 list.Add(to);
             }
 
-            // where the slope changes
+            // where the slope changes, and where the cross slope starts at both ends
             bool added = false;
-            foreach (double brk in Profile().Select(x => x.Station))
+            double len = Length;
+            double crossRun = Math.Min(CrossRun, Math.Max(0, (len / 2) - LevelEnd));
+            var breaks = Profile().Select(x => x.Station).ToList();
+            if (InnerSide != 0 || Combined)
+            {
+                breaks.AddRange(new[] { LevelEnd, LevelEnd + crossRun, len - LevelEnd - crossRun, len - LevelEnd });
+            }
+
+            foreach (double brk in breaks)
             {
                 if (brk > from + 1e-6 && brk < to - 1e-6 && !list.Any(x => Math.Abs(x - brk) < 1e-6))
                 {
@@ -538,7 +600,31 @@ namespace SiteDesignPro.Core.Roads
         /// Which way the surface falls across at a station (+1 to the left, −1 to the right, 0 level): the inside of
         /// the curve; on a combined ramp only in its arcs, growing over 3 m from each end of the arc.
         /// </summary>
-        public double CrossSide(double station)
+        public double CrossSide(double station) => CrossSideInArcs(station) * EndFactor(station);
+
+        /// <summary>
+        /// Both ends of every ramp are level across over <see cref="LevelEnd"/> (they meet the road or the slab
+        /// flush); the cross slope starts after that and grows to the full slope over <see cref="CrossRun"/>.
+        /// </summary>
+        public const double LevelEnd = 1.0;
+
+        public const double CrossRun = 2.0;
+
+        /// <summary>0 at the level ends, growing to 1 after them.</summary>
+        public double EndFactor(double station)
+        {
+            double total = Length;
+            double from = Math.Min(station, total - station);
+            double run = Math.Min(CrossRun, Math.Max(0, (total / 2) - LevelEnd));
+            if (from <= LevelEnd + 1e-9)
+            {
+                return 0;
+            }
+
+            return run < 1e-9 ? 0 : Math.Min(1, (from - LevelEnd) / run);
+        }
+
+        private double CrossSideInArcs(double station)
         {
             if (!Combined)
             {

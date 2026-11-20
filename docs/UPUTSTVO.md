@@ -91,6 +91,9 @@ imaju padajuće liste svih vrsta elemenata po podkategorijama i dugme *Pregled*,
 | `SDPSETPARAM` | Jedan parametar na više elemenata |
 | `SDPPATHARRAY` | Niz elemenata duž putanje (drvored, svjetiljke, stubići, stalci) |
 | `SDPPARKING` | Numerisani niz parking mjesta uz rub prolaza (standardno, za osobe s invaliditetom, punjač…) |
+| `SDPPARKINGOKOMITO` | Kartica *Parking mjesta → Okomito*: broj mjesta i broj mjesta za osobe s invaliditetom (2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1); mjesta 2,50 × 5,00 m |
+| `SDPPARKINGPARALELNO` | *Paralelno*: mjesta 5,50 × 2,50 m, strelica u prolazu 3,00 m |
+| `SDPPARKINGUGAO` | *Pod uglom 45°*: 3,40 m duž niza, 4,75 m dubine, šrafirani početni trougao, prikazan ugao 45°, strelica u prolazu |
 | `SDPGRID` | Raster sadnje u granici (kvadratni ili smaknuti) |
 | `SDPSELECT`, `SDPZOOM` | Odabir po vrsti, kategoriji, oznaci, id-u ili materijalu; zum na element |
 | `SDPCLEARANCE` | Zone servisa, sigurnosti i podizanja iz vrijednosti elementa |
@@ -166,6 +169,24 @@ kružni tokovi, prijelazi i rampe crtaju se direktno u SketchUpu; grade se **ist
   `dužina;visina` ili `v visina` (visina sljedeće tačke).
 * Upozorenja (nagib ulice preko 10 %, rampe preko 17 %, mali radijus rampe, niska svijetla visina) javljaju se odmah;
   zadnji izvještaj: *Saobraćajnice → Izvještaj posljednje izgradnje*.
+
+#### Parking mjesta u nizu (AutoCAD, kartica *Parking mjesta*)
+* Okomito, paralelno ili pod uglom 45°: upišete broj mjesta (kod okomitog i broj mjesta za osobe s invaliditetom),
+  kliknete početak niza na ivici trotoara/granici, smjer niza i stranu prolaza (dok birate, niz se vidi).
+* Crta se kao u standardu: linije 10 cm, T glava 1,00 m na strani prolaza, kuka 55 cm na početku i kraju niza,
+  brojevi mjesta, žuto mjesto za osobe s invaliditetom sa simbolom, šrafurom 1,40 m i rampom za trotoar (uvijek
+  ispred broja 1), kod 45° šrafirani početni trougao i ugao 45°, strelica smjera u prolazu. Kote se ne crtaju.
+* Kad u crtežu već ima numerisanih mjesta, naredba pita: numeracija **Nastavi** ili **Od1**.
+* Svako mjesto je element (broji se u pokazateljima, izvozi u SketchUp s istim oznakama).
+
+#### Tehnički minimumi rampi
+Rampa ispod minimuma se **ne može projektovati**: AutoCAD je ne nacrta (poruka s razlogom, izmjena poništena), a
+SketchUp poništi izmjenu. Garažna rampa: uzdužni nagib najviše 17 % u svakom dijelu, unutrašnji poluprečnik luka
+najmanje 5,00 m, traka najmanje 2,50 m (zakrivljena 3,50 m), zaštitni razmak zakrivljene rampe 0,25 m, svijetla
+visina pod pločom najmanje 2,10 m. Pješačka rampa: nagib najviše 8,33 % (1 : 12), širina najmanje 1,20 m. Rampa
+koja je već u crtežu javlja se u provjeri kao greška `SDP-C012`.
+Garažna rampa je na **prvom i zadnjem metru ravna** (bez poprečnog pada, u ravni s ulicom ili pločom); poprečni pad
+3 % počinje tek nakon 1 m i raste na punu vrijednost na sljedeća 2 m.
 
 #### Saobraćajnice u oba smjera (SketchUp ⇄ AutoCAD)
 * **SketchUp → AutoCAD:** *Saobraćajnice → Izvoz saobraćajnica za AutoCAD…* snima ulice, ceste, kružne tokove,

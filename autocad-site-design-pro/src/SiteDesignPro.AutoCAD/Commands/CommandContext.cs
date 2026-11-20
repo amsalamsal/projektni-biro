@@ -98,6 +98,13 @@ namespace SiteDesignPro.AutoCAD.Commands
                 SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, "Prekinuo korisnik.");
                 doc.Editor.WriteMessage("\n*Prekinuto*");
             }
+            catch (Core.Validation.DesignRuleException ex)
+            {
+                // a technical minimum: nothing is drawn, and the user is told why (not an error of the program)
+                SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);
+                doc.Editor.WriteMessage("\n" + ex.Message + "\nIzmjene su poništene.");
+                Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowAlertDialog(ex.Message + "\n\nIzmjene su poništene.");
+            }
             catch (Autodesk.AutoCAD.Runtime.Exception ex)
             {
                 SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);

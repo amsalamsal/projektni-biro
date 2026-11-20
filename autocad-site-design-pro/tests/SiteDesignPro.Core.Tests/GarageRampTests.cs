@@ -60,12 +60,67 @@ namespace SiteDesignPro.Core.Tests
             Assert.InRange(r.Length, (Math.PI * 8) - 0.01, (Math.PI * 8) + 0.01);
             Assert.Equal(1, r.InnerSide);
 
-            // at the start the inner edge (left, radius 5,75) is lower than the outer edge (radius 10,25)
-            Vec3[] second = r.Triangles()[1];
-            Vec3 outer = second[0], inner = second[2];
-            Assert.True(inner.XY.DistanceTo(new Vec2(0, 0)) < outer.XY.DistanceTo(new Vec2(0, 0)));
-            Assert.True(inner.Z < outer.Z);
-            Assert.InRange(outer.Z - inner.Z, (GarageRamp.CrossSlope * r.Width) - 0.01, (GarageRamp.CrossSlope * r.Width) + 0.01);
+            // in the middle the inner edge (left) is lower than the outer edge by the full cross slope
+            double half = r.Width / 2, mid = r.Length / 2;
+            Assert.InRange(r.HeightAt(mid, -half) - r.HeightAt(mid, half), (GarageRamp.CrossSlope * r.Width) - 0.001, (GarageRamp.CrossSlope * r.Width) + 0.001);
+
+            // both ends lie level across for the first and the last metre (flush with the road or the slab)
+            foreach (double s in new[] { 0.0, 0.5, GarageRamp.LevelEnd, r.Length - GarageRamp.LevelEnd, r.Length - 0.3, r.Length })
+            {
+                Assert.Equal(r.HeightAt(s, half), r.HeightAt(s, -half), 9);
+            }
+
+            // the cross slope grows after the level metre, and the 3D has an edge where it starts
+            Assert.True(r.HeightAt(GarageRamp.LevelEnd + 1, -half) > r.HeightAt(GarageRamp.LevelEnd + 1, half));
+            Assert.Contains(r.Stations(0, r.Length), x => Math.Abs(x - GarageRamp.LevelEnd) < 1e-6);
+            Assert.Contains(r.Stations(0, r.Length), x => Math.Abs(x - (r.Length - GarageRamp.LevelEnd)) < 1e-6);
+        }
+
+        [Fact]
+        public void RampsBelowTheTechnicalMinimum_AreRefused()
+        {
+            var axis = new Ring(new List<Vec3> { new Vec3(0, 0, 0), new Vec3(20, 0, 0) });
+            SiteElement ok = Ramp(axis, "straight", "one_way", 0, -3);
+            Assert.Empty(GarageRamp.From(ok, 1.0)!.Violations());
+            Validation.RampMinimums.Require(ok, TestSupport.Catalog);
+
+            // 4 m over 20 m: 20 %
+            SiteElement steep = Ramp(axis, "straight", "one_way", 0, -4);
+            Assert.Contains(GarageRamp.From(steep, 1.0)!.Violations(), v => v.StartsWith("uzdužni nagib", StringComparison.Ordinal));
+            var ex = Assert.Throws<Validation.DesignRuleException>(() => Validation.RampMinimums.Require(steep, TestSupport.Catalog));
+            Assert.Contains("tehničkog minimuma", ex.Message, StringComparison.Ordinal);
+
+            // a semicircle of radius 6: inner edge 6 - 2,25 = 3,75 m < 5 m
+            var small = new Ring(new List<Vec3> { new Vec3(6, 0, 0), new Vec3(-6, 0, 0) }, new List<double> { 1.0, 0.0 });
+            Assert.Contains(GarageRamp.From(Ramp(small, "semicircular", "one_way", 0, -1), 1.0)!.Violations(), v => v.StartsWith("unutrašnji poluprečnik", StringComparison.Ordinal));
+
+            // too narrow a lane on a curved ramp
+            var big = new Ring(new List<Vec3> { new Vec3(10, 0, 0), new Vec3(-10, 0, 0) }, new List<double> { 1.0, 0.0 });
+            SiteElement narrow = Ramp(big, "semicircular", "one_way", 0, -1);
+            narrow.Parameters["laneWidth"] = ParamValue.Of(3.0);
+            Assert.Contains(GarageRamp.From(narrow, 1.0)!.Violations(), v => v.StartsWith("širina trake", StringComparison.Ordinal));
+
+            // a slab too low above the ramp
+            SiteElement low = Ramp(axis, "straight", "one_way", 0, -3);
+            low.Parameters["ceilingFrom"] = ParamValue.Of(10.0);
+            low.Parameters["ceilingLevel"] = ParamValue.Of(0.3);
+            Assert.Contains(GarageRamp.From(low, 1.0)!.Violations(), v => v.StartsWith("svijetla visina", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void PedestrianRamp_AtMost833Percent_AtLeast120cmWide()
+        {
+            SiteElement R(double w, double l, double rise)
+            {
+                var g = new PolygonGeometry(new Ring(new[] { new Vec3(0, 0, 0), new Vec3(w, 0, 0), new Vec3(w, l, 0), new Vec3(0, l, 0) }));
+                var e = new SiteElement(Guid.NewGuid().ToString(), "level.ramp", g) { Parameters = TestSupport.Catalog.RequireType("level.ramp").CreateDefaultParameters() };
+                e.Parameters["rise"] = ParamValue.Of(rise);
+                return e;
+            }
+
+            Assert.Empty(Validation.RampMinimums.Check(R(1.5, 6, 0.3), TestSupport.Catalog));
+            Assert.Contains(Validation.RampMinimums.Check(R(1.5, 3, 0.3), TestSupport.Catalog), v => v.StartsWith("nagib", StringComparison.Ordinal));
+            Assert.Contains(Validation.RampMinimums.Check(R(1.0, 6, 0.3), TestSupport.Catalog), v => v.StartsWith("svijetla širina", StringComparison.Ordinal));
         }
 
         [Fact]

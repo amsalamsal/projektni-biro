@@ -240,8 +240,20 @@ namespace SiteDesignPro.Core.Exchange
             List<GarageRamp> ramps = GarageRamp.All(elements);
             List<RoadSpec> specs = RoadElements.Specs(elements, catalog);
             var rampsJson = new JsonArray();
+            var violations = new JsonArray();
             foreach (GarageRamp r in ramps)
             {
+                List<string> broken = r.Violations();
+                if (broken.Count > 0)
+                {
+                    violations.Add(new JsonObject
+                    {
+                        ["id"] = r.Id,
+                        ["name"] = r.Name,
+                        ["rules"] = new JsonArray(broken.Select(b => (JsonNode)JsonValue.Create(b)!).ToArray()),
+                    });
+                }
+
                 var parts = new JsonArray();
                 foreach ((double from, double to, double slope) in r.Parts())
                 {
@@ -323,6 +335,7 @@ namespace SiteDesignPro.Core.Exchange
             result["notes"] = new JsonArray(notes.Select(n => (JsonNode)JsonValue.Create(n)!).ToArray());
             result["warnings"] = new JsonArray(warnings.Select(n => (JsonNode)JsonValue.Create(n)!).ToArray());
             result["ramps"] = rampsJson;
+            result["violations"] = violations;
             result["sections"] = sections;
             return result;
         }

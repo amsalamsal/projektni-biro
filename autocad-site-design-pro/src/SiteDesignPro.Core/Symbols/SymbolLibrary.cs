@@ -10,7 +10,11 @@ using SiteDesignPro.Core.Model;
 namespace SiteDesignPro.Core.Symbols
 {
     /// <summary>2D drawing primitive in the element's local frame (metres; insertion point at the origin).</summary>
-    public abstract record SymbolPrimitive;
+    public abstract record SymbolPrimitive
+    {
+        /// <summary>AutoCAD colour index of the primitive (0: ByBlock, the colour of the element's layer).</summary>
+        public short Color { get; init; }
+    }
 
     public sealed record SymLine(Vec2 A, Vec2 B) : SymbolPrimitive;
 
@@ -24,8 +28,8 @@ namespace SiteDesignPro.Core.Symbols
     /// <summary>Solid-filled closed region.</summary>
     public sealed record SymFill(IReadOnlyList<Vec2> Points) : SymbolPrimitive;
 
-    /// <summary>Middle-centred text.</summary>
-    public sealed record SymText(Vec2 Position, double Height, string Text) : SymbolPrimitive;
+    /// <summary>Middle-centred text; Rotation in radians from the local X axis.</summary>
+    public sealed record SymText(Vec2 Position, double Height, string Text, double Rotation = 0) : SymbolPrimitive;
 
     /// <summary>Generated plan symbol for a point element.</summary>
     public sealed class SymbolDrawing
@@ -120,7 +124,19 @@ namespace SiteDesignPro.Core.Symbols
                         }
 
                         break;
-                    case SymText t: sb.Append("T").Append(V(t.Position)).Append(';').Append(N(t.Height)).Append(';').Append(t.Text); break;
+                    case SymText t:
+                        sb.Append("T").Append(V(t.Position)).Append(';').Append(N(t.Height)).Append(';').Append(t.Text);
+                        if (Math.Abs(t.Rotation) > 1e-9)
+                        {
+                            sb.Append("r").Append(N(t.Rotation));
+                        }
+
+                        break;
+                }
+
+                if (p.Color != 0)
+                {
+                    sb.Append("c").Append(p.Color.ToString(CultureInfo.InvariantCulture));
                 }
             }
 
@@ -415,6 +431,13 @@ namespace SiteDesignPro.Core.Symbols
 
                 case "parking_bay":
                     {
+                        string layout = T("layout", "single");
+                        if (layout == "perpendicular" || layout == "parallel" || layout == "angled")
+                        {
+                            ParkingSymbols.Build(items, layout, N("width", 2.5), N("length", 5), (int)Math.Round(N("rowDir", 1)), B("rowStart"), B("rowEnd"), B("accessible"), N("hatchWidth", 0), T("bayNumber", string.Empty));
+                            break;
+                        }
+
                         double w = N("width", 2.5), l = N("length", 5), lw = N("lineWidth", 0.12);
                         items.Add(new SymPolyline(new[] { new Vec2(-w / 2, 0), new Vec2(-w / 2, l), new Vec2(w / 2, l), new Vec2(w / 2, 0) }, false, null, lw));
                         string code = B("accessible") ? "A" : B("ev") ? "EV" : string.Empty;

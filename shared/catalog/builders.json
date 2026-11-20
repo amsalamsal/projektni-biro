@@ -415,7 +415,12 @@
         { "key": "accessible", "label": "Mjesto za osobe s invaliditetom", "type": "bool", "default": false, "group": "Konfiguracija", "labelEn": "Accessible bay", "groupEn": "Configuration" },
         { "key": "ev", "label": "Mjesto s punjačem", "type": "bool", "default": false, "group": "Konfiguracija", "labelEn": "EV charging bay", "groupEn": "Configuration" },
         { "key": "bayNumber", "label": "Broj mjesta", "type": "text", "default": "", "group": "Informacije", "labelEn": "Bay number", "groupEn": "Information" },
-        { "key": "markingMaterial", "label": "Materijal oznake", "type": "material", "default": "line_paint_white", "group": "Izgled", "labelEn": "Marking material", "groupEn": "Appearance" }
+        { "key": "markingMaterial", "label": "Materijal oznake", "type": "material", "default": "line_paint_white", "group": "Izgled", "labelEn": "Marking material", "groupEn": "Appearance" },
+        { "key": "layout", "label": "Raspored u nizu", "type": "enum", "default": "single", "options": ["single", "perpendicular", "parallel", "angled"], "group": "Niz", "labelEn": "Row layout", "groupEn": "Row" },
+        { "key": "rowDir", "label": "Smjer niza po lokalnoj X osi (1 ili -1)", "type": "integer", "default": 1, "min": -1, "max": 1, "group": "Niz", "labelEn": "Row direction along local X (1 or -1)", "groupEn": "Row" },
+        { "key": "rowStart", "label": "Prvo mjesto u nizu (početna linija s kukom)", "type": "bool", "default": false, "group": "Niz", "labelEn": "First bay of the row (start line with a hook)", "groupEn": "Row" },
+        { "key": "rowEnd", "label": "Zadnje mjesto u nizu (krajnja linija s kukom)", "type": "bool", "default": false, "group": "Niz", "labelEn": "Last bay of the row (end line with a hook)", "groupEn": "Row" },
+        { "key": "hatchWidth", "label": "Šrafura uz mjesto za osobe s invaliditetom", "type": "length", "default": 0, "min": 0, "max": 3, "group": "Niz", "labelEn": "Hatched area beside an accessible bay", "groupEn": "Row" }
       ],
       "descriptionEn": "Parking or loading bay. Insertion point = centre of the access (aisle) edge; the bay extends along local +Y."
     },
@@ -731,6 +736,10 @@
     }
   },
   "optionLabels": {
+    "single": "pojedinačno",
+    "perpendicular": "okomito",
+    "parallel": "paralelno",
+    "angled": "pod uglom 45°",
     "one_way": "jednosmjerna",
     "two_way": "dvosmjerna",
     "above_ground": "nadzemno",

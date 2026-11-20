@@ -35,7 +35,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
                 foreach (Entity e in Create(p, k))
                 {
                     e.Layer = "0";
-                    e.ColorIndex = 0; // ByBlock
+                    e.ColorIndex = p.Color != 0 ? p.Color : 0; // ByBlock unless the symbol sets a colour
                     e.Linetype = "BYBLOCK";
                     e.LineWeight = LineWeight.ByBlock;
                     btr.AppendEntity(e);
@@ -97,6 +97,7 @@ namespace SiteDesignPro.AutoCAD.Drawing
                         VerticalMode = TextVerticalMode.TextVerticalMid,
                         AlignmentPoint = P3(t.Position, k),
                         Position = P3(t.Position, k),
+                        Rotation = t.Rotation,
                     };
                     break;
             }

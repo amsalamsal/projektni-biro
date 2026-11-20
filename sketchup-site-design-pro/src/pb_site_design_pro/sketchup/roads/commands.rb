@@ -34,10 +34,19 @@ module ProjektniBiro
         # engine keeps the change (the roads can be rebuilt with Osvježi); a failing import undoes everything.
         def change(title)
           m = model
+          before = Rebuild.violations_before(m)
           m.start_operation("Saobraćajnice: #{title}", true)
           begin
             yield store
             outcome = Rebuild.run(m, operation: :none)
+            broken = Rebuild.new_violations(before, outcome)
+            unless broken.empty?
+              m.abort_operation
+              Commands.last_message = "Rampa ispod tehničkog minimuma:\n#{broken.join("\n")}"
+              UI.messagebox("#{title}: rampa ispod tehničkog minimuma se ne može projektovati.\n\n#{broken.join("\n")}\n\nIzmjena je poništena.", MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+              return nil
+            end
+
             m.commit_operation
             report(outcome, title)
           rescue Engine::Error => e
@@ -683,8 +692,14 @@ module ProjektniBiro
           sig = store.signature
           return if sig == store.built_signature
 
+          before = Rebuild.violations_before(model)
           outcome = Rebuild.run(model, operation: :transparent)
           Sketchup.status_text = "Saobraćajnice osvježene: #{outcome.summary}" if outcome
+          broken = Rebuild.new_violations(before, outcome)
+          unless broken.empty?
+            UI.messagebox("Rampa je ispod tehničkog minimuma i takva se ne može projektovati:\n\n#{broken.join("\n")}\n\nVratite izmjenu (Uredi > Poništi) ili ispravite rampu.", MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+            return
+          end
           UI.messagebox("Saobraćajnice\n\n#{Rebuild.message(outcome)}", MB_MULTILINE) if outcome && !outcome.warnings.empty?
         rescue StandardError => e
           Log.warn("Automatsko osvježavanje saobraćajnica: #{e.message}")

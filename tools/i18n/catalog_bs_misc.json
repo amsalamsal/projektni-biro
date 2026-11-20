@@ -374,7 +374,11 @@
     "textile": "tekstil",
     "triangle": "trougao",
     "underground": "podzemno",
-    "vertical_cylinder": "vertikalni cilindar"
+    "vertical_cylinder": "vertikalni cilindar",
+    "single": "pojedinačno",
+    "perpendicular": "okomito",
+    "parallel": "paralelno",
+    "angled": "pod uglom 45°"
   },
   "builderDescriptions": {
     "slab": "Ploča površine ograničena zatvorenom granicom; vrh na koti granice + pomak, debljina prema dolje.",

@@ -2,6 +2,16 @@
 
 ## Neobjavljeno
 
+### Inputi 19.11.: rampe i parking mjesta u nizu (20.11.)
+* **Garažna rampa**: prvi i zadnji metar su ravni (bez poprečnog pada), u ravni s ulicom ili pločom; poprečni pad
+  3 % počinje nakon 1 m i raste na punu vrijednost na 2 m (AutoCAD 3D i SketchUp, isti motor).
+* **Rampe ispod tehničkog minimuma se ne mogu projektovati**: garažne (nagib ≤ 17 %, unutrašnji poluprečnik
+  ≥ 5,00 m, traka ≥ 2,50 / 3,50 m, zaštitni razmak, svijetla visina ≥ 2,10 m) i pješačke (≤ 8,33 %, ≥ 1,20 m).
+  AutoCAD odbija element s porukom, SketchUp poništava izmjenu; provjera javlja postojeće kao `SDP-C012`.
+* **AutoCAD – Parking mjesta u nizu** (nova kartica *Parking mjesta*): okomito (s mjestima za osobe s
+  invaliditetom ispred broja 1: šrafura 1,40 m i rampa za trotoar), paralelno i pod uglom 45°; numeracija se
+  nastavlja ili kreće od 1; strelice u prolazu, ugao 45°, bez kota. Oznake idu i u SketchUp 3D.
+
 ### Saobraćajnice u oba smjera: SketchUp ⇄ AutoCAD (20.11.)
 * **SketchUp → AutoCAD:** nova stavka *Izvoz saobraćajnica za AutoCAD…* (motor `sdp-ceste export`) snima izvorne
   elemente alata Saobraćajnice u `.sdpkg`; visine osovina postaju kote. Generisani elementi su u paketu označeni
