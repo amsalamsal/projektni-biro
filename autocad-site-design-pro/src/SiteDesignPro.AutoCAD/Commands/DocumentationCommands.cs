@@ -295,14 +295,10 @@ namespace SiteDesignPro.AutoCAD.Commands
             List<SiteElement> elements = PackageFrameElements(ctx);
             var builder = new ScheduleBuilder(ctx.Catalog);
             var o = new PromptSaveFileOptions("\nCSV datoteka tabela (po jedna datoteka za svaku tabelu)") { Filter = "CSV (*.csv)|*.csv", DialogCaption = "Izvoz tabela (Excel)" };
-            PromptFileNameResult r = ctx.Ed.GetFileNameForSave(o);
-            if (r.Status != PromptStatus.OK)
-            {
-                throw new CommandCancelled();
-            }
+            string chosenFile = ctx.FileForSave(o);
 
-            string dir = Path.GetDirectoryName(r.StringResult)!;
-            string stem = Path.GetFileNameWithoutExtension(r.StringResult);
+            string dir = Path.GetDirectoryName(chosenFile)!;
+            string stem = Path.GetFileNameWithoutExtension(chosenFile);
             int n = 0;
             foreach (ScheduleDefinition def in builder.Applicable(elements))
             {

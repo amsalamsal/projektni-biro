@@ -170,7 +170,9 @@ namespace SiteDesignPro.Core.Exchange
                     }
                 }
 
-                list.Add(new SiteElement(e.Id, e.TypeId, e.Geometry.Transform(v => new Vec3(v.X, v.Y, 0)))
+                // the roads lie in the plan (their heights are the marks); any other element keeps its height
+                bool road = t != null && (RoadElements.SourceTypes.Contains(t.Id) || RoadElements.IsNetworkRoad(t));
+                list.Add(new SiteElement(e.Id, e.TypeId, road ? e.Geometry.Transform(v => new Vec3(v.X, v.Y, 0)) : e.Geometry)
                 {
                     Name = e.Name,
                     Label = e.Label,
@@ -378,6 +380,7 @@ namespace SiteDesignPro.Core.Exchange
                 ["package"] = written.Path,
                 ["elements"] = elements.Count,
                 ["roads"] = elements.Count(e => RoadElements.IsNetworkRoad(catalog.FindType(e.TypeId))),
+                ["others"] = elements.Count(e => !RoadElements.SourceTypes.Contains(e.TypeId)),
                 ["notes"] = new JsonArray(notes.Select(n => (JsonNode)JsonValue.Create(n)!).ToArray()),
             };
         }

@@ -158,6 +158,7 @@ module ProjektniBiro
           import: command('Uvoz paketa...', 'Uvoz paketa iz AutoCAD-a (.sdpkg ili manifest.json) s pregledom prije primjene.', 'import') { import_package },
           update: command('Ažuriranje iz paketa', 'Ponovni uvoz posljednjeg paketa: prikazuje nove, izmijenjene, obrisane i konfliktne elemente prije primjene.', 'update') { update_from_last },
           properties: command('Svojstva elementa', 'Prikaz i izmjena parametara odabranog elementa.', 'properties') { element_properties },
+          package: command('Izvoz za AutoCAD (.sdpkg)...', 'Svi elementi iz biblioteke i saobraćajnice u jednom paketu za AutoCAD (Uvoz paketa, SDPUVOZPAKETA): novi se dodaju, izmijenjeni zamjenjuju.', 'export') { Roads::Commands.export_to_autocad },
           export: command('Izvoz izmjena za AutoCAD...', 'Zapisuje izmijenjene parametre i pomjerene/zarotirane tačkaste elemente za naredbu SDPAPPLYCHANGES.', 'export') { export_changes },
           scenes: command('Izrada scena za pregled', 'Izrada ili osvježavanje scena (situacija, 3D pregled, zelenilo, rasvjeta, podzemno ...).', 'scenes') { create_scenes },
           underground: command('Prikaz podzemnog', 'Sakriva površine i prikazuje ukopane instalacije u X-ray prikazu.', 'underground') { toggle_underground },
@@ -171,7 +172,7 @@ module ProjektniBiro
         menu = UI.menu('Extensions').add_submenu('Vanjsko uređenje PRO')
         %i[import update].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
-        %i[properties export].each { |k| menu.add_item(cmds[k]) }
+        %i[properties package export].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
         %i[scenes underground].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator

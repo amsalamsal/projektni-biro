@@ -526,27 +526,25 @@ module ProjektniBiro
 
         # ---- both ways with AutoCAD
 
+        # One package for AutoCAD with everything designed or changed here: roads (axes and settings) and every
+        # other element of the library. In AutoCAD: Uvoz paketa (SDPUVOZPAKETA).
         def export_to_autocad
           m = model
-          if store.records.empty?
-            hint = Exchange.candidates(m).empty? ? '' : "\n\nUlice uvezene iz AutoCAD-a prvo preuzmite: Saobraćajnice > Preuzmi saobraćajnice iz AutoCAD-a."
-            return UI.messagebox("U modelu nema saobraćajnica nacrtanih alatima Saobraćajnice.#{hint}")
-          end
-
-          name = m.path.to_s.empty? ? 'saobracajnice' : "#{File.basename(m.path, '.*')}_saobracajnice"
+          name = m.path.to_s.empty? ? 'za_autocad' : "#{File.basename(m.path, '.*')}_za_autocad"
           dir = m.path.to_s.empty? ? nil : File.dirname(m.path)
-          path = UI.savepanel('Izvoz saobraćajnica za AutoCAD', dir, "#{name}.sdpkg")
+          path = UI.savepanel('Izvoz za AutoCAD', dir, "#{name}.sdpkg")
           return unless path
 
           path = "#{path}.sdpkg" unless File.extname(path).casecmp('.sdpkg').zero?
           result = Exchange.export(m, path)
           notes = (result['notes'] || []).first(8).map { |n| "• #{n}" }
-          UI.messagebox("Izvezeno: #{result['elements']} elemenata (#{result['roads']} ulica i cesta) u\n#{result['package']}\n\n" \
-                        "U AutoCAD-u: Uvoz paketa (SDPUVOZPAKETA). Postojeće saobraćajnice se zamjenjuju (Zamijeni), nove se dodaju, " \
-                        "a AutoCAD sam ponovo crta kolovoze, ivičnjake, trotoare, oznake i rampe." +
-                        (notes.empty? ? '' : "\n\nNapomene:\n#{notes.join("\n")}"), MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+          hint = Exchange.candidates(m).empty? ? '' : "\n\nUlice uvezene iz AutoCAD-a koje želite mijenjati ovdje prvo preuzmite: Saobraćajnice > Preuzmi saobraćajnice iz AutoCAD-a."
+          UI.messagebox("Izvezeno: #{result['elements']} elemenata (#{result['roads']} ulica i cesta, #{result['others'] || 0} ostalih elemenata iz biblioteke) u\n#{result['package']}\n\n" \
+                        "U AutoCAD-u: Uvoz paketa (SDPUVOZPAKETA) – odaberite ovu datoteku. Postojeći elementi se zamjenjuju (Zamijeni), novi se dodaju, " \
+                        "a AutoCAD sam ponovo crta kolovoze, ivičnjake, trotoare, oznake i rampe." + hint +
+                        (notes.empty? ? '' : "\n\nNapomene:\n#{notes.join("\n")}"), MB_MULTILINE, 'Vanjsko uređenje PRO – izvoz za AutoCAD')
         rescue Engine::Error => e
-          UI.messagebox("Izvoz saobraćajnica nije uspio:\n#{e.message}")
+          UI.messagebox("Izvoz za AutoCAD nije uspio:\n#{e.message}")
         end
 
         def adopt_from_autocad
@@ -559,7 +557,7 @@ module ProjektniBiro
           answer = UI.messagebox("Preuzeti #{count} saobraćajnih elemenata projekta „#{name}” u alate Saobraćajnice?\n\n" \
                                  "Ulice, ceste, prijelazi, kote i rampe postaju izmjenjive ovdje; njihov 3D iz AutoCAD-a se zamjenjuje " \
                                  "3D-om alata Saobraćajnice. Sljedeći uvozi tog projekta iz AutoCAD-a donose izmjene saobraćajnica, " \
-                                 "a Izvoz saobraćajnica za AutoCAD ih vraća u crtež.", MB_YESNO)
+                                 "a Izvoz za AutoCAD ih vraća u crtež.", MB_YESNO)
           return unless answer == IDYES
 
           stats, outcome = Exchange.adopt(m, root)
@@ -628,7 +626,7 @@ module ProjektniBiro
           sub.add_item(command('Odaberi osovine', 'Odabire grupu s osovinama (sakrivanje: oznaka „VU Saobraćajnice – osovine”).', nil) { select_axes })
           sub.add_item(command('Izvještaj posljednje izgradnje', 'Napomene i upozorenja posljednje izgradnje saobraćajnica.', nil) { show_last })
           sub.add_separator
-          sub.add_item(command('Izvoz saobraćajnica za AutoCAD…', 'Ulice, ceste, kružni tokovi, prijelazi, kote, rampe za invalide i garažne rampe kao paket za AutoCAD (Uvoz paketa); AutoCAD sam crta kolovoze, ivičnjake i oznake.', nil) { export_to_autocad })
+          sub.add_item(command('Izvoz za AutoCAD (sve)…', 'Saobraćajnice (osovine i postavke) i svi ostali elementi iz biblioteke kao paket za AutoCAD (Uvoz paketa); AutoCAD sam crta kolovoze, ivičnjake i oznake.', nil) { export_to_autocad })
           sub.add_item(command('Preuzmi saobraćajnice iz AutoCAD-a', 'Ulice i ostale saobraćajnice uvezenog AutoCAD projekta postaju izmjenjive alatima Saobraćajnice; sljedeći uvozi iz AutoCAD-a donose njihove izmjene.', nil) { adopt_from_autocad })
 
           tb = UI::Toolbar.new('Vanjsko uređenje PRO – Saobraćajnice')

@@ -145,11 +145,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 DialogCaption = "Izvoz za SketchUp",
                 InitialFileName = ctx.Settings.LastExportPath.Length > 0 ? ctx.Settings.LastExportPath : defaultName,
             };
-            PromptFileNameResult r = ctx.Ed.GetFileNameForSave(o);
-            if (r.Status != PromptStatus.OK)
-            {
-                throw new CommandCancelled();
-            }
+            string chosenFile = ctx.FileForSave(o);
 
             // revision tracking: bump the revision of every element whose content changed since the last export
             var elements = new List<SiteElement>();
@@ -192,7 +188,7 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
-            PackageWriteResult result = PackageWriter.Write(r.StringResult, ctx.Settings, elements, ctx.Catalog, options);
+            PackageWriteResult result = PackageWriter.Write(chosenFile, ctx.Settings, elements, ctx.Catalog, options);
             ctx.Settings.LastExportPath = result.Path;
             ctx.SaveSettings();
             ctx.Write("Izvezeno elemenata: " + result.ElementCount + (options.Terrains.Count > 0 ? " i teren" : string.Empty) + " → " + result.Path + ". Uvoz u SketchUp: Proširenja > Vanjsko uređenje PRO > Uvoz paketa.");
@@ -213,13 +209,9 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void ImportPackage() => CommandContext.RunMajor("SDPUVOZPAKETA", "Uvoz paketa u crtež", ctx =>
         {
             var o = new PromptOpenFileOptions("\nPaket Vanjsko uređenje PRO") { Filter = "Paket Vanjsko uređenje PRO (*.sdpkg)|*.sdpkg", DialogCaption = "Uvoz paketa u crtež" };
-            PromptFileNameResult r = ctx.Ed.GetFileNameForOpen(o);
-            if (r.Status != PromptStatus.OK)
-            {
-                throw new CommandCancelled();
-            }
+            string chosenFile = ctx.FileForOpen(o);
 
-            PackageReadResult read = PackageReader.Read(r.StringResult);
+            PackageReadResult read = PackageReader.Read(chosenFile);
             if (read.Package == null)
             {
                 Print(ctx, read.Report, 10);
@@ -341,7 +333,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             ctx.SaveSettings();
             ctx.Write(Core.Text.Bs.T("Uvoz paketa {0}: kreirano {1} elemenata (zamijenjeno {2}, preskočeno postojećih {3}, neuspjelo {4}).",
-                Path.GetFileName(r.StringResult), created, replaced, skipped, failed));
+                Path.GetFileName(chosenFile), created, replaced, skipped, failed));
             if (generated > 0)
             {
                 ctx.Write(Core.Text.Bs.T("  {0} elemenata mreže (kolovoz, ivičnjaci, trotoari, oznake, …) nije uvezeno: crtež ih crta sam iz ulica i cesta.", generated));
@@ -365,7 +357,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             ctx.Write("Dalje: ZOOM Extents, SDPEDIT za izmjene, SDPVALIDATE, SDPEXPORT.");
-            Log.Info("Uvezen paket " + r.StringResult + ": " + created + " elemenata");
+            Log.Info("Uvezen paket " + chosenFile + ": " + created + " elemenata");
         });
 
         /// <summary>An element the road network or a garage ramp generated (flagged in the package, or of a type only the network makes).</summary>
@@ -378,13 +370,9 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void ApplyChanges() => CommandContext.RunMajor("SDPAPPLYCHANGES", "Primjena izmjena iz SketchUp-a", ctx =>
         {
             var o = new PromptOpenFileOptions("\nDatoteka izmjena iz SketchUp-a") { Filter = "Izmjene Vanjsko uređenje PRO (*.json)|*.json", DialogCaption = "Primjena izmjena iz SketchUp-a" };
-            PromptFileNameResult r = ctx.Ed.GetFileNameForOpen(o);
-            if (r.Status != PromptStatus.OK)
-            {
-                throw new CommandCancelled();
-            }
+            string chosenFile = ctx.FileForOpen(o);
 
-            ChangeSetDocument doc = ChangeSetReader.Read(r.StringResult);
+            ChangeSetDocument doc = ChangeSetReader.Read(chosenFile);
             if (doc.ProjectId != ctx.Settings.ProjectId &&
                 ctx.Keyword("Datoteka izmjena pripada drugom projektu (" + doc.ProjectId + "). Nastaviti? [Da/Ne]", new[] { "Da", "Ne" }, "Ne") == "Ne")
             {

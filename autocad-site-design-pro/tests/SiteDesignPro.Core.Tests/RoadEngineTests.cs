@@ -106,6 +106,7 @@ namespace SiteDesignPro.Core.Tests
 
             Assert.True(result["ok"]!.GetValue<bool>());
             Assert.Equal(2, result["roads"]!.GetValue<int>());
+            Assert.Equal(1, result["others"]!.GetValue<int>());
             Assert.True(result["areas"]!["carriageway"]!.GetValue<double>() > 100);
             Assert.True(File.Exists(System.IO.Path.Combine(dir, RoadEngine.ResultFile)));
 
@@ -131,7 +132,10 @@ namespace SiteDesignPro.Core.Tests
         {
             JsonObject a = Element(RoadElements.StreetType, Path(false, -60, 0, 0, 60, 0, 0), null, "U-001");
             JsonObject b = Element(RoadElements.StreetType, Path(false, 0, 0, 0, 0, 60, 3.0), null, "U-002");
-            JsonObject o = JsonNode.Parse(Request(a, b))!.AsObject();
+
+            // any element of the library placed in SketchUp goes along, at its height
+            JsonObject bench = Element("furniture.bench", new JsonObject { ["kind"] = "point", ["position"] = new JsonArray(12.0, 7.0, 0.45), ["rotation"] = 0.3 }, null, "K-001");
+            JsonObject o = JsonNode.Parse(Request(a, b, bench))!.AsObject();
             o["origin"] = new JsonArray(6500000.0, 4800000.0, 0.0);
             RoadEngineRequest req = RoadEngine.ParseRequest(o.ToJsonString(), Cat);
             Assert.Equal(6500000.0, req.Origin[0]);
@@ -153,9 +157,13 @@ namespace SiteDesignPro.Core.Tests
             Assert.Equal(2, sources.Count(x => x.TypeId == RoadElements.StreetType));
             Assert.Contains(sources, x => x.TypeId == RoadElements.LevelMarkType); // heights of U-002
             Assert.Contains(sources, x => x.Label == "U-001");
+            SiteElement kb = pkg.Elements.Select(x => x.Element).Single(x => x.TypeId == "furniture.bench");
+            Assert.Equal("K-001", kb.Label);
+            Assert.Equal(0.45, ((PointGeometry)kb.Geometry).Position.Z, 6);
+            Assert.Equal(0.3, ((PointGeometry)kb.Geometry).Rotation, 6);
 
             // everything else (surfaces, kerbs, markings) is generated: AutoCAD leaves it out and draws its own network
-            List<SiteElement> generated = pkg.Elements.Select(x => x.Element).Except(sources).ToList();
+            List<SiteElement> generated = pkg.Elements.Select(x => x.Element).Except(sources).Where(x => x.TypeId != "furniture.bench").ToList();
             Assert.NotEmpty(generated);
             Assert.All(generated, x => Assert.True(RoadElements.NetworkOnlyTypes.Contains(x.TypeId) || (x.Custom.Contains(RoadElements.DerivedFlag) && x.Custom[RoadElements.DerivedFlag].AsBool()), x.TypeId));
             Assert.Contains(generated, x => x.TypeId == "road.carriageway");

@@ -2,6 +2,14 @@
 
 ## Neobjavljeno
 
+### Izvoz iz SketchUpa za sve elemente; prozori za datoteke (20.11.)
+* SketchUp: **Izvoz za AutoCAD (.sdpkg)…** (glavni meni i Saobraćajnice) šalje u jednom paketu saobraćajnice i
+  **sve ostale elemente iz biblioteke**: postavljene u SketchUpu i one iz AutoCAD projekta – gdje su sada
+  (pomjereni, zarotirani) i s parametrima izmijenjenim u SketchUpu. U AutoCAD-u Uvoz paketa dodaje nove i zamjenjuje
+  postojeće (isti id).
+* AutoCAD: odabir datoteke (uvoz paketa, izvoz, izmjene, CSV, KML) je uvijek Windows prozor za odabir datoteke,
+  i kad je FILEDIA = 0; pamti zadnji folder.
+
 ### Unos u prozorima umjesto komandne linije (20.11.)
 * Pitanja naredbi su u prozorima, sva pitanja jedne naredbe u jednom prozoru, s pamćenjem zadnjih unosa i
   provjerom prije „U redu“ (npr. nagib rampe, širina trake). Ulica i cesta (osovina i visine), kružni tok, pješački

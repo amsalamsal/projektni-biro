@@ -377,14 +377,10 @@ namespace SiteDesignPro.AutoCAD.Commands
             }
 
             var o = new PromptSaveFileOptions("\nKML datoteka") { Filter = "Google Earth KML (*.kml)|*.kml", DialogCaption = "Izvoz preklopa za Google Earth" };
-            PromptFileNameResult r = ctx.Ed.GetFileNameForSave(o);
-            if (r.Status != PromptStatus.OK)
-            {
-                throw new CommandCancelled();
-            }
+            string chosenFile = ctx.FileForSave(o);
 
-            SafeFile.WriteAllTextAtomic(r.StringResult, KmlWriter.Write(ctx.Settings.Name, features, KmlWriter.AccuracyNote(crs)));
-            ctx.Write(Bs.T("KML zapisan: {0} ({1} kontura). {2}", r.StringResult, features.Count, crs.DatumNote));
+            SafeFile.WriteAllTextAtomic(chosenFile, KmlWriter.Write(ctx.Settings.Name, features, KmlWriter.AccuracyNote(crs)));
+            ctx.Write(Bs.T("KML zapisan: {0} ({1} kontura). {2}", chosenFile, features.Count, crs.DatumNote));
             if (g.Transform.Kind == TransformKind.Identity && ctx.Settings.Origin[0] == 0 && features.Count > 0)
             {
                 ctx.Write("Napomena: koordinate crteža se koriste direktno kao koordinate sistema " + crs.Code + ". Ako je crtež u lokalnim koordinatama, prvo georeferencirajte (SDPGEOREF).");

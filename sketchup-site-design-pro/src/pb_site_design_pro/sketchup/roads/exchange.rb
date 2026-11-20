@@ -152,27 +152,93 @@ module ProjektniBiro
         # ---- export to AutoCAD
 
         # Writes the roads as a package for AutoCAD. Returns the result of the engine (package path, counts, notes).
+        # Everything for AutoCAD in one package: the source elements of the road tools (axes and settings, not the
+        # 3D) and every other element of the library in the model (placed here from the library, or imported from
+        # the AutoCAD project and changed here), where it is now and with its parameters. The package is in the
+        # frame of the AutoCAD project the model belongs to (linked project, else the imported one); AutoCAD
+        # replaces elements with the same id and adds the new ones.
         def export(model, path)
           store = SourceStore.new(model)
           settings = store.settings
           records = store.records
-          raise Engine::Error, 'u modelu nema saobraćajnica alata Saobraćajnice (ulica, cesta, kružni tok, …)' if records.empty?
-
-          linked = model.get_attribute(SourceStore::SETTINGS, 'linkedProjectId', nil)
-          to_project = root_transform(model, linked).inverse
+          target = model.get_attribute(SourceStore::SETTINGS, 'linkedProjectId', nil) || imported_project(model)
+          to_project = root_transform(model, target).inverse
           in_project = records.map do |r|
             Record.new(id: r.id, type: r.type, name: r.name, label: r.label, params: r.params,
                        geometry: Geo.map(r.geometry) { |v| SourceStore.xf(to_project, v) })
           end
-          origin = linked ? linked_origin(model) : [0.0, 0.0, 0.0]
-          name = linked ? model.get_attribute(SourceStore::SETTINGS, 'linkedName', settings['projectName']) : settings['projectName']
-          request = Request.build(in_project, project_id: linked || settings['projectId'], project_name: name,
-                                              base: settings['base'], flat: settings['flat'], origin: origin)
+          others = other_elements(model, target, to_project)
+          raise Engine::Error, 'u modelu nema elemenata za AutoCAD (saobraćajnice ili elementi iz biblioteke)' if in_project.empty? && others.empty?
+
+          origin = target ? linked_origin(model, target) : [0.0, 0.0, 0.0]
+          name = target ? (project_name(model, target) || settings['projectName']) : settings['projectName']
+          request = Request.build(in_project, project_id: target || settings['projectId'], project_name: name,
+                                              base: settings['base'], flat: settings['flat'], origin: origin, extra: others)
           result = Rebuild.engine(settings['projectId']).export(request, path)
-          model.start_operation('Izvoz saobraćajnica za AutoCAD', true, false, true)
+          model.start_operation('Izvoz za AutoCAD', true, false, true)
           records.each { |r| r.ref.set_attribute(SourceStore::DICT, IN_AUTOCAD, true) if r.ref && r.ref.valid? }
           model.commit_operation
           result
+        end
+
+        # The AutoCAD project imported into the model (the first one), if any.
+        def imported_project(model)
+          root = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICT, 'role') == 'projectRoot' && g.get_attribute(DICT, 'roadsProject') != true }
+          root ? root.get_attribute(DICT, 'projectId') : nil
+        end
+
+        def project_name(model, project_id)
+          root = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICT, 'role') == 'projectRoot' && g.get_attribute(DICT, 'projectId') == project_id }
+          name = root && root.get_attribute(DICT, 'projectName')
+          name || model.get_attribute(SourceStore::SETTINGS, 'linkedName', nil)
+        end
+
+        # The elements of the library in the model that are not roads: placed from the library here, or of the
+        # target project; where they are now (moved, turned) and with their parameters (changed here too).
+        def other_elements(model, target, to_project)
+          ModelIndex.managed_entities(model).map do |e|
+            next if road_entity?(e) || e.get_attribute(DICT, 'deletedInSource') == true || e.get_attribute(DICT, 'role')
+
+            source = e.get_attribute(DICT, 'source').to_s
+            pid = e.get_attribute(DICT, 'projectId')
+            next unless source == 'library' || (target && pid == target)
+
+            element_record(e, to_project * world(e))
+          end.compact
+        end
+
+        # Transformation of an entity to the model.
+        def world(entity)
+          t = entity.transformation
+          parent = entity.parent
+          while parent.is_a?(Sketchup::ComponentDefinition)
+            owner = parent.instances.first
+            break if owner.nil?
+
+            t = owner.transformation * t
+            parent = owner.parent
+          end
+          t
+        end
+
+        # One element as a request record; tr maps its stored geometry (as built) to the project frame.
+        def element_record(entity, tr)
+          type = entity.get_attribute(DICT, 'type')
+          id = entity.get_attribute(DICT, 'id')
+          return nil if type.to_s.empty? || id.to_s.empty?
+
+          params = JSON.parse(entity.get_attribute(DICT, 'params', '{}') || '{}').merge(JSON.parse(entity.get_attribute(DICT, 'localParams', '{}') || '{}'))
+          geometry = if (g = entity.get_attribute(DICT, 'geometry'))
+                       Geo.map(JSON.parse(g)) { |v| SourceStore.xf(tr, v) }
+                     else
+                       o = SourceStore.xf(tr, [0.0, 0.0, 0.0])
+                       x = tr.xaxis
+                       Geo.point(o, Math.atan2(x.y, x.x))
+                     end
+          Record.new(id: id, type: type, name: entity.get_attribute(DICT, 'name', '').to_s, label: entity.get_attribute(DICT, 'label', '').to_s,
+                     params: params, geometry: geometry)
+        rescue JSON::ParserError
+          nil
         end
 
         # ---- shared
@@ -269,7 +335,15 @@ module ProjektniBiro
           { id: package.project_id, origin: package.origin, name: package.project_name, base: package.building_zero_absolute }
         end
 
-        def linked_origin(model)
+        # Origin of the AutoCAD project: of the link, else of the imported project's root group.
+        def linked_origin(model, project_id = nil)
+          linked = model.get_attribute(SourceStore::SETTINGS, 'linkedProjectId', nil)
+          if project_id && project_id != linked
+            root = model.entities.grep(Sketchup::Group).find { |g| g.get_attribute(DICT, 'role') == 'projectRoot' && g.get_attribute(DICT, 'projectId') == project_id }
+            o = root && root.get_attribute(DICT, 'origin')
+            o = JSON.parse(o) if o.is_a?(String)
+            return o.to_a.map(&:to_f) if o && o.to_a.length >= 2
+          end
           JSON.parse(model.get_attribute(SourceStore::SETTINGS, 'linkedOrigin', '[0,0,0]') || '[0,0,0]').map(&:to_f)
         rescue JSON::ParserError
           [0.0, 0.0, 0.0]

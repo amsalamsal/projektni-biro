@@ -567,6 +567,85 @@ namespace SiteDesignPro.AutoCAD.Commands
             return form.Values();
         }
 
+        /// <summary>
+        /// A file to open: the Windows file window for a person (whatever FILEDIA is), the command line for a script.
+        /// The last folder is remembered per filter. Cancel stops the command.
+        /// </summary>
+        public string FileForOpen(PromptOpenFileOptions o)
+        {
+            if (UseDialogs)
+            {
+                var d = new Microsoft.Win32.OpenFileDialog { Title = o.DialogCaption, Filter = o.Filter, CheckFileExists = true, InitialDirectory = LastFolder(o.Filter, o.InitialDirectory) };
+                if (d.ShowDialog() != true)
+                {
+                    throw new CommandCancelled();
+                }
+
+                RememberFolder(o.Filter, d.FileName);
+                return d.FileName;
+            }
+
+            PromptFileNameResult r = Ed.GetFileNameForOpen(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.StringResult;
+        }
+
+        /// <summary>A file to save: the Windows file window for a person, the command line for a script.</summary>
+        public string FileForSave(PromptSaveFileOptions o)
+        {
+            if (UseDialogs)
+            {
+                string initial = o.InitialFileName ?? string.Empty;
+                var d = new Microsoft.Win32.SaveFileDialog
+                {
+                    Title = o.DialogCaption,
+                    Filter = o.Filter,
+                    OverwritePrompt = true,
+                    FileName = System.IO.Path.GetFileName(initial),
+                    InitialDirectory = System.IO.Path.IsPathRooted(initial) && System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(initial)) ? System.IO.Path.GetDirectoryName(initial) : LastFolder(o.Filter, o.InitialDirectory),
+                };
+                if (d.ShowDialog() != true)
+                {
+                    throw new CommandCancelled();
+                }
+
+                RememberFolder(o.Filter, d.FileName);
+                return d.FileName;
+            }
+
+            PromptFileNameResult r = Ed.GetFileNameForSave(o);
+            if (r.Status != PromptStatus.OK)
+            {
+                throw new CommandCancelled();
+            }
+
+            return r.StringResult;
+        }
+
+        private static string LastFolder(string? filter, string? fallback)
+        {
+            string last = UI.Preferences.Current.Default("folder:" + (filter ?? string.Empty), string.Empty);
+            if (last.Length > 0 && System.IO.Directory.Exists(last))
+            {
+                return last;
+            }
+
+            return !string.IsNullOrEmpty(fallback) && System.IO.Directory.Exists(fallback) ? fallback! : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        }
+
+        private static void RememberFolder(string? filter, string file)
+        {
+            string? dir = System.IO.Path.GetDirectoryName(file);
+            if (!string.IsNullOrEmpty(dir))
+            {
+                UI.Preferences.Current.RememberDefault("folder:" + (filter ?? string.Empty), dir!);
+            }
+        }
+
         /// <summary>A command-line prompt as the label of a window field: without the keyword list in [...].</summary>
         private static string Strip(string message)
         {

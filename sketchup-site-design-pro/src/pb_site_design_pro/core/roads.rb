@@ -413,7 +413,8 @@ module ProjektniBiro
       module Request
         module_function
 
-        def build(records, project_id: nil, project_name: 'Saobraćajnice', base: nil, flat: false, origin: nil)
+        # extra: further elements (any type of the library) as they are, never flattened
+        def build(records, project_id: nil, project_name: 'Saobraćajnice', base: nil, flat: false, origin: nil, extra: [])
           elements = records.map do |r|
             h = r.to_request
             if flat
@@ -423,6 +424,7 @@ module ProjektniBiro
             end
             h
           end.compact
+          elements.concat(extra.map(&:to_request))
           req = { 'format' => 'sdp-roads-request', 'version' => 1, 'project' => { 'id' => project_id, 'name' => project_name }, 'elements' => elements }
           req['base'] = base.to_f unless base.nil?
           req['origin'] = origin.map(&:to_f) if origin

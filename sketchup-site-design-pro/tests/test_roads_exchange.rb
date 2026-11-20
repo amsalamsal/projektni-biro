@@ -69,6 +69,27 @@ class TestRoadsExchange < Minitest::Test
     refute X.linked?(@model, pkg2), 'the packages of the road engine are imported as they are'
   end
 
+  def test_library_elements_go_to_autocad_where_they_are_now
+    g = @model.entities.add_group
+    g.transformation = Geom::Transformation.translation(Geom::Vector3d.new(Units.m_to_in(5), Units.m_to_in(7), Units.m_to_in(0.5))) *
+                       Geom::Transformation.rotation(Geom::Point3d.new(0, 0, 0), Geom::Vector3d.new(0, 0, 1), 0.3)
+    { 'id' => '0f8b1c3e-2d4a-4e6b-9a1c-5d7e9f0a1b2c', 'type' => 'furniture.bench', 'source' => 'library',
+      'params' => '{"length":2.0}', 'localParams' => '{"length":2.4}', 'label' => 'K-1' }.each { |k, v| g.set_attribute('SiteDesignPro', k, v) }
+    other = @model.entities.add_group # of another AutoCAD project: not sent
+    { 'id' => '1f8b1c3e-2d4a-4e6b-9a1c-5d7e9f0a1b2c', 'type' => 'furniture.bench', 'source' => 'package', 'projectId' => AUTOCAD_PROJECT }.each { |k, v| other.set_attribute('SiteDesignPro', k, v) }
+    recs = X.other_elements(@model, nil, Geom::Transformation.new)
+    assert_equal 1, recs.length
+    h = recs.first.to_request
+    assert_equal 'furniture.bench', h['type']
+    assert_in_delta 2.4, h['parameters']['length'], 1e-9, 'parameters changed here'
+    pos = h['geometry']['position']
+    assert_in_delta 5.0, pos[0], 1e-6
+    assert_in_delta 7.0, pos[1], 1e-6
+    assert_in_delta 0.5, pos[2], 1e-6
+    assert_in_delta 0.3, h['geometry']['rotation'], 1e-6
+    assert_equal 2, X.other_elements(@model, AUTOCAD_PROJECT, Geom::Transformation.new).length, 'the elements of the target project go along'
+  end
+
   def test_export_needs_roads
     assert_raises(R::Engine::Error) { X.export(@model, File.join(@tmp, 'x.sdpkg')) }
   end
