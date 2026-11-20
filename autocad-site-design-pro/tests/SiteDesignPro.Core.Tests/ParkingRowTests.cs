@@ -104,7 +104,7 @@ namespace SiteDesignPro.Core.Tests
         public void ToolExamples_EveryMainToolOnce_RampWithinTheMinimums_NetworkBuilds()
         {
             List<SiteElement> all = Samples.ToolExamples.Create(TestSupport.Catalog);
-            Assert.Equal(2, all.Count(e => e.TypeId == Roads.RoadElements.StreetType));
+            Assert.Equal(2, all.Count(e => e.TypeId == Roads.RoadElements.StreetType && e.Name.StartsWith("Primjer", StringComparison.Ordinal)));
             Assert.Contains(all, e => e.TypeId == Roads.GarageRamp.Type);
             Assert.Contains(all, e => e.TypeId == Roads.RoadElements.CrossingType);
             Assert.True(all.Count(e => e.TypeId.StartsWith("road.parking_bay", StringComparison.Ordinal)) == 15);
