@@ -165,7 +165,6 @@ class TestRoadsUi < Minitest::Test
     # a fresh model (the test fake does not undo an aborted operation)
     @model = Sketchup::Model.new
     Sketchup.active_model = @model
-    UI.reset!
     run_command('Garažna rampa')
     form('kind' => 'straight', 'endLevel' => -1.5)
     click(@model.tool, 0, 0)
