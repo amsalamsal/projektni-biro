@@ -106,7 +106,6 @@ namespace SiteDesignPro.Core.Tests
 
             Assert.True(result["ok"]!.GetValue<bool>());
             Assert.Equal(2, result["roads"]!.GetValue<int>());
-            Assert.Equal(1, result["others"]!.GetValue<int>());
             Assert.True(result["areas"]!["carriageway"]!.GetValue<double>() > 100);
             Assert.True(File.Exists(System.IO.Path.Combine(dir, RoadEngine.ResultFile)));
 
@@ -143,6 +142,7 @@ namespace SiteDesignPro.Core.Tests
             JsonObject result = RoadEngine.Export(req, file, Cat, "test");
             Assert.True(result["ok"]!.GetValue<bool>());
             Assert.Equal(2, result["roads"]!.GetValue<int>());
+            Assert.Equal(1, result["others"]!.GetValue<int>());
             Assert.True(File.Exists(file));
 
             PackageReadResult read = PackageReader.Read(file);
