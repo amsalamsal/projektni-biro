@@ -145,7 +145,7 @@ namespace SiteDesignPro.AutoCAD.UI
                       Small("Izmjene iz SketchUpa", "SDPAPPLYCHANGES", "apply", "Starija datoteka izmjena (.json) iz SketchUpa, s pregledom prije primjene."))));
 
             tab.Panels.Add(Panel("Pomoć",
-                Large("Brzi početak", "SDPBRZISTART", "steps", "Prvi projekat za 15 minuta: kratki vodič korak po korak."),
+                Large("Brzi početak", "SDPBRZISTART", "steps", "Kratki vodič sa slikama: primjer, izmjene, saobraćajnice, parking, SketchUp u oba smjera."),
                 Large("Uputstvo", "SDPPOMOC", "about", "Cijelo uputstvo na bosanskom jeziku."),
                 LargeCommands("Napredno", "advanced", "Alati koji se rjeđe koriste: georeferenciranje, teren, kote, posebne oznake, sigurnosne kopije.",
                     Small("Kontrolne tačke (georeferenca)", "SDPGEOREF", "coord", "Georeferenciranje preko kontrolnih tačaka."),

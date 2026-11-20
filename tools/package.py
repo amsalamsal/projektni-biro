@@ -32,7 +32,7 @@ def zip_dir(src: pathlib.Path, target: pathlib.Path, prefix: str = "") -> None:
 
 USER_DOCS = [
     ("index", "UPUTSTVO.md", "Uputstvo"),
-    ("brzi-start", "BRZI_START.md", "Brzi početak (15 minuta)"),
+    ("brzi-start", "BRZI_START.md", "Brzi početak (sa slikama)"),
     ("prvi-projekat", "PRVI_PROJEKAT.md", "Prvi projekat (za početnike)"),
     ("redoslijed-rada", "REDOSLIJED_RADA.md", "Redoslijed rada"),
     ("prirucnik", "PRIRUCNIK.md", "Priručnik (sve opcije)"),
@@ -71,6 +71,10 @@ def markdown_to_html(md: str) -> str:
                 j += 1
             out.append("<pre>" + html.escape("\n".join(lines[i + 1:j])) + "</pre>")
             i = j + 1
+        elif m := re.match(r"!\[([^\]]*)\]\(([^)]+)\)\s*$", line):
+            # a screenshot with its caption
+            out.append('<figure><img src="%s" alt="%s"><figcaption>%s</figcaption></figure>' % (html.escape(m.group(2)), html.escape(m.group(1)), _inline(m.group(1))))
+            i += 1
         elif m := re.match(r"(#{1,4}) (.*)", line):
             n = len(m.group(1))
             slug = re.sub(r"[^\w\- ]", "", m.group(2).lower()).replace(" ", "-")  # GitHub-style anchor
@@ -126,13 +130,16 @@ DOC_CSS = ("body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 
            "nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}"
            "table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}"
            "th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}"
-           "blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}")
+           "blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}"
+           "figure{margin:1rem 0}figure img{max-width:100%;border:1px solid #ccd5cf;border-radius:4px}figcaption{color:#5b6660;font-size:.9rem;margin-top:.25rem}")
 
 
 def write_docs(target: pathlib.Path) -> None:
     """Bosnian user documentation as HTML (index.html is opened by SDPPOMOC) plus the Markdown sources."""
     target.mkdir(parents=True)
     nav = "<nav>" + "".join('<a href="%s.html">%s</a>' % (page, title) for page, _, title in USER_DOCS) + "</nav>"
+    if (ROOT / "docs" / "slike").is_dir():
+        shutil.copytree(ROOT / "docs" / "slike", target / "slike")
     for page, md, title in USER_DOCS:
         src = ROOT / "docs" / md
         shutil.copy2(src, target / md)

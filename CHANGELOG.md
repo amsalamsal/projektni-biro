@@ -14,6 +14,13 @@
 * SketchUp: rezultati i greške saobraćajnica, slanja u AutoCAD i *O programu* u prozoru istog izgleda kao ostali
   dijalozi (može se kopirati); prozor Sinhronizacija u istom stilu.
 * **DEINSTALIRAJ_SVE.bat** uklanja AutoCAD i SketchUp dodatak odjednom.
+* Test uživo (AutoCAD 2021 + SketchUp 2026), ispravljeno:
+  * ulice nacrtane u AutoCAD-u nisu dobijale 3D u SketchUpu (preuzimale su se samo oznake i prijelazi);
+  * dugme *Dodaj tačku* u georeferenciranju je bilo odsječeno;
+  * izvoz nesačuvanog crteža je nudio folder AutoCAD predloška i naziv „acadiso”; sada Dokumenti i naziv projekta;
+  * poslije *Pošalji u SketchUp* prozor s rezultatom; tabele (količine) u prozoru kao redovi;
+  * prozori SketchUpa se otvaraju iznad SketchUpa i na drugom monitoru.
+* **Brzi početak sa slikama** (Pomoć → Brzi početak) – kraći, sa snimcima ekrana.
 
 ### Verzija 0.3.0 – lakše korištenje (20.11.)
 * **AutoCAD ribbon** složen po redoslijedu rada, bez duplikata: Projekat, Elementi, Saobraćajnice, Parking,
