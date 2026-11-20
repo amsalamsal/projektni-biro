@@ -95,7 +95,7 @@ class TestRoadsUi < Minitest::Test
     assert_in_delta 60.0, rec.geometry['vertices'][2][0], 1e-6
     assert_in_delta 1.5, rec.geometry['vertices'][2][2], 1e-6
     assert_in_delta 2.0, rec.params['lanesLeft']
-    assert(UI.log.any? { |e| e[0] == :messagebox && e[1] =~ /izmjena je sačuvana/ })
+    assert(UI.log.any? { |e| e[0] == :messagebox && e[1] =~ /izmjena je sačuvana/i })
   end
 
   def test_whole_network_with_the_engine

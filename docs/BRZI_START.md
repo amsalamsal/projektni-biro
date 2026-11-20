@@ -49,3 +49,4 @@ Preuzmi iz AutoCAD-a*. Ono što promijenite ili dodate u SketchUpu (*Pošalji u 
 * Prozor ima dugme **Zadane vrijednosti** kad zapamćeni unosi više ne odgovaraju.
 * Pitanja u komandnoj liniji umjesto prozora: **Pomoć → Napredno → Pitanja u prozorima / komandnoj liniji**.
 * Cijelo uputstvo: **Pomoć → Uputstvo**.
+* Uklanjanje oba dodatka: **DEINSTALIRAJ_SVE.bat** iz instalacionog zipa (crteži i modeli ostaju netaknuti).

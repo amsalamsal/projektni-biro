@@ -232,6 +232,26 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
 
         /// <summary>Coordinate system, control points and the drawing → project transformation.</summary>
+        /// <summary>The georeferencing menu as a window: system, control points with their residuals, actions.</summary>
+        private static string GeorefWindow(GeoreferenceSettings g, ProjectedCrs? crs, GeoreferenceResult? last)
+        {
+            var rows = new List<(string, string)>
+            {
+                ("Koordinatni sistem", string.IsNullOrEmpty(g.Crs) ? "nije naveden" : g.Crs + (crs != null ? " – " + crs.Name : " (nije u registru)")),
+                ("Transformacija", Describe(g.Transform)),
+            };
+            foreach (ControlPoint c in g.ControlPoints)
+            {
+                Residual? r = last?.Residuals.FirstOrDefault(x => x.Name == c.Name);
+                rows.Add((c.Name, "E " + Bs.Num(c.Easting, 3) + ", N " + Bs.Num(c.Northing, 3) + (r != null ? " (odst. " + Bs.Meters(r.Distance, 3) + ")" : string.Empty)));
+            }
+
+            string choice = UI.InfoDialog.Present("Georeferenciranje", "Kontrolne tačke: " + g.ControlPoints.Count, rows,
+                new[] { "Dodaj tačku: kliknite tačku u crtežu i upišite njene koordinate. Izračunaj: transformacija iz tačaka (2 ili više; s jednom treba poznata rotacija)." }, null,
+                ("Dodaj", "Dodaj tačku"), ("Izracunaj", "Izračunaj"), ("Sistem", "Sistem"), ("Obrisi", "Obriši tačku"), ("Ponisti", "Poništi"), ("close", "Zatvori"));
+            return choice == "close" ? "Izlaz" : choice;
+        }
+
         [CommandMethod("SITEDESIGNPRO", "SDPGEOREF", CommandFlags.Modal)]
         public void Georeference() => CommandContext.Run("SDPGEOREF", ctx =>
         {
@@ -243,12 +263,16 @@ namespace SiteDesignPro.AutoCAD.Commands
                 ProjectedCrs? crs = CrsRegistry.Find(g.Crs);
                 ctx.Write(Bs.T("Koordinatni sistem: {0} | kontrolnih tačaka: {1} | transformacija: {2}", string.IsNullOrEmpty(g.Crs) ? "nije naveden" : g.Crs + (crs != null ? " – " + crs.Name : " (nije u registru)"),
                     g.ControlPoints.Count, Describe(g.Transform)));
-                string k = ctx.Keyword("Georeferenciranje [Sistem/Dodaj/Lista/Obrisi/IZRacunaj/Ponisti/Izlaz]", new[] { "Sistem", "Dodaj", "Lista", "Obrisi", "Izracunaj|IZRacunaj", "Ponisti", "Izlaz" }, "Izlaz");
+                string k = CommandContext.UseDialogs
+                    ? GeorefWindow(g, crs, last)
+                    : ctx.Keyword("Georeferenciranje [Sistem/Dodaj/Lista/Obrisi/IZRacunaj/Ponisti/Izlaz]", new[] { "Sistem", "Dodaj", "Lista", "Obrisi", "Izracunaj|IZRacunaj", "Ponisti", "Izlaz" }, "Izlaz");
                 switch (k)
                 {
                     case "Sistem":
                         ctx.Write("Podržani sistemi za KML: " + CrsRegistry.Supported());
-                        g.Crs = ctx.Text("EPSG kod koordinatnog sistema projekta (npr. EPSG:3908)", g.Crs, false).Trim();
+                        g.Crs = (CommandContext.UseDialogs
+                            ? ctx.Ask(new Form("Koordinatni sistem", null, "Podržani za KML: " + CrsRegistry.Supported()).Text("crs", "EPSG kod (npr. EPSG:3908)", g.Crs ?? string.Empty, null, null, false)).Text("crs")
+                            : ctx.Text("EPSG kod koordinatnog sistema projekta (npr. EPSG:3908)", g.Crs, false)).Trim();
                         if (CrsRegistry.Find(g.Crs) == null)
                         {
                             ctx.Write("Upozorenje: sistem nije u registru programa; zapisuje se u projekat, ali KML izvoz neće biti moguć.");
@@ -258,9 +282,25 @@ namespace SiteDesignPro.AutoCAD.Commands
                     case "Dodaj":
                         {
                             var p = ctx.Point("Tačka u crtežu (npr. ugao objekta)")!.Value;
-                            string name = ctx.Text("Naziv tačke", "T" + (g.ControlPoints.Count + 1), true);
-                            double e = NumberText(ctx, "Koordinata E (y) u sistemu projekta");
-                            double n = NumberText(ctx, "Koordinata N (x) u sistemu projekta");
+                            string name;
+                            double e, n;
+                            if (CommandContext.UseDialogs)
+                            {
+                                FormValues fv = ctx.Ask(new Form("Kontrolna tačka", null, "Koordinate kliknute tačke u sistemu projekta (" + (string.IsNullOrEmpty(g.Crs) ? "sistem nije naveden" : g.Crs) + ").")
+                                    .Text("name", "Naziv tačke", "T" + (g.ControlPoints.Count + 1), null, null, false)
+                                    .Number("e", "Koordinata E (y)", 0, null, null, null, null, true, true)
+                                    .Number("n", "Koordinata N (x)", 0, null, null, null, null, true, true));
+                                name = fv.Text("name");
+                                e = fv.Number("e");
+                                n = fv.Number("n");
+                            }
+                            else
+                            {
+                                name = ctx.Text("Naziv tačke", "T" + (g.ControlPoints.Count + 1), true);
+                                e = NumberText(ctx, "Koordinata E (y) u sistemu projekta");
+                                n = NumberText(ctx, "Koordinata N (x) u sistemu projekta");
+                            }
+
                             g.ControlPoints.RemoveAll(c => c.Name == name);
                             g.ControlPoints.Add(new ControlPoint { Name = name, LocalX = p.X * mpu, LocalY = p.Y * mpu, Easting = e, Northing = n });
                             break;
@@ -277,24 +317,86 @@ namespace SiteDesignPro.AutoCAD.Commands
                         break;
                     case "Obrisi":
                         {
-                            string name = ctx.Text("Naziv tačke za brisanje", null, true);
+                            if (g.ControlPoints.Count == 0)
+                            {
+                                break;
+                            }
+
+                            string name = CommandContext.UseDialogs
+                                ? ctx.Ask(new Form("Brisanje kontrolne tačke").Choice("name", "Tačka", g.ControlPoints.Select(c => c.Name).ToArray(), g.ControlPoints[0].Name)).Choice("name")
+                                : ctx.Text("Naziv tačke za brisanje", null, true);
                             ctx.Write(g.ControlPoints.RemoveAll(c => c.Name == name) > 0 ? "Tačka obrisana." : "Tačka nije pronađena.");
                             break;
                         }
 
                     case "Izracunaj":
                         {
-                            bool fitScale = g.ControlPoints.Count >= 2 && ctx.Keyword("Određivanje mjerila [Kruto/Slicnost] (kruto = mjerilo 1)", new[] { "Kruto", "Slicnost" }, "Kruto") == "Slicnost";
-                            double? rot = null;
-                            if (g.ControlPoints.Count(c => c.Enabled) == 1)
+                            if (g.ControlPoints.Count(c => c.Enabled) == 0)
                             {
-                                rot = NumberText(ctx, "Jedna tačka ne određuje rotaciju. Unesite poznatu rotaciju crteža u stepenima (suprotno satu)");
+                                ctx.Write("Dodajte bar jednu kontrolnu tačku.");
+                                break;
+                            }
+
+                            bool fitScale;
+                            double? rot = null;
+                            bool one = g.ControlPoints.Count(c => c.Enabled) == 1;
+                            if (CommandContext.UseDialogs)
+                            {
+                                var f = new Form("Izračun transformacije", "georef-solve");
+                                if (g.ControlPoints.Count >= 2)
+                                {
+                                    f.Choice("scale", "Mjerilo", new[] { "Kruto|Kruto (mjerilo 1)", "Slicnost|Određuje se iz tačaka" }, "Kruto");
+                                }
+
+                                if (one)
+                                {
+                                    f.Number("rot", "Poznata rotacija crteža (°, suprotno satu)", 0, null, null, "Jedna tačka ne određuje rotaciju.", null, true, true);
+                                }
+
+                                FormValues fv = f.Fields.Count > 0 ? ctx.Ask(f) : new FormValues(new Dictionary<string, object>());
+                                fitScale = g.ControlPoints.Count >= 2 && fv.Is("scale", "Slicnost");
+                                if (one)
+                                {
+                                    rot = fv.Number("rot");
+                                }
+                            }
+                            else
+                            {
+                                fitScale = g.ControlPoints.Count >= 2 && ctx.Keyword("Određivanje mjerila [Kruto/Slicnost] (kruto = mjerilo 1)", new[] { "Kruto", "Slicnost" }, "Kruto") == "Slicnost";
+                                if (one)
+                                {
+                                    rot = NumberText(ctx, "Jedna tačka ne određuje rotaciju. Unesite poznatu rotaciju crteža u stepenima (suprotno satu)");
+                                }
                             }
 
                             last = GeoreferenceSolver.Solve(g.ControlPoints, fitScale, rot, g.ScaleTolerancePpm);
                             foreach (string w in last.Warnings)
                             {
                                 ctx.Write("  ! " + w);
+                            }
+
+                            if (CommandContext.UseDialogs)
+                            {
+                                var rr = new List<(string, string)> { ("Transformacija", Describe(last.Transform)), ("Srednje odstupanje", Bs.Meters(last.RmsError, 3)) };
+                                rr.AddRange(last.Residuals.Select(r => (r.Name, "dE " + Bs.Num(r.DE, 3) + ", dN " + Bs.Num(r.DN, 3))));
+                                string answer = last.Usable
+                                    ? UI.InfoDialog.Present("Georeferenciranje", "Rezultat izračuna", rr, new[] { "Primjena zapisuje transformaciju u projekat (s historijom). Geometrija crteža se ne mijenja." }, last.Warnings, ("apply", "Primijeni"), ("close", "Ne primjenjuj"))
+                                    : UI.InfoDialog.Present("Georeferenciranje", "Transformacija se ne može odrediti", rr, null, last.Warnings);
+                                if (answer == "apply")
+                                {
+                                    g.Transform = last.Transform;
+                                    g.History.Add(new TransformRecord
+                                    {
+                                        Utc = DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", System.Globalization.CultureInfo.InvariantCulture),
+                                        Description = "SDPGEOREF " + Describe(last.Transform),
+                                        Transform = last.Transform,
+                                        RmsError = last.RmsError,
+                                        ControlPointCount = g.ControlPoints.Count(c => c.Enabled),
+                                    });
+                                    ctx.Write("Transformacija je zapisana u projekat (s historijom izmjena).");
+                                }
+
+                                break;
                             }
 
                             if (!last.Usable)

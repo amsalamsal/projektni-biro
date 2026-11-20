@@ -63,6 +63,24 @@ namespace SiteDesignPro.AutoCAD.Commands
             "SDPPARKINGUGAO", "SDPULICA", "SDPULICAUREDI", "SDPKRUZNITOK", "SDPPJESACKIPRIJELAZ", "SDPGARAZNARAMPA", "SDPRAMPAINVALIDI", "SDPKOTACESTE",
         };
 
+        /// <summary>
+        /// Commands whose result is a report (terrain, heights, tables, indicators, checks): what they write in the
+        /// command line is also shown in one window at the end, so nothing has to be read from the command line.
+        /// </summary>
+        private static readonly Dictionary<string, string> Reported = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["SDPTEREN"] = "Teren", ["SDPANALIZATERENA"] = "Analiza terena", ["SDPPROFIL"] = "Profil terena",
+            ["SDPKOTEIZOZNAKA"] = "Kote iz oznaka", ["SDPPOKAZATELJI"] = "Urbanistički pokazatelji",
+            ["SDPPROHODNOST"] = "Prohodnost vozila", ["SDPSCHEDULE"] = "Tabele", ["SDPSCHEDULECSV"] = "Tabele za Excel", ["SDPQUANTITIES"] = "Količine",
+            ["SDPAUDIT"] = "Provjera podataka", ["SDPPROVJERADWG"] = "Provjera crteža", ["SDPMAPIRANJE"] = "Mapiranje slojeva", ["SDPPREUZMI"] = "Postojeći DWG",
+            ["SDPKML"] = "KML", ["SDPLAYERS"] = "Slojevi", ["SDPCLEARANCE"] = "Zone sigurnosti", ["SDPLIGHTCOVER"] = "Pokrivenost rasvjetom",
+            ["SDPPREZENTACIJA"] = "Prezentacija", ["SDPGARAZNARAMPA"] = "Garažna rampa", ["SDPRAMPAPRESJEK"] = "Presjek rampe", ["SDPVISINECESTA"] = "Visine ceste",
+            ["SDPCESTEOSVJEZI"] = "Osvježavanje saobraćajnica",
+        };
+
+        /// <summary>Lines written by the running command, for <see cref="Reported"/> commands.</summary>
+        private List<string>? transcript;
+
         /// <summary>The errors of each drawing as last seen (code and element), to tell the new ones.</summary>
         private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Database, HashSet<string>> KnownErrors = new System.Runtime.CompilerServices.ConditionalWeakTable<Database, HashSet<string>>();
 
@@ -152,6 +170,12 @@ namespace SiteDesignPro.AutoCAD.Commands
                     journalId = SafetyHost.Begin(majorOperation, doc.Database, backup);
                 }
 
+                bool report = Reported.TryGetValue(name, out string? reportTitle) && UseDialogs;
+                if (report)
+                {
+                    ctx.transcript = new List<string>();
+                }
+
                 bool watch = Watched.Contains(name) && UseDialogs;
                 if (watch)
                 {
@@ -162,6 +186,11 @@ namespace SiteDesignPro.AutoCAD.Commands
                 List<string> fresh = watch ? NewErrors(ctx) : new List<string>();
                 ctx.Commit();
                 SafetyHost.End(journalId, Core.Safety.JournalState.Completed);
+                if (report && ctx.transcript!.Count > 0)
+                {
+                    ShowTranscript(reportTitle!, ctx.transcript);
+                }
+
                 if (fresh.Count > 0)
                 {
                     UI.InfoDialog.Present("Provjera", fresh.Count == 1 ? "Ova izmjena je napravila grešku u projektu" : "Ova izmjena je napravila " + fresh.Count + " greške u projektu",
@@ -178,7 +207,14 @@ namespace SiteDesignPro.AutoCAD.Commands
                 // a technical minimum: nothing is drawn, and the user is told why (not an error of the program)
                 SafetyHost.End(journalId, Core.Safety.JournalState.RolledBack, ex.Message);
                 doc.Editor.WriteMessage("\n" + ex.Message + "\nIzmjene su poništene.");
-                Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowAlertDialog(ex.Message + "\n\nIzmjene su poništene.");
+                if (UseDialogs)
+                {
+                    UI.InfoDialog.Present("Tehnički minimum", "Ovo se ne može projektovati", Array.Empty<(string, string)>(), new[] { "Ništa nije nacrtano ni izmijenjeno. Promijenite podatke i pokušajte ponovo." }, new[] { ex.Message });
+                }
+                else
+                {
+                    Autodesk.AutoCAD.ApplicationServices.Core.Application.ShowAlertDialog(ex.Message + "\n\nIzmjene su poništene.");
+                }
             }
             catch (Autodesk.AutoCAD.Runtime.Exception ex)
             {
@@ -229,7 +265,54 @@ namespace SiteDesignPro.AutoCAD.Commands
             Tr.Dispose();
         }
 
-        public void Write(string text) => Ed.WriteMessage("\n" + text);
+        public void Write(string text)
+        {
+            Ed.WriteMessage("\n" + text);
+            transcript?.Add(text);
+        }
+
+        /// <summary>
+        /// The lines of a report command in a window: "Naziv: vrijednost" lines become rows, warnings ("!" or
+        /// "Upozorenje") go to the warnings, the rest are notes.
+        /// </summary>
+        private static void ShowTranscript(string title, List<string> lines)
+        {
+            var rows = new List<(string, string)>();
+            var notes = new List<string>();
+            var warnings = new List<string>();
+            foreach (string raw in lines.SelectMany(l => l.Split('\n')))
+            {
+                string line = raw.Trim();
+                if (line.Length == 0)
+                {
+                    continue;
+                }
+
+                if (line.StartsWith("!", StringComparison.Ordinal) || line.StartsWith("Upozorenje", StringComparison.OrdinalIgnoreCase) || line.StartsWith("Greška", StringComparison.OrdinalIgnoreCase))
+                {
+                    warnings.Add(line.TrimStart('!', ' '));
+                    continue;
+                }
+
+                int colon = line.IndexOf(": ", StringComparison.Ordinal);
+                if (colon > 0 && colon <= 40 && line.Length - colon <= 90 && rows.Count < 40)
+                {
+                    rows.Add((line.Substring(0, colon), line.Substring(colon + 2)));
+                }
+                else
+                {
+                    notes.Add(line);
+                }
+            }
+
+            string heading = notes.Count > 0 && rows.Count == 0 && notes.Count <= 2 ? notes[0] : title;
+            if (heading != title)
+            {
+                notes.RemoveAt(0);
+            }
+
+            UI.InfoDialog.Present(title, heading, rows, notes.Take(30), warnings.Take(15));
+        }
 
         // ------------------------------------------------------------------ prompts
 

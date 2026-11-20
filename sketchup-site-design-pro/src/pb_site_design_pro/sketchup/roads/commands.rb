@@ -43,7 +43,7 @@ module ProjektniBiro
             unless broken.empty?
               m.abort_operation
               Commands.last_message = "Rampa ispod tehničkog minimuma:\n#{broken.join("\n")}"
-              UI.messagebox("#{title}: rampa ispod tehničkog minimuma se ne može projektovati.\n\n#{broken.join("\n")}\n\nIzmjena je poništena.", MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+              Sync.message("#{title}: tehnički minimum", "Rampa ispod tehničkog minimuma se ne može projektovati.\n\n#{broken.join("\n")}\n\nIzmjena je poništena.")
               return nil
             end
 
@@ -52,11 +52,11 @@ module ProjektniBiro
           rescue Engine::Error => e
             m.commit_operation
             Log.warn("Saobraćajnice: #{e.message}")
-            UI.messagebox("#{title}: izmjena je sačuvana, ali saobraćajnice nisu izgrađene:\n#{e.message}\n\nNakon ispravke: Saobraćajnice > Osvježi.")
+            Sync.message(title, "Izmjena je sačuvana, ali saobraćajnice nisu izgrađene:\n#{e.message}\n\nNakon ispravke: Saobraćajnice > Osvježi.")
           rescue StandardError => e
             m.abort_operation
             Log.error("Saobraćajnice: #{title}", e)
-            UI.messagebox("#{title}: greška – #{e.message}\nIzmjena je poništena. Detalji su u dnevniku (log).")
+            Sync.message(title, "Greška – #{e.message}\nIzmjena je poništena. Detalji su u dnevniku (log).")
           end
         end
 
@@ -67,7 +67,7 @@ module ProjektniBiro
           Commands.last_message = text
           Sketchup.status_text = "#{title}: #{outcome.summary}"
           if always || !outcome.warnings.empty?
-            UI.messagebox("#{title}\n\n#{text}", MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+            Sync.message(title, text)
           end
         end
 
@@ -75,7 +75,7 @@ module ProjektniBiro
           outcome = Rebuild.run(model, operation: :own)
           report(outcome, 'Osvježi saobraćajnice', always: true)
         rescue Engine::Error => e
-          UI.messagebox("Saobraćajnice nisu izgrađene:\n#{e.message}")
+          Sync.message('Saobraćajnice', "Saobraćajnice nisu izgrađene:\n#{e.message}")
         end
 
         # ---- previews while drawing
@@ -354,7 +354,7 @@ module ProjektniBiro
           outcome = Rebuild.run(model, operation: :transparent)
           report(outcome, "Dodano: #{added}")
         rescue Engine::Error => e
-          UI.messagebox("Saobraćajnice nisu izgrađene:\n#{e.message}")
+          Sync.message('Saobraćajnice', "Saobraćajnice nisu izgrađene:\n#{e.message}")
         end
 
         def level_mark
@@ -521,7 +521,7 @@ module ProjektniBiro
         end
 
         def show_last
-          UI.messagebox(Commands.last_message || 'Saobraćajnice još nisu građene u ovoj sesiji.', MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+          Sync.message('Saobraćajnice – zadnji izvještaj', Commands.last_message || 'Saobraćajnice još nisu građene u ovoj sesiji.')
         end
 
         # ---- both ways with AutoCAD
@@ -547,7 +547,7 @@ module ProjektniBiro
                  (notes.empty? ? '' : "\n\nNapomene:\n#{notes.join("\n")}")
           Sync.message('Poslano u AutoCAD', text)
         rescue Engine::Error => e
-          UI.messagebox("Slanje u AutoCAD nije uspjelo:\n#{e.message}")
+          Sync.message('Pošalji u AutoCAD', "Slanje u AutoCAD nije uspjelo:\n#{e.message}")
         end
 
         def adopt_from_autocad
@@ -697,10 +697,10 @@ module ProjektniBiro
           Sketchup.status_text = "Saobraćajnice osvježene: #{outcome.summary}" if outcome
           broken = Rebuild.new_violations(before, outcome)
           unless broken.empty?
-            UI.messagebox("Rampa je ispod tehničkog minimuma i takva se ne može projektovati:\n\n#{broken.join("\n")}\n\nVratite izmjenu (Uredi > Poništi) ili ispravite rampu.", MB_MULTILINE, 'Vanjsko uređenje PRO – saobraćajnice')
+            Sync.message('Tehnički minimum', "Rampa je ispod tehničkog minimuma i takva se ne može projektovati:\n\n#{broken.join("\n")}\n\nVratite izmjenu (Uredi > Poništi) ili ispravite rampu.")
             return
           end
-          UI.messagebox("Saobraćajnice\n\n#{Rebuild.message(outcome)}", MB_MULTILINE) if outcome && !outcome.warnings.empty?
+          Sync.message('Saobraćajnice', Rebuild.message(outcome)) if outcome && !outcome.warnings.empty?
         rescue StandardError => e
           Log.warn("Automatsko osvježavanje saobraćajnica: #{e.message}")
           Sketchup.status_text = "Saobraćajnice nisu osvježene: #{e.message}"

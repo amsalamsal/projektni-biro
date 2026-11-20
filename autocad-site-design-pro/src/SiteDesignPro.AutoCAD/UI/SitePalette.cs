@@ -604,7 +604,7 @@ namespace SiteDesignPro.AutoCAD.UI
     internal sealed class ValidationView : DockPanel
     {
         private readonly ListBox list = new ListBox { BorderThickness = new Thickness(0) };
-        private readonly TextBlock summary = SitePalette.Label("Pokrenite Provjeri projekat (SDPVALIDATE) ili Provjera crteža (SDPPROVJERADWG).", 12, true);
+        private readonly TextBlock summary = SitePalette.Label("Ribbon → Provjera → Provjeri projekat. Rezultati se pojavljuju ovdje.", 12, true);
         private readonly CheckBox showReview = new CheckBox { Margin = new Thickness(6, 0, 6, 6) };
         private ValidationReport? report;
         private IReadOnlyDictionary<string, string> handles = new Dictionary<string, string>();
@@ -676,7 +676,7 @@ namespace SiteDesignPro.AutoCAD.UI
                 TextBlock res = SitePalette.Label(i.Resolution, 10, true);
                 res.TextWrapping = TextWrapping.Wrap;
                 panel.Children.Add(res);
-                list.Items.Add(new ListBoxItem { Content = panel, Tag = groupHandles, ToolTip = groupHandles.Length > 0 ? "Dvostruki klik: zumiranje i odabir; zatim Uredi element mijenja sve odabrane" : null });
+                list.Items.Add(new ListBoxItem { Content = panel, Tag = groupHandles, ToolTip = groupHandles.Length > 0 ? "Dvostruki klik: zumiranje i odabir; zatim desni klik → Uredi element mijenja sve odabrane" : null });
             }
 
             if (list.Items.Count == 0)
@@ -693,7 +693,7 @@ namespace SiteDesignPro.AutoCAD.UI
     internal sealed class FirstStepsView : DockPanel
     {
         private readonly ListBox list = new ListBox { BorderThickness = new Thickness(0) };
-        private readonly TextBlock intro = SitePalette.Label("Redoslijed rada. Dvostruki klik na korak ga pokreće; urađeni koraci se sami štikliraju.", 11, true);
+        private readonly TextBlock intro = SitePalette.Label("Redoslijed rada (isti kao kartice u ribbonu). Dvostruki klik na korak ga pokreće; urađeni koraci se sami štikliraju.", 11, true);
 
         public FirstStepsView()
         {
@@ -754,13 +754,13 @@ namespace SiteDesignPro.AutoCAD.UI
             }
 
             Step(1, "Novi projekat", "Naziv, jedinice, mjerilo i nulta kota u jednom prozoru.", "_SDPNEW ", project);
-            Step(2, "Nulta kota ±0,00", "Apsolutna visina poda prizemlja (može i kasnije).", "_SDPDATUM ", zero);
+            Step(2, "Nulta kota ±0,00", "Apsolutna visina poda prizemlja, parter i ceste (može i kasnije).", "_SDPDATUM ", zero);
             Step(3, "Parcela", "Nacrtajte granicu parcele (pravougaonik ili polilinija).", "_SDPDRAW ", site, "site.boundary");
-            Step(4, "Ceste, staze, kružni tokovi", "Ulica po profilu iz jedne osovine; kružni tok iz jedne tačke.", "_SDPULICA ", roads);
+            Step(4, "Saobraćajnice", "Ulica iz jedne osovine, kružni tok iz jedne tačke, garažna rampa, parking redovi.", "_SDPULICA ", roads);
             Step(5, "Objekti, parter, zelenilo, oprema", "Iz biblioteke: dvostruki klik na element.", "_SDPBROWSER ", content);
             Step(6, "Dokumentuj list", "Oznake, legenda, tabele, sjever, razmjernik i okvir lista odjednom.", "_SDPDOKUMENTUJ ", sheet);
-            Step(7, "Provjeri projekat", "Kolizije, izlazak iz parcele, podaci.", "_SDPVALIDATE ", SitePalette.Validated);
-            Step(8, "Izvoz za SketchUp", "Paket .sdpkg za 3D model.", "_SDPEXPORT ", SitePalette.Exported);
+            Step(7, "Provjeri projekat", "Kolizije, izlazak iz parcele, tehnički minimumi, podaci.", "_SDPVALIDATE ", SitePalette.Validated);
+            Step(8, "Sinhronizacija sa SketchUpom", "Pošalji u SketchUp za 3D; izmjene iz SketchUpa se preuzimaju istim prozorom.", "_SDPSINHRONIZACIJA ", SitePalette.Exported);
         }
 
         private void Step(int n, string title, string hint, string macro, bool done, string? typeHint = null)

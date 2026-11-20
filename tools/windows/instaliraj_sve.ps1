@@ -7,15 +7,16 @@
     2. AutoCAD: AutoCAD\instaliraj.ps1 (sve pronađene verzije 2020-2027).
     3. SketchUp: raspakuje pb_site_design_pro.rbz u Plugins svake instalirane verzije (2017-2027), stara verzija
        dodatka se prije toga uklanja.
+    -Deinstaliraj (DEINSTALIRAJ_SVE.bat): uklanja oba dodatka. Crteži i SketchUp modeli zadržavaju geometriju i podatke.
 #>
 [CmdletBinding()]
-param([switch]$BezPitanja)
+param([switch]$BezPitanja, [switch]$Deinstaliraj)
 
 $ErrorActionPreference = 'Stop'
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch { }
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Write-Host ''
-Write-Host 'Vanjsko uređenje PRO - instalacija (AutoCAD i SketchUp)' -ForegroundColor Cyan
+Write-Host ('Vanjsko uređenje PRO - ' + $(if ($Deinstaliraj) { 'deinstalacija' } else { 'instalacija' }) + ' (AutoCAD i SketchUp)') -ForegroundColor Cyan
 Write-Host ''
 
 function Wait-Closed([string]$process, [string]$name) {
@@ -26,6 +27,32 @@ function Wait-Closed([string]$process, [string]$name) {
         if ($a -match '^[pP]') { return $false }
     }
     return $true
+}
+
+if ($Deinstaliraj) {
+    $acad = Join-Path $Root 'AutoCAD\instaliraj.ps1'
+    if (-not (Test-Path $acad)) { $acad = Join-Path $Root 'instaliraj.ps1' }
+    if ((Test-Path $acad) -and (Wait-Closed 'acad' 'AutoCAD')) {
+        Write-Host '== AutoCAD ==' -ForegroundColor Cyan
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $acad -Deinstaliraj -BezPitanja
+    }
+    if (Wait-Closed 'SketchUp' 'SketchUp') {
+        Write-Host '== SketchUp ==' -ForegroundColor Cyan
+        $found = $false
+        foreach ($v in @(Get-ChildItem -Path (Join-Path $env:APPDATA 'SketchUp') -Directory -Filter 'SketchUp 20*' -ErrorAction SilentlyContinue)) {
+            $plugins = Join-Path $v.FullName 'SketchUp\Plugins'
+            $here = $false
+            foreach ($item in @('pb_site_design_pro', 'pb_site_design_pro.rb')) {
+                $path = Join-Path $plugins $item
+                if (Test-Path $path) { Remove-Item -Recurse -Force $path; $found = $true; $here = $true }
+            }
+            if ($here) { Write-Host ("  " + $v.Name + ': uklonjeno') -ForegroundColor Green }
+        }
+        if (-not $found) { Write-Host '  SketchUp dodatak nije bio instaliran.' }
+    }
+    Write-Host ''
+    Write-Host 'Gotovo. Postavke programa (%LOCALAPPDATA%\SiteDesignPro) su zadržane; obrišite folder ručno ako ih ne trebate.' -ForegroundColor Green
+    return
 }
 
 # AutoCAD

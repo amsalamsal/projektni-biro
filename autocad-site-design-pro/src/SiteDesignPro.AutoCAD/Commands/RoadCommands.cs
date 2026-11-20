@@ -371,7 +371,53 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         /// <summary>Quiet redraw started automatically after a street or road was changed, moved, copied or erased.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPCESTEAUTO", CommandFlags.Modal | CommandFlags.NoHistory)]
-        public void AutoRefresh() => Guarded(() => CommandContext.Run("SDPCESTEAUTO", ctx => Rebuild(ctx, false)));
+        public void AutoRefresh() => Guarded(() => CommandContext.Run("SDPCESTEAUTO", ctx =>
+        {
+            // on a big drawing the redraw takes time: it is skipped when nothing the roads are drawn from has
+            // changed (a label, a layer or a colour of an axis, an axis moved and moved back)
+            List<SiteElement> now = ctx.Svc.ReadAll().Where(m => m.Element != null && m.Type != null).Select(m => m.Element!).ToList();
+            if (LastDrawn.TryGetValue(ctx.Db, out string? before) && before == Signature(now) && ctx.Svc.Aux(NetOwner).Any())
+            {
+                return;
+            }
+
+            Rebuild(ctx, false);
+        }));
+
+        /// <summary>What the roads of each drawing were last drawn from (<see cref="Signature"/>).</summary>
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Database, string> LastDrawn = new System.Runtime.CompilerServices.ConditionalWeakTable<Database, string>();
+
+        /// <summary>The elements the road network is drawn from (streets and roads, crossings, marks, garage ramps).</summary>
+        internal static bool DrawsRoads(string? type) => type != null && (type == RoadElements.CrossingType || type == RoadElements.HatchedAreaType || type == RoadElements.LevelMarkType ||
+            type == RoadElements.RampMarkType || type == RoadElements.RampSectionType || type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(type)));
+
+        /// <summary>A fingerprint of everything the road network is drawn from: ids, types, parameters and geometry.</summary>
+        internal static string Signature(IEnumerable<SiteElement> elements)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (SiteElement e in elements.Where(x => DrawsRoads(x.TypeId)).OrderBy(x => x.Id, StringComparer.Ordinal))
+            {
+                sb.Append(e.Id).Append('|').Append(e.TypeId).Append('|').Append(e.Parameters.ToJson().ToJsonString()).Append('|');
+                e.Geometry.Transform(v =>
+                {
+                    sb.Append(v.X.ToString("R", CultureInfo.InvariantCulture)).Append(',').Append(v.Y.ToString("R", CultureInfo.InvariantCulture)).Append(',').Append(v.Z.ToString("R", CultureInfo.InvariantCulture)).Append(';');
+                    return v;
+                });
+                if (e.Geometry is PointGeometry pg)
+                {
+                    sb.Append('r').Append(pg.Rotation.ToString("R", CultureInfo.InvariantCulture));
+                }
+                else if (e.Geometry is PathGeometry path)
+                {
+                    sb.Append(path.Closed ? 'c' : 'o');
+                }
+
+                sb.Append('\n');
+            }
+
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            return Convert.ToBase64String(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(sb.ToString())));
+        }
 
         /// <summary>
         /// Pedestrian crossing as an element (road.pedestrian_crossing): white 0,50 m bars with 0,50 m gaps across all
@@ -563,6 +609,8 @@ namespace SiteDesignPro.AutoCAD.Commands
                 RoadNetworkResult? res = Redraw(ctx, elements, roads.Count, verbose);
                 DrawLevels(ctx, elements);
                 DrawGarageRamps(ctx, elements);
+                LastDrawn.Remove(ctx.Db);
+                LastDrawn.Add(ctx.Db, Signature(elements));
                 return res;
             }
             finally
@@ -1335,7 +1383,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
                 // a street, a road or a pedestrian crossing was added, changed, moved, copied or erased
                 (string Id, string Type)? key = ElementStore.ReadKey(ent);
-                if (key.HasValue && (key.Value.Type == RoadElements.CrossingType || key.Value.Type == RoadElements.HatchedAreaType || key.Value.Type == RoadElements.LevelMarkType || key.Value.Type == RoadElements.RampMarkType || key.Value.Type == RoadElements.RampSectionType || key.Value.Type == GarageRamp.Type || RoadElements.IsNetworkRoad(AcadEnv.Catalog.FindType(key.Value.Type))))
+                if (key.HasValue && RoadCommands.DrawsRoads(key.Value.Type))
                 {
                     Dirty.Add(db);
                 }

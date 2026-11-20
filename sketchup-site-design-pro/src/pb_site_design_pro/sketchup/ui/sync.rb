@@ -7,16 +7,30 @@ module ProjektniBiro
     # full and copied (instead of a message box). SketchUp 2014–2016 (no HtmlDialog) get a message box.
     module Sync
       DICT = 'SiteDesignPro'
-      CSS = 'body{font:13px "Segoe UI",Arial,sans-serif;margin:16px;color:#222}h2{font-size:16px;margin:0 0 10px}' \
-            'table{border-collapse:collapse;width:100%;margin-bottom:10px}td{padding:3px 0}td.v{text-align:right;font-weight:600}' \
-            'p{color:#555;margin:6px 0}pre{white-space:pre-wrap;font:13px "Segoe UI",Arial,sans-serif;margin:0 0 12px}' \
-            '.bar{text-align:right;margin-top:14px}button{min-width:110px;padding:5px 12px;margin-left:6px;font:13px "Segoe UI",Arial}' \
-            'button.main{font-weight:600}'
+      # the stylesheet of all dialogs of the extension (sdp.css), so these windows look like the others
+      EXTRA_CSS = 'pre{white-space:pre-wrap;font:inherit;margin:0}.rows td:last-child{text-align:right;font-weight:600}' \
+                  '.notes p{color:var(--muted);margin:8px 0 0}'
 
       module_function
 
       def html?
         defined?(UI::HtmlDialog) && UI::HtmlDialog.method_defined?(:set_html)
+      end
+
+      def css
+        @css ||= begin
+          File.read(File.join(__dir__, 'html', 'sdp.css'), encoding: 'UTF-8')
+        rescue StandardError
+          ''
+        end
+        "#{@css}#{EXTRA_CSS}"
+      end
+
+      # One page in the layout of the other dialogs: header with title and subtitle, content, buttons in the footer.
+      def page(title, sub, body, buttons)
+        "<!DOCTYPE html><html><head><meta charset='utf-8'><style>#{css}</style></head><body>" \
+          "<header><h1>#{esc(title)}</h1>#{sub.to_s.empty? ? '' : "<div class='sub'>#{esc(sub)}</div>"}</header>" \
+          "<main>#{body}</main><footer>#{buttons}</footer></body></html>"
       end
 
       def esc(text)
@@ -30,11 +44,10 @@ module ProjektniBiro
           return
         end
 
-        d = UI::HtmlDialog.new(dialog_title: title, preferences_key: 'pb_sdp_message', width: 560, height: 420, style: UI::HtmlDialog::STYLE_DIALOG)
-        d.set_html("<!DOCTYPE html><html><head><meta charset='utf-8'><style>#{CSS}</style></head><body>" \
-                   "<h2>#{esc(title)}</h2><pre id='t'>#{esc(text)}</pre><div class='bar'>" \
-                   "<button onclick=\"navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('t').innerText)\">Kopiraj</button>" \
-                   "<button class='main' onclick='sketchup.close()'>Zatvori</button></div></body></html>")
+        d = UI::HtmlDialog.new(dialog_title: "#{title} – Vanjsko uređenje PRO", preferences_key: 'pb_sdp_message', width: 580, height: 440, style: UI::HtmlDialog::STYLE_DIALOG)
+        d.set_html(page(title, nil, "<pre id='t'>#{esc(text)}</pre>",
+                        "<button onclick=\"navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('t').innerText)\">Kopiraj</button>" \
+                        "<button class='primary' onclick='sketchup.close()'>Zatvori</button>"))
         d.add_action_callback('close') { |_c, _a| d.close }
         d.show
         d
@@ -67,13 +80,13 @@ module ProjektniBiro
           return
         end
 
-        table = rows.map { |a, b| "<tr><td>#{esc(a)}</td><td class='v'>#{esc(b)}</td></tr>" }.join
-        d = UI::HtmlDialog.new(dialog_title: 'Sinhronizacija s AutoCAD-om', preferences_key: 'pb_sdp_sync', width: 560, height: 430, style: UI::HtmlDialog::STYLE_DIALOG)
-        d.set_html("<!DOCTYPE html><html><head><meta charset='utf-8'><style>#{CSS}</style></head><body><h2>Sinhronizacija s AutoCAD-om</h2>" \
-                   "<table>#{table}</table>#{notes.map { |n| "<p>#{esc(n)}</p>" }.join}<div class='bar'>" \
-                   "<button class='main' onclick='sketchup.receive()'>Preuzmi iz AutoCAD-a</button>" \
-                   "<button class='main' onclick='sketchup.push()'>Pošalji u AutoCAD</button>" \
-                   "<button onclick='sketchup.close()'>Zatvori</button></div></body></html>")
+        table = rows.map { |a, b| "<tr><td>#{esc(a)}</td><td>#{esc(b)}</td></tr>" }.join
+        d = UI::HtmlDialog.new(dialog_title: 'Sinhronizacija s AutoCAD-om – Vanjsko uređenje PRO', preferences_key: 'pb_sdp_sync', width: 600, height: 470, style: UI::HtmlDialog::STYLE_DIALOG)
+        d.set_html(page('Sinhronizacija s AutoCAD-om', project.empty? ? 'Model bez AutoCAD projekta' : project,
+                        "<table class='rows'>#{table}</table><div class='notes'>#{notes.map { |n| "<p>#{esc(n)}</p>" }.join}</div>",
+                        "<button onclick='sketchup.close()'>Zatvori</button>" \
+                        "<button class='primary' onclick='sketchup.receive()'>Preuzmi iz AutoCAD-a</button>" \
+                        "<button class='primary' onclick='sketchup.push()'>Pošalji u AutoCAD</button>"))
         d.add_action_callback('receive') do |_c, _a|
           d.close
           Commands.import_package

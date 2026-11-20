@@ -28,6 +28,37 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// Sets the building zero. On a flat 2D plan the drawing Z becomes relative (Z = 0 is ±0,00); with absolute Z
         /// the project origin may be lifted to the zero (asked on the command line, or done directly from the window).
         /// </summary>
+        /// <summary>The height system of the project in one window.</summary>
+        private static void DatumInWindow(CommandContext ctx, ElevationDatum d)
+        {
+            var f = new Form("Nulta kota i visine", null, "Visinski sistem: " + d.Describe() + (d.Problems().Any() ? "\nPažnja: " + string.Join("; ", d.Problems()) : string.Empty));
+            f.Bool("known", "Nulta kota objekta (±0,00) je poznata", d.BuildingZeroAbsolute.HasValue);
+            f.Number("zero", "Apsolutna visina ±0,00 (m n.v.)", d.BuildingZeroAbsolute ?? 0, null, null, "Npr. 520,15.", v => v.Bool("known"), true, true);
+            f.Choice("parter", "Glavni parter", new[] { "Equal|Na ±0,00", "Other|Drugačiji" }, d.ParterreEqualsBuildingZero ? "Equal" : "Other");
+            f.Number("parterRel", "Kota partera u odnosu na ±0,00 (m)", d.ParterreEqualsBuildingZero ? -0.15 : d.ParterreRelative, null, null, "Npr. -0,15.", v => v.Is("parter", "Other"), true, true);
+            f.Bool("roads", "Saobraćajnice su ispod partera", d.DefaultRoadOffsetBelowParterre.HasValue);
+            f.Number("roadsCm", "Koliko ispod partera (cm)", (d.DefaultRoadOffsetBelowParterre ?? 0.15) * 100, 0, 500, null, v => v.Bool("roads"), false, true);
+            f.Text("datum", "Naziv visinskog datuma (npr. Trst 1900)", d.VerticalDatum);
+            f.Choice("z", "Z koordinate crteža su", new[] { "Absolute|Apsolutne (m n.v.)", "Relative|Relativne (u odnosu na ±0,00)" }, d.DrawingZ == DrawingZMode.Absolute ? "Absolute" : "Relative");
+            FormValues v = ctx.Ask(f);
+            d.DrawingZ = v.Is("z", "Absolute") ? DrawingZMode.Absolute : DrawingZMode.Relative;
+            d.ParterreEqualsBuildingZero = v.Is("parter", "Equal");
+            if (!d.ParterreEqualsBuildingZero)
+            {
+                d.ParterreRelative = v.Number("parterRel");
+            }
+
+            d.DefaultRoadOffsetBelowParterre = v.Bool("roads") ? v.Number("roadsCm") / 100.0 : (double?)null;
+            d.VerticalDatum = v.Text("datum");
+            if (v.Bool("known") && (!d.BuildingZeroAbsolute.HasValue || Math.Abs(d.BuildingZeroAbsolute.Value - v.Number("zero")) > 1e-9))
+            {
+                SetBuildingZero(ctx, d, v.Number("zero"), askOrigin: true);
+            }
+
+            ctx.SaveSettings();
+            ctx.Write("Visinski sistem projekta: " + d.Describe());
+        }
+
         internal static void SetBuildingZero(CommandContext ctx, ElevationDatum d, double zero, bool askOrigin)
         {
             bool firstZero = !d.BuildingZeroAbsolute.HasValue;
@@ -71,6 +102,12 @@ namespace SiteDesignPro.AutoCAD.Commands
         public void Datum() => CommandContext.Run("SDPDATUM", ctx =>
         {
             ElevationDatum d = ctx.Settings.Elevations;
+            if (CommandContext.UseDialogs)
+            {
+                DatumInWindow(ctx, d);
+                return;
+            }
+
             while (true)
             {
                 ctx.Write("Visinski sistem projekta: " + d.Describe());

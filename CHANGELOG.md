@@ -2,6 +2,19 @@
 
 ## Neobjavljeno
 
+### Verzija 0.3.1 – prozori svuda (20.11.)
+* **Nulta kota** (SDPDATUM) i **georeferenciranje** (SDPGEOREF) u prozorima: kontrolne tačke s odstupanjima,
+  Dodaj / Izračunaj / Obriši / Poništi kao dugmad, rezultat izračuna s dugmetom *Primijeni*.
+* Teren, profil, analiza terena, kote iz oznaka, pokazatelji, prohodnost, tabele, količine, provjere crteža, KML,
+  zone sigurnosti, rasvjeta, garažna rampa: **rezultat u prozoru** na kraju naredbe (ne treba čitati komandnu liniju).
+* Tehnički minimum (npr. prestrma rampa) javlja se u prozoru istog izgleda kao ostali.
+* Paleta *Prvi koraci* usklađena s ribbonom (Saobraćajnice, Sinhronizacija sa SketchUpom).
+* Brže na velikim crtežima: automatsko ponovno crtanje saobraćajnica se preskače kad se ništa od čega se crtaju
+  (osovine, parametri, kote, prijelazi, rampe) nije promijenilo.
+* SketchUp: rezultati i greške saobraćajnica, slanja u AutoCAD i *O programu* u prozoru istog izgleda kao ostali
+  dijalozi (može se kopirati); prozor Sinhronizacija u istom stilu.
+* **DEINSTALIRAJ_SVE.bat** uklanja AutoCAD i SketchUp dodatak odjednom.
+
 ### Verzija 0.3.0 – lakše korištenje (20.11.)
 * **AutoCAD ribbon** složen po redoslijedu rada, bez duplikata: Projekat, Elementi, Saobraćajnice, Parking,
   Izmjena, Dokumentacija, Provjera, SketchUp, Pomoć (rijetki alati u Napredno). Glavni alat svakog panela je veliko

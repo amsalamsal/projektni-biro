@@ -82,7 +82,7 @@ module ProjektniBiro
 
         File.write(path, cs.to_json)
         notes = cs.report.issues.empty? ? '' : "\n\nNapomene:\n#{cs.report.issues.map(&:message).uniq.first(8).join("\n")}"
-        UI.messagebox("Zapisano izmjena: #{cs.changes.length}\n#{path}\n\nPrimijenite ih u AutoCAD-u naredbom SDPAPPLYCHANGES.#{notes}")
+        Sync.message('Izmjene parametara', "Zapisano izmjena: #{cs.changes.length}\n#{path}\n\nU AutoCAD-u: SketchUp → Izmjene iz SketchUpa.#{notes}")
       rescue PackageError, SystemCallError, IOError => e
         Log.error('Izvoz izmjena nije uspio', e)
         UI.messagebox("Izmjene nije moguće izvesti: #{e.message}")
@@ -125,7 +125,7 @@ module ProjektniBiro
       end
 
       def about
-        UI.messagebox("Vanjsko uređenje PRO za SketchUp #{VERSION}\nShema razmjene #{SCHEMA_VERSION}\nPodržano: SketchUp 2014–2027\n\n" \
+        Sync.message('O programu', "Vanjsko uređenje PRO za SketchUp #{VERSION}\nShema razmjene #{SCHEMA_VERSION}\nPodržano: SketchUp 2014–2027\n\n" \
                       "Uvozi pakete iz AutoCAD-a u organizovane, izmjenjive 3D modele.\nSaobraćajnice (ulice, kružni tokovi, prijelazi, rampe) crta i samostalno, bez AutoCAD-a.\nDnevnik: #{Log.path}")
       end
 
