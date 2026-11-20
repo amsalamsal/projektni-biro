@@ -33,6 +33,7 @@ module ProjektniBiro
             end
           end
           dlg.add_action_callback('close') { |_c| dlg.close }
+          dlg.center if dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
           dlg.show
           dlg
         end

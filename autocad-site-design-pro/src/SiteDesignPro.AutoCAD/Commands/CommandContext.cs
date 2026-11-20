@@ -358,12 +358,19 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// Keyword prompt. A keyword may be given as "Global|Lokalni": the Bosnian local name is shown and typed,
         /// the global name is returned (so code can compare stable names). Without '|' both names are the same.
         /// </summary>
+        /// <summary>The title of a one-question window: the question itself when short, else "Pitanje" (the question is in the window).</summary>
+        private static string ShortTitle(string label)
+        {
+            string first = label.Split(new[] { ". ", "? ", "\n" }, StringSplitOptions.None)[0].Trim().TrimEnd('.', '?', ':');
+            return first.Length <= 48 ? first : "Pitanje";
+        }
+
         public string Keyword(string message, string[] keywords, string? defaultKeyword = null)
         {
             if (UseDialogs)
             {
                 string label = Strip(message);
-                var f = new Form(label).Choice("v", label, keywords, defaultKeyword ?? FormField.Global(keywords[0]));
+                var f = new Form(ShortTitle(label)).Choice("v", label, keywords, defaultKeyword ?? FormField.Global(keywords[0]));
                 return Ask(f).Choice("v");
             }
 
