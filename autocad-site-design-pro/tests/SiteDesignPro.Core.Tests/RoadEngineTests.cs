@@ -136,6 +136,7 @@ namespace SiteDesignPro.Core.Tests
             JsonObject bench = Element("furniture.bench", new JsonObject { ["kind"] = "point", ["position"] = new JsonArray(12.0, 7.0, 0.45), ["rotation"] = 0.3 }, null, "K-001");
             JsonObject o = JsonNode.Parse(Request(a, b, bench))!.AsObject();
             o["origin"] = new JsonArray(6500000.0, 4800000.0, 0.0);
+            o["removed"] = new JsonArray("5b1e0c7a-9d2f-4c3e-8a6b-1f0e2d3c4b5a");
             RoadEngineRequest req = RoadEngine.ParseRequest(o.ToJsonString(), Cat);
             Assert.Equal(6500000.0, req.Origin[0]);
             string file = System.IO.Path.Combine(TestSupport.TempDir(), "saobracajnice.sdpkg");
@@ -150,6 +151,7 @@ namespace SiteDesignPro.Core.Tests
             Assert.False(read.Report.HasErrors, read.Report.ToString());
             SitePackage pkg = read.Package!;
             Assert.Equal(RoadEngine.Host, pkg.GeneratorHost);
+            Assert.Equal(new[] { "5b1e0c7a-9d2f-4c3e-8a6b-1f0e2d3c4b5a" }, pkg.RemovedElements); // erased in SketchUp: only these are offered for erasing
             Assert.Equal("7a0f5d3e-3c55-4d47-9a7e-1f0d8f2b9c01", pkg.ProjectId);
             Assert.Equal(6500000.0, pkg.Origin[0]);
 

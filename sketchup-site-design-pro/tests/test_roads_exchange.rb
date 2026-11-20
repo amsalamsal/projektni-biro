@@ -90,6 +90,21 @@ class TestRoadsExchange < Minitest::Test
     assert_equal 2, X.other_elements(@model, AUTOCAD_PROJECT, Geom::Transformation.new).length, 'the elements of the target project go along'
   end
 
+  def test_only_what_was_erased_here_is_offered_for_erasing_in_autocad
+    st = draw_streets(@model)
+    u1 = street(@model, 'U-001')
+    mark = 'aaaaaaaa-1111-4222-8333-444444444444'
+    X.remember_known(@model, [u1.id, street(@model, 'U-002').id, mark])
+    X.remember_absorbed(@model, mark, u1.id, 1) # a mark from AutoCAD that went into the height of the axis
+    st.erase(street(@model, 'U-002').ref)
+    recs = R::SourceStore.new(@model).records
+    back = X.absorbed_marks(@model, recs, Geom::Transformation.new)
+    assert_equal [mark], back.map(&:id), 'the absorbed mark goes back under its own id'
+    assert_equal R::LEVEL_MARK, back.first.type
+    sent = recs.map(&:id) + back.map(&:id)
+    assert_equal [X.known_ids(@model) - sent].flatten.length, 1, 'only the street erased here'
+  end
+
   def test_export_needs_roads
     assert_raises(R::Engine::Error) { X.export(@model, File.join(@tmp, 'x.sdpkg')) }
   end

@@ -335,6 +335,11 @@
         }
       }
     },
+    "removedElements": {
+      "type": "array",
+      "description": "Ids of elements erased in the application that wrote the package since it last had them; the receiver may offer to erase them.",
+      "items": { "type": "string" }
+    },
     "terrain": {
       "type": "object",
       "additionalProperties": false,

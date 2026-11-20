@@ -36,6 +36,9 @@ namespace SiteDesignPro.Core.Exchange
 
         /// <summary>Problems found while reading the request (an element that could not be read is left out).</summary>
         public List<string> Problems { get; } = new List<string>();
+
+        /// <summary>Ids of road elements erased in the host since AutoCAD last had them (export only).</summary>
+        public List<string> Removed { get; } = new List<string>();
     }
 
     /// <summary>
@@ -83,6 +86,11 @@ namespace SiteDesignPro.Core.Exchange
             if (root.TryGetProperty("origin", out JsonElement or) && or.ValueKind == JsonValueKind.Array && or.GetArrayLength() >= 2)
             {
                 req.Origin = new[] { or[0].GetDouble(), or[1].GetDouble(), or.GetArrayLength() >= 3 ? or[2].GetDouble() : 0 };
+            }
+
+            if (root.TryGetProperty("removed", out JsonElement removed) && removed.ValueKind == JsonValueKind.Array)
+            {
+                req.Removed.AddRange(removed.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.String).Select(x => x.GetString()!).Where(SiteElement.IsValidId));
             }
 
             var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -369,6 +377,7 @@ namespace SiteDesignPro.Core.Exchange
                 GeneratorVersion = generatorVersion,
                 Host = Host,
                 SourceDocument = request.ProjectName,
+                RemovedElements = request.Removed.Where(id => !elements.Any(e => e.Id == id)).ToList(),
             });
             var notes = new List<string>(request.Problems);
             notes.AddRange(written.Skipped.Select(x => "Preskočeno: " + x));

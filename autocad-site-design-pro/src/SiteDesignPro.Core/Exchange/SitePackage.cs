@@ -76,6 +76,9 @@ namespace SiteDesignPro.Core.Exchange
         /// <summary>The host that wrote the package (e.g. AutoCAD, or the SketchUp road tools).</summary>
         public string GeneratorHost { get; set; } = string.Empty;
 
+        /// <summary>Ids of elements erased in the application that wrote the package since it last had them.</summary>
+        public List<string> RemovedElements { get; set; } = new List<string>();
+
         public string ProjectId { get; set; } = string.Empty;
 
         public string ProjectName { get; set; } = string.Empty;

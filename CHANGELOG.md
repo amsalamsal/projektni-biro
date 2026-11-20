@@ -2,6 +2,12 @@
 
 ## Neobjavljeno
 
+### Ispravka: uvoz iz SketchUpa javljao „obrisane“ elemente koji nisu obrisani (20.11.)
+* AutoCAD je smatrao obrisanim svaki saobraćajni element kojeg nije bilo u paketu (npr. ulice iz AutoCAD-a koje
+  nisu preuzete u alate Saobraćajnice, ili kote koje su u SketchUpu postale visina osovine). Sada SketchUp u paketu
+  šalje spisak onoga što je stvarno obrisano (od elemenata koje je dobio iz AutoCAD-a ili poslao u AutoCAD), i
+  AutoCAD nudi brisanje samo njih. Kote koje su ušle u visinu osovine vraćaju se u AutoCAD pod svojim id-om.
+
 ### Izvoz iz SketchUpa za sve elemente; prozori za datoteke (20.11.)
 * SketchUp: **Izvoz za AutoCAD (.sdpkg)…** (glavni meni i Saobraćajnice) šalje u jednom paketu saobraćajnice i
   **sve ostale elemente iz biblioteke**: postavljene u SketchUpu i one iz AutoCAD projekta – gdje su sada

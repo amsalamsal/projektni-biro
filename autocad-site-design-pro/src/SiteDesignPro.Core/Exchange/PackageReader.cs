@@ -156,6 +156,9 @@ namespace SiteDesignPro.Core.Exchange
                 GeneratorApplication = Str(generator, "application"),
                 GeneratorVersion = Str(generator, "version"),
                 GeneratorHost = generator.TryGetProperty("host", out JsonElement host) && host.ValueKind == JsonValueKind.String ? host.GetString() ?? string.Empty : string.Empty,
+                RemovedElements = m.TryGetProperty("removedElements", out JsonElement removed) && removed.ValueKind == JsonValueKind.Array
+                    ? removed.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.String).Select(x => x.GetString()!).ToList()
+                    : new List<string>(),
                 ProjectId = Str(project, "id"),
                 ProjectName = Str(project, "name"),
                 SourceLengthUnit = Str(units, "sourceLengthUnit"),

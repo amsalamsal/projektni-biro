@@ -36,6 +36,9 @@ namespace SiteDesignPro.Core.Exchange
 
         /// <summary>Terrain surfaces in the package frame (metres relative to the origin), written to terrain.json.</summary>
         public IList<(string Id, string Name, Terrain.TerrainModel Model)> Terrains { get; set; } = new List<(string, string, Terrain.TerrainModel)>();
+
+        /// <summary>Ids of elements erased in the sending application (manifest removedElements; the receiver may erase them).</summary>
+        public IList<string> RemovedElements { get; set; } = new List<string>();
     }
 
     public sealed class PackageWriteResult
@@ -246,6 +249,11 @@ namespace SiteDesignPro.Core.Exchange
                     ["sha256"] = a.Sha256,
                     ["description"] = a.Description,
                 })).ToArray());
+            }
+
+            if (options.RemovedElements.Count > 0)
+            {
+                manifest["removedElements"] = new JsonArray(options.RemovedElements.Distinct().Select(id => (JsonNode)JsonValue.Create(id)!).ToArray());
             }
 
             if (options.Terrains.Count > 0)

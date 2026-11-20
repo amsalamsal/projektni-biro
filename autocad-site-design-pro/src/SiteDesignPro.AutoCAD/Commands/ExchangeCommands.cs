@@ -309,12 +309,14 @@ namespace SiteDesignPro.AutoCAD.Commands
                 }
             }
 
-            // roads erased in SketchUp: a package of the SketchUp road tools of this project holds all its roads
+            // elements erased in SketchUp: only those the package names (what SketchUp had from or sent to this drawing
+            // and erased since); anything else that is not in the package is left alone
             int erased = 0;
-            if (fromSketchUpRoads && !adopt && pkg.ProjectId == ctx.Settings.ProjectId)
+            if (fromSketchUpRoads && !adopt && pkg.ProjectId == ctx.Settings.ProjectId && pkg.RemovedElements.Count > 0)
             {
+                var removed = new HashSet<string>(pkg.RemovedElements, StringComparer.Ordinal);
                 var inPackage = new HashSet<string>(pkg.Elements.Select(e => e.Element.Id), StringComparer.Ordinal);
-                List<ManagedElement> gone = existing.Where(m => !m.IsCopy && Core.Roads.RoadElements.SourceTypes.Contains(m.Record.TypeId) && !inPackage.Contains(m.Record.Id)).ToList();
+                List<ManagedElement> gone = existing.Where(m => !m.IsCopy && removed.Contains(m.Record.Id) && !inPackage.Contains(m.Record.Id)).ToList();
                 if (gone.Count > 0 &&
                     ctx.Keyword(Core.Text.Bs.T("U crtežu je {0} saobraćajnih elemenata kojih nema u paketu iz SketchUp-a (tamo su obrisani). Obrisati ih i u crtežu? [Da/Ne]", gone.Count), new[] { "Da", "Ne" }, "Ne") == "Da")
                 {

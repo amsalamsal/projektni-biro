@@ -167,18 +167,67 @@ module ProjektniBiro
             Record.new(id: r.id, type: r.type, name: r.name, label: r.label, params: r.params,
                        geometry: Geo.map(r.geometry) { |v| SourceStore.xf(to_project, v) })
           end
+          in_project.concat(absorbed_marks(model, records, to_project))
           others = other_elements(model, target, to_project)
           raise Engine::Error, 'u modelu nema elemenata za AutoCAD (saobraćajnice ili elementi iz biblioteke)' if in_project.empty? && others.empty?
+
+          # erased here: what AutoCAD gave or got before and is no more in the model (only these are offered for erasing there)
+          sent = in_project.map(&:id)
+          removed = known_ids(model) - sent
 
           origin = target ? linked_origin(model, target) : [0.0, 0.0, 0.0]
           name = target ? (project_name(model, target) || settings['projectName']) : settings['projectName']
           request = Request.build(in_project, project_id: target || settings['projectId'], project_name: name,
                                               base: settings['base'], flat: settings['flat'], origin: origin, extra: others)
+          request['removed'] = removed unless removed.empty?
           result = Rebuild.engine(settings['projectId']).export(request, path)
           model.start_operation('Izvoz za AutoCAD', true, false, true)
           records.each { |r| r.ref.set_attribute(SourceStore::DICT, IN_AUTOCAD, true) if r.ref && r.ref.valid? }
+          remember_known(model, sent)
           model.commit_operation
           result
+        end
+
+        # ---- what AutoCAD knows (so that only what was erased here is offered for erasing there)
+
+        # Ids of the road source elements AutoCAD has: received from it, or sent to it.
+        def known_ids(model)
+          JSON.parse(model.get_attribute(SourceStore::SETTINGS, 'autocadIds', '[]') || '[]')
+        rescue JSON::ParserError
+          []
+        end
+
+        def remember_known(model, ids)
+          model.set_attribute(SourceStore::SETTINGS, 'autocadIds', JSON.generate(ids.uniq))
+        end
+
+        # Elevation marks from AutoCAD that went into the height of an axis vertex: mark id => [axis id, vertex].
+        def absorbed(model)
+          JSON.parse(model.get_attribute(SourceStore::SETTINGS, 'absorbedMarks', '{}') || '{}')
+        rescue JSON::ParserError
+          {}
+        end
+
+        def remember_absorbed(model, mark_id, axis_id, index)
+          map = absorbed(model)
+          map[mark_id] = [axis_id, index]
+          model.set_attribute(SourceStore::SETTINGS, 'absorbedMarks', JSON.generate(map))
+        end
+
+        # The absorbed marks go back to AutoCAD under their own ids, with the height of their axis vertex now.
+        def absorbed_marks(model, records, to_project)
+          by_id = records.each_with_object({}) { |r, h| h[r.id] = r }
+          absorbed(model).map do |mark_id, (axis_id, index)|
+            axis = by_id[axis_id]
+            next nil if by_id.key?(mark_id) || axis.nil? || axis.kind != 'path' || index.nil?
+
+            v = axis.geometry['vertices'][index]
+            next nil unless v
+
+            p = SourceStore.xf(to_project, v)
+            Record.new(id: mark_id, type: LEVEL_MARK, name: 'Kota osovine', label: '', params: { 'level' => p[2].round(4) },
+                       geometry: Geo.point([p[0], p[1], 0.0]))
+          end.compact
         end
 
         # The AutoCAD project imported into the model (the first one), if any.
@@ -262,6 +311,7 @@ module ProjektniBiro
           end
 
           absorbed = absorb_marks(store, marks, existing, stats)
+          remember_known(model, known_ids(model) | items.map(&:id))
           if delete
             keep = items.map(&:id) - absorbed
             store.records.each do |r|
@@ -300,6 +350,8 @@ module ProjektniBiro
             level = it.params['level']
             hit = level.is_a?(Numeric) && roads.find { |r| r.geometry['vertices'].any? { |v| Math.hypot(v[0] - pos[0], v[1] - pos[1]) < 0.05 } }
             if hit
+              index = hit.geometry['vertices'].index { |v| Math.hypot(v[0] - pos[0], v[1] - pos[1]) < 0.05 }
+              remember_absorbed(store.model, it.id, hit.id, index)
               g = JSON.parse(JSON.generate(hit.geometry))
               g['vertices'] = g['vertices'].map { |v| Math.hypot(v[0] - pos[0], v[1] - pos[1]) < 0.05 ? [v[0], v[1], level.to_f] : v }
               store.update(hit.ref, geometry: g)
