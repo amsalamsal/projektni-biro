@@ -44,14 +44,20 @@ namespace SiteDesignPro.AutoCAD.UI
                 r++;
             }
 
-            panel.Children.Add(grid);
+            panel.Children.Add(new ScrollViewer { Content = grid, VerticalScrollBarVisibility = ScrollBarVisibility.Auto, MaxHeight = System.Math.Max(240, SystemParameters.WorkArea.Height * 0.5) });
             AddList(panel, warnings, Brushes.Firebrick);
             AddList(panel, notes, Brushes.DimGray);
 
-            var bar = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 12, 0, 0) };
+            // many buttons wrap to a second row instead of being cut off on the left
+            if (buttons.Count > 4)
+            {
+                Width = 600;
+            }
+
+            var bar = new WrapPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 12, 0, 0) };
             foreach ((string id, string text) in buttons)
             {
-                var b = new Button { Content = text, MinWidth = 90, Margin = new Thickness(6, 0, 0, 0), Padding = new Thickness(10, 3, 10, 3), IsDefault = id == buttons[0].Id, IsCancel = id == "close" };
+                var b = new Button { Content = text, MinWidth = 90, Margin = new Thickness(6, 4, 0, 0), Padding = new Thickness(10, 3, 10, 3), IsDefault = id == buttons[0].Id, IsCancel = id == "close" };
                 string captured = id;
                 b.Click += (o, e) =>
                 {

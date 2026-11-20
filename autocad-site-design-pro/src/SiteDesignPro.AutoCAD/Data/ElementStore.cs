@@ -319,7 +319,7 @@ namespace SiteDesignPro.AutoCAD.Data
             Core.Units.LengthUnit? unit = Core.Units.UnitConversion.FromInsUnits((int)db.Insunits);
             return new ProjectSettings
             {
-                Name = System.IO.Path.GetFileNameWithoutExtension(db.Filename) is string n && n.Length > 0 ? n : "Projekat vanjskog uređenja",
+                Name = !db.Filename.EndsWith(".dwt", StringComparison.OrdinalIgnoreCase) && System.IO.Path.GetFileNameWithoutExtension(db.Filename) is string n && n.Length > 0 ? n : "Projekat vanjskog uređenja",
                 DrawingUnit = Core.Units.UnitConversion.Code(unit ?? Core.Units.LengthUnit.Millimeter),
             };
         }

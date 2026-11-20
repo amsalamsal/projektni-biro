@@ -31,7 +31,8 @@ namespace SiteDesignPro.AutoCAD.Commands
         /// <summary>The height system of the project in one window.</summary>
         private static void DatumInWindow(CommandContext ctx, ElevationDatum d)
         {
-            var f = new Form("Nulta kota i visine", null, "Visinski sistem: " + d.Describe() + (d.Problems().Any() ? "\nPažnja: " + string.Join("; ", d.Problems()) : string.Empty));
+            var f = new Form("Nulta kota i visine", null, "Apsolutna visina poda prizemlja (±0,00), parter i saobraćajnice u odnosu na nju." +
+                (d.Problems().Any() ? "\n\nŠta još nedostaje:\n" + string.Join("\n", d.Problems().Select(p => "• " + p.TrimEnd('.') + ".")) : string.Empty));
             f.Bool("known", "Nulta kota objekta (±0,00) je poznata", d.BuildingZeroAbsolute.HasValue);
             f.Number("zero", "Apsolutna visina ±0,00 (m n.v.)", d.BuildingZeroAbsolute ?? 0, null, null, "Npr. 520,15.", v => v.Bool("known"), true, true);
             f.Choice("parter", "Glavni parter", new[] { "Equal|Na ±0,00", "Other|Drugačiji" }, d.ParterreEqualsBuildingZero ? "Equal" : "Other");

@@ -49,6 +49,7 @@ module ProjektniBiro
         end
 
         def show
+          @dlg.center if @dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
           @dlg.show
         end
 
@@ -103,6 +104,7 @@ module ProjektniBiro
         end
         dlg.add_action_callback('saveReport') { |_ctx, arg| save_text(parse(arg)) }
         dlg.add_action_callback('close') { |_ctx| dlg.close }
+        dlg.center if dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
         dlg.show
         dlg
       rescue PackageError, SystemCallError, IOError => e
@@ -151,6 +153,7 @@ module ProjektniBiro
         dlg.add_action_callback('ready') { |_ctx| push(dlg, 'mode' => 'report', 'report' => data) }
         dlg.add_action_callback('saveReport') { |_ctx, arg| save_text(parse(arg)) }
         dlg.add_action_callback('close') { |_ctx| dlg.close }
+        dlg.center if dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
         dlg.show
       end
 
@@ -181,6 +184,7 @@ module ProjektniBiro
         end
         dlg.add_action_callback('selectType') { |_ctx| Commands.select_type(current.get_attribute(Editing::DICT, 'type')) }
         dlg.add_action_callback('close') { |_ctx| dlg.close }
+        dlg.center if dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
         dlg.show
       end
 
@@ -236,6 +240,7 @@ module ProjektniBiro
         end
         dlg.add_action_callback('selectType') { |_ctx, arg| Commands.select_type(parse(arg)['id']) }
         dlg.add_action_callback('close') { |_ctx| dlg.close }
+        dlg.center if dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
         dlg.show
       end
 
@@ -274,6 +279,7 @@ module ProjektniBiro
         end
         dlg.add_action_callback('selectType') { |_ctx, arg| Commands.select_type(parse(arg)['type']) }
         dlg.add_action_callback('close') { |_ctx| dlg.close }
+        dlg.center if dlg.respond_to?(:center) # over the SketchUp window, also on a second monitor
         dlg.show
       end
     end

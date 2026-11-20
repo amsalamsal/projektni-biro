@@ -125,10 +125,26 @@ module ProjektniBiro
 
         # Makes the roads of the AutoCAD project (root group) source elements; their AutoCAD 3D is removed (the road
         # engine builds it). Returns [stats, outcome of the rebuild].
-        def adopt(model, root)
+        #
+        # A street drawn as part of the AutoCAD road network has no 3D of its own in the package (its carriageway comes
+        # as generated surfaces), so the importer may not have made an entity for it: the elements of the package
+        # (+package_elements+) fill in the source elements that have no entity.
+        def adopt(model, root, package_elements = nil)
           pid = root.get_attribute(DICT, 'projectId')
           entities = ModelIndex.managed_entities(model).select { |e| e.get_attribute(DICT, 'projectId') == pid && road_entity?(e) }
           items = entities.select { |e| source_element?(e.get_attribute(DICT, 'type'), entity_custom(e)) }.map { |e| item_of(e) }.compact
+          have = items.map(&:id)
+          (package_elements || []).each do |el|
+            next if have.include?(el.id) || !source_element?(el.type_id, el.custom)
+
+            geometry = if el.kind == 'point'
+                         { 'kind' => 'point', 'position' => el.geometry[:position].to_a.map(&:to_f), 'rotation' => el.geometry[:rotation].to_f }
+                       else
+                         PackageReader.geometry_json(el.geometry)
+                       end
+            items << Item.new(id: el.id, type: el.type_id, name: el.name.to_s, label: el.label.to_s, params: el.params, geometry: geometry)
+            have << el.id
+          end
           model.start_operation('Preuzimanje saobraćajnica iz AutoCAD-a', true)
           begin
             entities.each { |e| e.erase! if e.valid? }

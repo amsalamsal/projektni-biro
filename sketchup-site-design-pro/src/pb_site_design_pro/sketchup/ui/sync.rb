@@ -49,6 +49,7 @@ module ProjektniBiro
                         "<button onclick=\"navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('t').innerText)\">Kopiraj</button>" \
                         "<button class='primary' onclick='sketchup.close()'>Zatvori</button>"))
         d.add_action_callback('close') { |_c, _a| d.close }
+        d.center if d.respond_to?(:center) # over the SketchUp window, also on a second monitor
         d.show
         d
       end
@@ -96,6 +97,7 @@ module ProjektniBiro
           Roads::Commands.export_to_autocad
         end
         d.add_action_callback('close') { |_c, _a| d.close }
+        d.center if d.respond_to?(:center) # over the SketchUp window, also on a second monitor
         d.show
         d
       end

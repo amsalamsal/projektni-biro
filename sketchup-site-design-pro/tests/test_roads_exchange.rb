@@ -139,6 +139,8 @@ class TestRoadsExchange < Minitest::Test
     m = JSON.parse(File.read(manifest, encoding: 'UTF-8'))
     m['generator']['host'] = 'AutoCAD 2021'
     m['project']['id'] = AUTOCAD_PROJECT
+    # as AutoCAD writes them: the streets of the network carry no 3D of their own (networkSurface)
+    m['elements'].each { |e| (e['custom'] ||= {})['networkSurface'] = true if e['type'] == R::STREET }
     File.write(manifest, JSON.generate(m))
 
     # first the import without taking the roads over (as before), then the automatic takeover in another model

@@ -139,7 +139,7 @@ namespace SiteDesignPro.AutoCAD.Commands
             (string sentFile, string sentWhen) = Last("sync:lastSent");
             (string gotFile, string gotWhen) = Last("sync:lastReceived");
             int count = ctx.Svc.ReadAll().Count(m => m.Element != null && !m.IsCopy);
-            string choice = UI.InfoDialog.Present("Sinhronizacija sa SketchUpom", ctx.Settings.Name.Length > 0 ? ctx.Settings.Name : "Projekat", new[]
+            string choice = UI.InfoDialog.Present("Sinhronizacija sa SketchUpom", ctx.ProjectTitle, new[]
                 {
                     ("Elemenata u crtežu", count.ToString(System.Globalization.CultureInfo.InvariantCulture)),
                     ("Zadnje poslano u SketchUp", sentFile + (sentWhen.Length > 0 ? "  (" + sentWhen + ")" : string.Empty)),
@@ -177,7 +177,10 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            string defaultName = Path.Combine(Path.GetDirectoryName(ctx.Db.Filename) ?? string.Empty, Path.GetFileNameWithoutExtension(ctx.Db.Filename) + ".sdpkg");
+            // an unsaved drawing still points at the template folder: the package goes to Documents then
+            string defaultName = ctx.Titled
+                ? Path.Combine(Path.GetDirectoryName(ctx.Db.Filename) ?? string.Empty, Path.GetFileNameWithoutExtension(ctx.Db.Filename) + ".sdpkg")
+                : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), ctx.ProjectTitle + ".sdpkg");
             var o = new PromptSaveFileOptions("\nPaket razmjene")
             {
                 Filter = "Paket Vanjsko uređenje PRO (*.sdpkg)|*.sdpkg",
@@ -236,6 +239,19 @@ namespace SiteDesignPro.AutoCAD.Commands
             foreach (string s in result.Skipped)
             {
                 ctx.Write("  preskočeno: " + s);
+            }
+
+            if (CommandContext.UseDialogs)
+            {
+                UI.InfoDialog.Present("Poslano u SketchUp", "Paket je spreman", new[]
+                    {
+                        ("Elemenata", result.ElementCount.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                        ("Teren", options.Terrains.Count > 0 ? "da" : "ne"),
+                        ("Datoteka", Path.GetFileName(result.Path)),
+                        ("Folder", Path.GetDirectoryName(result.Path) ?? string.Empty),
+                    },
+                    new[] { "U SketchUpu: Proširenja → Vanjsko uređenje PRO → Preuzmi iz AutoCAD-a i odaberite ovu datoteku." },
+                    result.Skipped.Take(10).Select(x => "Preskočeno: " + x));
             }
 
             Log.Info("Izvezeno " + result.ElementCount + " elemenata u " + result.Path);

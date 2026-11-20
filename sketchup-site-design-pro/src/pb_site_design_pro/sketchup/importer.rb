@@ -113,7 +113,7 @@ module ProjektniBiro
         root = Roads::Exchange.candidates(@model).map(&:first).find { |r| r.get_attribute('SiteDesignPro', 'projectId') == @package.project_id }
         return unless root
 
-        stats, outcome = Roads::Exchange.adopt(@model, root)
+        stats, outcome = Roads::Exchange.adopt(@model, root, @package.elements)
         @road_outcome = outcome
         @report.add(:info, 'SDP-S004', nil, "Ulice i ceste iz AutoCAD-a su preuzete u alate Saobraćajnice: #{Roads::Exchange.stats_text(stats)}.",
                     'Uređuju se ovdje (Saobraćajnice > Uredi ulicu); u AutoCAD se vraćaju s Pošalji u AutoCAD.')

@@ -265,6 +265,38 @@ namespace SiteDesignPro.AutoCAD.Commands
             Tr.Dispose();
         }
 
+        /// <summary>Whether the drawing has been saved under a name (an unsaved one still carries the template path).</summary>
+        public bool Titled
+        {
+            get
+            {
+                try
+                {
+                    return Convert.ToInt32(AcApp.GetSystemVariable("DWGTITLED"), CultureInfo.InvariantCulture) != 0 && !Db.Filename.EndsWith(".dwt", StringComparison.OrdinalIgnoreCase);
+                }
+                catch (Exception)
+                {
+                    return !string.IsNullOrEmpty(Db.Filename) && !Db.Filename.EndsWith(".dwt", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+        }
+
+        /// <summary>The name of the project as shown to the user: the project name, else the drawing name (Drawing1).</summary>
+        public string ProjectTitle
+        {
+            get
+            {
+                string template = System.IO.Path.GetFileNameWithoutExtension(Db.Filename ?? string.Empty);
+                string name = Settings.Name ?? string.Empty;
+                if (name.Length > 0 && (Titled || !string.Equals(name, template, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return name;
+                }
+
+                return System.IO.Path.GetFileNameWithoutExtension(Doc.Name ?? string.Empty) is string d && d.Length > 0 ? d : "Projekat";
+            }
+        }
+
         public void Write(string text)
         {
             Ed.WriteMessage("\n" + text);
@@ -294,8 +326,14 @@ namespace SiteDesignPro.AutoCAD.Commands
                     continue;
                 }
 
+                // a table line: "Ivičnjak      74,93 m" (columns aligned with spaces) or "Naziv: vrijednost"
+                System.Text.RegularExpressions.Match column = System.Text.RegularExpressions.Regex.Match(line, @"^(\S.{1,60}?)\s{2,}(\S.{0,80})$");
                 int colon = line.IndexOf(": ", StringComparison.Ordinal);
-                if (colon > 0 && colon <= 40 && line.Length - colon <= 90 && rows.Count < 40)
+                if (column.Success && rows.Count < 60)
+                {
+                    rows.Add((column.Groups[1].Value.Trim(), System.Text.RegularExpressions.Regex.Replace(column.Groups[2].Value.Trim(), @"\s{2,}", "  ")));
+                }
+                else if (colon > 0 && colon <= 40 && line.Length - colon <= 90 && rows.Count < 60)
                 {
                     rows.Add((line.Substring(0, colon), line.Substring(colon + 2)));
                 }
