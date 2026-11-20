@@ -35,7 +35,8 @@ KNOWN = {
   'plateShape' => %w[recreation.basketball_hoop info.site_map], 'postHeight' => %w[info.site_map], # backboard; tilted map table
   'columnMaterial' => %w[utility.waste_container_semi], 'columnDiameter' => %w[utility.waste_container_semi], # semi: no column
   'bodyWidth' => %w[utility.waste_container_semi], 'bodyLength' => %w[utility.waste_container_semi], # round body: min(l, w)
-  'bikeMaterial' => %w[road.street], 'lanesLeft' => %w[road.street] # no bike lane by default; one-way uses lanesRight only
+  'bikeMaterial' => %w[road.street], 'lanesLeft' => %w[road.street], # no bike lane by default; one-way uses lanesRight only
+  'rowStart' => :all, 'rowEnd' => :all, 'hatchWidth' => :all # parking rows only (layout 'single' by default)
 }.freeze
 
 lib = AssetLibrary.new(File.join(ROOT, 'sketchup-site-design-pro/src/pb_site_design_pro/Assets'), File.join(ROOT, 'shared/catalog'))
