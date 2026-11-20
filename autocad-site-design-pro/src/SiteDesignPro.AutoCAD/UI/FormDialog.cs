@@ -17,6 +17,7 @@ namespace SiteDesignPro.AutoCAD.UI
     {
         private readonly Form form;
         private readonly Dictionary<string, Func<string>> readers = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
+        private readonly Dictionary<string, Action<object>> writers = new Dictionary<string, Action<object>>(StringComparer.Ordinal);
         private readonly Dictionary<string, (FrameworkElement Label, FrameworkElement Editor)> rows = new Dictionary<string, (FrameworkElement, FrameworkElement)>(StringComparer.Ordinal);
         private readonly TextBlock summary = new TextBlock { Foreground = Brushes.DimGray, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) };
         private readonly TextBlock error = new TextBlock { Foreground = Brushes.Firebrick, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 6, 0, 0) };
@@ -90,6 +91,25 @@ namespace SiteDesignPro.AutoCAD.UI
             panel.Children.Add(summary);
             panel.Children.Add(error);
             var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 10, 0, 0) };
+            if (form.Defaults.Count > 0)
+            {
+                // back to the values of the program when the remembered answers no longer fit
+                var reset = new Button { Content = "Zadane vrijednosti", MinWidth = 90, Margin = new Thickness(0, 0, 18, 0), Padding = new Thickness(8, 3, 8, 3), IsEnabled = form.Recalled, ToolTip = "Vraća vrijednosti programa umjesto zapamćenih zadnjih unosa." };
+                reset.Click += (o, e) =>
+                {
+                    foreach (KeyValuePair<string, object> kv in form.Defaults)
+                    {
+                        if (writers.TryGetValue(kv.Key, out Action<object>? write))
+                        {
+                            write(kv.Value);
+                        }
+                    }
+
+                    Refresh();
+                };
+                buttons.Children.Add(reset);
+            }
+
             var ok = new Button { Content = "U redu", IsDefault = true, MinWidth = 90, Margin = new Thickness(0, 0, 6, 0), Padding = new Thickness(8, 3, 8, 3) };
             var cancel = new Button { Content = "Odustani", IsCancel = true, MinWidth = 90, Padding = new Thickness(8, 3, 8, 3) };
             ok.Click += (o, e) => Accept();
@@ -118,6 +138,7 @@ namespace SiteDesignPro.AutoCAD.UI
                         box.Checked += (o, e) => Refresh();
                         box.Unchecked += (o, e) => Refresh();
                         readers[f.Key] = () => box.IsChecked == true ? "1" : "0";
+                        writers[f.Key] = v => box.IsChecked = v is bool b && b;
                         return box;
                     }
 
@@ -138,6 +159,7 @@ namespace SiteDesignPro.AutoCAD.UI
                             }
 
                             readers[f.Key] = () => buttons.FirstOrDefault(b => b.Button.IsChecked == true).Value ?? current;
+                            writers[f.Key] = v => buttons.ForEach(b => b.Button.IsChecked = b.Value == (v as string));
                             return panel;
                         }
 
@@ -150,6 +172,7 @@ namespace SiteDesignPro.AutoCAD.UI
                         combo.SelectedIndex = Math.Max(0, Array.FindIndex(f.Options, o => FormField.Global(o) == current));
                         combo.SelectionChanged += (s, e) => Refresh();
                         readers[f.Key] = () => FormField.Global(f.Options[Math.Max(0, combo.SelectedIndex)]);
+                        writers[f.Key] = v => combo.SelectedIndex = Math.Max(0, Array.FindIndex(f.Options, o => FormField.Global(o) == (v as string)));
                         return combo;
                     }
 
@@ -173,6 +196,7 @@ namespace SiteDesignPro.AutoCAD.UI
                         };
                         box.TextChanged += (s, e) => Refresh();
                         readers[f.Key] = () => box.Text;
+                        writers[f.Key] = v => box.Text = f.Format(v);
                         return box;
                     }
             }

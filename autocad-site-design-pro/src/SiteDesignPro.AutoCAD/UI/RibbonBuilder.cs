@@ -71,51 +71,53 @@ namespace SiteDesignPro.AutoCAD.UI
             var tab = new RibbonTab { Title = "VANJSKO UREĐENJE PRO", Id = TabId, Description = "Vanjsko uređenje PRO – autor " + Author };
             ElementCatalog cat = AcadEnv.Catalog;
 
-            // Six panels in the order of the work; rarely used tools are under Pomoć → Napredno.
+            // Panels in the order of the work: project, elements, roads, parking, editing, sheet, check, SketchUp, help.
+            // Every panel: one or two large buttons for the main tool, the rest in stacks of three.
             tab.Panels.Add(Panel("Projekat",
                 Large("Novi projekat", "SDPNEW", "new", "Naziv, jedinice, mjerilo i nulta kota u jednom prozoru."),
                 Stack(Small("Prvi koraci", "SDPPRVIKORACI", "steps", "Redoslijed rada kao lista: svaki korak pokreće svoju naredbu i štiklira se kad je urađen."),
                       Small("Nulta kota", "SDPDATUM", "spotlevel", "Nulta kota objekta (±0,00), kota partera i visinski datum."),
                       Small("Postavke", "SDPSETTINGS", "settings", "Postavke projekta: jedinice, ishodište, sjever, mjerilo, numeracija.")),
-                Stack(Commands("Uvoz DWG-a", "import", "Rad na postojećem crtežu (geodetska podloga, arhitekta).",
+                Stack(Commands("Postojeći DWG", "import", "Rad na postojećem crtežu (geodetska podloga, arhitekta).",
                           Small("Mapiranje slojeva", "SDPMAPIRANJE", "layers", "Povežite slojeve izvornog crteža s ulogama (parcela, objekti, kote...)."),
                           Small("Provjera crteža", "SDPPROVJERADWG", "validate", "Izvještaj o ulaznom crtežu: jedinice, parcela, objekti, kote."),
-                          Small("Preuzmi objekte", "SDPPREUZMI", "convert", "Mapiranu parcelu i tlocrte objekata pretvara u elemente."),
-                          Small("Pretvori krive", "SDPCONVERT", "convert", "Odabrane polilinije, linije, lukove ili krugove pretvara u elemente.")),
-                      Small("Primjer projekta", "SDPSAMPLE", "sample", "Nacrta primjer projekta za učenje."),
+                          Small("Preuzmi objekte", "SDPPREUZMI", "convert", "Mapiranu parcelu i tlocrte objekata pretvara u elemente.")),
+                      Small("Primjer projekta", "SDPSAMPLE", "sample", "Nacrta primjer projekta ili primjere pojedinih alata za učenje."),
                       Small("Slojevi", "SDPLAYERS", "layers", "Napravi, popravi ili provjeri standard slojeva."))));
 
-            tab.Panels.Add(Panel("Crtanje",
+            tab.Panels.Add(Panel("Elementi",
                 Large("Biblioteka", "SDPBROWSER", "browser", "Svi elementi s pretragom; dvostruki klik postavlja ili crta element."),
-                Large("Ulica", "SDPULICA", "street", "Ulica iz osovine: jednosmjerna ili dvosmjerna, 1–3 trake, trotoari i biciklističke staze, ivičnjaci, linije traka i strelice. Sve ulice i ceste se spajaju bez preklapanja, uglovi raskrsnica se zaobljuju."),
-                Large("Kružni tok", "SDPKRUZNITOK", "roundabout", "Cijeli kružni tok iz jedne tačke: prsten, ostrvo, ivičnjaci, razdjelna ostrva, prelazi, strelice, znakovi i krakovi."),
                 Stack(Types(cat, "Parcela i objekti", "site", "site", "buildings"),
                       Types(cat, "Parter i ograde", "surfaces", "surfaces", "walls"),
-                      Types(cat, "Ceste i biciklisti", "roads", "roads", "cycling")),
-                Stack(Types(cat, "Zelenilo", "landscape", "landscape"),
-                      Types(cat, "Rasvjeta", "lighting", "lighting"),
-                      Types(cat, "Mobilijar i oprema", "furniture", "furniture", "structures", "decorative", "information")),
-                Stack(Types(cat, "Voda i instalacije", "utilities", "water", "utilities", "sustainability", "climate"),
-                      Small("Duž linije", "SDPPATHARRAY", "patharray", "Drvored, svjetiljke, klupe ili stalci duž linije na zadanom razmaku."),
-                      Small("Raster sadnje", "SDPGRID", "plantgrid", "Popuna površine sadnjom.")),
-                Stack(Small("Uredi ulicu", "SDPULICAUREDI", "edit", "Trake, širine, trotoari, staze, radijus i strelice ulice; obična cesta tako postaje ulica."),
-                      Small("Pješački prijelaz", "SDPPJESACKIPRIJELAZ", "roads", "Bijele pruge 0,50 m s razmakom 0,50 m preko svih traka; na ulici se sam okrene i uzme trake."),
-                      Small("Osvježi ceste", "SDPCESTEOSVJEZI", "reload", "Ponovo crta kolovoze, ivičnjake, trotoare i oznake svih ulica i cesta (radi se i samo).")),
-                Stack(Small("Kota saobraćajnice", "SDPKOTACESTE", "spotlevel", "Simbol visine na ulici: +/− u odnosu na osnovnu visinu saobraćajnica; između kota visina se mijenja linearno, nagib preko 10 % se odmah javlja."),
-                      Small("Visine saobraćajnica", "SDPVISINECESTA", "slope", "Ravan ili neravan teren i osnovna visina saobraćajnica (m n.v.)."),
-                      Small("Garažna rampa", "SDPGARAZNARAMPA", "roads", "Pravolinijska, polukružna ili kružna (spiralna) rampa, jednosmjerna ili dvosmjerna: srednja linija, žute linije zaštitnog razmaka, strelice i L / h / nagib (najviše 17 %).")),
-                Stack(Small("Niz parking mjesta", "SDPPARKING", "parking", "Red parking mjesta uz ivicu prolaza."),
-                      Small("Pretvori krive", "SDPCONVERT", "convert", "Postojeće linije ili krugove pretvara u elemente."),
-                      Small("Presjek rampe", "SDPRAMPAPRESJEK", "slope", "Uzdužni presjek garažne rampe pored tlocrta: nagibi i dužine dionica, kote, ploča iznad i svijetla visina. Prati izmjene rampe.")),
-                Stack(Small("Rampa za invalide", "SDPRAMPAINVALIDI", "roads", "Rampa 120 cm (spušteni ivičnjak i kosina) gdje kliknete: na trotoaru s te strane, na kolovozu s obje strane. Briše se brisanjem plavog trougla."))));
+                      Types(cat, "Zelenilo", "landscape", "landscape")),
+                Stack(Types(cat, "Rasvjeta", "lighting", "lighting"),
+                      Types(cat, "Mobilijar i oprema", "furniture", "furniture", "structures", "decorative", "information"),
+                      Types(cat, "Voda i instalacije", "utilities", "water", "utilities", "sustainability", "climate")),
+                Stack(Small("Duž linije", "SDPPATHARRAY", "patharray", "Drvored, svjetiljke, klupe ili stalci duž linije na zadanom razmaku."),
+                      Small("Popuni površinu", "SDPGRID", "plantgrid", "Raster sadnje ili opreme unutar granice."),
+                      Small("Pretvori linije", "SDPCONVERT", "convert", "Postojeće polilinije, linije, lukove ili krugove pretvara u elemente."))));
 
-            tab.Panels.Add(Panel("Parking mjesta",
-                Large("Okomito", "SDPPARKINGOKOMITO", "parking", "Parking mjesta u nizu 2,50 × 5,00 m: broj mjesta i broj mjesta za osobe s invaliditetom (2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1). Ponovo: numeracija se nastavlja ili kreće od 1."),
+            tab.Panels.Add(Panel("Saobraćajnice",
+                Large("Ulica", "SDPULICA", "street", "Ulica iz osovine: jednosmjerna ili dvosmjerna, 1–3 trake, trotoari i biciklističke staze, ivičnjaci, linije traka i strelice. Sve ulice i ceste se spajaju bez preklapanja, uglovi raskrsnica se zaobljuju."),
+                Large("Kružni tok", "SDPKRUZNITOK", "roundabout", "Cijeli kružni tok: otok, prsten, ivičnjaci, razdjelna ostrva, prijelazi, strelice, znakovi i krakovi."),
+                Stack(Small("Uredi ulicu", "SDPULICAUREDI", "edit", "Trake, širine, trotoari, staze, radijus i strelice ulice; obična cesta tako postaje ulica."),
+                      Small("Pješački prijelaz", "SDPPJESACKIPRIJELAZ", "roads", "Pruge 0,50 / 0,50 m preko svih traka; na ulici se sam okrene i uzme trake."),
+                      Small("Rampa za invalide", "SDPRAMPAINVALIDI", "roads", "Spušteni ivičnjak 120 cm gdje kliknete: na trotoaru s te strane, na kolovozu s obje strane.")),
+                Stack(Small("Kota saobraćajnice", "SDPKOTACESTE", "spotlevel", "Visina na ulici u odnosu na osnovnu visinu; između kota visina se mijenja linearno."),
+                      Small("Visine saobraćajnica", "SDPVISINECESTA", "slope", "Ravan ili neravan teren i osnovna visina saobraćajnica (m n.v.)."),
+                      Types(cat, "Ostale ceste i staze", "roads", "roads", "cycling")),
+                Stack(Small("Garažna rampa", "SDPGARAZNARAMPA", "roads", "Pravolinijska, polukružna, spiralna ili kombinovana rampa; ispod tehničkog minimuma se ne može nacrtati."),
+                      Small("Presjek rampe", "SDPRAMPAPRESJEK", "slope", "Uzdužni presjek garažne rampe pored tlocrta; prati izmjene rampe."),
+                      Small("Osvježi saobraćajnice", "SDPCESTEOSVJEZI", "reload", "Ponovo crta kolovoze, ivičnjake, trotoare i oznake (radi se i samo)."))));
+
+            tab.Panels.Add(Panel("Parking",
+                Large("Okomito", "SDPPARKINGOKOMITO", "parking", "Parking mjesta u nizu 2,50 × 5,00 m, s mjestima za osobe s invaliditetom ispred broja 1 (šrafura 1,40 m i rampa za trotoar)."),
                 Stack(Small("Paralelno", "SDPPARKINGPARALELNO", "parking", "Parking mjesta u nizu 5,50 × 2,50 m uz prolaz 3,00 m sa strelicom smjera."),
-                      Small("Pod uglom 45°", "SDPPARKINGUGAO", "parking", "Parking mjesta pod 45°: 3,40 m duž niza, 4,75 m dubine, šrafirani početni trougao, ugao 45° i strelica u prolazu."))));
+                      Small("Pod uglom 45°", "SDPPARKINGUGAO", "parking", "Parking mjesta pod 45°: 3,40 m duž niza, 4,75 m dubine, šrafirani početni trougao i strelica."),
+                      Small("Uz liniju (bilo koji ugao)", "SDPPARKING", "parking", "Bilo koji tip parking mjesta popunjava ivicu prolaza pod zadanim uglom (30–90°), bez oznaka standarda."))));
 
             tab.Panels.Add(Panel("Izmjena",
-                Large("Uredi element", "SDPEDIT", "edit", "Širina, visina i ostali podaci odabranih elemenata. Isto se može i u paleti, kartica Svojstva."),
+                Large("Uredi element", "SDPEDIT", "edit", "Svi podaci odabranih elemenata u jednom prozoru. Isto i desnim klikom na element."),
                 Stack(Small("Odabir", "SDPSELECT", "select", "Odabir svih elemenata iste vrste, kategorije, oznake ili materijala."),
                       Small("Zone sigurnosti", "SDPCLEARANCE", "clearance", "Zone servisa i sigurnosti oko opreme."),
                       Small("Popravi oznake", "SDPAUDIT", "audit", "Nove oznake za kopirane elemente i izvještaj o problemima."))));
@@ -125,23 +127,26 @@ namespace SiteDesignPro.AutoCAD.UI
                 Stack(Small("Oznaka", "SDPLABEL", "label", "Oznake odabranih elemenata."),
                       Small("Numeracija", "SDPNUMBER", "number", "Brojevi elemenata od sjevera prema jugu."),
                       Small("Legenda", "SDPLEGEND", "legend", "Legenda vrsta elemenata.")),
-                Stack(Small("Tabele", "SDPSCHEDULE", "schedule", "Količinske tabele."),
-                      Small("Sastavnica", "SDPTITLEBLOCK", "titleblock", "Okvir lista i sastavnica."),
-                      Small("Izvoz CSV", "SDPSCHEDULECSV", "csv", "Tabele za Excel.")),
-                Large("Prezentacija u boji", "SDPPREZENTACIJA", "decorative", "Plan u boji za investitora: materijali, zelenilo, voda, krošnje i sjene. Ponovni klik osvježava boje.")));
+                Stack(Small("Tabele", "SDPSCHEDULE", "schedule", "Količinske tabele u crtežu."),
+                      Small("Tabele u Excel", "SDPSCHEDULECSV", "csv", "Tabele kao CSV datoteke za Excel."),
+                      Small("Okvir lista", "SDPTITLEBLOCK", "titleblock", "Okvir lista i sastavnica.")),
+                Large("Prezentacija u boji", "SDPPREZENTACIJA", "decorative", "Plan u boji za investitora: materijali, zelenilo, voda, krošnje i sjene.")));
 
-            tab.Panels.Add(Panel("Provjera i izvoz",
+            tab.Panels.Add(Panel("Provjera",
                 Large("Provjeri projekat", "SDPVALIDATE", "validate", "Greške, kolizije, izlazak iz parcele; rezultat u paleti, grupisano."),
-                Large("Izvoz za SketchUp", "SDPEXPORT", "export", "Paket .sdpkg za 3D model u SketchUpu."),
-                Large("Uvoz iz SketchUpa", "SDPUVOZPAKETA", "import", "Otvara prozor za odabir paketa .sdpkg (iz SketchUpa: Izvoz za AutoCAD) i unosi elemente u crtež: novi se dodaju, postojeći zamjenjuju, saobraćajnice se same ponovo nacrtaju."),
-                Stack(Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Datoteka izmjena iz SketchUpa (Izvoz izmjena za AutoCAD), s pregledom prije primjene."),
-                      Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti u komandnoj liniji."),
-                      Small("Prozori / komandna linija", "SDPPROZORI", "settings", "Pitanja naredbi u prozorima (zadano) ili u komandnoj liniji.")),
-                Stack(Small("Urbanistički pokazatelji", "SDPPOKAZATELJI", "area", "Kiz, Kis, zelenilo, vodopropusne površine i parking prema zahtjevima regulacionog plana."),
-                      Small("Prohodnost vozila", "SDPPROHODNOST", "clearance", "Putanja vatrogasnog vozila, kamiona za smeće, dostavnog ili putničkog vozila: krivine i udari u prepreke."))));
+                Stack(Small("Urbanistički pokazatelji", "SDPPOKAZATELJI", "area", "Kiz, Kis, zelenilo, vodopropusne površine i parking prema regulacionom planu."),
+                      Small("Prohodnost vozila", "SDPPROHODNOST", "clearance", "Putanja vatrogasnog, komunalnog, dostavnog ili putničkog vozila."),
+                      Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti elementa."))));
+
+            tab.Panels.Add(Panel("SketchUp",
+                Large("Sinhronizacija", "SDPSINHRONIZACIJA", "export", "Sve razmjene sa SketchUpom na jednom mjestu: pošalji crtež u SketchUp ili preuzmi ono što je urađeno u SketchUpu, s pregledom i verzijama."),
+                Stack(Small("Pošalji u SketchUp", "SDPEXPORT", "export", "Paket (.sdpkg) za 3D model u SketchUpu."),
+                      Small("Preuzmi iz SketchUpa", "SDPUVOZPAKETA", "import", "Paket (.sdpkg) iz SketchUpa (Pošalji u AutoCAD): novi elementi se dodaju, postojeći zamjenjuju."),
+                      Small("Izmjene iz SketchUpa", "SDPAPPLYCHANGES", "apply", "Starija datoteka izmjena (.json) iz SketchUpa, s pregledom prije primjene."))));
 
             tab.Panels.Add(Panel("Pomoć",
-                Large("Pomoć", "SDPPOMOC", "about", "Uputstvo za korištenje na bosanskom jeziku."),
+                Large("Brzi početak", "SDPBRZISTART", "steps", "Prvi projekat za 15 minuta: kratki vodič korak po korak."),
+                Large("Uputstvo", "SDPPOMOC", "about", "Cijelo uputstvo na bosanskom jeziku."),
                 LargeCommands("Napredno", "advanced", "Alati koji se rjeđe koriste: georeferenciranje, teren, kote, posebne oznake, sigurnosne kopije.",
                     Small("Kontrolne tačke (georeferenca)", "SDPGEOREF", "coord", "Georeferenciranje preko kontrolnih tačaka."),
                     Small("Izvoz KML (Google Earth)", "SDPKML", "export", "KML samo za orijentaciju."),
@@ -168,6 +173,7 @@ namespace SiteDesignPro.AutoCAD.UI
                     Small("Sigurnosna kopija", "SDPKOPIJA", "export", "Provjerena kopija sačuvanog crteža."),
                     Small("Postavke kopija", "SDPKOPIJEPOSTAVKE", "settings", "Automatske kopije prije većih operacija."),
                     Small("Oporavak", "SDPOPORAVAK", "apply", "Prekinute operacije i otvaranje kopije."),
+                    Small("Pitanja u prozorima / komandnoj liniji", "SDPPROZORI", "settings", "Prekidač: pitanja naredbi u prozorima (zadano) ili u komandnoj liniji."),
                     Small("O programu", "SDPABOUT", "about", "Verzija, katalog i dnevnik.")),
                 Stack(Label("Vanjsko uređenje PRO"), Label("Autor: " + Author), Label("© 2026"))));
 

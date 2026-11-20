@@ -56,6 +56,69 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         public double K => Settings.Scale.DrawingUnitsPerMeter;
 
+        /// <summary>Commands that draw or change elements: a new error in the project is shown right after them.</summary>
+        private static readonly HashSet<string> Watched = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "SDPPLACE", "SDPDRAW", "SDPEDIT", "SDPCONVERT", "SDPPATHARRAY", "SDPGRID", "SDPPARKING", "SDPPARKINGOKOMITO", "SDPPARKINGPARALELNO",
+            "SDPPARKINGUGAO", "SDPULICA", "SDPULICAUREDI", "SDPKRUZNITOK", "SDPPJESACKIPRIJELAZ", "SDPGARAZNARAMPA", "SDPRAMPAINVALIDI", "SDPKOTACESTE",
+        };
+
+        /// <summary>The errors of each drawing as last seen (code and element), to tell the new ones.</summary>
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Database, HashSet<string>> KnownErrors = new System.Runtime.CompilerServices.ConditionalWeakTable<Database, HashSet<string>>();
+
+        private const int WatchLimit = 1500;
+
+        private static Dictionary<string, string> Errors(CommandContext ctx)
+        {
+            var map = new Dictionary<string, string>(StringComparer.Ordinal);
+            List<SiteElement> elements = ctx.Svc.ReadAll().Where(m => m.Element != null && !m.IsCopy).Select(m => Core.Exchange.PackageWriter.ToPackageFrame(m.Element!, ctx.Settings)).ToList();
+            if (elements.Count > WatchLimit)
+            {
+                return map;
+            }
+
+            Dictionary<string, string> labels = elements.GroupBy(e => e.Id).ToDictionary(g => g.Key, g => g.First().Label ?? g.First().Name, StringComparer.Ordinal);
+            foreach (Core.Validation.ValidationIssue i in new Core.Validation.ProjectValidator(ctx.Catalog, ctx.Settings.Checks).Validate(elements).Issues)
+            {
+                if (i.Severity != Core.Validation.Severity.Error)
+                {
+                    continue;
+                }
+
+                string key = i.Code + "|" + i.ElementId;
+                string who = i.ElementId != null && labels.TryGetValue(i.ElementId, out string? l) ? l + ": " : string.Empty;
+                map[key] = who + i.Message;
+            }
+
+            return map;
+        }
+
+        private static void Baseline(CommandContext ctx)
+        {
+            if (!KnownErrors.TryGetValue(ctx.Db, out _))
+            {
+                KnownErrors.Add(ctx.Db, new HashSet<string>(Errors(ctx).Keys, StringComparer.Ordinal));
+            }
+        }
+
+        private static List<string> NewErrors(CommandContext ctx)
+        {
+            try
+            {
+                Dictionary<string, string> now = Errors(ctx);
+                HashSet<string> known = KnownErrors.GetValue(ctx.Db, _ => new HashSet<string>(StringComparer.Ordinal));
+                List<string> fresh = now.Where(kv => !known.Contains(kv.Key)).Select(kv => kv.Value).ToList();
+                known.Clear();
+                known.UnionWith(now.Keys);
+                return fresh;
+            }
+            catch (System.Exception ex) when (!(ex is CommandCancelled))
+            {
+                Log.Warn("Provjera poslije naredbe nije uspjela: " + ex.Message);
+                return new List<string>();
+            }
+        }
+
         /// <summary>Runs a command body with error handling, logging and transaction management.</summary>
         public static void Run(string name, Action<CommandContext> body) => Run(name, null, body);
 
@@ -89,9 +152,21 @@ namespace SiteDesignPro.AutoCAD.Commands
                     journalId = SafetyHost.Begin(majorOperation, doc.Database, backup);
                 }
 
+                bool watch = Watched.Contains(name) && UseDialogs;
+                if (watch)
+                {
+                    Baseline(ctx);
+                }
+
                 body(ctx);
+                List<string> fresh = watch ? NewErrors(ctx) : new List<string>();
                 ctx.Commit();
                 SafetyHost.End(journalId, Core.Safety.JournalState.Completed);
+                if (fresh.Count > 0)
+                {
+                    UI.InfoDialog.Present("Provjera", fresh.Count == 1 ? "Ova izmjena je napravila grešku u projektu" : "Ova izmjena je napravila " + fresh.Count + " greške u projektu",
+                        Array.Empty<(string, string)>(), new[] { "Ispravite odmah ili poništite izmjenu (U). Sve greške: Provjera → Provjeri projekat." }, fresh.Take(6));
+                }
             }
             catch (CommandCancelled)
             {

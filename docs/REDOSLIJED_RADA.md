@@ -50,7 +50,7 @@ dijela B ovdje se **ne rade**; to je urađeno pri pretvaranju.
 | # | Gdje kliknuti | Šta uraditi / odgovoriti |
 |---|---|---|
 | A1 | AutoCAD: **File → New** | Prazan crtež (šablon `acadiso.dwt`). Ne uvozite u crtež koji već ima elemente drugog projekta. |
-| A2 | Ploča **SketchUp razmjena** → **Uvoz paketa** (`SDPUVOZPAKETA`) | Odaberite `situacija-vanjsko-uredjenje.sdpkg`. |
+| A2 | Panel **SketchUp** → **Preuzmi iz SketchUpa** (`SDPUVOZPAKETA`) | Odaberite `situacija-vanjsko-uredjenje.sdpkg`. |
 | A3 | Pitanje *INSUNITS … Postaviti INSUNITS na cm?* | **Da** |
 | A4 | Kucajte `ZOOM` → `E` | Vidi se cijela situacija. |
 | A5 | **File → Save As** | Snimite kao DWG, npr. `Situacija_VU.dwg`. **To je vaš projekat.** |
@@ -92,7 +92,7 @@ dijela B ovdje se **ne rade**; to je urađeno pri pretvaranju.
 | B11 | **Nacrti i oznake** → **Numeracija** (`SDPNUMBER`) → **Oznaka** (`SDPLABEL`) → **Legenda** (`SDPLEGEND`) | Za nacrte: prvo numeracija, pa oznake, pa legenda. | za nacrte |
 | B12 | **Provjera projekta** → **Provjeri projekat** (`SDPVALIDATE`) | Ispravite **GREŠKE**. Upozorenja pročitajte. Provjere su pomoć softvera, ne potvrda usklađenosti s propisima. | **da** |
 | B13 | **Količinski obračun** → **Tabele** (`SDPSCHEDULE`) / **Izvoz CSV** (`SDPSCHEDULECSV`) | Količine za predmjer. | po potrebi |
-| B14 | **SketchUp razmjena** → **Izvoz paketa** (`SDPEXPORT`) | Snimite `.sdpkg` (npr. pored DWG-a). | **da – za 3D** |
+| B14 | **SketchUp** → **Pošalji u SketchUp** (`SDPEXPORT`) | Snimite `.sdpkg` (npr. pored DWG-a). | **da – za 3D** |
 
 ---
 
@@ -101,7 +101,7 @@ dijela B ovdje se **ne rade**; to je urađeno pri pretvaranju.
 | # | Gdje kliknuti | Šta uraditi |
 |---|---|---|
 | C1 | **File → New** (šablon u metrima) | Novi model. Paket u isti model uvozite i kad ga kasnije osvježavate. |
-| C2 | **Extensions → Vanjsko uređenje PRO → Uvoz paketa...** (prvo dugme na traci) | Odaberite `.sdpkg`. Dijalog prvo pokazuje **provjeru paketa**. |
+| C2 | **Extensions → Vanjsko uređenje PRO → Preuzmi iz AutoCAD-a...** (prvo dugme na traci) | Odaberite `.sdpkg`. Dijalog prvo pokazuje **provjeru paketa**. |
 | C3 | U dijalogu: **nivo detalja** | Za rad **Standardni kvalitet**; za slike **Visoki kvalitet** (sporije, teži model). |
 | C4 | U dijalogu: **Primijeni** | Model se gradi. Izvještaj: **Izvještaj posljednjeg uvoza**. |
 | C5 | **Izrada scena za pregled** (dugme na traci) | Gotove scene: tlocrt, ptičja perspektiva … |
@@ -113,11 +113,11 @@ dijela B ovdje se **ne rade**; to je urađeno pri pretvaranju.
 ## D. Kad se projekat promijeni (uvijek ovim redom)
 
 1. **Izmjena u AutoCAD-u** (najčešće): izmijenite element (gripovi ili **Uredi element**) →
-   **Provjeri projekat** → **Izvoz paketa** u **istu** datoteku → u SketchUpu ponovo **Uvoz paketa...** u isti
+   **Provjeri projekat** → **Pošalji u SketchUp** u **istu** datoteku → u SketchUpu ponovo **Preuzmi iz AutoCAD-a...** u isti
    model. Mijenjaju se samo izmijenjeni elementi.
 2. **Izmjena u SketchUpu:** u SketchUpu izmjene u **Svojstva elementa** → zatim **Izvoz izmjena za AutoCAD...** → u AutoCAD-u
-   **SketchUp razmjena** → **Primijeni izmjene** (`SDPAPPLYCHANGES`) → zatim ponovo **Izvoz paketa**.
-3. **Paket napravljen drugdje** (npr. pretvoren iz drugog DWG-a): **Uvoz paketa** (`SDPUVOZPAKETA`) u prazan crtež
+   **SketchUp** → **Izmjene iz SketchUpa** (`SDPAPPLYCHANGES`) → zatim ponovo **Pošalji u SketchUp**.
+3. **Paket napravljen drugdje** (npr. pretvoren iz drugog DWG-a): **Preuzmi iz SketchUpa** (`SDPUVOZPAKETA`) u prazan crtež
    (dio A).
 
 ---

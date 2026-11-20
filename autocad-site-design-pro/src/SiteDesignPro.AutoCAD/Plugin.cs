@@ -48,6 +48,7 @@ namespace SiteDesignPro.AutoCAD
                     ComponentManager.ItemInitialized += OnItemInitialized;
                 }
 
+                Log.Guard("Meni desnog klika", ElementContextMenu.Attach);
                 AcApp.SystemVariableChanged += OnSystemVariableChanged;
                 AcApp.Idle += OnIdle;
                 AcApp.Idle += RoadWatcher.OnIdle;
@@ -57,7 +58,7 @@ namespace SiteDesignPro.AutoCAD
                     Hook(doc);
                 }
 
-                AcadEnv.Message("Vanjsko uređenje PRO " + AcadEnv.Version + " je učitano: kartica VANJSKO UREĐENJE PRO na traci, paleta SDPBROWSER. Početak: SDPNEW ili SDPSAMPLE, pomoć: SDPPOMOC.");
+                AcadEnv.Message("Vanjsko uređenje PRO " + AcadEnv.Version + " je učitano – kartica VANJSKO UREĐENJE PRO. Prvi put: Pomoć → Brzi početak.");
                 SafetyCommands.ReportInterrupted();
             }
             catch (System.Exception ex)

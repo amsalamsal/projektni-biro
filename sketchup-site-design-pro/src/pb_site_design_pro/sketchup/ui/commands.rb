@@ -19,6 +19,7 @@ module ProjektniBiro
         return unless path
 
         Settings.set('lastFolder', File.dirname(path))
+        Sync.remember('syncReceived', path)
         Dialogs.import(path)
       end
 
@@ -155,11 +156,12 @@ module ProjektniBiro
 
       def install
         cmds = {
-          import: command('Uvoz paketa...', 'Uvoz paketa iz AutoCAD-a (.sdpkg ili manifest.json) s pregledom prije primjene.', 'import') { import_package },
-          update: command('Ažuriranje iz paketa', 'Ponovni uvoz posljednjeg paketa: prikazuje nove, izmijenjene, obrisane i konfliktne elemente prije primjene.', 'update') { update_from_last },
+          sync: command('Sinhronizacija s AutoCAD-om...', 'Sve razmjene s AutoCAD-om na jednom mjestu: preuzmi paket iz AutoCAD-a ili pošalji ono što je urađeno ovdje.', 'update') { Sync.open(model) },
+          import: command('Preuzmi iz AutoCAD-a...', 'Paket iz AutoCAD-a (.sdpkg ili manifest.json) s pregledom prije primjene; ulice i ceste postaju izmjenjive ovdje.', 'import') { import_package },
+          update: command('Ponovo preuzmi zadnji paket', 'Ponovni uvoz posljednjeg paketa: prikazuje nove, izmijenjene, obrisane i konfliktne elemente prije primjene.', 'update') { update_from_last },
           properties: command('Svojstva elementa', 'Prikaz i izmjena parametara odabranog elementa.', 'properties') { element_properties },
-          package: command('Izvoz za AutoCAD (.sdpkg)...', 'Svi elementi iz biblioteke i saobraćajnice u jednom paketu za AutoCAD (Uvoz paketa, SDPUVOZPAKETA): novi se dodaju, izmijenjeni zamjenjuju.', 'export') { Roads::Commands.export_to_autocad },
-          export: command('Izvoz izmjena za AutoCAD...', 'Zapisuje izmijenjene parametre i pomjerene/zarotirane tačkaste elemente za naredbu SDPAPPLYCHANGES.', 'export') { export_changes },
+          package: command('Pošalji u AutoCAD...', 'Saobraćajnice i svi elementi iz biblioteke u jednom paketu za AutoCAD (Sinhronizacija → Preuzmi iz SketchUpa): novi se dodaju, izmijenjeni zamjenjuju.', 'export') { Roads::Commands.export_to_autocad },
+          export: command('Pošalji samo izmjene parametara (stari način)...', 'Zapisuje izmijenjene parametre i pomjerene/zarotirane tačkaste elemente za naredbu SDPAPPLYCHANGES.', 'export') { export_changes },
           scenes: command('Izrada scena za pregled', 'Izrada ili osvježavanje scena (situacija, 3D pregled, zelenilo, rasvjeta, podzemno ...).', 'scenes') { create_scenes },
           underground: command('Prikaz podzemnog', 'Sakriva površine i prikazuje ukopane instalacije u X-ray prikazu.', 'underground') { toggle_underground },
           models: command('Biblioteka 3D modela...', 'Pregled, umetanje i zamjena 3D modela iz lokalne biblioteke (14 kategorija, bez interneta).', 'models') { Dialogs.models },
@@ -169,26 +171,27 @@ module ProjektniBiro
         }
         cmds[:properties].set_validation_proc { selected_element ? MF_ENABLED : MF_GRAYED }
 
+        # one menu: exchange with AutoCAD, elements, roads, views, advanced
         menu = UI.menu('Extensions').add_submenu('Vanjsko uređenje PRO')
-        %i[import update].each { |k| menu.add_item(cmds[k]) }
+        %i[sync import package].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
-        %i[properties package export].each { |k| menu.add_item(cmds[k]) }
-        menu.add_separator
-        %i[scenes underground].each { |k| menu.add_item(cmds[k]) }
-        menu.add_separator
-        %i[models library report recovery].each { |k| menu.add_item(cmds[k]) }
+        %i[properties models].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
         begin
           Roads::Commands.install(menu)
         rescue StandardError => e
           Log.error('Alati za saobraćajnice se nisu pokrenuli', e)
         end
+        %i[scenes underground].each { |k| menu.add_item(cmds[k]) }
         menu.add_separator
-        menu.add_item('Otvori dnevnik (log)') { open_log }
+        adv = menu.add_submenu('Napredno')
+        %i[update export library report recovery].each { |k| adv.add_item(cmds[k]) }
+        adv.add_separator
+        adv.add_item('Otvori dnevnik (log)') { open_log }
         menu.add_item('O programu Vanjsko uređenje PRO') { about }
 
         tb = UI::Toolbar.new('Vanjsko uređenje PRO')
-        %i[import update properties export scenes underground models library report].each { |k| tb.add_item(cmds[k]) }
+        %i[sync import package properties models scenes underground library report].each { |k| tb.add_item(cmds[k]) }
         # restore keeps the user's choice; a toolbar never shown before (first install) is shown explicitly
         tb.get_last_state == TB_NEVER_SHOWN ? tb.show : tb.restore
 

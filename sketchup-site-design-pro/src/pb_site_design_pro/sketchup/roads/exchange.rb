@@ -98,6 +98,17 @@ module ProjektniBiro
         # ---- taking over the roads of an imported AutoCAD project
 
         # AutoCAD projects imported into the model whose roads can be taken over: [[root group, number of roads]].
+        # Take the roads of an AutoCAD package over right after its import: the setting is on (default), the road
+        # engine is there to build them, the package is AutoCAD's (not the road tools') and not of a linked project.
+        def auto_adopt?(model, package)
+          return false if Settings.get('autoAdoptRoads') == false || engine_package?(package) || linked?(model, package)
+          return false unless Rebuild.engine(model.get_attribute(SourceStore::SETTINGS, 'projectId', nil) || 'x').available?
+
+          package.elements.any? { |e| source_element?(e.type_id, e.custom) }
+        rescue StandardError
+          false
+        end
+
         def candidates(model)
           own = model.get_attribute(SourceStore::SETTINGS, 'projectId', nil)
           roots = model.entities.grep(Sketchup::Group).select do |g|
@@ -185,6 +196,7 @@ module ProjektniBiro
           records.each { |r| r.ref.set_attribute(SourceStore::DICT, IN_AUTOCAD, true) if r.ref && r.ref.valid? }
           remember_known(model, sent)
           model.commit_operation
+          result['notes'] = (result['notes'] || []) + shape_notes(model, others.map(&:id))
           result
         end
 
@@ -254,6 +266,22 @@ module ProjektniBiro
 
             element_record(e, to_project * world(e))
           end.compact
+        end
+
+        # Surfaces and lines whose shape was edited by hand here: only their move and parameters reach AutoCAD.
+        def shape_notes(model, ids)
+          ModelIndex.managed_entities(model).map do |e|
+            next unless ids.include?(e.get_attribute(DICT, 'id')) && e.get_attribute(DICT, 'geometry')
+
+            stored = e.get_attribute(DICT, 'fingerprint')
+            next if stored.nil? || ModelIndex.fingerprint(e) == stored
+
+            name = e.get_attribute(DICT, 'label').to_s
+            name = e.get_attribute(DICT, 'name').to_s if name.empty?
+            "Oblik elementa #{name} je ručno mijenjan u SketchUpu: u AutoCAD idu samo pomjeranje i parametri, oblik promijenite u AutoCAD-u."
+          end.compact.uniq
+        rescue StandardError
+          []
         end
 
         # Transformation of an entity to the model.

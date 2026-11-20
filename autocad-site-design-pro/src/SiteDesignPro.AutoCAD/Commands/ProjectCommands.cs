@@ -341,10 +341,46 @@ namespace SiteDesignPro.AutoCAD.Commands
         });
 
         /// <summary>Builds the sample project: managed elements and/or the synthetic source drawing for the input workflow.</summary>
+        /// <summary>One example of every main tool, around the origin of the drawing (metres scaled to the drawing unit).</summary>
+        private static void ToolExamplesInto(CommandContext ctx)
+        {
+            if (ProjectStore.Read(ctx.Db, ctx.Tr) == null && ctx.ExistingElements().Count == 0)
+            {
+                ctx.Settings.DrawingUnit = "cm";
+                ctx.Db.Insunits = UnitsValue.Centimeters;
+                ctx.SaveSettings();
+            }
+
+            ctx.Svc.Layers.EnsureAll(false);
+            double k = ctx.K;
+            List<SiteElement> existing = ctx.ExistingElements();
+            int n = 0;
+            foreach (SiteElement e in ToolExamples.Create(ctx.Catalog))
+            {
+                e.Geometry = e.Geometry.Transform(v => new Vec3(v.X * k, v.Y * k, v.Z * k));
+                SiteElement placed = ctx.NewElement(ctx.Catalog.RequireType(e.TypeId), e.Geometry, existing);
+                placed.Parameters = e.Parameters;
+                placed.Name = e.Name;
+                ctx.Svc.Create(placed);
+                existing.Add(placed);
+                n++;
+            }
+
+            RoadCommands.RebuildNow(ctx);
+            ctx.Write(Bs.T("Primjeri alata: {0} elemenata (ulica s raskrsnicom, kružni tok, garažna rampa, parking okomito/paralelno/45°, pješački prijelaz, drvored). Zumirajte cijeli crtež (ZOOM, Extents) i probajte desni klik → Uredi element.", n));
+        }
+
         [CommandMethod("SITEDESIGNPRO", "SDPSAMPLE", CommandFlags.Modal)]
         public void Sample() => CommandContext.RunMajor("SDPSAMPLE", "Primjer projekta", ctx =>
         {
-            string what = ctx.Keyword("Primjer [Elementi/Izvorni/Oba] (Izvorni = ulazni DWG za mapiranje, provjeru, kote i teren)", new[] { "Elementi", "Izvorni", "Oba" }, "Oba");
+            string what = ctx.Ask(new Form("Primjer projekta", "primjer", "Primjer za učenje. Najbolje u novom, praznom crtežu.")
+                .Choice("what", "Šta nacrtati", new[] { "Alati|Primjeri alata (ulica, kružni tok, rampa, parking, prijelaz, drvored)", "Oba|Cijelo naselje s ulaznim DWG-om", "Elementi|Cijelo naselje (samo elementi)", "Izvorni|Samo ulazni DWG (za mapiranje, kote i teren)" }, "Alati")).Choice("what");
+            if (what == "Alati")
+            {
+                ToolExamplesInto(ctx);
+                return;
+            }
+
             if (ctx.ExistingElements().Count > 0 && what != "Izvorni" &&
                 ctx.Keyword("Crtež već sadrži elemente Vanjsko uređenje PRO. Ipak dodati primjer? [Da/Ne]", new[] { "Da", "Ne" }, "Ne") == "Ne")
             {

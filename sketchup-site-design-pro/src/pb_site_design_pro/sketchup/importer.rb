@@ -46,6 +46,7 @@ module ProjektniBiro
         plan! unless @plan
         @set_north = set_north
         @report = Report.new('Vanjsko uređenje PRO – izvještaj uvoza')
+        version_note
         @report.package_path = @path
         @report.merge!(@read_report)
         started = Time.now
@@ -61,6 +62,7 @@ module ProjektniBiro
           @model.commit_operation if operation
           journal.end_operation(op_id, 'Completed', @plan.summary) if journal
           import_roads if @road_items && operation
+          adopt_roads if @road_items.nil? && operation && defined?(Roads::Exchange) && Roads::Exchange.auto_adopt?(@model, @package)
         rescue StandardError => e
           raise unless operation
 
@@ -86,13 +88,39 @@ module ProjektniBiro
         stats, outcome = Roads::Exchange.after_import(@model, @package, @road_items)
         @road_outcome = outcome
         @report.add(:info, 'SDP-S001', nil, "Saobraćajnice iz AutoCAD-a preuzete u alate Saobraćajnice: #{Roads::Exchange.stats_text(stats)}.",
-                    'Uređuju se alatima Saobraćajnice; nazad u AutoCAD: Saobraćajnice > Izvoz saobraćajnica za AutoCAD.')
+                    'Uređuju se alatima Saobraćajnice; nazad u AutoCAD: Pošalji u AutoCAD.')
         unless outcome
           @report.add(:warning, 'SDP-S002', nil, 'Saobraćajnice nisu izgrađene (motor saobraćajnica).', 'Saobraćajnice > Osvježi saobraćajnice.')
         end
       rescue StandardError => e
         Log.error('Saobraćajnice iz AutoCAD-a nisu preuzete', e)
         @report.add(:warning, 'SDP-S003', nil, "Saobraćajnice iz AutoCAD-a nisu preuzete: #{e.message}", 'Pogledajte dnevnik (log).')
+      end
+
+      # AutoCAD and SketchUp should run the same version of the add-ins (major.minor).
+      def version_note
+        other = (@package.generator || {})['version'].to_s
+        mm = ->(v) { v.split(/[.\-+]/).first(2).join('.') }
+        return if other.empty? || other == '0.0.0' || mm.call(other) == mm.call(VERSION)
+
+        @report.add(:warning, 'SDP-V001', nil, "Paket je napravila druga verzija dodatka (#{other}, ovdje #{VERSION}).",
+                    'Instalirajte istu verziju u AutoCAD i SketchUp (INSTALIRAJ_SVE.bat iz zipa).')
+      end
+
+      # The streets and roads of an AutoCAD project imported for the first time become source elements of the road
+      # tools at once (editable here, sent back with Pošalji u AutoCAD); their 3D is built by the road engine.
+      def adopt_roads
+        root = Roads::Exchange.candidates(@model).map(&:first).find { |r| r.get_attribute('SiteDesignPro', 'projectId') == @package.project_id }
+        return unless root
+
+        stats, outcome = Roads::Exchange.adopt(@model, root)
+        @road_outcome = outcome
+        @report.add(:info, 'SDP-S004', nil, "Ulice i ceste iz AutoCAD-a su preuzete u alate Saobraćajnice: #{Roads::Exchange.stats_text(stats)}.",
+                    'Uređuju se ovdje (Saobraćajnice > Uredi ulicu); u AutoCAD se vraćaju s Pošalji u AutoCAD.')
+        @report.add(:warning, 'SDP-S002', nil, 'Saobraćajnice nisu izgrađene (motor saobraćajnica).', 'Saobraćajnice > Osvježi saobraćajnice.') unless outcome
+      rescue StandardError => e
+        Log.error('Saobraćajnice iz AutoCAD-a nisu preuzete', e)
+        @report.add(:warning, 'SDP-S003', nil, "Saobraćajnice iz AutoCAD-a nisu preuzete: #{e.message}", 'Saobraćajnice > Preuzmi saobraćajnice iz AutoCAD-a.')
       end
 
       # Backup of the model before the import. A saved model is copied (Model#save_copy keeps unsaved changes

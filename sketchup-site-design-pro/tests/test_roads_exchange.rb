@@ -141,11 +141,23 @@ class TestRoadsExchange < Minitest::Test
     m['project']['id'] = AUTOCAD_PROJECT
     File.write(manifest, JSON.generate(m))
 
+    # first the import without taking the roads over (as before), then the automatic takeover in another model
+    c = Sketchup::Model.new
+    Sketchup.active_model = c
+    auto = Importer.new(c, folder)
+    auto.plan!
+    rep_auto = auto.apply!(create_scenes: false, backup: false, set_north: false)
+    assert(rep_auto.issues.any? { |i| i.code == 'SDP-S004' }, rep_auto.to_text)
+    assert_empty X.candidates(c), 'the roads of AutoCAD are taken over on import'
+    assert_equal %w[U-001 U-002], R::SourceStore.new(c).records.select { |r| r.type == R::STREET }.map(&:label).sort
+
+    Settings.set('autoAdoptRoads', false)
     b = Sketchup::Model.new
     Sketchup.active_model = b
     imp = Importer.new(b, folder)
     imp.plan!
     imp.apply!(create_scenes: false, backup: false, set_north: false)
+    Settings.set('autoAdoptRoads', true)
     assert_nil imp.road_items, 'not linked yet: an ordinary import'
     roots = X.candidates(b)
     assert_equal 1, roots.length

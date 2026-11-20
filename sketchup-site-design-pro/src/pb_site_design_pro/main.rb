@@ -24,6 +24,7 @@ require File.join(__dir__, 'core')
   sketchup/roads/forms
   sketchup/roads/commands
   sketchup/ui/dialogs
+  sketchup/ui/sync
   sketchup/ui/commands
 ].each { |f| require File.join(__dir__, f) }
 

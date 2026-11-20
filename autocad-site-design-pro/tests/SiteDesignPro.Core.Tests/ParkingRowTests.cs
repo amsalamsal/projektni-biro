@@ -100,6 +100,20 @@ namespace SiteDesignPro.Core.Tests
             }
         }
 
+        [Fact]
+        public void ToolExamples_EveryMainToolOnce_RampWithinTheMinimums_NetworkBuilds()
+        {
+            List<SiteElement> all = Samples.ToolExamples.Create(TestSupport.Catalog);
+            Assert.Equal(2, all.Count(e => e.TypeId == Roads.RoadElements.StreetType));
+            Assert.Contains(all, e => e.TypeId == Roads.GarageRamp.Type);
+            Assert.Contains(all, e => e.TypeId == Roads.RoadElements.CrossingType);
+            Assert.True(all.Count(e => e.TypeId.StartsWith("road.parking_bay", StringComparison.Ordinal)) == 15);
+            Assert.Contains(all, e => e.TypeId == "road.arrow");
+            Assert.Contains(all, e => e.TypeId == "landscape.tree_deciduous");
+            Assert.All(all, e => Assert.Empty(Validation.RampMinimums.Check(e, TestSupport.Catalog)));
+            Assert.NotEmpty(Roads.RoadElements.Derived(all, TestSupport.Catalog));
+        }
+
         private static void Bounds(SymbolDrawing s, out double minY, out double maxY)
         {
             Box2 b = s.Bounds();

@@ -106,14 +106,16 @@ imaju padajuće liste svih vrsta elemenata po podkategorijama i dugme *Pregled*,
 * Količine: `SDPSCHEDULE` (AutoCAD tabele), `SDPSCHEDULECSV` (CSV sa separatorom `;` i JSON), `SDPQUANTITIES`.
   Količine izmjerene iz geometrije su odvojene od procijenjenih, koje su označene znakom `~`.
 
-### 8. Provjera i izvoz
+### 8. Provjera i SketchUp
 * `SDPVALIDATE` – geometrija, podaci, kolizije, preklapanja, razmaci, stavke za reviziju i provjere lokacije:
   * `SDP-C020` – element izvan parcele;
   * `SDP-E010` – saobraćajnica iznad partera;
   * `SDP-E011` – dodijeljena kota bez datuma;
   * `SDP-E012` – objekat pomjeren nakon dodjele kote.
-* `SDPEXPORT` – zapisuje paket `.sdpkg` (shema 1.1.0) s elementima, kotama, georeferencom i terenom (`terrain.json`).
-* `SDPUVOZPAKETA` – učitava gotov paket `.sdpkg` u crtež kao uredive elemente (u prazan crtež s jedinicom, ishodištem i kotom ±0,00 iz paketa).
+* **SketchUp → Sinhronizacija** (`SDPSINHRONIZACIJA`) – sve razmjene sa SketchUpom u jednom prozoru: zadnje poslano i
+  preuzeto, verzija, *Pošalji u SketchUp* i *Preuzmi iz SketchUpa* (poslije preuzimanja sažetak u prozoru).
+* `SDPEXPORT` (*Pošalji u SketchUp*) – zapisuje paket `.sdpkg` (shema 1.1.0) s elementima, kotama, georeferencom i terenom (`terrain.json`).
+* `SDPUVOZPAKETA` (*Preuzmi iz SketchUpa*) – učitava gotov paket `.sdpkg` u crtež kao uredive elemente (u prazan crtež s jedinicom, ishodištem i kotom ±0,00 iz paketa).
 * `SDPAPPLYCHANGES` – primjena izmjena iz SketchUpa s pregledom. Elementi koje ste u međuvremenu mijenjali u
   AutoCAD-u preskaču se ako ne odaberete prepisivanje.
 
@@ -122,10 +124,13 @@ Meni *Extensions → Vanjsko uređenje PRO*:
 
 | Stavka | Namjena |
 |---|---|
-| Uvoz paketa... | Čita `.sdpkg` ili `manifest.json`, prikazuje pregled, nudi izbor nivoa detalja i pravila, pa gradi model |
-| Ažuriranje iz paketa | Ponovni uvoz zadnjeg paketa s pregledom: novo, izmijenjeno, obrisano, lokalno mijenjano, konflikti |
+| Sinhronizacija s AutoCAD-om... | Sve razmjene na jednom mjestu: zadnje preuzeto i poslano, verzija, *Preuzmi iz AutoCAD-a* i *Pošalji u AutoCAD* |
+| Preuzmi iz AutoCAD-a... | Čita `.sdpkg` ili `manifest.json`, prikazuje pregled, pa gradi model; ulice i ceste odmah postaju izmjenjive alatima Saobraćajnice |
+| Pošalji u AutoCAD... | Saobraćajnice i svi elementi iz biblioteke (gdje su sada, s izmijenjenim parametrima) kao paket za AutoCAD |
 | Svojstva elementa | Parametri odabranog elementa; element se ponovo gradi |
-| Izvoz izmjena za AutoCAD... | Izmijenjeni parametri i pomjereni ili zarotirani tačkasti elementi, za `SDPAPPLYCHANGES` |
+| Biblioteka 3D modela... | Pregled, umetanje i zamjena modela |
+| Saobraćajnice ▸ | Ulica, kružni tok, prijelaz, kote, rampe, … |
+| Napredno ▸ | Ponovo preuzmi zadnji paket, Pošalji samo izmjene parametara (stari način, za `SDPAPPLYCHANGES`), biblioteka i postavke, izvještaj, kopije, dnevnik |
 | Izrada scena za pregled | Scene od „VU 01 Situacija“ do „VU 10 Prezentacija“ |
 | Prikaz podzemnog | Skriva površine i prikazuje ukopane instalacije |
 | Biblioteka i postavke... | Vrste, dodjela vlastitih komponenti (.skp) vrstama, materijali, nivo detalja, pravila ažuriranja |
@@ -197,17 +202,17 @@ Garažna rampa je na **prvom i zadnjem metru ravna** (bez poprečnog pada, u rav
 3 % počinje tek nakon 1 m i raste na punu vrijednost na sljedeća 2 m.
 
 #### Saobraćajnice u oba smjera (SketchUp ⇄ AutoCAD)
-* **SketchUp → AutoCAD:** *Saobraćajnice → Izvoz saobraćajnica za AutoCAD…* snima ulice, ceste, kružne tokove,
+* **SketchUp → AutoCAD:** *Vanjsko uređenje PRO → Pošalji u AutoCAD…* snima ulice, ceste, kružne tokove,
   prijelaze, kote, rampe za invalide, garažne rampe i presjeke (osovine i sve postavke, ne 3D) u `.sdpkg`. U
   AutoCAD-u `SDPUVOZPAKETA`: postojeći elementi se zamjenjuju (isti id), novi dodaju, generisani dijelovi (kolovoz,
   trotoari, oznake) se preskaču i AutoCAD odmah ponovo crta mrežu ulica. Ulice obrisane u SketchUpu program nudi
   obrisati i u crtežu (pitanje Da/Ne). Visine osovina dolaze kao kote saobraćajnice.
-* **Svi elementi iz biblioteke:** isti *Izvoz za AutoCAD (.sdpkg)…* (glavni meni Vanjsko uređenje PRO) nosi i sve
+* **Svi elementi iz biblioteke:** isti *Pošalji u AutoCAD…* (meni Vanjsko uređenje PRO) nosi i sve
   ostale elemente – one postavljene u SketchUpu iz biblioteke i one iz AutoCAD projekta, na mjestu gdje su sada i s
-  parametrima izmijenjenim u SketchUpu. U AutoCAD-u: dugme *Uvoz iz SketchUpa* (kartica, panel Provjera i izvoz) otvara prozor za odabir datoteke.
+  parametrima izmijenjenim u SketchUpu. U AutoCAD-u: dugme *SketchUp → Sinhronizacija → Preuzmi iz SketchUpa* otvara prozor za odabir datoteke.
 * **AutoCAD → SketchUp:** nakon uvoza AutoCAD paketa, *Saobraćajnice → Preuzmi saobraćajnice iz AutoCAD-a* pretvara
   ulice tog projekta u osovine alata Saobraćajnice (uređuju se ovdje; 3D gradi motor). Od tada je projekat
-  **povezan**: svaki naredni *Uvoz paketa* iz AutoCAD-a prenosi izmjene ulica (nove, izmijenjene, obrisane) u
+  **povezan**: svaki naredni *Preuzmi iz AutoCAD-a* prenosi izmjene ulica (nove, izmijenjene, obrisane) u
   osovine i ponovo gradi saobraćajnice, a izvoz iz SketchUpa ide pod id-em AutoCAD projekta.
 * **Koordinate:** paket je u koordinatama AutoCAD projekta (ishodište / državne koordinate se prenose preko
   korijenske grupe uvezenog projekta). Model napravljen uvozom iz AutoCAD-a se zato poklapa sam; ulice nacrtane u

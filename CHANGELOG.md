@@ -2,6 +2,27 @@
 
 ## Neobjavljeno
 
+### Verzija 0.3.0 – lakše korištenje (20.11.)
+* **AutoCAD ribbon** složen po redoslijedu rada, bez duplikata: Projekat, Elementi, Saobraćajnice, Parking,
+  Izmjena, Dokumentacija, Provjera, SketchUp, Pomoć (rijetki alati u Napredno). Glavni alat svakog panela je veliko
+  dugme, ostalo po tri u koloni.
+* **Sinhronizacija sa SketchUpom** jednim dugmetom u oba programa: zadnje poslano i preuzeto, verzija, *Pošalji* i
+  *Preuzmi*. Poslije preuzimanja u AutoCAD-u sažetak u prozoru (novi, zamijenjeni, preskočeni, obrisani); u
+  SketchUpu rezultat slanja u prozoru koji se može kopirati.
+* SketchUp: ulice i ceste iz AutoCAD-a se pri preuzimanju **odmah** prebacuju u alate Saobraćajnice (bez posebne
+  naredbe); upozorenje kad je oblik površine ručno mijenjan (u AutoCAD idu pomjeranje i parametri); jedan meni
+  (Sinhronizacija, Preuzmi, Pošalji, Svojstva, Biblioteka, Saobraćajnice, Scene, Napredno).
+* Upozorenje kad AutoCAD i SketchUp dodatak nisu iste verzije.
+* **Desni klik** na element: Uredi element, Uredi ulicu, Oznaka.
+* **Nova greška se javlja odmah** poslije naredbe koja crta ili mijenja elemente (kolizija, izlazak iz parcele …).
+* Prozori s pitanjima imaju dugme **Zadane vrijednosti**.
+* **Primjeri alata** (Projekat → Primjer projekta): ulica s raskrsnicom, kružni tok, garažna rampa, parking
+  okomito/paralelno/45°, pješački prijelaz, drvored.
+* **Brzi početak** (Pomoć): prvi projekat za 15 minuta.
+* **INSTALIRAJ_SVE.bat**: AutoCAD i SketchUp dodatak jednim klikom.
+* Ujednačeni nazivi: *Pošalji u SketchUp / Preuzmi iz SketchUpa* (AutoCAD) i *Pošalji u AutoCAD / Preuzmi iz
+  AutoCAD-a* (SketchUp).
+
 ### Ispravka: uvoz iz SketchUpa javljao „obrisane“ elemente koji nisu obrisani (20.11.)
 * AutoCAD je smatrao obrisanim svaki saobraćajni element kojeg nije bilo u paketu (npr. ulice iz AutoCAD-a koje
   nisu preuzete u alate Saobraćajnice, ili kote koje su u SketchUpu postale visina osovine). Sada SketchUp u paketu

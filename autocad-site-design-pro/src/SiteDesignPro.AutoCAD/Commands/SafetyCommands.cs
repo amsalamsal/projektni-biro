@@ -139,11 +139,17 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         /// <summary>Opens the Bosnian user documentation.</summary>
         [CommandMethod("SITEDESIGNPRO", "SDPPOMOC", CommandFlags.Modal)]
-        public void Help()
+        public void Help() => OpenDoc("SDPPOMOC", "index.html");
+
+        /// <summary>The short guide: the first project in 15 minutes.</summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPBRZISTART", CommandFlags.Modal)]
+        public void QuickStart() => OpenDoc("SDPBRZISTART", "brzi-start.html");
+
+        private static void OpenDoc(string command, string page)
         {
-            CommandContext.Safe("SDPPOMOC", () =>
+            CommandContext.Safe(command, () =>
             {
-                string docs = Path.GetFullPath(Path.Combine(AcadEnv.PluginDirectory, "..", "..", "Docs", "index.html"));
+                string docs = Path.GetFullPath(Path.Combine(AcadEnv.PluginDirectory, "..", "..", "Docs", page));
                 if (!File.Exists(docs))
                 {
                     AcadEnv.Message("Dokumentacija nije pronađena (" + docs + "). Pogledajte folder docs/ u izvornom paketu.");

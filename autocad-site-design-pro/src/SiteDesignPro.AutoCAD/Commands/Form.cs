@@ -75,12 +75,23 @@ namespace SiteDesignPro.AutoCAD.Commands
 
         public FormField Field(string key) => Fields.First(f => f.Key == key);
 
+        /// <summary>The values given in the code, before the remembered answers were taken (button "Zadane vrijednosti").</summary>
+        public Dictionary<string, object> Defaults { get; } = new Dictionary<string, object>(StringComparer.Ordinal);
+
+        /// <summary>True when some field starts from a remembered answer that differs from the code's value.</summary>
+        public bool Recalled => Fields.Any(f => f.Kind != FieldKind.Header && Defaults.TryGetValue(f.Key, out object? d) && f.Format(d) != f.Format());
+
         /// <summary>The current values of all fields.</summary>
         public FormValues Values() => new FormValues(Fields.Where(f => f.Kind != FieldKind.Header).ToDictionary(f => f.Key, f => f.Value, StringComparer.Ordinal));
 
         /// <summary>Takes the remembered answers of an earlier use as the starting values.</summary>
         public void Recall()
         {
+            foreach (FormField f in Fields.Where(x => x.Kind != FieldKind.Header))
+            {
+                Defaults[f.Key] = f.Value;
+            }
+
             if (Id == null)
             {
                 return;
@@ -167,12 +178,14 @@ namespace SiteDesignPro.AutoCAD.Commands
             return p[p.Length - 1];
         }
 
-        public string Format() => Kind switch
+        public string Format() => Format(Value);
+
+        public string Format(object value) => Kind switch
         {
-            FieldKind.Number => CommandContext.F((double)Value, 4),
-            FieldKind.Integer => ((int)Value).ToString(CultureInfo.InvariantCulture),
-            FieldKind.Bool => (bool)Value ? "1" : "0",
-            _ => Value?.ToString() ?? string.Empty,
+            FieldKind.Number => CommandContext.F(Convert.ToDouble(value, CultureInfo.InvariantCulture), 4),
+            FieldKind.Integer => Convert.ToInt32(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
+            FieldKind.Bool => value is bool b && b ? "1" : "0",
+            _ => value?.ToString() ?? string.Empty,
         };
 
         /// <summary>Reads a typed answer; the error says what is expected.</summary>

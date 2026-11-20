@@ -158,6 +158,59 @@ namespace SiteDesignPro.Core.Layout
             return Math.Min(ArrowLength, len * 0.8);
         }
 
+        /// <summary>
+        /// The row as elements (metres, z 0): a parking bay element per bay with the markings of the standard and the
+        /// arrows in the aisle. New ids; labels are left to the numbering of the host.
+        /// </summary>
+        public static List<Model.SiteElement> Elements(Catalog.ElementCatalog cat, Vec2 start, Vec2 along, Vec2 aisleSide, string kind, int count, int accessible, int firstNumber)
+        {
+            var list = new List<Model.SiteElement>();
+            Catalog.ElementType normal = cat.RequireType("road.parking_bay");
+            Catalog.ElementType disabled = cat.FindType("road.parking_bay_accessible") ?? normal;
+            foreach (ParkingRowBay bay in Bays(start, along, aisleSide, kind, count, accessible, firstNumber))
+            {
+                Catalog.ElementType type = bay.Accessible ? disabled : normal;
+                var e = new Model.SiteElement(Guid.NewGuid().ToString("D"), type.Id, new PointGeometry(bay.Position.WithZ(0), bay.Rotation))
+                {
+                    Parameters = type.CreateDefaultParameters(),
+                    Name = bay.Accessible ? "Parking mjesto za osobe s invaliditetom" : "Parking mjesto " + bay.Number,
+                };
+                Model.ParameterSet p = e.Parameters;
+                p["layout"] = Model.ParamValue.Of(kind);
+                p["width"] = Model.ParamValue.Of(bay.Width);
+                p["length"] = Model.ParamValue.Of(bay.Depth);
+                p["lineWidth"] = Model.ParamValue.Of(Symbols.ParkingSymbols.LineWidth);
+                p["rowDir"] = Model.ParamValue.Of((double)bay.RowDir);
+                p["rowStart"] = Model.ParamValue.Of(bay.First);
+                p["rowEnd"] = Model.ParamValue.Of(bay.Last);
+                p["accessible"] = Model.ParamValue.Of(bay.Accessible);
+                p["hatchWidth"] = Model.ParamValue.Of(bay.Hatch);
+                p["bayNumber"] = Model.ParamValue.Of(bay.Number);
+                p["markingMaterial"] = Model.ParamValue.Of(bay.Accessible ? "line_paint_yellow" : "line_paint_white");
+                list.Add(e);
+            }
+
+            Catalog.ElementType? arrowType = cat.FindType("road.arrow");
+            if (arrowType != null)
+            {
+                double size = ArrowSize(kind, count);
+                foreach (ParkingArrow ar in Arrows(start, along, aisleSide, kind, count))
+                {
+                    var e = new Model.SiteElement(Guid.NewGuid().ToString("D"), arrowType.Id, new PointGeometry(ar.Position.WithZ(0), ar.Rotation))
+                    {
+                        Parameters = arrowType.CreateDefaultParameters(),
+                        Name = "Strelica smjera na parkingu",
+                    };
+                    e.Parameters["length"] = Model.ParamValue.Of(size);
+                    e.Parameters["width"] = Model.ParamValue.Of(ArrowWidth);
+                    e.Parameters["shaftWidth"] = Model.ParamValue.Of(ArrowShaft);
+                    list.Add(e);
+                }
+            }
+
+            return list;
+        }
+
         /// <summary>The row direction and the unit vector from the kerb line to the aisle.</summary>
         private static (Vec2 U, Vec2 A) Frame(Vec2 start, Vec2 along, Vec2 aisleSide)
         {

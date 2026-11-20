@@ -300,7 +300,7 @@ namespace SiteDesignPro.AutoCAD.Commands
         };
 
         /// <summary>Changes the cross-section of a street (or turns a simple road into a street) in the same window.</summary>
-        [CommandMethod("SITEDESIGNPRO", "SDPULICAUREDI", CommandFlags.Modal)]
+        [CommandMethod("SITEDESIGNPRO", "SDPULICAUREDI", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EditStreet() => Guarded(() => CommandContext.Run("SDPULICAUREDI", ctx =>
         {
             List<ManagedElement> roads = ctx.Svc.ReadAll().Where(m => m.Element != null && RoadElements.IsNetworkRoad(m.Type)).ToList();
@@ -310,7 +310,26 @@ namespace SiteDesignPro.AutoCAD.Commands
                 return;
             }
 
-            Point3d? pick = ctx.Point("Kliknite ulicu ili cestu");
+            // a street already selected (right click → Uredi ulicu) is taken as it is
+            Point3d? pick = null;
+            PromptSelectionResult implied = ctx.Ed.SelectImplied();
+            if (implied.Status == PromptStatus.OK)
+            {
+                foreach (ObjectId id in implied.Value.GetObjectIds())
+                {
+                    ManagedElement? m = roads.FirstOrDefault(r => r.ObjectId == id);
+                    if (m?.Element?.Geometry is PathGeometry pg && pg.Ring.Count >= 2)
+                    {
+                        Vec3 a = pg.Ring.Vertices[0], b = pg.Ring.Vertices[1];
+                        pick = new Point3d((a.X + b.X) / 2, (a.Y + b.Y) / 2, 0);
+                        break;
+                    }
+                }
+
+                ctx.Ed.SetImpliedSelection(Array.Empty<ObjectId>());
+            }
+
+            pick ??= ctx.Point("Kliknite ulicu ili cestu");
             if (!pick.HasValue)
             {
                 return;

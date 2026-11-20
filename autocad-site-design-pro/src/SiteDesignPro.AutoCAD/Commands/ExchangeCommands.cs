@@ -122,6 +122,45 @@ namespace SiteDesignPro.AutoCAD.Commands
         }
 
         /// <summary>Validates and writes the exchange package (.sdpkg) for SketchUp.</summary>
+        /// <summary>
+        /// Sinhronizacija sa SketchUpom: everything about the exchange in one window – what was sent and received last,
+        /// the version, and the two actions (send the drawing to SketchUp, take what was done in SketchUp).
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPSINHRONIZACIJA", CommandFlags.Modal)]
+        public void Sync() => CommandContext.Run("SDPSINHRONIZACIJA", ctx =>
+        {
+            static (string File, string When) Last(string key)
+            {
+                string raw = UI.Preferences.Current.Default(key, string.Empty);
+                int bar = raw.LastIndexOf('|');
+                return bar > 0 ? (Path.GetFileName(raw.Substring(0, bar)), raw.Substring(bar + 1)) : ("—", string.Empty);
+            }
+
+            (string sentFile, string sentWhen) = Last("sync:lastSent");
+            (string gotFile, string gotWhen) = Last("sync:lastReceived");
+            int count = ctx.Svc.ReadAll().Count(m => m.Element != null && !m.IsCopy);
+            string choice = UI.InfoDialog.Present("Sinhronizacija sa SketchUpom", ctx.Settings.Name.Length > 0 ? ctx.Settings.Name : "Projekat", new[]
+                {
+                    ("Elemenata u crtežu", count.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    ("Zadnje poslano u SketchUp", sentFile + (sentWhen.Length > 0 ? "  (" + sentWhen + ")" : string.Empty)),
+                    ("Zadnje preuzeto iz SketchUpa", gotFile + (gotWhen.Length > 0 ? "  (" + gotWhen + ")" : string.Empty)),
+                    ("Verzija dodatka", AcadEnv.Version),
+                },
+                new[]
+                {
+                    "Pošalji u SketchUp: cijeli crtež kao paket (.sdpkg); u SketchUpu: Vanjsko uređenje PRO → Preuzmi iz AutoCAD-a.",
+                    "Preuzmi iz SketchUpa: paket koji je SketchUp napravio (Vanjsko uređenje PRO → Pošalji u AutoCAD). Novi elementi se dodaju, izmijenjeni zamjenjuju, obrisani u SketchUpu se nude za brisanje.",
+                    "AutoCAD i SketchUp trebaju imati istu verziju dodatka.",
+                },
+                null,
+                ("send", "Pošalji u SketchUp"), ("receive", "Preuzmi iz SketchUpa"), ("close", "Zatvori"));
+            string? cmd = choice == "send" ? "_SDPEXPORT " : choice == "receive" ? "_SDPUVOZPAKETA " : null;
+            if (cmd != null)
+            {
+                ctx.Doc.SendStringToExecute(cmd, true, false, false);
+            }
+        });
+
         [CommandMethod("SITEDESIGNPRO", "SDPEXPORT", CommandFlags.Modal)]
         public void Export() => CommandContext.Run("SDPEXPORT", ctx =>
         {
@@ -190,6 +229,7 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             PackageWriteResult result = PackageWriter.Write(chosenFile, ctx.Settings, elements, ctx.Catalog, options);
             ctx.Settings.LastExportPath = result.Path;
+            UI.Preferences.Current.RememberDefault("sync:lastSent", result.Path + "|" + DateTime.Now.ToString("dd.MM.yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture));
             ctx.SaveSettings();
             ctx.Write("Izvezeno elemenata: " + result.ElementCount + (options.Terrains.Count > 0 ? " i teren" : string.Empty) + " → " + result.Path + ". Uvoz u SketchUp: Proširenja > Vanjsko uređenje PRO > Uvoz paketa.");
             SitePalette.MarkExported();
@@ -246,8 +286,9 @@ namespace SiteDesignPro.AutoCAD.Commands
             List<PackageElement> elements = pkg.Elements.Where(pe => !IsGenerated(pe.Element)).ToList();
             int generated = pkg.Elements.Count - elements.Count;
             bool fromSketchUpRoads = pkg.GeneratorHost == RoadEngine.Host;
-            bool replace = elements.Any(e => byId.ContainsKey(e.Element.Id)) &&
-                ctx.Keyword("Neki elementi paketa već postoje u crtežu [Preskoci/Zamijeni]", new[] { "Preskoci", "Zamijeni" }, "Preskoci") == "Zamijeni";
+            int already = elements.Count(e => byId.ContainsKey(e.Element.Id));
+            bool replace = already > 0 &&
+                ctx.Keyword(Core.Text.Bs.T("{0} elemenata paketa već postoji u crtežu. Zamijeniti ih stanjem iz paketa (izmjene iz SketchUpa) ili preskočiti? [Zamijeni/Preskoci]", already), new[] { "Zamijeni", "Preskoci" }, fromSketchUpRoads ? "Zamijeni" : "Preskoci") == "Zamijeni";
             ctx.Svc.Layers.EnsureAll(false);
             int created = 0, replaced = 0, skipped = 0, failed = 0, roads = 0;
             foreach (PackageElement pe in elements)
@@ -360,7 +401,64 @@ namespace SiteDesignPro.AutoCAD.Commands
 
             ctx.Write("Dalje: ZOOM Extents, SDPEDIT za izmjene, SDPVALIDATE, SDPEXPORT.");
             Log.Info("Uvezen paket " + chosenFile + ": " + created + " elemenata");
+            UI.Preferences.Current.RememberDefault("sync:lastReceived", chosenFile + "|" + DateTime.Now.ToString("dd.MM.yyyy HH:mm", System.Globalization.CultureInfo.InvariantCulture));
+
+            // the summary in a window (a person at the keyboard)
+            if (CommandContext.UseDialogs)
+            {
+                var warnings = new List<string>();
+                string? mismatch = VersionMismatch(pkg.GeneratorVersion);
+                if (mismatch != null)
+                {
+                    warnings.Add(mismatch);
+                }
+
+                if (failed > 0)
+                {
+                    warnings.Add(Core.Text.Bs.T("{0} elemenata nije uvezeno (nepoznat tip ili greška) – detalji su u komandnoj liniji.", failed));
+                }
+
+                var notes = new List<string>();
+                if (generated > 0)
+                {
+                    notes.Add("Kolovozi, ivičnjaci, trotoari i oznake iz paketa nisu uvezeni: crtež ih crta sam iz ulica i cesta.");
+                }
+
+                if (roads > 0 || erased > 0)
+                {
+                    notes.Add("Mreža saobraćajnica je ponovo nacrtana.");
+                }
+
+                UI.InfoDialog.Present("Preuzeto iz SketchUpa", Path.GetFileName(chosenFile), new[]
+                {
+                    ("Novi elementi", (created - replaced).ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    ("Zamijenjeni (izmijenjeni u SketchUpu)", replaced.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    ("Preskočeni (već u crtežu)", skipped.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    ("Obrisani (obrisani u SketchUpu)", erased.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                    ("Nisu uvezeni", failed.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+                }, notes, warnings);
+            }
         });
+
+        /// <summary>
+        /// A warning when the package was written by another version of the add-ins (major.minor differ): AutoCAD and
+        /// SketchUp should run the same version, otherwise new elements or parameters may be missing on one side.
+        /// </summary>
+        internal static string? VersionMismatch(string packageVersion)
+        {
+            static string Mm(string v)
+            {
+                string[] p = (v ?? string.Empty).Split('.', '-', '+');
+                return p.Length >= 2 ? p[0] + "." + p[1] : v ?? string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(packageVersion) || packageVersion == "0.0.0" || Mm(packageVersion) == Mm(AcadEnv.Version))
+            {
+                return null;
+            }
+
+            return "Paket je napravila druga verzija dodatka (" + packageVersion + ", ovdje " + AcadEnv.Version + "). Instalirajte istu verziju u AutoCAD i SketchUp (INSTALIRAJ_SVE.bat iz zipa).";
+        }
 
         /// <summary>An element the road network or a garage ramp generated (flagged in the package, or of a type only the network makes).</summary>
         internal static bool IsGenerated(SiteElement e) =>

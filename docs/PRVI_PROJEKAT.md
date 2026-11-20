@@ -35,7 +35,7 @@ Vanjsko uređenje PRO ima dva dijela:
 Tok rada je uvijek isti:
 
 ```
-Vaš DWG  →  AutoCAD: pripremi i projektuj  →  SDPEXPORT (.sdpkg)  →  SketchUp: Uvoz paketa  →  3D model
+Vaš DWG  →  AutoCAD: pripremi i projektuj  →  SDPEXPORT (.sdpkg)  →  SketchUp: Preuzmi iz AutoCAD-a  →  3D model
 ```
 
 Važno pravilo programa: **ništa se ne izmišlja.** Ako podatak nedostaje (npr. kota objekta), program to kaže i
@@ -98,7 +98,7 @@ Ploče se redaju s lijeva na desno ovim redom:
 | **Rasvjeta** | **Pregled**, liste: Stubovi, Niska rasvjeta, Zidna montaža, Dekorativno, Upravljanje; Svjetiljke duž puta, Pokrivenost | svjetiljke |
 | **Urbani mobilijar** | **Pregled**, liste: Sjedenje, Stolovi, Korpe i kante, Dječija igrališta, Sport, Pergole, Nadstrešnice, Informacije …; Raspored duž staze | klupe, igrališta, pergole, table |
 | **3D modeli** | **Uredi element**, Zone sigurnosti, Odabir, Korisnički katalozi | izmjena nacrtanih elemenata |
-| **SketchUp razmjena** | **Izvoz paketa**, Primijeni izmjene, Uvoz paketa, Provjera prije izvoza | prenos u SketchUp i nazad; uvoz gotovog paketa u crtež |
+| **SketchUp** | **Sinhronizacija**, Pošalji u SketchUp, Preuzmi iz SketchUpa, Izmjene iz SketchUpa | prenos u SketchUp i nazad; uvoz gotovog paketa u crtež |
 | **Količinski obračun** | **Tabele**, Izvoz CSV, Količine | količine |
 | **Nacrti i oznake** | **Oznaka**, Numeracija, Legenda, Sastavnica, Razmjernik, Presjek, Detalj, Rasterske ose, Oblak revizije | crtanje nacrta |
 | **Provjera projekta** | **Provjeri projekat**, Provjera crteža, Revizija | kontrola |
@@ -160,8 +160,8 @@ Prije vašeg pravog projekta prođite ovu vježbu. Program ima ugrađen primjer,
 |   |   | *Koristiti oznake kota kao visinske tačke terena? [Da/Ne]* | **Ne** |
 | 8 | ploča **Provjera projekta** → **Provjeri projekat** (`SDPVALIDATE`) | rezultati u paleti, kartica **Provjera** | – |
 | 9 | ploča **Količinski obračun** → **Tabele** (`SDPSCHEDULE`) | *Tabela [T1…/Sve]* → *Tačka umetanja tabele* | **Sve**, pa klik desno od crteža |
-| 10 | ploča **SketchUp razmjena** → **Izvoz paketa** (`SDPEXPORT`) | prozor za snimanje paketa | snimite `vjezba.sdpkg` na Desktop |
-| 11 | SketchUp: meni **Extensions → Vanjsko uređenje PRO → Uvoz paketa…** | prozor s pregledom | odaberite `vjezba.sdpkg` → **Uvezi** |
+| 10 | panel **SketchUp** → **Pošalji u SketchUp** (`SDPEXPORT`) | prozor za snimanje paketa | snimite `vjezba.sdpkg` na Desktop |
+| 11 | SketchUp: meni **Extensions → Vanjsko uređenje PRO → Preuzmi iz AutoCAD-a…** | prozor s pregledom | odaberite `vjezba.sdpkg` → **Uvezi** |
 
 Izbore u komandnoj liniji (npr. **Oba**, **Da**, **Bez**) možete kliknuti mišem direktno u komandnoj liniji ili
 upisati prvo slovo i Enter.
@@ -404,7 +404,7 @@ postave tabele (površine, dužine, komadi po tipu). Za Excel: ista ploča → *
 ### Korak 13 – Izvoz za SketchUp
 
 1. Snimite crtež (Ctrl+S).
-2. Kliknite: ploča **SketchUp razmjena** → **Izvoz paketa** (`SDPEXPORT`).
+2. Kliknite: panel **SketchUp** → **Pošalji u SketchUp** (`SDPEXPORT`).
 3. Ako postoje greške, program pita *„Ipak izvesti? [Da/Ne]"* – bolje **Ne**, ispravite greške (korak 11), pa ponovo.
 4. Otvara se prozor – snimite paket, najbolje **pored DWG-a** s istim imenom (npr. `Situacija_VU.sdpkg`).
 
@@ -414,10 +414,10 @@ Na kraju piše *„Izvezeno elemenata: …"*.
 
 ## 6. Prenos u SketchUp i 3D model
 
-### Uvoz paketa
+### Preuzimanje u SketchUpu
 
 1. Otvorite SketchUp → novi model (šablon **Architectural – Meters** ili bilo koji metrički).
-2. **Extensions → Vanjsko uređenje PRO → Uvoz paketa…** (ili prvo dugme na traci).
+2. **Extensions → Vanjsko uređenje PRO → Preuzmi iz AutoCAD-a…** (ili prvo dugme na traci).
 3. Odaberite `.sdpkg` datoteku.
 4. Otvara se **pregled prije uvoza**:
    * kartice pokazuju koliko će se elemenata **napraviti**, **ažurirati**, **obrisati**;
@@ -465,7 +465,7 @@ Odaberite element → desni klik → **Vanjsko uređenje PRO → Svojstva elemen
 ### Izmjena u AutoCAD-u (najčešće)
 
 1. Promijenite projekat u AutoCAD-u.
-2. Ploča **SketchUp razmjena** → **Izvoz paketa** → snimite preko istog `.sdpkg`.
+2. Panel **SketchUp** → **Pošalji u SketchUp** → snimite preko istog `.sdpkg`.
 3. U SketchUpu: **Extensions → Vanjsko uređenje PRO → Ažuriranje iz paketa** (ili drugo dugme na traci alata). Pregled pokazuje šta je novo, izmijenjeno i obrisano.
 4. **Uvezi**. Program mijenja samo izmijenjene elemente; vaše kamere, materijali i dodaci u SketchUpu ostaju.
 
@@ -476,9 +476,9 @@ postavkama zadrži SketchUp verziju.
 
 1. U SketchUpu mijenjajte parametre (Svojstva elementa) ili pomjerite/zarotirajte stabla, klupe i slično.
 2. **Izvoz izmjena za AutoCAD…** → snimite `sdp-izmjene.json`.
-3. U AutoCAD-u: ploča **SketchUp razmjena** → **Primijeni izmjene** (`SDPAPPLYCHANGES`) → odaberite tu datoteku →
+3. U AutoCAD-u: ploča **SketchUp** → **Izmjene iz SketchUpa** (`SDPAPPLYCHANGES`) → odaberite tu datoteku →
    pregledajte → primijenite.
-4. Zatim ponovo **Izvoz paketa**.
+4. Zatim ponovo **Pošalji u SketchUp**.
 
 ---
 
@@ -487,13 +487,13 @@ postavkama zadrži SketchUp verziju.
 | Simptom | Uzrok | Rješenje |
 |---|---|---|
 | Klupa je ogromna ili sitna | pogrešna jedinica crteža | ploča **Projekt** → **Postavke** → **Jedinice** (korak 1) |
-| SketchUp model je kilometrima od ishodišta | ishodište ostavljeno na 0,0,0 u državnim koordinatama | **Projekt → Postavke → Ishodiste** → tačka na parceli, pa ponovo **Izvoz paketa** i uvoz |
+| SketchUp model je kilometrima od ishodišta | ishodište ostavljeno na 0,0,0 u državnim koordinatama | **Projekt → Postavke → Ishodiste** → tačka na parceli, pa ponovo **Pošalji u SketchUp** i uvoz |
 | `SDPPROVJERADWG` kaže da nema parcele | sloj granice nije mapiran ili linija nije zatvorena | **Uvoz DWG-a → Mapiranje slojeva**; `PEDIT` → `Close` |
 | Kote se ne računaju | nije zadana nulta kota | **Teren i kote → Nulta kota → NultaKota** |
 | Teren se ne pravi | nema tačaka/izohipsi s visinom | mapirajte slojeve snimka; bez snimka teren ne postoji |
 | nema kartice VANJSKO UREĐENJE PRO ili *Unknown command* | dodatak nije učitan ili stara verzija | ponovo `INSTALIRAJ.bat`, restart AutoCAD-a; traka skrivena: kucajte `RIBBON` |
 | U SketchUpu nema trake | traka isključena | **View → Toolbars…** → Vanjsko uređenje PRO |
-| Izmjena u AutoCAD-u se ne vidi u SketchUpu | paket nije ponovo izvezen | **SketchUp razmjena → Izvoz paketa**, pa u SketchUpu **Ažuriranje iz paketa** |
+| Izmjena u AutoCAD-u se ne vidi u SketchUpu | paket nije ponovo izvezen | **SketchUp → Pošalji u SketchUp**, pa u SketchUpu **Napredno → Ponovo preuzmi zadnji paket** |
 | Nešto je pošlo krivo | – | Ctrl+Z poništava cijelu naredbu; sigurnosne kopije: **Postavke i pomoć → Oporavak** |
 
 ---
@@ -522,12 +522,12 @@ PROJEKTOVANJE
 KONTROLA I IZVOZ
 [ ] Provjera projekta → Provjeri projekat
 [ ] Količinski obračun → Tabele
-[ ] Ctrl+S, pa SketchUp razmjena → Izvoz paketa → ________.sdpkg
+[ ] Ctrl+S, pa SketchUp → Pošalji u SketchUp → ________.sdpkg
 
 SKETCHUP
-[ ] Extensions → Vanjsko uređenje PRO → Uvoz paketa → Standardni kvalitet → Uvezi
+[ ] Extensions → Vanjsko uređenje PRO → Preuzmi iz AutoCAD-a → Standardni kvalitet → Uvezi
 [ ] Scene i sjene pregledane
-[ ] Za izmjene: Izvoz paketa (AutoCAD) → Ažuriranje iz paketa (SketchUp)
+[ ] Za izmjene: Pošalji u SketchUp (AutoCAD) → Ponovo preuzmi zadnji paket (SketchUp)
 ```
 
 ---
