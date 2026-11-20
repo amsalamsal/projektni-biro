@@ -162,10 +162,14 @@ class TestRoadsUi < Minitest::Test
     assert_equal [:abort], @model.operations.last(1).map(&:first), 'the change is undone (SketchUp abort_operation)'
     assert(UI.log.any? { |e| e[0] == :messagebox && e[1] =~ /tehničkog minimuma/ && e[1] =~ /uzdužni nagib/ }, UI.log.inspect)
 
+    # a fresh model (the test fake does not undo an aborted operation)
+    @model = Sketchup::Model.new
+    Sketchup.active_model = @model
+    UI.reset!
     run_command('Garažna rampa')
     form('kind' => 'straight', 'endLevel' => -1.5)
     click(@model.tool, 0, 0)
     click(@model.tool, 0, -12) # 12,5 %
-    assert_equal [:commit], @model.operations.last(1).map(&:first)
+    assert_equal [:commit], @model.operations.last(1).map(&:first), UI.log.inspect
   end
 end
