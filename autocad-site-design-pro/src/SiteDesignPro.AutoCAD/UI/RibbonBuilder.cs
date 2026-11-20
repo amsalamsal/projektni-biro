@@ -132,10 +132,11 @@ namespace SiteDesignPro.AutoCAD.UI
 
             tab.Panels.Add(Panel("Provjera i izvoz",
                 Large("Provjeri projekat", "SDPVALIDATE", "validate", "Greške, kolizije, izlazak iz parcele; rezultat u paleti, grupisano."),
-                Large("Izvoz paketa", "SDPEXPORT", "export", "Paket .sdpkg za 3D model u SketchUpu."),
-                Stack(Small("Uvoz paketa", "SDPUVOZPAKETA", "import", "Učitava .sdpkg paket u crtež."),
-                      Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Izmjene iz SketchUpa, s pregledom prije primjene."),
-                      Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti u komandnoj liniji.")),
+                Large("Izvoz za SketchUp", "SDPEXPORT", "export", "Paket .sdpkg za 3D model u SketchUpu."),
+                Large("Uvoz iz SketchUpa", "SDPUVOZPAKETA", "import", "Otvara prozor za odabir paketa .sdpkg (iz SketchUpa: Izvoz za AutoCAD) i unosi elemente u crtež: novi se dodaju, postojeći zamjenjuju, saobraćajnice se same ponovo nacrtaju."),
+                Stack(Small("Primijeni izmjene", "SDPAPPLYCHANGES", "apply", "Datoteka izmjena iz SketchUpa (Izvoz izmjena za AutoCAD), s pregledom prije primjene."),
+                      Small("Količine", "SDPQUANTITIES", "quantities", "Količine po vrsti u komandnoj liniji."),
+                      Small("Prozori / komandna linija", "SDPPROZORI", "settings", "Pitanja naredbi u prozorima (zadano) ili u komandnoj liniji.")),
                 Stack(Small("Urbanistički pokazatelji", "SDPPOKAZATELJI", "area", "Kiz, Kis, zelenilo, vodopropusne površine i parking prema zahtjevima regulacionog plana."),
                       Small("Prohodnost vozila", "SDPPROHODNOST", "clearance", "Putanja vatrogasnog vozila, kamiona za smeće, dostavnog ili putničkog vozila: krivine i udari u prepreke."))));
 

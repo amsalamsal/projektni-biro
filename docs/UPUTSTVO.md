@@ -204,7 +204,7 @@ Garažna rampa je na **prvom i zadnjem metru ravna** (bez poprečnog pada, u rav
   obrisati i u crtežu (pitanje Da/Ne). Visine osovina dolaze kao kote saobraćajnice.
 * **Svi elementi iz biblioteke:** isti *Izvoz za AutoCAD (.sdpkg)…* (glavni meni Vanjsko uređenje PRO) nosi i sve
   ostale elemente – one postavljene u SketchUpu iz biblioteke i one iz AutoCAD projekta, na mjestu gdje su sada i s
-  parametrima izmijenjenim u SketchUpu. U AutoCAD-u: *Uvoz paketa* otvara prozor za odabir datoteke.
+  parametrima izmijenjenim u SketchUpu. U AutoCAD-u: dugme *Uvoz iz SketchUpa* (kartica, panel Provjera i izvoz) otvara prozor za odabir datoteke.
 * **AutoCAD → SketchUp:** nakon uvoza AutoCAD paketa, *Saobraćajnice → Preuzmi saobraćajnice iz AutoCAD-a* pretvara
   ulice tog projekta u osovine alata Saobraćajnice (uređuju se ovdje; 3D gradi motor). Od tada je projekat
   **povezan**: svaki naredni *Uvoz paketa* iz AutoCAD-a prenosi izmjene ulica (nove, izmijenjene, obrisane) u
