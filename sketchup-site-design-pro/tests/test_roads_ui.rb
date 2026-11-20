@@ -159,13 +159,13 @@ class TestRoadsUi < Minitest::Test
     form('kind' => 'straight', 'endLevel' => -4.0)
     click(@model.tool, 0, 0)
     click(@model.tool, 0, -12) # 4 m over 12 m: 33 %
-    refute(R::SourceStore.new(@model).records.any? { |r| r.type == R::GARAGE_RAMP }, 'the ramp is not kept')
+    assert_equal [:abort], @model.operations.last(1).map(&:first), 'the change is undone (SketchUp abort_operation)'
     assert(UI.log.any? { |e| e[0] == :messagebox && e[1] =~ /tehničkog minimuma/ && e[1] =~ /uzdužni nagib/ }, UI.log.inspect)
 
     run_command('Garažna rampa')
     form('kind' => 'straight', 'endLevel' => -1.5)
     click(@model.tool, 0, 0)
     click(@model.tool, 0, -12) # 12,5 %
-    assert_equal 1, R::SourceStore.new(@model).records.count { |r| r.type == R::GARAGE_RAMP }
+    assert_equal [:commit], @model.operations.last(1).map(&:first)
   end
 end
