@@ -20,6 +20,8 @@
   * izvoz nesačuvanog crteža je nudio folder AutoCAD predloška i naziv „acadiso”; sada Dokumenti i naziv projekta;
   * poslije *Pošalji u SketchUp* prozor s rezultatom; tabele (količine) u prozoru kao redovi;
   * prozori SketchUpa se otvaraju iznad SketchUpa i na drugom monitoru.
+* SketchUp: kod ponovnog preuzimanja iz AutoCAD-a u isti model (Sinhronizacija) ponovno građenje saobraćajnica je brisalo
+  sve ostale elemente tog projekta (drveće, mobilijar…). Sada briše samo elemente saobraćajnica.
 * **Brzi početak sa slikama** (Pomoć → Brzi početak) – kraći, sa snimcima ekrana.
 
 ### Verzija 0.3.0 – lakše korištenje (20.11.)

@@ -80,6 +80,16 @@ module ProjektniBiro
           kept.length == plan.actions.length ? plan : plan.class.new(kept, plan.policy)
         end
 
+        # The road engine's own package holds the roads only. In a model linked to an AutoCAD project the roads share
+        # the project with the trees, furniture and everything else of that project, so an element missing from the
+        # engine's package is removed only when it is a road element (the rest was never the engine's to remove).
+        def only_road_removals(plan)
+          kept = plan.actions.reject do |a|
+            a.element.nil? && a.entry && %i[delete mark_deleted keep_orphan].include?(a.kind) && !(a.entry.ref && road_entity?(a.entry.ref))
+          end
+          kept.length == plan.actions.length ? plan : plan.class.new(kept, plan.policy)
+        end
+
         # After the import: the roads of the package become the source elements, then the roads are rebuilt.
         def after_import(model, package, items)
           model.start_operation('Saobraćajnice iz AutoCAD-a', true)

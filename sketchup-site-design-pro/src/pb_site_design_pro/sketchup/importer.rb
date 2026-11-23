@@ -21,6 +21,12 @@ module ProjektniBiro
         @package, @read_report = PackageReader.read(path)
       end
 
+      # The road tools rebuild into a project that may hold other elements as well: only road elements may be removed.
+      def only_road_removals!
+        @plan = Roads::Exchange.only_road_removals(@plan) if @plan
+        @plan
+      end
+
       def readable?
         !@package.nil?
       end

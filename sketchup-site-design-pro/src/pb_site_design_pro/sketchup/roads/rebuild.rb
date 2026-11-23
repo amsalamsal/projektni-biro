@@ -60,6 +60,7 @@ module ProjektniBiro
             raise Engine::Error, "paket saobraćajnica nije čitljiv: #{importer.read_report.to_text[0, 400]}" unless importer.readable?
 
             importer.plan!(policy: POLICY)
+            importer.only_road_removals!
             report = importer.apply!(create_scenes: false, backup: false, operation: false, set_north: false)
             name_root(model, settings)
             draw_overlays(model, result)

@@ -105,6 +105,17 @@ class TestRoadsExchange < Minitest::Test
     assert_equal [X.known_ids(@model) - sent].flatten.length, 1, 'only the street erased here'
   end
 
+  def test_rebuilding_the_roads_removes_only_road_elements
+    tree = @model.entities.add_group
+    { 'id' => 't1', 'type' => 'landscape.tree_evergreen', 'projectId' => AUTOCAD_PROJECT }.each { |k, v| tree.set_attribute('SiteDesignPro', k, v) }
+    road = @model.entities.add_group
+    { 'id' => 'r1', 'type' => 'road.carriageway', 'projectId' => AUTOCAD_PROJECT }.each { |k, v| road.set_attribute('SiteDesignPro', k, v) }
+    entry = ->(g, id) { ModelEntry.new(id: id, project_id: AUTOCAD_PROJECT, type_id: g.get_attribute('SiteDesignPro', 'type'), ref: g) }
+    plan = Plan.new([PlanAction.new(:delete, nil, entry.call(tree, 't1'), 'x'), PlanAction.new(:delete, nil, entry.call(road, 'r1'), 'x')], {})
+    kept = X.only_road_removals(plan)
+    assert_equal ['r1'], kept.actions.map { |a| a.entry.id }, 'the trees of the linked AutoCAD project stay when the roads are rebuilt'
+  end
+
   def test_export_needs_roads
     assert_raises(R::Engine::Error) { X.export(@model, File.join(@tmp, 'x.sdpkg')) }
   end
