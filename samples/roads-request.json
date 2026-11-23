@@ -1,0 +1,255 @@
+{
+ "format": "sdp-roads-request",
+ "version": 1,
+ "project": {
+  "id": "f3289ced-383b-5ebb-8ce3-ef474ef7a7b6",
+  "name": "Primjer saobraćajnica"
+ },
+ "base": 500.0,
+ "elements": [
+  {
+   "id": "47ea4314-de02-507a-b067-2d41cd93e5f7",
+   "type": "road.street",
+   "name": "Glavna ulica",
+   "parameters": {
+    "direction": "two_way",
+    "lanesLeft": 1.0,
+    "lanesRight": 1.0,
+    "laneWidth": 3.0,
+    "sidewalkLeft": 1.6,
+    "sidewalkRight": 1.6,
+    "bikeLeft": 0.0,
+    "bikeRight": 0.0,
+    "cornerRadius": 6.0,
+    "arrows": true,
+    "arrowSpacing": 40.0,
+    "median": 0.0
+   },
+   "geometry": {
+    "kind": "path",
+    "vertices": [
+     [
+      -80.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      0.0,
+      0.0
+     ],
+     [
+      80.0,
+      0.0,
+      0.0
+     ]
+    ],
+    "closed": false,
+    "id": "47ea4314-de02-507a-b067-2d41cd93e5f7"
+   },
+   "label": "U-001"
+  },
+  {
+   "id": "b6c6c130-b8f3-5837-8592-9c231e536957",
+   "type": "road.street",
+   "name": "Sporedna ulica",
+   "parameters": {
+    "direction": "two_way",
+    "lanesLeft": 1.0,
+    "lanesRight": 1.0,
+    "laneWidth": 3.0,
+    "sidewalkLeft": 1.6,
+    "sidewalkRight": 2.0,
+    "bikeLeft": 0.0,
+    "bikeRight": 1.5,
+    "cornerRadius": 6.0,
+    "arrows": true,
+    "arrowSpacing": 40.0,
+    "median": 0.0
+   },
+   "geometry": {
+    "kind": "path",
+    "vertices": [
+     [
+      0.0,
+      0.0,
+      0.0
+     ],
+     [
+      0.0,
+      40.0,
+      1.2
+     ],
+     [
+      30.0,
+      80.0,
+      2.0
+     ]
+    ],
+    "closed": false,
+    "id": "b6c6c130-b8f3-5837-8592-9c231e536957"
+   },
+   "label": "U-002"
+  },
+  {
+   "id": "4b8d99e4-989d-56ab-ae09-dc6d8761855d",
+   "type": "road.pedestrian_crossing",
+   "name": "",
+   "parameters": {
+    "stripeWidth": 0.5,
+    "gapWidth": 0.5,
+    "bikeLane": false
+   },
+   "geometry": {
+    "kind": "polygon",
+    "outer": {
+     "vertices": [
+      [
+       -30.0,
+       -3.5,
+       0.0
+      ],
+      [
+       -26.0,
+       -3.5,
+       0.0
+      ],
+      [
+       -26.0,
+       3.5,
+       0.0
+      ],
+      [
+       -30.0,
+       3.5,
+       0.0
+      ]
+     ]
+    },
+    "id": "4b8d99e4-989d-56ab-ae09-dc6d8761855d"
+   },
+   "label": "PC-001"
+  },
+  {
+   "id": "043c317d-5570-5178-bb88-520f0f537edc",
+   "type": "road.level_mark",
+   "name": "",
+   "parameters": {
+    "level": -0.5
+   },
+   "geometry": {
+    "kind": "point",
+    "position": [
+     60.0,
+     0.0,
+     0.0
+    ],
+    "rotation": 0.0,
+    "id": "043c317d-5570-5178-bb88-520f0f537edc"
+   },
+   "label": "KS-001"
+  },
+  {
+   "id": "0e9ec8c9-2abd-5a33-99f3-827cea2626d0",
+   "type": "road.curb_ramp_mark",
+   "name": "",
+   "parameters": {},
+   "geometry": {
+    "kind": "point",
+    "position": [
+     40.0,
+     4.2,
+     0.0
+    ],
+    "rotation": 0.0,
+    "id": "0e9ec8c9-2abd-5a33-99f3-827cea2626d0"
+   },
+   "label": "OR-001"
+  },
+  {
+   "id": "924854c3-531e-50c0-a729-63675a03d918",
+   "type": "road.garage_ramp",
+   "name": "Garažna rampa",
+   "parameters": {
+    "kind": "straight",
+    "direction": "one_way",
+    "laneWidth": 3.0,
+    "margin": 0.25,
+    "island": false,
+    "transition": 0.0,
+    "flatLength": 0.0,
+    "ceilingFrom": 0.0,
+    "ceilingLevel": 0.0,
+    "heated": false,
+    "walls": true,
+    "drain": "bottom",
+    "startLevel": 0.0,
+    "endLevel": -2.5,
+    "width": 3.5
+   },
+   "geometry": {
+    "kind": "path",
+    "vertices": [
+     [
+      -50.0,
+      -6.0,
+      0.0
+     ],
+     [
+      -50.0,
+      -21.0,
+      0.0
+     ]
+    ],
+    "closed": false,
+    "id": "924854c3-531e-50c0-a729-63675a03d918"
+   },
+   "label": "GR-001"
+  },
+  {
+   "id": "3203f9e8-d77c-53c4-936a-c80a3b9e15e2",
+   "type": "road.ramp_section",
+   "name": "",
+   "parameters": {
+    "reference": "924854c3-531e-50c0-a729-63675a03d918"
+   },
+   "geometry": {
+    "kind": "point",
+    "position": [
+     -40.0,
+     -40.0,
+     0.0
+    ],
+    "rotation": 0.0,
+    "id": "3203f9e8-d77c-53c4-936a-c80a3b9e15e2"
+   },
+   "label": "UP-001"
+  },
+  {
+   "id": "47c99703-1b36-52ba-84bf-160e7854b6a9",
+   "type": "road.driveway",
+   "name": "",
+   "parameters": {
+    "width": 3.5
+   },
+   "geometry": {
+    "kind": "path",
+    "vertices": [
+     [
+      50.0,
+      0.0,
+      0.0
+     ],
+     [
+      50.0,
+      -25.0,
+      0.0
+     ]
+    ],
+    "closed": false,
+    "id": "47c99703-1b36-52ba-84bf-160e7854b6a9"
+   },
+   "label": "R-001"
+  }
+ ]
+}

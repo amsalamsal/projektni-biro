@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang='bs'><head><meta charset='utf-8'><title>Vanjsko uređenje PRO – Uputstvo</title><style>body{font-family:Segoe UI,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem 1.5rem;line-height:1.5;color:#1d2520;background:#fff}nav{border-bottom:1px solid #ccd5cf;padding-bottom:.5rem;margin-bottom:1rem}nav a{margin-right:1rem}table{border-collapse:collapse;margin:.75rem 0;font-size:.92rem}th,td{border:1px solid #ccd5cf;padding:.3rem .5rem;vertical-align:top;text-align:left}th{background:#eef3ef}code{background:#f1f3f2;padding:0 .2rem}pre{background:#f1f3f2;padding:.6rem;overflow:auto}blockquote{border-left:4px solid #3b7a57;margin:.75rem 0;padding:.25rem .75rem;background:#f4f8f5}h1{color:#2c5e43}figure{margin:1rem 0}figure img{max-width:100%;border:1px solid #ccd5cf;border-radius:4px}figcaption{color:#5b6660;font-size:.9rem;margin-top:.25rem}</style></head><body><nav><a href="index.html">Uputstvo</a><a href="brzi-start.html">Brzi početak (sa slikama)</a><a href="prvi-projekat.html">Prvi projekat (za početnike)</a><a href="redoslijed-rada.html">Redoslijed rada</a><a href="prirucnik.html">Priručnik (sve opcije)</a><a href="instalacija.html">Instalacija i oporavak</a><a href="kompatibilnost.html">Kompatibilnost</a><a href="ogranicenja.html">Ograničenja</a><a href="testiranje.html">Izvještaj testiranja</a><a href="licence.html">Registar licenci</a></nav><h1 id="uputstvo-za-korištenje--vanjsko-uređenje-pro">Uputstvo za korištenje – Vanjsko uređenje PRO</h1>
+<p>Vanjsko uređenje PRO ima dva dijela:</p>
+<ul>
+<li><strong>dodatak za AutoCAD</strong> – kartica trake <em>VANJSKO UREĐENJE PRO</em>, paleta i naredbe <code>SDP…</code>;
+</li>
+<li><strong>proširenje za SketchUp</strong> – meni <em>Extensions → Vanjsko uređenje PRO</em>.
+</li></ul>
+<p>AutoCAD je glavni izvor tlocrta. SketchUp od paketa iz AutoCAD-a gradi 3D model.</p>
+<p><strong>Prvi put koristite program?</strong> Počnite s uputstvom <a href="prvi-projekat.html">Prvi projekat</a> – korak po korak, od instalacije do 3D modela. Samo redoslijed (šta se postavlja prvo, po spisku): <a href="redoslijed-rada.html">Redoslijed rada</a>.</p>
+<p>Ovo je kratki pregled. Svaka naredba, opcija i dijalog detaljno su opisani u <a href="prirucnik.html">Priručniku</a>.</p>
+<blockquote><p>Status: kod je napisan, kompajlira se i prolazi automatske testove, ali <strong>nije provjeren u AutoCAD-u ni u SketchUpu</strong>. Pogledajte <a href="kompatibilnost.html">Kompatibilnost</a> i <a href="ogranicenja.html">Ograničenja</a>.</p></blockquote>
+<h2 id="osnovna-pravila">Osnovna pravila</h2>
+<ul>
+<li><strong>Jedinice:</strong> metričke (mm, cm, m). U korisničkom interfejsu se koristi decimalni zarez: <code>0,15 m</code>, <code>1.234,50 m²</code>. Komandna linija AutoCAD-a prihvata i tačku i zarez.
+</li>
+<li><strong>Nazivi slojeva izvornog crteža se ne mijenjaju.</strong> Uloge slojeva (parcela, objekti, kote…) zadaju se mapiranjem. Elementi dodatka idu na slojeve <code>VU-…</code>.
+</li>
+<li><strong>Ništa se ne izmišlja.</strong> Geometrija, kote i koordinate kojih nema u crtežu se ne dodaju. Kada podataka nema dovoljno, izvještaj to kaže.
+</li>
+<li><strong>Oznaka objekta nije tlocrt.</strong> Blok ili tekst koji označava objekat ne pretvara se automatski u tlocrt; potrebna je zatvorena kontura ili Vaša potvrda.
+</li>
+<li><strong>Provjere su pomoć pri projektovanju</strong>, a ne potvrda usklađenosti s propisima. Stavke označene za reviziju mora pregledati odgovorni projektant ili specijalista.
+</li></ul>
+<h2 id="tok-rada-od-dwg-a-do-sketchupa">Tok rada od DWG-a do SketchUpa</h2>
+<h3 id="1-projekat">1. Projekat</h3>
+<p><code>SDPNEW</code> – naziv, jedinica crteža, ishodište (Y/X/kota), stvarni sjever, razmjera oznaka. <code>SDPSETTINGS</code> mijenja postavke kasnije. Za učenje: u praznom crtežu <code>SDPSAMPLE</code> → <em>Oba</em> nacrta primjer izvornog DWG-a i primjer stambenog kompleksa.</p>
+<h3 id="2-uvoz-dwg-a-panel-uvoz-dwg-a">2. Uvoz DWG-a (panel <em>Uvoz DWG-a</em>)</h3>
+<ol>
+<li><code>SDPMAPIRANJE</code> – tabela svih slojeva crteža s brojem objekata. Svakom sloju dodijelite ulogu: granica parcele, tlocrt objekta, oznaka objekta, saobraćajnice, linija partera, visinske oznake, tačke terena, izohipse, prelomnice… Dugme <em>Prijedlog prema nazivima</em> predlaže uloge po nazivima slojeva, ali ga uvijek provjerite. Mapiranje se može sačuvati kao predložak (<code>%APPDATA%\SiteDesignPro\mappings\*.sdpmap.json</code>) i koristiti u drugim projektima.
+</li>
+<li><code>SDPPROVJERADWG</code> – izvještaj o ulaznom crtežu: jedinice, koordinatni sistem, parcela i njena površina, broj objekata, upotrebljive visinske oznake, tačke terena s kotom, otvorene konture, duplikati, objekti izvan mapiranih slojeva… Svaki nalaz ima šifru <code>SDP-I…</code>.
+</li>
+<li><code>SDPPREUZMI</code> – mapiranu granicu parcele i zatvorene tlocrte pretvara u elemente projekta. Oznake objekata (blokovi, tekst) preuzimaju se samo uz potvrdu. Već preuzeti objekti se preskaču.
+</li></ol>
+<h3 id="3-georeferenciranje-panel-georeferenciranje">3. Georeferenciranje (panel <em>Georeferenciranje</em>)</h3>
+<ul>
+<li><code>SDPGEOREF</code> – koordinatni sistem (npr. EPSG:3908 MGI 1901 / Balkans zona 6) i kontrolne tačke (lokalna tačka → Y/X). Jedna tačka daje <strong>samo položaj</strong>; rotaciju tada zadajete Vi. Od dvije tačke naviše računa se kruta ili sličnosna transformacija metodom najmanjih kvadrata, s odstupanjima po tački i upozorenjem na razmjeru (ppm). Svaka promjena se bilježi u historiji transformacija.
+</li>
+<li><code>SDPKML</code> – KML za Google Earth. Služi <strong>samo za orijentaciju</strong> i nije geodetska podloga. Pretvorba MGI 1901 → WGS84 koristi približne parametre (greška reda veličine nekoliko metara).
+</li></ul>
+<h3 id="4-kote-panel-teren-i-kote">4. Kote (panel <em>Teren i kote</em>)</h3>
+<ul>
+<li><code>SDPDATUM</code>:
+<ul>
+<li>nulta kota objekta (±0,00) kao apsolutna nadmorska visina i naziv visinskog datuma;
+</li>
+<li>kota partera (podrazumijevano jednaka ±0,00, ako ne odaberete drugačije);
+</li>
+<li>spuštanje saobraćajnica ispod partera.
+</li></ul>
+</li></ul>
+<p><strong>Spuštanje nema podrazumijevanu vrijednost.</strong> Zadaje ga korisnik; 15 cm je samo primjer. Vrijedi pravilo apsolutna kota = datum + relativna kota. Bez zadanog datuma apsolutne kote se ne računaju.</p>
+<ul>
+<li><code>SDPKOTA</code> – kota za <strong>odabrani objekat</strong> (relativna, apsolutna, parter, saobraćajnica, stvarna Z vrijednost). Prije primjene se prikazuje stara i nova kota. Mijenja se samo odabrani objekat.
+</li>
+<li><code>SDPKOTEIZOZNAKA</code> – čita visinske oznake (<code>+0,00</code>, <code>-0,15</code>, <code>%%p0.00</code>, <code>KT 520,00</code>, <code>520,15 m n.v.</code>…) i predlaže kojem objektu pripadaju (oznaka unutar konture ili na kraju pokazne linije). Veze se prvo prikažu privremenim linijama, pa tek onda potvrđujete. Nejasne oznake (dvije moguće konture, oznaka bez objekta, oznake koje se ne slažu) se prijavljuju i ne dodjeljuju.
+</li>
+<li><code>SDPSPOTLEVEL</code> – oznaka kote: relativna i u zagradi apsolutna.
+</li></ul>
+<h3 id="5-teren">5. Teren</h3>
+<ul>
+<li><code>SDPTEREN</code> – model terena (TIN) iz tačaka s kotom, izohipsi, prelomnica i, po izboru, dodijeljenih kota i visinskih oznaka. Prelomnice se poštuju, a granica može ograničiti teren. Ako podataka nema dovoljno (premalo tačaka, sve na jednoj liniji, bez raspona kota), teren se ne gradi i izvještaj kaže zašto.
+</li>
+<li><code>SDPPROFIL</code> – profil terena duž odabrane linije.
+</li>
+<li><code>SDPANALIZATERENA</code> – nagibi trouglova, ravni dijelovi, lokalne depresije (mogući problem odvodnje) i kubature iznad/ispod zadane kote. Rezultati su <strong>orijentacioni</strong> i nisu hidraulički ni geotehnički proračun.
+</li></ul>
+<h3 id="6-projektovanje">6. Projektovanje</h3>
+<p>Paneli <em>Parter i popločanje</em>, <em>Zelenilo</em>, <em>Saobraćaj i parking</em>, <em>Infrastruktura</em>, <em>Rasvjeta</em> i <em>Urbani mobilijar</em> imaju padajuće liste svih vrsta elemenata po podkategorijama i dugme <em>Pregled</em>, koje otvara paletu na toj kategoriji.</p>
+<table><thead><tr><th>Naredba</th><th>Namjena</th></tr></thead><tbody><tr><td><code>SDPPLACE</code></td><td>Tačkasti element (stablo, klupa, svjetiljka, šaht…) s pregledom; rotacija uglom ili tačkom</td></tr><tr><td><code>SDPDRAW</code></td><td>Linijski ili površinski element: polilinija, pravougaonik, odabir unutar zatvorene granice ili postojeće krive</td></tr><tr><td><code>SDPCONVERT</code></td><td>Pretvaranje linija, lukova, polilinija i krugova u elemente odabrane vrste</td></tr><tr><td><code>SDPEDIT</code></td><td>Parametri, oznaka i svojstva odabranih elemenata</td></tr><tr><td><code>SDPSETPARAM</code></td><td>Jedan parametar na više elemenata</td></tr><tr><td><code>SDPPATHARRAY</code></td><td>Niz elemenata duž putanje (drvored, svjetiljke, stubići, stalci)</td></tr><tr><td><code>SDPPARKING</code></td><td>Numerisani niz parking mjesta uz rub prolaza (standardno, za osobe s invaliditetom, punjač…)</td></tr><tr><td><code>SDPPROZORI</code></td><td>Pitanja naredbi u prozorima (zadano) ili u komandnoj liniji – prekidač</td></tr><tr><td><code>SDPPARKINGOKOMITO</code></td><td>Kartica <em>Parking mjesta → Okomito</em>: broj mjesta i broj mjesta za osobe s invaliditetom (2,50 m + šrafura 1,40 m i rampa za trotoar, uvijek ispred broja 1); mjesta 2,50 × 5,00 m</td></tr><tr><td><code>SDPPARKINGPARALELNO</code></td><td><em>Paralelno</em>: mjesta 5,50 × 2,50 m, strelica u prolazu 3,00 m</td></tr><tr><td><code>SDPPARKINGUGAO</code></td><td><em>Pod uglom 45°</em>: 3,40 m duž niza, 4,75 m dubine, šrafirani početni trougao, prikazan ugao 45°, strelica u prolazu</td></tr><tr><td><code>SDPGRID</code></td><td>Raster sadnje u granici (kvadratni ili smaknuti)</td></tr><tr><td><code>SDPSELECT</code>, <code>SDPZOOM</code></td><td>Odabir po vrsti, kategoriji, oznaci, id-u ili materijalu; zum na element</td></tr><tr><td><code>SDPCLEARANCE</code></td><td>Zone servisa, sigurnosti i podizanja iz vrijednosti elementa</td></tr><tr><td><code>SDPLIGHTCOVER</code></td><td>Ilustrativni krugovi pokrivenosti rasvjete – nije fotometrijski proračun</td></tr></tbody></table>
+<h3 id="7-nacrti-oznake-i-količine">7. Nacrti, oznake i količine</h3>
+<ul>
+<li>Oznake: <code>SDPLABEL</code>, <code>SDPNUMBER</code>, <code>SDPAREALABEL</code>, <code>SDPWIDTHLABEL</code>, <code>SDPSLOPE</code>, <code>SDPCOORD</code> (Y = / X =), <code>SDPNORTH</code>, <code>SDPSCALEBAR</code>, <code>SDPSECTION</code>, <code>SDPDETAIL</code>, <code>SDPGRIDLINES</code>, <code>SDPLEGEND</code>, <code>SDPTITLEBLOCK</code>, <code>SDPREVCLOUD</code>.
+</li>
+<li>Količine: <code>SDPSCHEDULE</code> (AutoCAD tabele), <code>SDPSCHEDULECSV</code> (CSV sa separatorom <code>;</code> i JSON), <code>SDPQUANTITIES</code>. Količine izmjerene iz geometrije su odvojene od procijenjenih, koje su označene znakom <code>~</code>.
+</li></ul>
+<h3 id="8-provjera-i-sketchup">8. Provjera i SketchUp</h3>
+<ul>
+<li><code>SDPVALIDATE</code> – geometrija, podaci, kolizije, preklapanja, razmaci, stavke za reviziju i provjere lokacije:
+<ul>
+<li><code>SDP-C020</code> – element izvan parcele;
+</li>
+<li><code>SDP-E010</code> – saobraćajnica iznad partera;
+</li>
+<li><code>SDP-E011</code> – dodijeljena kota bez datuma;
+</li>
+<li><code>SDP-E012</code> – objekat pomjeren nakon dodjele kote.
+</li></ul>
+</li>
+<li><strong>SketchUp → Sinhronizacija</strong> (<code>SDPSINHRONIZACIJA</code>) – sve razmjene sa SketchUpom u jednom prozoru: zadnje poslano i preuzeto, verzija, <em>Pošalji u SketchUp</em> i <em>Preuzmi iz SketchUpa</em> (poslije preuzimanja sažetak u prozoru).
+</li>
+<li><code>SDPEXPORT</code> (<em>Pošalji u SketchUp</em>) – zapisuje paket <code>.sdpkg</code> (shema 1.1.0) s elementima, kotama, georeferencom i terenom (<code>terrain.json</code>).
+</li>
+<li><code>SDPUVOZPAKETA</code> (<em>Preuzmi iz SketchUpa</em>) – učitava gotov paket <code>.sdpkg</code> u crtež kao uredive elemente (u prazan crtež s jedinicom, ishodištem i kotom ±0,00 iz paketa).
+</li>
+<li><code>SDPAPPLYCHANGES</code> – primjena izmjena iz SketchUpa s pregledom. Elementi koje ste u međuvremenu mijenjali u AutoCAD-u preskaču se ako ne odaberete prepisivanje.
+</li></ul>
+<h3 id="9-sketchup">9. SketchUp</h3>
+<p>Meni <em>Extensions → Vanjsko uređenje PRO</em>:</p>
+<table><thead><tr><th>Stavka</th><th>Namjena</th></tr></thead><tbody><tr><td>Sinhronizacija s AutoCAD-om...</td><td>Sve razmjene na jednom mjestu: zadnje preuzeto i poslano, verzija, <em>Preuzmi iz AutoCAD-a</em> i <em>Pošalji u AutoCAD</em></td></tr><tr><td>Preuzmi iz AutoCAD-a...</td><td>Čita <code>.sdpkg</code> ili <code>manifest.json</code>, prikazuje pregled, pa gradi model; ulice i ceste odmah postaju izmjenjive alatima Saobraćajnice</td></tr><tr><td>Pošalji u AutoCAD...</td><td>Saobraćajnice i svi elementi iz biblioteke (gdje su sada, s izmijenjenim parametrima) kao paket za AutoCAD</td></tr><tr><td>Svojstva elementa</td><td>Parametri odabranog elementa; element se ponovo gradi</td></tr><tr><td>Biblioteka 3D modela...</td><td>Pregled, umetanje i zamjena modela</td></tr><tr><td>Saobraćajnice ▸</td><td>Ulica, kružni tok, prijelaz, kote, rampe, …</td></tr><tr><td>Napredno ▸</td><td>Ponovo preuzmi zadnji paket, Pošalji samo izmjene parametara (stari način, za <code>SDPAPPLYCHANGES</code>), biblioteka i postavke, izvještaj, kopije, dnevnik</td></tr><tr><td>Izrada scena za pregled</td><td>Scene od „VU 01 Situacija“ do „VU 10 Prezentacija“</td></tr><tr><td>Prikaz podzemnog</td><td>Skriva površine i prikazuje ukopane instalacije</td></tr><tr><td>Biblioteka i postavke...</td><td>Vrste, dodjela vlastitih komponenti (.skp) vrstama, materijali, nivo detalja, pravila ažuriranja</td></tr><tr><td>Izvještaj posljednjeg uvoza</td><td>Izvještaj zadnjeg uvoza, uz mogućnost snimanja kao tekst</td></tr><tr><td>Sigurnosne kopije i oporavak...</td><td>Prekinute operacije i kopije modela</td></tr></tbody></table>
+<ul>
+<li><strong>Nivoi detalja:</strong> <em>Šematski prikaz</em> (lagano), <em>Standardni kvalitet</em> i <em>Visoki kvalitet</em>.
+</li>
+<li><strong>Pravila ažuriranja:</strong>
+<ul>
+<li>lokalno izmijenjeni elementi se zadržavaju (uz prijavu konflikta) ili prepisuju verzijom iz AutoCAD-a;
+</li>
+<li>elementi obrisani u AutoCAD-u se premještaju na skrivenu oznaku „Obrisano u izvoru“, brišu iz modela ili zadržavaju.
+</li></ul>
+</li>
+<li><strong>Teren</strong> se uvozi kao zasebna grupa na oznaci <em>VU Teren</em>. Ponovni uvoz ga ažurira, a ne duplira.
+</li>
+<li><strong>Organizacija:</strong> korijenska grupa projekta → grupa po modelskoj grupi (oznake <code>VU …</code>) → elementi. Atributi su u rječniku <code>SiteDesignPro</code>.
+</li></ul>
+<h3 id="10-saobraćajnice-u-sketchupu--bez-autocad-a">10. Saobraćajnice u SketchUpu – bez AutoCAD-a</h3>
+<p>Meni <em>Extensions → Vanjsko uređenje PRO → Saobraćajnice</em> i traka <em>Vanjsko uređenje PRO – Saobraćajnice</em>. Ulice, kružni tokovi, prijelazi i rampe crtaju se direktno u SketchUpu; grade se <strong>istim motorom kao u AutoCAD-u</strong> (program <code>sdp-ceste</code> dolazi uz proširenje, na Windowsu radi bez ikakve instalacije), pa su spojevi, radijusi, staze, rampe i 3D visine isti.</p>
+<table><thead><tr><th>Stavka</th><th>Namjena</th></tr></thead><tbody><tr><td>Ulica</td><td>Prozor s presjekom (smjer, 1–3 trake lijevo/desno, širina trake, srednje ostrvo i do kojeg mjesta ide, dužina spajanja traka, trotoari, biciklističke staze, radijus ivičnjaka, strelice i razmak), zatim klikovi osovine. Visine tačaka: iz kliknutih tačaka (npr. na terenu), sve iste ili upisane za svaku tačku</td></tr><tr><td>Uredi ulicu</td><td>Isti prozor za odabranu osovinu ili kliknutu ulicu; obična cesta postaje ulica (i desni klik → <em>Uredi ulicu</em>)</td></tr><tr><td>Kružni tok</td><td>Otok 10–30 m, prijelazni prsten, broj i dužina krakova, presjek krakova; klik na centar (po želji drugi klik za smjer prvog kraka)</td></tr><tr><td>Pješački prijelaz</td><td>Klik na ulicu: trake i širina se preuzimaju, prijelaz ide okomito preko kolovoza; opcija biciklističke staze 80 cm</td></tr><tr><td>Cesta</td><td>Kolni prilaz, interna pristupna ili servisna cesta zadana širinom</td></tr><tr><td>Kota saobraćajnice</td><td>Klikovi na ulicu i visina; između kota visina se mijenja linearno, nagib preko 10 % se javlja</td></tr><tr><td>Rampa za invalide</td><td>Klik na trotoar (ta strana) ili na kolovoz (obje strane)</td></tr><tr><td>Garažna rampa</td><td>Pravolinijska, polukružna, spiralna ili kombinovana; jednosmjerna/dvosmjerna, širina trake, zaštitni razmak, ostrvo, visine (početak može na visini ulice), prijelazne dionice, blagi dio pred ulicom, ploča iznad i svijetla visina, odvodnja, zidovi, grijanje. Uz ulicu se nudi smjer okomit na nju</td></tr><tr><td>Presjek rampe</td><td>Uzdužni presjek rampe na mjestu klika (prati izmjene rampe)</td></tr><tr><td>Visine i postavke saobraćajnica</td><td>Nadmorska visina Z = 0 modela (tada se visine mogu upisivati i kao m n.v.), ravan ili neravan teren, automatsko osvježavanje</td></tr><tr><td>Osvježi saobraćajnice</td><td>Ponovo gradi sve; inače se gradi samo nakon svake izmjene</td></tr></tbody></table>
+<ul>
+<li><strong>Osovine</strong> su male grupe u grupi <em>Saobraćajnice – osovine</em> (oznaka <em>VU Saobraćajnice – osovine</em>). Mogu se pomjerati, rotirati, kopirati i brisati alatima SketchUpa, a tačke ravne osovine pomjerati unutar njene grupe (i gore-dolje: to je visina osovine tu). Saobraćajnice se same osvježe; <em>Poništi</em> (Undo) vraća i osovinu i 3D.
+</li>
+<li><strong>3D</strong> se gradi u grupi <em>Saobraćajnice – 3D</em> (kao uvezeni paket), tekstovi L / h / nagib garažnih rampi i uzdužni presjeci u grupi <em>Saobraćajnice – tekstovi i presjeci</em>.
+</li>
+<li>Pri crtanju osovine: Enter ili dvostruki klik = kraj, Backspace = poništi tačku, u VCB se upisuje dužina u m, <code>dužina;visina</code> ili <code>v visina</code> (visina sljedeće tačke).
+</li>
+<li>Upozorenja (nagib ulice preko 10 %, rampe preko 17 %, mali radijus rampe, niska svijetla visina) javljaju se odmah; zadnji izvještaj: <em>Saobraćajnice → Izvještaj posljednje izgradnje</em>.
+</li></ul>
+<h4 id="unos-u-prozorima">Unos u prozorima</h4>
+<p>Sve naredbe pitaju u <strong>prozoru</strong>: sva pitanja jedne naredbe su u jednom prozoru (ulica – presjek pa osovina i visine, kružni tok, pješački prijelaz, garažna rampa – vrsta pa visine, duž linije, popuna površine, parking, izmjena elementa – svi parametri odjednom, postavke projekta, dokumentovanje …). Prozor pamti zadnje unose. Tačke i linije se i dalje biraju u crtežu. Ko više voli kucanje: <code>SDPPROZORI</code> prebacuje na komandnu liniju (i nazad). Skripte i AutoLISP uvijek dobijaju pitanja u komandnoj liniji.</p>
+<h4 id="parking-mjesta-u-nizu-autocad-kartica-parking-mjesta">Parking mjesta u nizu (AutoCAD, kartica <em>Parking mjesta</em>)</h4>
+<ul>
+<li>Okomito, paralelno ili pod uglom 45°: upišete broj mjesta (kod okomitog i broj mjesta za osobe s invaliditetom), kliknete početak niza na ivici trotoara/granici, smjer niza i stranu prolaza (dok birate, niz se vidi).
+</li>
+<li>Crta se kao u standardu: linije 10 cm, T glava 1,00 m na strani prolaza, kuka 55 cm na početku i kraju niza, brojevi mjesta, žuto mjesto za osobe s invaliditetom sa simbolom, šrafurom 1,40 m i rampom za trotoar (uvijek ispred broja 1), kod 45° šrafirani početni trougao i ugao 45°, strelica smjera u prolazu. Kote se ne crtaju.
+</li>
+<li>Kad u crtežu već ima numerisanih mjesta, naredba pita: numeracija <strong>Nastavi</strong> ili <strong>Od1</strong>.
+</li>
+<li>Svako mjesto je element (broji se u pokazateljima, izvozi u SketchUp s istim oznakama).
+</li></ul>
+<h4 id="tehnički-minimumi-rampi">Tehnički minimumi rampi</h4>
+<p>Rampa ispod minimuma se <strong>ne može projektovati</strong>: AutoCAD je ne nacrta (poruka s razlogom, izmjena poništena), a SketchUp poništi izmjenu. Garažna rampa: uzdužni nagib najviše 17 % u svakom dijelu, unutrašnji poluprečnik luka najmanje 5,00 m, traka najmanje 2,50 m (zakrivljena 3,50 m), zaštitni razmak zakrivljene rampe 0,25 m, svijetla visina pod pločom najmanje 2,10 m. Pješačka rampa: nagib najviše 8,33 % (1 : 12), širina najmanje 1,20 m. Rampa koja je već u crtežu javlja se u provjeri kao greška <code>SDP-C012</code>. Garažna rampa je na <strong>prvom i zadnjem metru ravna</strong> (bez poprečnog pada, u ravni s ulicom ili pločom); poprečni pad 3 % počinje tek nakon 1 m i raste na punu vrijednost na sljedeća 2 m.</p>
+<h4 id="saobraćajnice-u-oba-smjera-sketchup--autocad">Saobraćajnice u oba smjera (SketchUp ⇄ AutoCAD)</h4>
+<ul>
+<li><strong>SketchUp → AutoCAD:</strong> <em>Vanjsko uređenje PRO → Pošalji u AutoCAD…</em> snima ulice, ceste, kružne tokove, prijelaze, kote, rampe za invalide, garažne rampe i presjeke (osovine i sve postavke, ne 3D) u <code>.sdpkg</code>. U AutoCAD-u <code>SDPUVOZPAKETA</code>: postojeći elementi se zamjenjuju (isti id), novi dodaju, generisani dijelovi (kolovoz, trotoari, oznake) se preskaču i AutoCAD odmah ponovo crta mrežu ulica. Ulice obrisane u SketchUpu program nudi obrisati i u crtežu (pitanje Da/Ne). Visine osovina dolaze kao kote saobraćajnice.
+</li>
+<li><strong>Svi elementi iz biblioteke:</strong> isti <em>Pošalji u AutoCAD…</em> (meni Vanjsko uređenje PRO) nosi i sve ostale elemente – one postavljene u SketchUpu iz biblioteke i one iz AutoCAD projekta, na mjestu gdje su sada i s parametrima izmijenjenim u SketchUpu. U AutoCAD-u: dugme <em>SketchUp → Sinhronizacija → Preuzmi iz SketchUpa</em> otvara prozor za odabir datoteke.
+</li>
+<li><strong>AutoCAD → SketchUp:</strong> nakon uvoza AutoCAD paketa, <em>Saobraćajnice → Preuzmi saobraćajnice iz AutoCAD-a</em> pretvara ulice tog projekta u osovine alata Saobraćajnice (uređuju se ovdje; 3D gradi motor). Od tada je projekat <strong>povezan</strong>: svaki naredni <em>Preuzmi iz AutoCAD-a</em> prenosi izmjene ulica (nove, izmijenjene, obrisane) u osovine i ponovo gradi saobraćajnice, a izvoz iz SketchUpa ide pod id-em AutoCAD projekta.
+</li>
+<li><strong>Koordinate:</strong> paket je u koordinatama AutoCAD projekta (ishodište / državne koordinate se prenose preko korijenske grupe uvezenog projekta). Model napravljen uvozom iz AutoCAD-a se zato poklapa sam; ulice nacrtane u praznom SketchUp modelu idu u AutoCAD relativno na ishodište crteža.
+</li>
+<li>Šifre u izvještaju uvoza: <code>SDP-S001</code> preuzete saobraćajnice, <code>SDP-S002</code> / <code>SDP-S003</code> nisu izgrađene / preuzete.
+</li></ul>
+<h2 id="ažuriranja">Ažuriranja</h2>
+<p>Dodatak sam provjerava novu verziju jednom dnevno (AutoCAD pri pokretanju, SketchUp dvadesetak sekundi poslije pokretanja). Nova verzija se nudi u prozoru sa spiskom izmjena: <strong>Instaliraj</strong>, <strong>Preskoči ovu verziju</strong> ili <strong>Kasnije</strong>.</p>
+<ul>
+<li>AutoCAD: nova verzija se preuzme i provjeri odmah, a instalira kad zatvorite AutoCAD (dok radi, njegove datoteke su zaključane). Pri sljedećem pokretanju komandna linija javlja „ažurirano na verziju …”.
+</li>
+<li>SketchUp: instalira se odmah, a radi poslije ponovnog pokretanja SketchUpa.
+</li>
+<li>Način: AutoCAD <strong>Pomoć → Napredno → Ažuriranja</strong> (pita / automatski / isključeno, i ručna provjera); SketchUp <strong>Napredno → Provjeri ažuriranja / Način ažuriranja</strong>.
+</li>
+<li>Verzije se objavljuju na stranici izdanja projekta na GitHubu; tamo je i instalacioni zip za novi računar.
+</li>
+<li>Preuzeti paket se provjerava (SHA-256); oštećen paket se ne instalira. Crteži, modeli i postavke se ne diraju.
+</li></ul>
+<h2 id="šifre-nalaza">Šifre nalaza</h2>
+<table><thead><tr><th>Prefiks</th><th>Značenje</th></tr></thead><tbody><tr><td><code>SDP-I…</code></td><td>Ulazni DWG (mapiranje, jedinice, parcela, objekti, kote, tačke terena)</td></tr><tr><td><code>SDP-T…</code></td><td>Teren (nedovoljno podataka, strmi i ravni dijelovi, depresije)</td></tr><tr><td><code>SDP-E…</code></td><td>Kote (saobraćajnica iznad partera, nema datuma, pomjeren objekat)</td></tr><tr><td><code>SDP-G…</code></td><td>Geometrija (samopresijecanje, nulta dužina ili površina, skalirani simboli)</td></tr><tr><td><code>SDP-P…</code></td><td>Parametri (raspon, nedostaju, neispravne vrijednosti)</td></tr><tr><td><code>SDP-D…</code></td><td>Podaci (nepoznata vrsta, kopirani id-evi, jedinice)</td></tr><tr><td><code>SDP-C…</code></td><td>Kolizije, preklapanja, razmaci, izlazak iz parcele</td></tr><tr><td><code>SDP-S…</code></td><td>Saobraćajnice između SketchUpa i AutoCAD-a</td></tr><tr><td><code>SDP-R…</code></td><td>Stavke za reviziju (statika, elektro, odvodnja, pristupačnost) – provjera stručnjaka</td></tr></tbody></table>
+<h2 id="slojevi">Slojevi</h2>
+<p>Slojevi dodatka imaju prefiks <code>VU-</code> (npr. <code>VU-ZELENILO-DRVECE</code>, <code>VU-TEREN</code>, <code>VU-KOTE-DODJELA</code>). <code>SDPLAYERS</code> ih pravi, popravlja ili provjerava; opcija <em>Stari</em> preimenuje slojeve verzije 0.1 tek nakon Vaše potvrde. Puna lista slojeva je u <code>shared/catalog/layers.json</code>, a vrste elemenata u <a href="OBJECT_LIBRARY.md">biblioteci objekata</a>.</p></body></html>
