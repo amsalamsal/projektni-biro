@@ -17,7 +17,10 @@ module ProjektniBiro
         'backupEnabled' => true,
         'backupKeep' => 10,
         'backupMaxAgeDays' => 30,
-        'autoAdoptRoads' => true
+        'autoAdoptRoads' => true,
+        'updates' => 'ask',
+        'updatesLastCheck' => 0,
+        'updatesSkip' => ''
       }.freeze
 
       module_function

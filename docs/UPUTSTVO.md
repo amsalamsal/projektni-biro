@@ -219,6 +219,19 @@ Garažna rampa je na **prvom i zadnjem metru ravna** (bez poprečnog pada, u rav
   praznom SketchUp modelu idu u AutoCAD relativno na ishodište crteža.
 * Šifre u izvještaju uvoza: `SDP-S001` preuzete saobraćajnice, `SDP-S002` / `SDP-S003` nisu izgrađene / preuzete.
 
+## Ažuriranja
+
+Dodatak sam provjerava novu verziju jednom dnevno (AutoCAD pri pokretanju, SketchUp dvadesetak sekundi poslije
+pokretanja). Nova verzija se nudi u prozoru sa spiskom izmjena: **Instaliraj**, **Preskoči ovu verziju** ili **Kasnije**.
+
+* AutoCAD: nova verzija se preuzme i provjeri odmah, a instalira kad zatvorite AutoCAD (dok radi, njegove datoteke su
+  zaključane). Pri sljedećem pokretanju komandna linija javlja „ažurirano na verziju …”.
+* SketchUp: instalira se odmah, a radi poslije ponovnog pokretanja SketchUpa.
+* Način: AutoCAD **Pomoć → Napredno → Ažuriranja** (pita / automatski / isključeno, i ručna provjera);
+  SketchUp **Napredno → Provjeri ažuriranja / Način ažuriranja**.
+* Verzije se objavljuju na stranici izdanja projekta na GitHubu; tamo je i instalacioni zip za novi računar.
+* Preuzeti paket se provjerava (SHA-256); oštećen paket se ne instalira. Crteži, modeli i postavke se ne diraju.
+
 ## Šifre nalaza
 | Prefiks | Značenje |
 |---|---|

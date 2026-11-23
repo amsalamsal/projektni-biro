@@ -89,3 +89,18 @@ jobs:
           git add -A
           git commit -q -m "Izgradnja $GITHUB_SHA"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" builds:"builds/$GITHUB_REF_NAME"
+
+      - name: Objava nove verzije (automatska ažuriranja)
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          ver=$(sed -n 's:.*<Version>\([0-9.]*\)</Version>.*:\1:p' autocad-site-design-pro/Directory.Build.props)
+          if gh release view "v$ver" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Verzija $ver je već objavljena."
+            exit 0
+          fi
+          python3 tools/release.py dist izdanje
+          gh release create "v$ver" izdanje/VanjskoUredjenjePRO-$ver.zip izdanje/SiteDesignPro.bundle.zip izdanje/pb_site_design_pro.rbz izdanje/latest.json \
+            --repo "${{ github.repository }}" --target "$GITHUB_SHA" --title "Vanjsko uređenje PRO $ver" --notes-file izdanje/notes.md --latest

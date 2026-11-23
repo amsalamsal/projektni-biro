@@ -14,6 +14,7 @@ end
 require File.join(__dir__, 'version')
 %w[
   compat
+  updates
   report
   units
   geometry

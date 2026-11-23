@@ -5,7 +5,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <WarningsAsErrors>nullable</WarningsAsErrors>
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Company>Projektni biro</Company>
     <Product>Site Design Pro</Product>
     <Copyright>Copyright (c) 2026 Projektni biro</Copyright>

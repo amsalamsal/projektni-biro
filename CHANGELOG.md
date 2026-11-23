@@ -2,6 +2,13 @@
 
 ## Neobjavljeno
 
+### Verzija 0.3.2 – automatska ažuriranja (23.11.)
+* **Automatska ažuriranja** u AutoCAD-u i SketchUpu: jednom dnevno se provjerava nova verzija i nudi u prozoru
+  (šta je novo, Instaliraj / Preskoči / Kasnije). AutoCAD dio se instalira kad zatvorite AutoCAD, SketchUp dio odmah
+  (radi poslije ponovnog pokretanja). Preuzeti paket se provjerava (SHA-256) prije instalacije.
+* Način (pita / automatski / isključeno): AutoCAD Pomoć → Napredno → Ažuriranja; SketchUp Napredno → Način ažuriranja.
+* SketchUp: ponovno preuzimanje iz AutoCAD-a u isti model više ne briše drveće i ostale elemente projekta.
+
 ### Verzija 0.3.1 – prozori svuda (20.11.)
 * **Nulta kota** (SDPDATUM) i **georeferenciranje** (SDPGEOREF) u prozorima: kontrolne tačke s odstupanjima,
   Dodaj / Izračunaj / Obriši / Poništi kao dugmad, rezultat izračuna s dugmetom *Primijeni*.

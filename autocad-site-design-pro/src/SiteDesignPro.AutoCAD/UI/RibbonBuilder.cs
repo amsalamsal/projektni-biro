@@ -174,6 +174,7 @@ namespace SiteDesignPro.AutoCAD.UI
                     Small("Postavke kopija", "SDPKOPIJEPOSTAVKE", "settings", "Automatske kopije prije većih operacija."),
                     Small("Oporavak", "SDPOPORAVAK", "apply", "Prekinute operacije i otvaranje kopije."),
                     Small("Pitanja u prozorima / komandnoj liniji", "SDPPROZORI", "settings", "Prekidač: pitanja naredbi u prozorima (zadano) ili u komandnoj liniji."),
+                    Small("Ažuriranja", "SDPAZURIRANJE", "settings", "Provjera nove verzije i način ažuriranja (pita / automatski / isključeno)."),
                     Small("O programu", "SDPABOUT", "about", "Verzija, katalog i dnevnik.")),
                 Stack(Label("Vanjsko uređenje PRO"), Label("Autor: " + Author), Label("© 2026"))));
 

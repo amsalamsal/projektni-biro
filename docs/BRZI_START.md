@@ -101,4 +101,6 @@ zamjenjuju, novi dodaju, a brisanje se nudi samo za ono što je obrisano u Sketc
 * AutoCAD i SketchUp trebaju imati istu verziju dodatka (vidi se u prozoru Sinhronizacija).
 * Pitanja u komandnoj liniji umjesto prozora: **Pomoć → Napredno → Pitanja u prozorima / komandnoj liniji**.
 * Cijelo uputstvo: **Pomoć → Uputstvo**.
+* Nove verzije stižu same: jednom dnevno se provjerava, a prozor pita da li instalirati (AutoCAD dio se instalira kad
+  zatvorite AutoCAD). Način: **Pomoć → Napredno → Ažuriranja** (u SketchUpu: Napredno → Način ažuriranja).
 * Uklanjanje oba dodatka: **DEINSTALIRAJ_SVE.bat** iz instalacionog zipa (crteži i modeli ostaju netaknuti).

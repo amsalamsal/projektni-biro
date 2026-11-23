@@ -145,6 +145,65 @@ namespace SiteDesignPro.AutoCAD.Commands
         [CommandMethod("SITEDESIGNPRO", "SDPBRZISTART", CommandFlags.Modal)]
         public void QuickStart() => OpenDoc("SDPBRZISTART", "brzi-start.html");
 
+        /// <summary>
+        /// Ažuriranja: the installed and the newest published version, the mode (ask / automatic / off) and, when there is
+        /// a newer one, its installation on closing AutoCAD.
+        /// </summary>
+        [CommandMethod("SITEDESIGNPRO", "SDPAZURIRANJE", CommandFlags.Modal)]
+        public void Updates()
+        {
+            CommandContext.Safe("SDPAZURIRANJE", () =>
+            {
+                {
+                    Core.Updates.UpdateInfo? latest = null;
+                    string? error = null;
+                    try
+                    {
+                        AcadEnv.Message("Provjera nove verzije...");
+                        latest = Updater.Fetch();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        error = ex.Message;
+                        Log.Warn("Provjera ažuriranja nije uspjela: " + ex.Message);
+                    }
+
+                    if (latest != null && Core.Updates.UpdateInfo.IsNewer(latest.Version, AcadEnv.Version))
+                    {
+                        if (Updater.Offer(latest, true) == "install")
+                        {
+                            Updater.Install(latest);
+                        }
+
+                        return;
+                    }
+
+                    var rows = new List<(string, string)>
+                    {
+                        ("Instalirana verzija", AcadEnv.Version),
+                        ("Najnovija objavljena", latest?.Version ?? "—"),
+                        ("Ažuriranja", Updater.ModeText(Updater.Mode)),
+                    };
+                    string choice = UI.InfoDialog.Present("Ažuriranja", error == null ? "Imate najnoviju verziju" : "Provjera nije uspjela", rows,
+                        new[] { "Nove verzije se provjeravaju jednom dnevno pri pokretanju AutoCAD-a, a instaliraju kad ga zatvorite." },
+                        error == null ? null : new[] { error + " (provjerite internet vezu)" },
+                        ("mode", "Promijeni način…"), ("close", "Zatvori"));
+                    if (choice != "mode")
+                    {
+                        return;
+                    }
+
+                    var form = new Form("Ažuriranja")
+                        .Choice("mode", "Nove verzije", new[] { Updater.Ask + "|Pitaj prije instalacije", Updater.Auto + "|Instaliraj automatski", Updater.Off + "|Isključeno (samo na zahtjev)" }, Updater.Mode);
+                    if (UI.FormDialog.Ask(form) && form.Fields.First(x => x.Key == "mode").Value is string chosen)
+                    {
+                        Updater.Mode = chosen;
+                        AcadEnv.Message("Ažuriranja: " + Updater.ModeText(chosen) + ".");
+                    }
+                }
+            });
+        }
+
         private static void OpenDoc(string command, string page)
         {
             CommandContext.Safe(command, () =>

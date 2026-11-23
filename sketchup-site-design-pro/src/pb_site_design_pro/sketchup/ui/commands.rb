@@ -188,6 +188,9 @@ module ProjektniBiro
         %i[update export library report recovery].each { |k| adv.add_item(cmds[k]) }
         adv.add_separator
         adv.add_item('Otvori dnevnik (log)') { open_log }
+        adv.add_separator
+        adv.add_item('Provjeri ažuriranja...') { Updater.check(true) }
+        adv.add_item('Način ažuriranja...') { Updater.settings }
         menu.add_item('O programu Vanjsko uređenje PRO') { about }
 
         tb = UI::Toolbar.new('Vanjsko uređenje PRO')
@@ -204,6 +207,7 @@ module ProjektniBiro
           sub.add_item("Odaberi sve tipa '#{entity.get_attribute(DICT, 'type')}'") { select_type(entity.get_attribute(DICT, 'type')) }
         end
         UI.start_timer(2, false) { check_interrupted }
+        Updater.start
         cmds
       end
 

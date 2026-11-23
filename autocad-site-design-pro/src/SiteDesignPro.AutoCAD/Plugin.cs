@@ -60,6 +60,7 @@ namespace SiteDesignPro.AutoCAD
 
                 AcadEnv.Message("Vanjsko uređenje PRO " + AcadEnv.Version + " je učitano – kartica VANJSKO UREĐENJE PRO. Prvi put: Pomoć → Brzi početak.");
                 SafetyCommands.ReportInterrupted();
+                Log.Guard("Ažuriranja", Updater.Startup);
             }
             catch (System.Exception ex)
             {
