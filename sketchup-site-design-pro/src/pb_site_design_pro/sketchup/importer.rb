@@ -23,7 +23,7 @@ module ProjektniBiro
 
       # The road tools rebuild into a project that may hold other elements as well: only road elements may be removed.
       def only_road_removals!
-        @plan = Roads::Exchange.only_road_removals(@plan) if @plan
+        @plan = Roads::Exchange.only_road_removals(@plan) if @plan && defined?(Roads::Exchange)
         @plan
       end
 
